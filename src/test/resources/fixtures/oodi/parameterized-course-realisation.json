@@ -1,0 +1,55 @@
+{
+  "status": 200,
+  "data": {
+    "students": [
+      {
+        "mobile_phone": "040-1234321",
+        "email": null,
+        "first_names": "Niina Johanna",
+        "last_name": "Sulin",
+        "enrollment_status_code": 3,
+        "student_number": "{{ studentnumber}}"
+      }
+    ],
+    "subcourses": [],
+    "enrollmentstartdate": "01.08.2014T080000",
+    "realisationtypecode": 5,
+    "lastchanged": "27.06.2014",
+    "creditpoints": 3,
+    "realisationid": 102374742,
+    "enrollmentenddate": "27.10.2014T235900",
+    "teachers": [
+      {
+        "full_name": "Kotivuori Tuomas Olavi",
+        "last_name": "Kotivuori",
+        "calling_name": "Tuomas",
+        "first_names": "Tuomas Olavi",
+        "email": null,
+        "teacher_id": "{{ teacherid }}",
+        "teacher_role_code": 3
+      }
+    ],
+    "end_date": "{{ endDate }}",
+    "start_date": "{{ startDate }}",
+    "basecode": "590346",
+    "languages": [
+      {
+        "langcode": "fi"
+      }
+    ],
+    "descriptions": [
+      {
+        "description": "<p><strong>590346 Advanced Immunobiology\/<\/strong>(Biosciences code510041) <strong>, 4+3 cr<\/strong><\/p><p><strong>Time: Lectures<\/strong> 27.10. at 12-14 and3.11.-14.11.2014 at 10-16 (4 ECTS, max 24 students) seminar room3041 every day, <strong>practical part<\/strong> for selected students (3 ECTS, max12 students) (lab 2016, cell culture room 2020). 17.11.-5.12.<\/p><p><strong>Responsible person:<\/strong> University lecturer PiaSiljander (Biosciences) and Associate prof. Vincenzo Cerullo(Pharmacy).<\/p><p><strong>Target group:<\/strong> Designed for MSc students and PhDstudents.<\/p>",
+        "elementid": 30
+      }
+    ],
+    "organisations": [
+      {
+        "percentage": 100,
+        "name": "Farmaseuttisten biotieteiden osasto",
+        "code": "H5510"
+      }
+    ],
+    "realisationname": "{{ realisationname }}"
+  }
+}

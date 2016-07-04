@@ -1,0 +1,53 @@
+package fi.helsinki.moodi.test.fixtures;
+
+import com.google.common.io.Files;
+import fi.helsinki.moodi.test.templates.Templates;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
+
+public final class Fixtures {
+
+    private static final String PREFIX = "src/test/resources/fixtures/";
+
+    public static String asString(final String path) {
+        return asString(path, new HashMap<>());
+    }
+
+    public static String asString(final String path, final Map<String, ?> variables) {
+        try {
+            final String content = Files.toString(new File(PREFIX + path), Charset.forName("UTF-8"));
+            return Templates.render(content, variables);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static FixtureBuilder builder(final String path) {
+        return new FixtureBuilder(path);
+    }
+
+    public static final class FixtureBuilder {
+
+        private final String path;
+        private final Map<String, Object> variables;
+
+        private FixtureBuilder(String path) {
+            this.path = path;
+            this.variables = new HashMap<>();
+        }
+
+        public FixtureBuilder withVariable(final String name, final Object value) {
+            variables.put(name, value);
+            return this;
+        }
+
+        public String build() {
+            return "";
+        }
+
+    }
+}

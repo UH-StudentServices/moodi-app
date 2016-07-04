@@ -1,0 +1,19 @@
+spring.datasource:
+  dataSourceClassName: org.h2.jdbcx.JdbcDataSource
+  url: jdbc:h2:mem:moodi;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database: PostgreSQL
+
+auth.client.testclient: xxx123
+auth.enabled: true
+
+synchronize.logging.file.path: /tmp/log/moodi
+
+integration:
+  moodle:
+    baseUrl: https://mdl-bak.it.helsinki.fi
+    url: https://mdl-bak.it.helsinki.fi/webservice/rest/server.php
+  oodi.url: https://oprek4.it.helsinki.fi:30039
+  esb.url: https://esbmt1.it.helsinki.fi

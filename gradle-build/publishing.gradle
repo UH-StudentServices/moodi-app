@@ -1,0 +1,46 @@
+//
+// Publishing build artifacts.
+//
+
+apply plugin: "maven-publish"
+
+publishing {
+
+    //
+    // What is published, i.e. build artifacts and their names.
+    //
+    publications {
+        maven(MavenPublication) {
+            groupId "fi.helsinki.moodi"
+            artifactId "moodi"
+            version version
+            from components.java
+        }
+    }
+
+    //
+    // Where to publish, i.e. repository connection information.
+    //
+    repositories {
+        maven {
+            credentials {
+                username opintoni_artifactory_username
+                password opintoni_artifactory_password
+            }
+
+            if (version.endsWith("SNAPSHOT")) {
+                url "${opintoni_artifactory_base_url}/libs-snapshot-local"
+            } else {
+                url "${opintoni_artifactory_base_url}/libs-release-local"
+            }
+        }
+    }
+}
+
+// Run tests before publishing
+tasks.withType(PublishToMavenRepository) {
+    it.dependsOn test
+}
+
+// Ensure that jar produced by bootRepackace is published
+publish.dependsOn bootRepackage

@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    dataSourceClassName: org.postgresql.ds.PGSimpleDataSource
+    url: jdbc:postgresql://localhost:5432/moodi
+    username: ${datasource.username}
+    password: ${datasource.password}
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database: PostgreSQL
+
+dev.mode.enabled: true
+
+synchronize.INCREMENTAL.enabled: false
+synchronize.FULL.enabled: false

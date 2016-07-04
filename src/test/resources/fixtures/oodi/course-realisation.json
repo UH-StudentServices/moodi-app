@@ -1,0 +1,127 @@
+{
+  "status": 200,
+  "data": {
+    "students": [
+      {
+        "mobile_phone": "040-1234321",
+        "email": null,
+        "first_names": "Niina Johanna",
+        "last_name": "Sulin",
+        "enrollment_status_code": 3,
+        "student_number": "010342729"
+      },
+      {
+        "mobile_phone": "040-1234321",
+        "email": null,
+        "first_names": "Milla Maaret",
+        "last_name": "Uromo",
+        "enrollment_status_code": 3,
+        "student_number": "011119854"
+      },
+      {
+        "mobile_phone": "040-1234321",
+        "email": null,
+        "first_names": "Virpi Tuulikki",
+        "last_name": "Kontinen",
+        "enrollment_status_code": 3,
+        "student_number": "011524656"
+      }
+    ],
+    "subcourses": [],
+    "enroll_start_date": "01.08.2014T080000",
+    "realisation_type_code": 5,
+    "last_changed": "27.06.2014",
+    "credit_points": 3,
+    "course_id": 102374742,
+    "enroll_end_date": "27.10.2014T235900",
+    "teachers": [
+      {
+        "full_name": "Kotivuori Tuomas Olavi",
+        "last_name": "Kotivuori",
+        "calling_name": "Tuomas",
+        "first_names": "Tuomas Olavi",
+        "email": null,
+        "teacher_id": "110588",
+        "teacher_role_code": 3
+      }
+    ],
+    "end_date": "05.12.2014",
+    "start_date": "27.10.2014",
+    "basecode": "590346",
+    "languages": [
+      {
+        "langcode": "fi"
+      }
+    ],
+    "descriptions": [
+      {
+        "id": 22,
+        "texts": [
+          {
+            "langcode": "fi",
+            "text": "Description 1 (fi)"
+          },
+          {
+            "langcode": "sv",
+            "text": "Description 1 (sv)"
+          },
+          {
+            "langcode": "en",
+            "text": "Description 1 (en)"
+          }
+        ]
+      },
+      {
+        "id": 26,
+        "texts": [
+          {
+            "langcode": "fi",
+            "text": "Description 2 (fi)"
+          },
+          {
+            "langcode": "sv",
+            "text": "Description 2 (sv)"
+          },
+          {
+            "langcode": "en",
+            "text": "Description 2 (en)"
+          }
+        ]
+      }
+    ],
+    "organisations": [
+      {
+        "percentage": 100,
+        "name": [
+          {
+            "langcode": "fi",
+            "text": "Sosiologia"
+          },
+          {
+            "langcode": "sv",
+            "text": "Sociologiska institutionen"
+          },
+          {
+            "langcode": "en",
+            "text": "Department of Sociology"
+          }
+        ],
+        "code": "H5510"
+      }
+    ],
+    "realisation_name": [
+      {
+        "langcode": "fi",
+        "text": "Lapsuus ja yhteiskunta"
+      },
+      {
+        "langcode": "sv",
+        "text": "Barndom i samhället"
+      },
+      {
+        "langcode": "en",
+        "text": "Childhood and society"
+      }
+    ]
+  }
+}

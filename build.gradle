@@ -1,0 +1,84 @@
+apply from: "gradle-build/required-properties.gradle"
+
+task wrapper(type: Wrapper) {
+    gradleVersion = gradleVersion
+    doLast {
+        file("gradlew.bat").delete()
+    }
+}
+
+buildscript {
+    repositories {
+        jcenter()
+        maven { url "http://repo.spring.io/milestone" }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:$spring_boot_version"
+        classpath "net.researchgate:gradle-release:2.0.0"
+    }
+}
+
+apply plugin: "java"
+apply plugin: "spring-boot"
+
+bootRepackage {
+    mainClass = "fi.helsinki.moodi.Application"
+}
+
+springBoot {
+    mainClass = "fi.helsinki.moodi.Application"
+}
+
+repositories {
+    mavenLocal()
+
+    maven {
+        credentials {
+            username opintoni_artifactory_username
+            password opintoni_artifactory_password
+        }
+
+        url "${opintoni_artifactory_base_url}/repo"
+    }
+
+    jcenter()
+    maven { url "http://repo.spring.io/milestone" }
+}
+
+dependencies {
+
+    compile(group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: spring_boot_version) {
+        exclude module: 'spring-boot-starter-tomcat'
+    }
+
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-undertow', version: spring_boot_version
+    compile group: 'org.springframework.boot', name: 'spring-boot-actuator', version: spring_boot_version
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-thymeleaf', version: spring_boot_version
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: spring_boot_version
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-logging', version: spring_boot_version
+
+    compile "org.springframework:spring-context-support:4.1.6.RELEASE"
+    compile "org.jadira.usertype:usertype.extended:3.2.0.GA"
+    compile "com.zaxxer:HikariCP:2.1.0"
+    compile "org.apache.commons:commons-lang3:3.3.2"
+    compile "com.google.guava:guava:18.0"
+    compile "com.h2database:h2:1.4.187"
+    compile "org.flywaydb:flyway-core:3.1"
+    compile "org.postgresql:postgresql:9.4-1201-jdbc41"
+    compile "net.sf.ehcache:ehcache-core:2.6.11"
+    compile "com.fasterxml.jackson.core:jackson-core:2.6.2"
+    compile "com.fasterxml.jackson.core:jackson-databind:2.6.2"
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.6.2"
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.6.2"
+    compile "com.fasterxml.jackson.module:jackson-module-parameter-names:2.6.2"
+    compile "org.apache.httpcomponents:httpclient:4.4.1"
+    compile "org.trimou:trimou-core:1.7.3.Final"
+    compile "commons-pool:commons-pool:1.6"
+
+    testCompile "org.springframework.boot:spring-boot-starter-test"
+    testCompile "com.jayway.jsonpath:json-path-assert:0.9.1"
+}
+
+apply from: "gradle-build/publishing.gradle"
+apply from: "gradle-build/deploy.gradle"
+apply from: "gradle-build/release.gradle"

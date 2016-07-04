@@ -1,0 +1,79 @@
+server.port: 8084
+
+endpoints.enabled: false
+endpoints.health.enabled: true
+
+integration:
+  moodle:
+    baseUrl: https://mdl-bak.it.helsinki.fi
+    url: https://mdl-bak.it.helsinki.fi/webservice/rest/server.php
+  oodi.url: https://oprek2.it.helsinki.fi:30039
+  esb.url: https://esbmt1.it.helsinki.fi
+
+#
+# Map Oodi organizations to Moodle's internal category IDs.
+#
+mapper.oodi.organization:
+  H1*: 11
+  H2*: 10
+  H3*: 7
+  H4*: 5
+  H50*: 9
+  H51*: 9
+  H52*: 9
+  H55*: 4
+  H57*: 2
+  H6*: 6
+  H70: 12
+  H72*: 12
+  H74*: 54
+  H799: 12
+  H8*: 8
+  H90: 3
+  H901*: 3
+  H902*: 3
+  H906: 15
+  H91*: 13
+  H92: 17
+  H920: 5
+  H921: 7
+  H922: 2
+  H923: 9
+  H929: 13
+  H93*: 14
+  H941: 13
+  H955: 13
+  H985*: 31
+  H99: 31 
+  "*": 17
+
+mapper.oodi.default-category: 17
+
+#
+# Map application roles to Moodle's internal role IDs.
+#
+mapper.moodle.role.teacher: 3
+mapper.moodle.role.student: 5
+mapper.moodle.role.moodi: 11
+
+synchronize.FULL.enabled: true
+
+# Retain logs for 30 days, for more information see:
+# http://docs.oracle.com/javase/8/docs/api/java/time/Duration.html#parse-java.lang.CharSequence-
+synchronize.FULL.retain.logs: P30D
+
+synchronize.INCREMENTAL.enabled: true
+
+# Retain logs for 7 days, for more information see:
+# http://docs.oracle.com/javase/8/docs/api/java/time/Duration.html#parse-java.lang.CharSequence-
+synchronize.INCREMENTAL.retain.logs: P7D
+
+synchronize.logging.file.path: /var/log/moodi-sync
+synchronize.logging.file.retain.logs: P30D
+
+spring.jpa.hibernate.ddl-auto: none
+spring.jpa.generate-ddl: false
+
+auth.enabled: true
+
+dev.mode.enabled: false

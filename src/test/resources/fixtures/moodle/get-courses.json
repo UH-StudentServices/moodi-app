@@ -1,0 +1,1505 @@
+[
+  {
+    "id": 9,
+    "shortname": "LYH",
+    "categoryid": 1,
+    "categorysortorder": 10001,
+    "fullname": "T\u00e4\u00e4 on v\u00e4h\u00e4n hieno kurssialueen nimi",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 0,
+    "numsections": 10,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1430910847,
+    "timemodified": 1430910847,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 10
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "shortname": "testi2",
+    "categoryid": 3,
+    "categorysortorder": 40002,
+    "fullname": "testikurssi avaimella",
+    "idnumber": "2",
+    "summary": "summary",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1429747200,
+    "numsections": 10,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 0,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1429696691,
+    "timemodified": 1429782261,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 10
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "shortname": "TIPE",
+    "categoryid": 3,
+    "categorysortorder": 40001,
+    "fullname": "Tietokoneen perusteet",
+    "idnumber": "",
+    "summary": "Yhteenveto",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 0,
+    "numsections": 10,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1430735592,
+    "timemodified": 1430735592,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 10
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "shortname": "testi3",
+    "categoryid": 2,
+    "categorysortorder": 30002,
+    "fullname": "testikurssi3",
+    "idnumber": "",
+    "summary": "summary",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 0,
+    "numsections": 10,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 0,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1429696977,
+    "timemodified": 1429696977,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 10
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "shortname": "tilattu",
+    "categoryid": 2,
+    "categorysortorder": 30001,
+    "fullname": "Tilattu kurssi",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1432080000,
+    "numsections": 10,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1432117268,
+    "timemodified": 1432117301,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 10
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 32,
+    "shortname": "090909",
+    "categoryid": 6,
+    "categorysortorder": 70006,
+    "fullname": "090909",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "topics",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1433376000,
+    "numsections": 7,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1433399151,
+    "timemodified": 1433399241,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "shortname": "test004",
+    "categoryid": 6,
+    "categorysortorder": 70018,
+    "fullname": "test004",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1432598400,
+    "numsections": 7,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1432553739,
+    "timemodified": 1432622800,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "shortname": "test002",
+    "categoryid": 6,
+    "categorysortorder": 70019,
+    "fullname": "test002",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1432512000,
+    "numsections": 7,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1432550971,
+    "timemodified": 1432553706,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 22,
+    "shortname": "aaaaaaa",
+    "categoryid": 4,
+    "categorysortorder": 50002,
+    "fullname": "aaaaaaa",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1433203200,
+    "numsections": 7,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1433247522,
+    "timemodified": 1433247562,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 20,
+    "shortname": "test11",
+    "categoryid": 4,
+    "categorysortorder": 50004,
+    "fullname": "test11",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1433203200,
+    "numsections": 7,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1433246189,
+    "timemodified": 1433246317,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 18,
+    "shortname": "ccccc",
+    "categoryid": 4,
+    "categorysortorder": 50006,
+    "fullname": "xxxxx",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1433203200,
+    "numsections": 7,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1433245643,
+    "timemodified": 1433245833,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 44,
+    "shortname": "Exxon1 - 103131320",
+    "categoryid": 6,
+    "categorysortorder": 70004,
+    "fullname": "Exam1 - tentti2",
+    "idnumber": "XXX131320",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "topics",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1434585600,
+    "numsections": 7,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1434614703,
+    "timemodified": 1434615136,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 46,
+    "shortname": "Exam2 -  103131357",
+    "categoryid": 6,
+    "categorysortorder": 70002,
+    "fullname": "Exam2 - kurssi, kolme tasoa 1",
+    "idnumber": "103131357",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "topics",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 0,
+    "numsections": 7,
+    "maxbytes": 20971520,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1434615374,
+    "timemodified": 1434615374,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 1,
+    "shortname": "o-moodle",
+    "categoryid": 0,
+    "categorysortorder": 1,
+    "fullname": "o-moodle.it.helsinki.fi",
+    "idnumber": "",
+    "summary": "<p>o-moodle<br><\/p>",
+    "summaryformat": 1,
+    "format": "site",
+    "showgrades": 1,
+    "newsitems": 3,
+    "startdate": 0,
+    "numsections": 1,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1429209971,
+    "timemodified": 1429607442,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "shortname": "lomaketesti",
+    "categoryid": 1,
+    "categorysortorder": 10004,
+    "fullname": "Testikurssi lomakkeelta",
+    "idnumber": "",
+    "summary": "summary",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 0,
+    "numsections": 10,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1430211543,
+    "timemodified": 1430211543,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 10
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "shortname": "testi",
+    "categoryid": 1,
+    "categorysortorder": 10005,
+    "fullname": "testikurssi",
+    "idnumber": "1",
+    "summary": "summary",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 0,
+    "numsections": 10,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 0,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1429696402,
+    "timemodified": 1429696402,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 10
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "shortname": "hiekkalinnat",
+    "categoryid": 1,
+    "categorysortorder": 10003,
+    "fullname": "Hiekkalinnojen rakentelu",
+    "idnumber": "",
+    "summary": "Kurssilla opetellaan rakentelemaan hiekkalinnoja",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 0,
+    "numsections": 10,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1430212372,
+    "timemodified": 1430212372,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 10
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "shortname": "foo",
+    "categoryid": 1,
+    "categorysortorder": 10002,
+    "fullname": "foobar",
+    "idnumber": "",
+    "summary": "summary",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 0,
+    "numsections": 10,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1430735569,
+    "timemodified": 1430735569,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 10
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 21,
+    "shortname": "asassa",
+    "categoryid": 4,
+    "categorysortorder": 50003,
+    "fullname": "asdas",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1433203200,
+    "numsections": 7,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1433247417,
+    "timemodified": 1433247499,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 19,
+    "shortname": "test10",
+    "categoryid": 4,
+    "categorysortorder": 50005,
+    "fullname": "test10",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1433203200,
+    "numsections": 7,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1433245848,
+    "timemodified": 1433246167,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 47,
+    "shortname": "Advanced 102374742",
+    "categoryid": 4,
+    "categorysortorder": 50001,
+    "fullname": "Advanced Immunobiology",
+    "idnumber": "102374742",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "topics",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 0,
+    "numsections": 7,
+    "maxbytes": 20971520,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1434615649,
+    "timemodified": 1434615649,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 33,
+    "shortname": "3333333",
+    "categoryid": 6,
+    "categorysortorder": 70005,
+    "fullname": "3333333",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "topics",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1433376000,
+    "numsections": 7,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1433410598,
+    "timemodified": 1433410627,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 29,
+    "shortname": "0007",
+    "categoryid": 6,
+    "categorysortorder": 70007,
+    "fullname": "0007",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1433289600,
+    "numsections": 7,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1433314889,
+    "timemodified": 1433315092,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 28,
+    "shortname": "434354",
+    "categoryid": 6,
+    "categorysortorder": 70008,
+    "fullname": "434354",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1433289600,
+    "numsections": 7,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1433313237,
+    "timemodified": 1433313269,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 27,
+    "shortname": "323232",
+    "categoryid": 6,
+    "categorysortorder": 70009,
+    "fullname": "323232",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1433289600,
+    "numsections": 7,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1433312228,
+    "timemodified": 1433312267,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 26,
+    "shortname": "1234",
+    "categoryid": 6,
+    "categorysortorder": 70010,
+    "fullname": "1234",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1433289600,
+    "numsections": 7,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1433311724,
+    "timemodified": 1433311764,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 25,
+    "shortname": "test100",
+    "categoryid": 6,
+    "categorysortorder": 70011,
+    "fullname": "test100",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1433203200,
+    "numsections": 7,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1433252049,
+    "timemodified": 1433252117,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 24,
+    "shortname": "test101",
+    "categoryid": 6,
+    "categorysortorder": 70012,
+    "fullname": "test101",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1433203200,
+    "numsections": 7,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1433248992,
+    "timemodified": 1433252132,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 23,
+    "shortname": "test102",
+    "categoryid": 6,
+    "categorysortorder": 70013,
+    "fullname": "test102",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1433203200,
+    "numsections": 7,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1433248845,
+    "timemodified": 1433252151,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "shortname": "test5",
+    "categoryid": 6,
+    "categorysortorder": 70017,
+    "fullname": "test5",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1432684800,
+    "numsections": 7,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1432622899,
+    "timemodified": 1432710545,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "shortname": "testi01",
+    "categoryid": 6,
+    "categorysortorder": 70020,
+    "fullname": "testi01",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1432512000,
+    "numsections": 7,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1432290898,
+    "timemodified": 1432550930,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 45,
+    "shortname": "Exam1 -  103131320",
+    "categoryid": 6,
+    "categorysortorder": 70003,
+    "fullname": "Exam1 - tentti2",
+    "idnumber": "103131320",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "topics",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 0,
+    "numsections": 7,
+    "maxbytes": 20971520,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1434615141,
+    "timemodified": 1434615141,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 17,
+    "shortname": "test8",
+    "categoryid": 6,
+    "categorysortorder": 70014,
+    "fullname": "test8",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1433203200,
+    "numsections": 7,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1432729223,
+    "timemodified": 1433245441,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 16,
+    "shortname": "ssss",
+    "categoryid": 6,
+    "categorysortorder": 70015,
+    "fullname": "aaaa",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1432684800,
+    "numsections": 7,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1432710792,
+    "timemodified": 1432729182,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 15,
+    "shortname": "test6",
+    "categoryid": 6,
+    "categorysortorder": 70016,
+    "fullname": "test6",
+    "idnumber": "",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "weeks",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 1432684800,
+    "numsections": 7,
+    "maxbytes": 0,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1432710617,
+    "timemodified": 1432710786,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": 48,
+    "shortname": "Exam2 -  103127925",
+    "categoryid": 6,
+    "categorysortorder": 70001,
+    "fullname": "Exam2 - tentti1",
+    "idnumber": "103127925",
+    "summary": "",
+    "summaryformat": 1,
+    "format": "topics",
+    "showgrades": 1,
+    "newsitems": 5,
+    "startdate": 0,
+    "numsections": 7,
+    "maxbytes": 20971520,
+    "showreports": 0,
+    "visible": 1,
+    "hiddensections": 0,
+    "groupmode": 0,
+    "groupmodeforce": 0,
+    "defaultgroupingid": 0,
+    "timecreated": 1434615757,
+    "timemodified": 1434615757,
+    "enablecompletion": 0,
+    "completionnotify": 0,
+    "lang": "",
+    "forcetheme": "",
+    "courseformatoptions": [
+      {
+        "name": "numsections",
+        "value": 7
+      },
+      {
+        "name": "hiddensections",
+        "value": 0
+      },
+      {
+        "name": "coursedisplay",
+        "value": 0
+      }
+    ]
+  }
+]

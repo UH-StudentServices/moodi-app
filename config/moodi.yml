@@ -1,0 +1,6 @@
+# Access token for Moodle web service
+integration.moodle.wstoken: ???
+
+# Database connection
+datasource.username: ???
+datasource.password: ???

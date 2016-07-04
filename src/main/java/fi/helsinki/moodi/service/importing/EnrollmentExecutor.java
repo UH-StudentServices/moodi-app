@@ -1,0 +1,224 @@
+package fi.helsinki.moodi.service.importing;
+
+import com.google.common.collect.Lists;
+import fi.helsinki.moodi.integration.esb.EsbService;
+import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
+import fi.helsinki.moodi.integration.moodle.MoodleService;
+import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
+import fi.helsinki.moodi.service.course.Course;
+import fi.helsinki.moodi.service.course.CourseService;
+import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatusService;
+import fi.helsinki.moodi.service.util.MapperService;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StopWatch;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+import static java.util.stream.Collectors.partitioningBy;
+import static java.util.stream.Collectors.toList;
+import static org.slf4j.LoggerFactory.getLogger;
+
+@Component
+public class EnrollmentExecutor {
+
+    private static final Logger LOGGER = getLogger(EnrollmentExecutor.class);
+
+    private final MoodleService moodleService;
+    private final EsbService esbService;
+    private final MapperService mapperService;
+    private final CourseEnrollmentStatusService courseEnrollmentStatusService;
+    private final CourseService courseService;
+
+    @Autowired
+    public EnrollmentExecutor(
+        MoodleService moodleService,
+        EsbService esbService,
+        MapperService mapperService,
+        CourseEnrollmentStatusService courseEnrollmentStatusService,
+        CourseService courseService) {
+        this.moodleService = moodleService;
+        this.esbService = esbService;
+        this.mapperService = mapperService;
+        this.courseEnrollmentStatusService = courseEnrollmentStatusService;
+        this.courseService = courseService;
+    }
+
+
+    @Async("taskExecutor")
+    public void processEnrollments(final Course course,
+                                   final OodiCourseUnitRealisation courseUnitRealisation,
+                                   final long moodleCourseId) {
+        try {
+
+            LOGGER.info("Enrollment executor started for realisationId {} ", course.realisationId);
+
+            StopWatch stopWatch = new StopWatch();
+            stopWatch.start();
+
+            final List<Enrollment> enrollments = createEnrollments(courseUnitRealisation);
+
+            final List<Enrollment> enrollmentsWithUsernames = enrichEnrollmentsWithUsernames(enrollments);
+            final List<Enrollment> enrollmentsWithMoodleIds = enrichEnrollmentsWithMoodleIds(enrollmentsWithUsernames);
+
+            final List<EnrollmentWarning> enrollmentWarnings = persistMoodleEnrollments(moodleCourseId, enrollmentsWithMoodleIds);
+
+            courseEnrollmentStatusService.persistCourseEnrollmentStatuses(
+                course.id,
+                course.realisationId,
+                enrollmentsWithMoodleIds,
+                enrollmentWarnings);
+
+            courseService.completeCourseImport(course.realisationId, true);
+
+            stopWatch.stop();
+
+            LOGGER.info("Enrollment executor for realisationId {} finished in {} seconds", course.realisationId, stopWatch.getTotalTimeSeconds());
+
+        } catch(Exception e) {
+            courseService.completeCourseImport(course.realisationId, false);
+            LOGGER.error("Enrollment execution failed for course " + course.realisationId);
+            e.printStackTrace();
+        }
+    }
+
+    private List<Enrollment> enrichEnrollmentsWithMoodleIds(final List<Enrollment> enrollments) {
+        enrollments.stream()
+                .filter(e -> e.username.isPresent())
+                .forEach(e -> {
+                    e.moodleId = moodleService.getUser(e.username.get()).map(user -> user.id);
+                });
+
+        return enrollments;
+    }
+
+    private List<Enrollment> enrichEnrollmentsWithUsernames(final List<Enrollment> enrollments) {
+        return enrollments.stream()
+                .map(this::enrichEnrollmentWithUsername)
+                .collect(toList());
+    }
+
+    private Enrollment enrichEnrollmentWithUsername(final Enrollment enrollment) {
+        enrollment.username = Enrollment.ROLE_TEACHER.equals(enrollment.role) ?
+            esbService.getTeacherUsername(enrollment.teacherId.get()) :
+            esbService.getStudentUsername(enrollment.studentNumber.get());
+
+        return enrollment;
+    }
+
+    private List<Enrollment> createEnrollments(final OodiCourseUnitRealisation cur) {
+        final List<Enrollment> enrollments = Lists.newArrayList();
+
+        enrollments.addAll(cur.students.stream()
+                .map(s -> Enrollment.forStudent(s.studentNumber))
+                .collect(toList()));
+
+        enrollments.addAll(cur.teachers.stream()
+                .map(s -> Enrollment.forTeacher(s.teacherId))
+                .collect(toList()));
+
+        return enrollments;
+    }
+
+    private void logMoodleEnrollments(final List<MoodleEnrollment> moodleEnrollments) {
+        LOGGER.info("About to create {} enrollments to Moodle", moodleEnrollments.size());
+        moodleEnrollments.forEach(e -> LOGGER.info(e.toString()));
+    }
+
+    private List<MoodleEnrollment> buildMoodleEnrollments(final long courseId, final List<Enrollment> enrollments) {
+        return enrollments.stream()
+                .map(e -> new MoodleEnrollment(mapperService.getMoodleRole(e.role), e.moodleId.get(), courseId))
+                .collect(toList());
+    }
+
+    private List<Enrollment> filterOutEnrollmentsWithoutUsername(
+            final List<Enrollment> enrollments,
+            final List<EnrollmentWarning> enrollmentWarnings) {
+
+        return filterEnrollmentsAndCreateWarnings(
+                enrollments, enrollmentWarnings, this::isUsernamePresent, EnrollmentWarning::userNotFoundFromEsb);
+    }
+
+    private List<Enrollment> filterOutEnrollmentsWithoutMoodleIds(
+            final List<Enrollment> enrollments,
+            final List<EnrollmentWarning> enrollmentWarnings) {
+
+        return filterEnrollmentsAndCreateWarnings(
+                enrollments, enrollmentWarnings, this::isMoodleIdPresent, EnrollmentWarning::userNotFoundFromMoodle);
+    }
+
+    private boolean isMoodleIdPresent(final Enrollment enrollment) {
+        return enrollment.moodleId.isPresent();
+    }
+
+    private boolean isUsernamePresent(final Enrollment enrollment) {
+        return enrollment.username.isPresent();
+    }
+
+    private List<Enrollment> filterEnrollmentsAndCreateWarnings(
+            final List<Enrollment> enrollments,
+            final List<EnrollmentWarning> enrollmentWarnings,
+            final Predicate<Enrollment> partitionPredicate,
+            final Function<Enrollment, EnrollmentWarning> warningCreator) {
+
+        final Map<Boolean, List<Enrollment>> partitions =
+                enrollments.stream().collect(partitioningBy(partitionPredicate));
+
+        partitions.getOrDefault(false, Lists.newArrayList())
+                .stream()
+                .map(warningCreator)
+                .forEach(enrollmentWarnings::add);
+
+        return partitions.getOrDefault(true, Lists.newArrayList());
+    }
+
+    private long countEnrollmentsByRole(List<Enrollment> enrollments, String role) {
+        return enrollments.stream().filter(e -> role.equals(e.role)).count();
+    }
+
+    private List<EnrollmentWarning> persistMoodleEnrollments(final long courseId, final List<Enrollment> enrollments) {
+
+        final List<EnrollmentWarning> enrollmentWarnings = Lists.newArrayList();
+
+        final List<Enrollment> enrollmentsWithUsernames = filterOutEnrollmentsWithoutUsername(enrollments, enrollmentWarnings);
+        final List<Enrollment> enrollmentsWithMoodleIds = filterOutEnrollmentsWithoutMoodleIds(enrollmentsWithUsernames, enrollmentWarnings);
+
+        final long teacherCount = countEnrollmentsByRole(enrollmentsWithMoodleIds, Enrollment.ROLE_TEACHER);
+        final long studentCount = countEnrollmentsByRole(enrollmentsWithMoodleIds, Enrollment.ROLE_STUDENT);
+
+        LOGGER.info("About to enroll {} teacher(s) and {} students", teacherCount, studentCount);
+
+        if (enrollToCourse(courseId, enrollmentsWithMoodleIds)) {
+            LOGGER.info("Successfully enrolled {} teacher(s) and {} student(s)", teacherCount, studentCount);
+        } else {
+            LOGGER.warn("Failed to enroll {} teacher(s) and {} student(s)", teacherCount, studentCount);
+            enrollmentsWithMoodleIds
+                    .stream()
+                    .map(EnrollmentWarning::enrollFailed)
+                    .forEach(enrollmentWarnings::add);
+        }
+
+        return enrollmentWarnings;
+    }
+
+    private boolean enrollToCourse(final long courseId, final List<Enrollment> enrollments) {
+        if (enrollments.isEmpty()) {
+            return true;
+        }
+
+        try {
+            final List<MoodleEnrollment> moodleEnrollments = buildMoodleEnrollments(courseId, enrollments);
+            logMoodleEnrollments(moodleEnrollments);
+            moodleService.enrollToCourse(moodleEnrollments);
+            return true;
+        } catch (Exception e) {
+            LOGGER.error("An error occurred while enrolling", e);
+            return false;
+        }
+    }
+}

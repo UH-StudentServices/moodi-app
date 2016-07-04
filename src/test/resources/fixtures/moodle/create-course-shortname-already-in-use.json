@@ -1,0 +1,5 @@
+{
+  "exception": "moodle_exception",
+  "errorcode": "shortnametaken",
+  "message": "Short name is already used for another course (ICT Driv 103127921)"
+}

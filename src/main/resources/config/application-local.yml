@@ -1,0 +1,27 @@
+spring:
+# Uncomment to use local Postgres
+#  datasource:
+#    dataSourceClassName: org.postgresql.ds.PGSimpleDataSource
+#    url: jdbc:postgresql://localhost:5432/moodi
+#    username: moodi
+#    password: moodi
+
+  dataSourceClassName: org.h2.jdbcx.JdbcDataSource
+  url: jdbc:h2:mem:moodi;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database: PostgreSQL
+
+integration.oodi.url: https://oprek2.it.helsinki.fi:30039
+
+synchronize.FULL.enabled: true
+synchronize.INCREMENTAL.enabled: true
+synchronize.INCREMENTAL.retain.logs: PT30M
+
+synchronize.logging.file.path: /tmp/log/moodi-sync
+
+auth.client.user: password
+auth.enabled: true
+
+dev.mode.enabled: true

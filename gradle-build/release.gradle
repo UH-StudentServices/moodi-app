@@ -1,0 +1,7 @@
+//
+// Release
+//
+
+apply plugin: "net.researchgate.release"
+
+createReleaseTag.dependsOn storeDeployInformationToFile

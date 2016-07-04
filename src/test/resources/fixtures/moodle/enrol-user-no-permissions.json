@@ -1,0 +1,5 @@
+{
+  "exception": "moodle_exception",
+  "errorcode": "wsusercannotassign",
+  "message": "You don't have the permission to assign this role (9) to this user (5) in this course(12)."
+}

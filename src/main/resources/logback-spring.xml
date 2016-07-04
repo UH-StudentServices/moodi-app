@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration debug="true" scan="true">
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <charset>utf-8</charset>
+            <Pattern>[%p] %c - %m%n</Pattern>
+        </encoder>
+    </appender>
+
+    <springProfile name="dev">
+        <include resource="logback-rolling-file-appender.xml"/>
+        <root level="INFO">
+            <appender-ref ref="FILE"/>
+            <appender-ref ref="CONSOLE"/>
+        </root>
+        <logger name="fi.helsinki.moodi" level="DEBUG"/>
+    </springProfile>
+
+    <springProfile name="prod">
+        <include resource="logback-rolling-file-appender.xml"/>
+        <root level="INFO">
+            <appender-ref ref="FILE"/>
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="local">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+        <logger name="fi.helsinki.moodi" level="DEBUG"/>
+    </springProfile>
+
+    <springProfile name="test">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+        <logger name="fi.helsinki.moodi" level="DEBUG"/>
+        <logger name="fi.helsinki.moodi.test" level="TRACE"/>
+
+    </springProfile>
+
+</configuration>
