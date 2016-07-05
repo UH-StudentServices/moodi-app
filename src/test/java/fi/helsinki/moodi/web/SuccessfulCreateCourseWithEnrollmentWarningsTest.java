@@ -23,7 +23,7 @@ import org.junit.Test;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class SuccessfulCreateCourseWithEnrollmentWarningsTest extends AbstractSuccessfullCreateCourseTest {
+public class SuccessfulCreateCourseWithEnrollmentWarningsTest extends AbstractSuccessfulCreateCourseTest {
 
     private static final long COURSE_REALISATION_ID = 102374742L;
 

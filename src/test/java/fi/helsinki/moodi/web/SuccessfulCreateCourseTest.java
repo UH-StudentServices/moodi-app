@@ -19,14 +19,12 @@ package fi.helsinki.moodi.web;
 
 import org.junit.Before;
 import org.junit.Test;
+import static java.lang.Math.toIntExact;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class SuccessfulCreateCourseTest extends AbstractSuccessfullCreateCourseTest {
-
-    private static final long COURSE_REALISATION_ID = 102374742L;
-
+public class SuccessfulCreateCourseTest extends AbstractSuccessfulCreateCourseTest {
     @Before
     public void setUp() {
         setUpMockServerResponses();
@@ -36,7 +34,7 @@ public class SuccessfulCreateCourseTest extends AbstractSuccessfullCreateCourseT
     public void successfulCreateCourseReturnsCorrectResponse() throws Exception {
         makeCreateCourseRequest(COURSE_REALISATION_ID)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.moodleCourseId").value(988888));
+                .andExpect(jsonPath("$.data.moodleCourseId").value(toIntExact(MOODLE_COURSE_ID)));
     }
 
     @Test
