@@ -31,7 +31,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 public abstract class AbstractSuccessfullCreateCourseTest extends AbstractCourseControllerTest {
 
     protected static final long COURSE_REALISATION_ID = 102374742L;
-    private final static long MOODLE_COURSE_ID = 988888;
+    protected final static long MOODLE_COURSE_ID = 988888L;
     private static final long MOODLE_USER_ID_1 = 1L;
     private static final long MOODLE_USER_ID_2 = 2L;
     private static final long MOODLE_USER_ID_3 = 3L;
