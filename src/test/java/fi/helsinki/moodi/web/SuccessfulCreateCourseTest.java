@@ -24,7 +24,7 @@ import static java.lang.Math.toIntExact;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class SuccessfulCreateCourseTest extends AbstractSuccessfullCreateCourseTest {
+public class SuccessfulCreateCourseTest extends AbstractSuccessfulCreateCourseTest {
     @Before
     public void setUp() {
         setUpMockServerResponses();

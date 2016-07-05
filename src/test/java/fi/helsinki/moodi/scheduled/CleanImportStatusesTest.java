@@ -37,7 +37,7 @@ public class CleanImportStatusesTest extends AbstractMoodiIntegrationTest {
     private CourseRepository courseRepository;
 
     @Test
-    public void thatImportStatusesAreCleaned() {
+    public void thatInProgressImportStatusesOlderThanTwoHoursAreSetToCompletedFailed() {
 
         assertCourseCountByStatus(IN_PROGRESS, 2);
         assertCourseCountByStatus(COMPLETED_FAILED, 0);
