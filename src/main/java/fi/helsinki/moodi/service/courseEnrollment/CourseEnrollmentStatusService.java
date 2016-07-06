@@ -106,11 +106,8 @@ public class CourseEnrollmentStatusService {
        return courseEnrollmentStatus;
     }
 
-    public void persistCourseEnrollmentStatuses(List<SynchronizationItem> synchronizationItemList) {
-        synchronizationItemList.stream()
-            .filter(synchronizationItem -> !synchronizationItem.isRemoved())
-            .map(this::createCourseEnrolmentStatusFromSynchronizationItem)
-            .forEach(courseEnrollmentStatusRepository::save);
+    public void persistCourseEnrollmentStatus(SynchronizationItem synchronizationItem) {
+        courseEnrollmentStatusRepository.save(createCourseEnrolmentStatusFromSynchronizationItem(synchronizationItem));
     }
 
     public void persistCourseEnrollmentStatuses(

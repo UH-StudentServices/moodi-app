@@ -23,6 +23,8 @@ import fi.helsinki.moodi.integration.moodle.*;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
 import fi.helsinki.moodi.integration.oodi.OodiStudent;
 import fi.helsinki.moodi.integration.oodi.OodiTeacher;
+import fi.helsinki.moodi.service.course.CourseService;
+import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatusService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.util.MapperService;
 import org.slf4j.Logger;
@@ -30,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -66,13 +69,21 @@ public class SynchronizingProcessor extends AbstractProcessor {
     private final EsbService esbService;
     private final MapperService mapperService;
     private final MoodleService moodleService;
+    private final CourseEnrollmentStatusService courseEnrollmentStatusService;
+    private final CourseService courseService;
 
     @Autowired
-    public SynchronizingProcessor(EsbService esbService, MapperService mapperService, MoodleService moodleService) {
+    public SynchronizingProcessor(EsbService esbService,
+                                  MapperService mapperService,
+                                  MoodleService moodleService,
+                                  CourseEnrollmentStatusService courseEnrollmentStatusService,
+                                  CourseService courseService) {
         super(Action.SYNCHRONIZE);
         this.esbService = esbService;
         this.mapperService = mapperService;
         this.moodleService = moodleService;
+        this.courseEnrollmentStatusService = courseEnrollmentStatusService;
+        this.courseService = courseService;
     }
 
     @Override
@@ -86,9 +97,17 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
         final List<TeacherSynchronizationItem> processedTeachers = filterSynchronizationItemsByType(processedItems, TeacherSynchronizationItem.class);
 
+        completeCourseEnrollments(item);
+
         return item.setStudentItems(Optional.of(processedStudents))
             .setTeacherItems(Optional.of(processedTeachers))
             .completeProcessingPhase();
+    }
+
+    @Transactional
+    private void completeCourseEnrollments(final SynchronizationItem item) {
+        courseEnrollmentStatusService.persistCourseEnrollmentStatus(item);
+        courseService.completeCourseImport(item.getCourse().realisationId, true);
     }
 
     private <T extends EnrollmentSynchronizationItem> List<T> filterSynchronizationItemsByType(List<EnrollmentSynchronizationItem> items, Class<T> type) {

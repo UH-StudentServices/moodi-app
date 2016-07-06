@@ -110,7 +110,7 @@ public class CourseEnrollmentStatusServiceTest extends AbstractMoodiIntegrationT
 
         SynchronizationItem synchronizationItem = createSynchronizationItem(studentSynchronizationItems, teacherSynchronizationItems);
 
-        courseEnrollmentStatusService.persistCourseEnrollmentStatuses(Lists.newArrayList(synchronizationItem));
+        courseEnrollmentStatusService.persistCourseEnrollmentStatus(synchronizationItem);
 
         CourseEnrollmentStatus courseEnrollmentStatus = courseEnrollmentStatusRepository.findTop1ByRealisationIdOrderByCreatedDesc(1L).get();
         assertEquals("[{\"courseEnrollmentStatusCode\":\"OK\",\"studentNumber\":\"12345\"}]", courseEnrollmentStatus.studentEnrollments);
@@ -157,7 +157,7 @@ public class CourseEnrollmentStatusServiceTest extends AbstractMoodiIntegrationT
 
         SynchronizationItem synchronizationItem = createSynchronizationItem(studentSynchronizationItems, teacherSynchronizationItems);
 
-        courseEnrollmentStatusService.persistCourseEnrollmentStatuses(Lists.newArrayList(synchronizationItem));
+        courseEnrollmentStatusService.persistCourseEnrollmentStatus(synchronizationItem);
 
         CourseEnrollmentStatus courseEnrollmentStatus = courseEnrollmentStatusRepository.findTop1ByRealisationIdOrderByCreatedDesc(1L).get();
 
@@ -204,7 +204,7 @@ public class CourseEnrollmentStatusServiceTest extends AbstractMoodiIntegrationT
 
         SynchronizationItem synchronizationItem = createSynchronizationItem(studentSynchronizationItems, teacherSynchronizationItems);
 
-        courseEnrollmentStatusService.persistCourseEnrollmentStatuses(Lists.newArrayList(synchronizationItem));
+        courseEnrollmentStatusService.persistCourseEnrollmentStatus(synchronizationItem);
 
         CourseEnrollmentStatus courseEnrollmentStatus = courseEnrollmentStatusRepository.findTop1ByRealisationIdOrderByCreatedDesc(1L).get();
 

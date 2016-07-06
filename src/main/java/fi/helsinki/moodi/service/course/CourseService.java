@@ -75,15 +75,6 @@ public class CourseService {
         return courseRepository.save(course);
     }
 
-    public void completeFailedImports(List<Long> realisationIds) {
-        List<Course> courses = courseRepository
-            .findByImportStatusInAndRealisationIdIn(newArrayList(COMPLETED_FAILED), realisationIds);
-
-        courses.stream().forEach(c -> c.importStatus = COMPLETED);
-
-        courseRepository.save(courses);
-    }
-
     public List<Course> findCompletedByRealisationIds(List<Long> realisationIds) {
         return courseRepository.findByImportStatusInAndRealisationIdIn(newArrayList(COMPLETED, COMPLETED_FAILED), realisationIds);
     }

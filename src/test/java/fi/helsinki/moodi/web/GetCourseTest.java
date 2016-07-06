@@ -21,7 +21,7 @@ import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 
-import static fi.helsinki.moodi.service.course.Course.ImportStatus.COMPLETED;
+import static fi.helsinki.moodi.service.course.Course.ImportStatus.COMPLETED_FAILED;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -37,7 +37,7 @@ public class GetCourseTest extends AbstractMoodiIntegrationTest {
                 .header("client-token", "xxx123"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.url").value(getMoodleBaseUrl() + "/course/view.php?id=54321"))
-            .andExpect(jsonPath("$.importStatus").value(COMPLETED.toString()));
+            .andExpect(jsonPath("$.importStatus").value(COMPLETED_FAILED.toString()));
     }
 
     @Test
