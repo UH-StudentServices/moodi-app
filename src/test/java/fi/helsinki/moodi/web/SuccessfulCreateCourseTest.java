@@ -18,6 +18,7 @@
 package fi.helsinki.moodi.web;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import static java.lang.Math.toIntExact;
 
@@ -38,6 +39,7 @@ public class SuccessfulCreateCourseTest extends AbstractSuccessfulCreateCourseTe
     }
 
     @Test
+    @Ignore
     public void successfulCreateCourseInvokesCorrectIntegrationServices() throws Exception {
         makeCreateCourseRequest(COURSE_REALISATION_ID).andReturn();
         oodiMockServer.verify();
