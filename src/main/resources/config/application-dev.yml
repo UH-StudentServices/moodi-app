@@ -11,5 +11,4 @@ spring:
 
 dev.mode.enabled: true
 
-synchronize.INCREMENTAL.enabled: false
 synchronize.FULL.enabled: false
