@@ -19,7 +19,9 @@ package fi.helsinki.moodi.scheduled;
 
 import com.google.common.collect.ImmutableMap;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
+import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
+import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatusService;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
 import fi.helsinki.moodi.web.AbstractCourseControllerTest;
 import org.junit.Test;
@@ -29,9 +31,13 @@ import org.springframework.http.MediaType;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
+import static fi.helsinki.moodi.service.course.Course.ImportStatus;
 import static fi.helsinki.moodi.util.DateFormat.OODI_UTC_DATE_FORMAT;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
@@ -50,6 +56,9 @@ public class FullSynchronizationJobTest extends AbstractCourseControllerTest {
 
     @Autowired
     private CourseService courseService;
+
+    @Autowired
+    private CourseEnrollmentStatusService courseEnrollmentStatusService;
 
     private void setUpMockServerResponses(String endDate) {
 
@@ -72,7 +81,6 @@ public class FullSynchronizationJobTest extends AbstractCourseControllerTest {
 
     @Test
     public void thatCourseIsSynchronized() {
-
         String endDateInFuture = LocalDateTime.now().plusDays(1).format(DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
         setUpMockServerResponses(endDateInFuture);
 
@@ -106,8 +114,31 @@ public class FullSynchronizationJobTest extends AbstractCourseControllerTest {
         assertCourseFound(false);
     }
 
+    @Test
+    public void thatImportStatusIsSetToCompletedAndEnrollmentStatusesAreGenerated() {
+        assertImportStatus(ImportStatus.COMPLETED_FAILED);
+
+        assertNull(courseEnrollmentStatusService.getCourseEnrollmentStatus(REALISATION_ID));
+
+        thatCourseIsSynchronized();
+
+        assertNotNull(courseEnrollmentStatusService.getCourseEnrollmentStatus(REALISATION_ID));
+
+        assertImportStatus(ImportStatus.COMPLETED);
+    }
+
     private void assertCourseFound(boolean found) {
-        assertEquals(courseService.findByRealisationId(REALISATION_ID).isPresent(), found);
+        assertEquals(findCourse().isPresent(), found);
+    }
+
+    private Optional<Course> findCourse() {
+        return courseService.findByRealisationId(REALISATION_ID);
+    }
+
+    private void assertImportStatus(ImportStatus expectedImportStatus) {
+        Course course = findCourse().get();
+
+        assertEquals(course.importStatus, expectedImportStatus);
     }
 
 }

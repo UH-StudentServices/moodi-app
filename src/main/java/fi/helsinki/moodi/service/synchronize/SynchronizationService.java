@@ -19,8 +19,6 @@ package fi.helsinki.moodi.service.synchronize;
 
 import com.google.common.base.Stopwatch;
 import fi.helsinki.moodi.service.course.Course;
-import fi.helsinki.moodi.service.course.CourseService;
-import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatusService;
 import fi.helsinki.moodi.service.synchronize.enrich.EnricherService;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRunService;
 import fi.helsinki.moodi.service.synchronize.loader.CourseLoaderService;
@@ -31,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -49,8 +46,6 @@ public class SynchronizationService {
     private final SynchronizationJobRunService synchronizationJobRunService;
     private final CourseLoaderService courseLoaderService;
     private final LoggingService loggingService;
-    private final CourseEnrollmentStatusService courseEnrollmentStatusService;
-    private final CourseService courseService;
 
 
     @Autowired
@@ -59,17 +54,13 @@ public class SynchronizationService {
             ProcessorService processorService,
             SynchronizationJobRunService synchronizationJobRunService,
             CourseLoaderService courseLoaderService,
-            LoggingService loggingService,
-            CourseEnrollmentStatusService courseEnrollmentStatusService,
-            CourseService courseService) {
+            LoggingService loggingService) {
 
         this.enricherService = enricherService;
         this.processorService = processorService;
         this.synchronizationJobRunService = synchronizationJobRunService;
         this.courseLoaderService = courseLoaderService;
         this.loggingService = loggingService;
-        this.courseEnrollmentStatusService = courseEnrollmentStatusService;
-        this.courseService = courseService;
     }
 
     public SynchronizationSummary synchronize(final SynchronizationType type) {
@@ -82,9 +73,6 @@ public class SynchronizationService {
         final List<SynchronizationItem> processedItems = processItems(enrichedItems);
 
         final SynchronizationSummary summary = complete(type, jobId, stopwatch, processedItems);
-
-        courseEnrollmentStatusService.persistCourseEnrollmentStatuses(processedItems);
-        courseService.completeFailedImports(courses.stream().map(c -> c.realisationId).collect(Collectors.toList()));
 
         return logSummary(summary);
     }

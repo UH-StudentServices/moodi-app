@@ -40,12 +40,12 @@ public class CleanImportStatusesTest extends AbstractMoodiIntegrationTest {
     public void thatInProgressImportStatusesOlderThanTwoHoursAreSetToCompletedFailed() {
 
         assertCourseCountByStatus(IN_PROGRESS, 2);
-        assertCourseCountByStatus(COMPLETED_FAILED, 0);
+        assertCourseCountByStatus(COMPLETED_FAILED, 1);
 
         cleanImportStatuses.execute();
 
         assertCourseCountByStatus(IN_PROGRESS, 1);
-        assertCourseCountByStatus(COMPLETED_FAILED, 1);
+        assertCourseCountByStatus(COMPLETED_FAILED, 2);
     }
 
     private void assertCourseCountByStatus(ImportStatus status, int expextedCount) {
