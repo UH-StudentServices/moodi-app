@@ -26,7 +26,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+
+import static fi.helsinki.moodi.util.DateFormat.OODI_UTC_DATE_FORMAT;
 
 @Component
 public class OodiCourseEnricher extends AbstractEnricher {
@@ -66,9 +70,8 @@ public class OodiCourseEnricher extends AbstractEnricher {
     }
 
     private boolean isCourseEnded(OodiCourseUnitRealisation oodiCourse) {
-        /*LocalDateTime endDate = LocalDateTime.parse(oodiCourse.endDate, DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
+        LocalDateTime endDate = LocalDateTime.parse(oodiCourse.endDate, DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
         LocalDateTime nowDate = LocalDateTime.now();
-        return endDate.isBefore(nowDate);*/
-        return false;
+        return endDate.isBefore(nowDate);
     }
 }

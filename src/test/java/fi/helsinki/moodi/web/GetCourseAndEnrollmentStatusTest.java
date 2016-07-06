@@ -18,7 +18,6 @@
 package fi.helsinki.moodi.web;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 
@@ -35,7 +34,6 @@ public class GetCourseAndEnrollmentStatusTest extends AbstractSuccessfulCreateCo
     }
 
     @Test
-    @Ignore
     public void successfulCreateCourseReturnsCorrectResponse() throws Exception {
         makeCreateCourseRequest(COURSE_REALISATION_ID);
 
