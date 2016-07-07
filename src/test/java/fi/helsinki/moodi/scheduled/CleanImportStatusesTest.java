@@ -49,6 +49,6 @@ public class CleanImportStatusesTest extends AbstractMoodiIntegrationTest {
     }
 
     private void assertCourseCountByStatus(ImportStatus status, int expextedCount) {
-        assertEquals(courseRepository.findByImportStatusIn(Lists.newArrayList(status)).size(), expextedCount);
+        assertEquals(courseRepository.findByImportStatusInAndRemovedFalse(Lists.newArrayList(status)).size(), expextedCount);
     }
 }

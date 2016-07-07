@@ -22,6 +22,7 @@ import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatusService;
+import fi.helsinki.moodi.service.synchronize.enrich.EnrichmentStatus;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
 import fi.helsinki.moodi.web.AbstractCourseControllerTest;
 import org.junit.Test;
@@ -31,13 +32,10 @@ import org.springframework.http.MediaType;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
 
 import static fi.helsinki.moodi.service.course.Course.ImportStatus;
 import static fi.helsinki.moodi.util.DateFormat.OODI_UTC_DATE_FORMAT;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
@@ -103,15 +101,19 @@ public class FullSynchronizationJobTest extends AbstractCourseControllerTest {
 
     @Test
     public void thatEndedCourseIsRemoved() {
-
         String endDateInPast = LocalDateTime.now().minusDays(1).format(DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
         setUpMockServerResponses(endDateInPast);
 
-        assertCourseFound(true);
+        Course course = findCourse();
+
+        assertFalse(course.removed);
 
         job.execute();
 
-        assertCourseFound(false);
+        course = findCourse();
+
+        assertTrue(course.removed);
+        assertEquals(course.removedMessage, EnrichmentStatus.OODI_COURSE_ENDED.toString());
     }
 
     @Test
@@ -127,16 +129,12 @@ public class FullSynchronizationJobTest extends AbstractCourseControllerTest {
         assertImportStatus(ImportStatus.COMPLETED);
     }
 
-    private void assertCourseFound(boolean found) {
-        assertEquals(findCourse().isPresent(), found);
-    }
-
-    private Optional<Course> findCourse() {
-        return courseService.findByRealisationId(REALISATION_ID);
+    private Course findCourse() {
+        return courseService.findByRealisationId(REALISATION_ID).get();
     }
 
     private void assertImportStatus(ImportStatus expectedImportStatus) {
-        Course course = findCourse().get();
+        Course course = findCourse();
 
         assertEquals(course.importStatus, expectedImportStatus);
     }

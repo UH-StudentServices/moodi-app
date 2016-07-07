@@ -54,9 +54,21 @@ public class Course implements Serializable {
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentLocalDateTime")
     public LocalDateTime created;
 
+    @Column(name = "modified")
+    @NotNull
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentLocalDateTime")
+    public LocalDateTime modified;
+
     @Column(name = "import_status")
     @NotNull
     @Enumerated(EnumType.STRING)
     public ImportStatus importStatus;
+
+    @Column(name = "removed")
+    @NotNull
+    public boolean removed;
+
+    @Column(name = "removed_message")
+    public String removedMessage;
 
 }
