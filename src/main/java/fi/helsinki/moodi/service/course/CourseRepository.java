@@ -28,7 +28,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
     Optional<Course> findByRealisationId(long realisationId);
 
-    List<Course> findByImportStatusIn(List<ImportStatus> importStatus);
+    List<Course> findByImportStatusInAndRemovedFalse(List<ImportStatus> importStatus);
 
     List<Course> findByImportStatusInAndRealisationIdIn(List<ImportStatus> importStatuses, List<Long> realisationIds);
 

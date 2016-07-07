@@ -43,8 +43,10 @@ public class CourseService {
         this.timeService = timeService;
     }
 
-    public void delete(final long courseId) {
-        courseRepository.delete(courseId);
+    public void markAsRemoved(Course course, String message) {
+        course.removed = true;
+        course.removedMessage = message;
+        saveCourse(course);
     }
 
     public Optional<Course> findByRealisationId(final long realisationId) {
@@ -52,7 +54,7 @@ public class CourseService {
     }
 
     public List<Course> findAllCompleted() {
-        return courseRepository.findByImportStatusIn(newArrayList(COMPLETED, COMPLETED_FAILED));
+        return courseRepository.findByImportStatusInAndRemovedFalse(newArrayList(COMPLETED, COMPLETED_FAILED));
     }
 
     public Course createCourse(final long realisationId, final long moodleCourseId) {
@@ -61,7 +63,7 @@ public class CourseService {
         course.moodleId = moodleCourseId;
         course.realisationId = realisationId;
         course.importStatus = IN_PROGRESS;
-        return courseRepository.save(course);
+        return saveCourse(course);
     }
 
     public Course completeCourseImport(long realisationId, boolean success) {
@@ -72,7 +74,7 @@ public class CourseService {
 
         course.importStatus = success ? COMPLETED : COMPLETED_FAILED;
 
-        return courseRepository.save(course);
+        return saveCourse(course);
     }
 
     public List<Course> findCompletedByRealisationIds(List<Long> realisationIds) {
@@ -80,14 +82,14 @@ public class CourseService {
     }
 
     public void cleanImportStatuses() {
-        List<Course> inProgressCourses = courseRepository.findByImportStatusIn(newArrayList(IN_PROGRESS));
+        List<Course> inProgressCourses = courseRepository.findByImportStatusInAndRemovedFalse(newArrayList(IN_PROGRESS));
 
         inProgressCourses
             .stream()
             .filter(this::isImportExpired)
             .forEach(c -> {
                 c.importStatus = COMPLETED_FAILED;
-                courseRepository.save(c);
+                saveCourse(c);
             });
     }
 
@@ -95,5 +97,10 @@ public class CourseService {
         return course.created
             .plusSeconds(MAX_IMPORT_TIME_SECONDS)
             .isBefore(timeService.getCurrentDateTime());
+    }
+
+    private Course saveCourse(Course course) {
+        course.modified = timeService.getCurrentDateTime();
+        return courseRepository.save(course);
     }
 }

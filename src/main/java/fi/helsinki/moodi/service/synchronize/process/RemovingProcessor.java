@@ -42,7 +42,7 @@ public class RemovingProcessor extends AbstractProcessor {
 
     @Override
     protected SynchronizationItem doProcess(final SynchronizationItem item) {
-        courseService.delete(item.getCourse().id);
+        courseService.markAsRemoved(item.getCourse(), item.getEnrichmentStatus().toString());
         return item.completeProcessingPhase(ProcessingStatus.SUCCESS, "Removed", true);
     }
 
