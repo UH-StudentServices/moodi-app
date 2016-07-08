@@ -51,7 +51,15 @@ public class OodiCourseEnricher extends AbstractEnricher {
         final Optional<OodiCourseUnitRealisation> oodiCourse = oodiService.getOodiCourseUnitRealisation(course.realisationId);
         final boolean courseEnded = oodiCourse.map(this::isCourseEnded).orElse(false);
 
-        if (oodiCourse.isPresent() && !courseEnded) {
+        if (oodiCourse.isPresent()) {
+            return item.setOodiCourse(oodiCourse);
+        } else {
+            return item.completeEnrichmentPhase(
+                EnrichmentStatus.OODI_COURSE_NOT_FOUND,
+                String.format("Course not found from Oodi with id %s", course.realisationId));
+        }
+
+        /*if (oodiCourse.isPresent() && !courseEnded) {
             return item.setOodiCourse(oodiCourse);
         } else if(courseEnded) {
             return item.completeEnrichmentPhase(
@@ -61,7 +69,7 @@ public class OodiCourseEnricher extends AbstractEnricher {
             return item.completeEnrichmentPhase(
                 EnrichmentStatus.OODI_COURSE_NOT_FOUND,
                 String.format("Course not found from Oodi with id %s", course.realisationId));
-        }
+        }*/
     }
 
     @Override
