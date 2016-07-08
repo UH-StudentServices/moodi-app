@@ -95,7 +95,7 @@ public class ImportingService {
 
         Course savedCourse = courseService.createCourse(request.realisationId, moodleCourseId);
 
-        //enrollmentExecutor.processEnrollments(savedCourse, courseUnitRealisation, moodleCourseId);
+        enrollmentExecutor.processEnrollments(savedCourse, courseUnitRealisation, moodleCourseId);
 
         stopWatch.stop();
 

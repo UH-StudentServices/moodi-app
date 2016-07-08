@@ -25,7 +25,6 @@ import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatusService;
 import fi.helsinki.moodi.service.synchronize.enrich.EnrichmentStatus;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
 import fi.helsinki.moodi.web.AbstractCourseControllerTest;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -101,7 +100,6 @@ public class FullSynchronizationJobTest extends AbstractCourseControllerTest {
     }
 
     @Test
-    @Ignore
     public void thatEndedCourseIsRemoved() {
         String endDateInPast = LocalDateTime.now().minusDays(1).format(DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
         setUpMockServerResponses(endDateInPast);
