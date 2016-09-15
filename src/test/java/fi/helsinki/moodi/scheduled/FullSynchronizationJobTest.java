@@ -24,17 +24,14 @@ import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatusService;
 import fi.helsinki.moodi.service.synchronize.enrich.EnrichmentStatus;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
+import fi.helsinki.moodi.test.util.DateUtil;
 import fi.helsinki.moodi.web.AbstractCourseControllerTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 import static fi.helsinki.moodi.service.course.Course.ImportStatus;
-import static fi.helsinki.moodi.util.DateFormat.OODI_UTC_DATE_FORMAT;
 import static org.junit.Assert.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -73,13 +70,14 @@ public class FullSynchronizationJobTest extends AbstractCourseControllerTest {
                         .put("studentnumber", STUDENT_NUMBER)
                         .put("teacherid", TEACHER_ID)
                         .put("endDate", endDate)
+                        .put("removed", false)
                         .build()),
                 MediaType.APPLICATION_JSON));
     }
 
     @Test
     public void thatCourseIsSynchronized() {
-        String endDateInFuture = LocalDateTime.now().plusDays(1).format(DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
+        String endDateInFuture = DateUtil.getFutureDateString();
         setUpMockServerResponses(endDateInFuture);
 
         expectGetEnrollmentsRequestToMoodle(MOODLE_COURSE_ID);
@@ -101,7 +99,7 @@ public class FullSynchronizationJobTest extends AbstractCourseControllerTest {
 
     @Test
     public void thatEndedCourseIsRemoved() {
-        String endDateInPast = LocalDateTime.now().minusDays(1).format(DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
+        String endDateInPast = DateUtil.getPastDateString();
         setUpMockServerResponses(endDateInPast);
 
         Course course = findCourse();

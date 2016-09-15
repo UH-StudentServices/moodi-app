@@ -15,15 +15,24 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.service.synchronize.enrich;
+package fi.helsinki.moodi.test.util;
 
-public enum EnrichmentStatus {
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
-    IN_PROGESS,
-    MOODLE_COURSE_NOT_FOUND,
-    OODI_COURSE_REMOVED,
-    OODI_COURSE_ENDED,
-    SUCCESS,
-    ERROR
+import static fi.helsinki.moodi.util.DateFormat.OODI_UTC_DATE_FORMAT;
 
+public class DateUtil {
+
+    private static String formatDate(LocalDateTime localDateTime) {
+        return localDateTime.format(DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
+    }
+
+    public static String getFutureDateString() {
+        return formatDate(LocalDateTime.now().plusDays(1));
+    }
+
+    public static String getPastDateString() {
+        return formatDate(LocalDateTime.now().minusDays(1));
+    }
 }
