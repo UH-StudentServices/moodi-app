@@ -62,7 +62,7 @@ synchronize.FULL.enabled: true
 # http://docs.oracle.com/javase/8/docs/api/java/time/Duration.html#parse-java.lang.CharSequence-
 synchronize.FULL.retain.logs: P30D
 
-synchronize.INCREMENTAL.enabled: false
+synchronize.INCREMENTAL.enabled: true
 
 # Retain logs for 7 days, for more information see:
 # http://docs.oracle.com/javase/8/docs/api/java/time/Duration.html#parse-java.lang.CharSequence-

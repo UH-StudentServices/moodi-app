@@ -41,8 +41,8 @@ public class IncrementalSynchronizationJob {
         this.synchronizationService = synchronizationService;
     }
 
-    // Run every 2 hours
-    @Scheduled(initialDelay = 60000, fixedDelay = 7200000)
+    // Run every 1 hour
+    @Scheduled(initialDelay = 60000, fixedDelay = 3600000)
     public void execute() {
         if (isEnabled()) {
             synchronizationService.synchronize(INCREMENTAL);
