@@ -24,7 +24,7 @@ import static fi.helsinki.moodi.util.DateFormat.OODI_UTC_DATE_FORMAT;
 
 public class DateUtil {
 
-    private static String formatDate(LocalDateTime localDateTime) {
+    public static String formatDate(LocalDateTime localDateTime) {
         return localDateTime.format(DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
     }
 
@@ -34,5 +34,9 @@ public class DateUtil {
 
     public static String getPastDateString() {
         return formatDate(LocalDateTime.now().minusDays(1));
+    }
+
+    public static String getOverYearAgoPastDateString() {
+        return formatDate(LocalDateTime.now().minusDays(1).minusYears(1));
     }
 }

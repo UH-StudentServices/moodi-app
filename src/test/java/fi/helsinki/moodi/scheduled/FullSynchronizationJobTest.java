@@ -26,17 +26,15 @@ import fi.helsinki.moodi.service.synchronize.enrich.EnrichmentStatus;
 import fi.helsinki.moodi.service.util.MapperService;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
+import fi.helsinki.moodi.test.util.DateUtil;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 import static fi.helsinki.moodi.service.course.Course.ImportStatus;
 import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
-import static fi.helsinki.moodi.util.DateFormat.OODI_UTC_DATE_FORMAT;
+import static fi.helsinki.moodi.test.util.DateUtil.getPastDateString;
 import static org.junit.Assert.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -87,7 +85,9 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
                 MediaType.APPLICATION_JSON));
     }
 
-    private void setUpPositiveMockServerResponses() {
+    private void thatCourseIsSynchronizedWithNoExistingEnrollments(String endDateString) {
+        setUpMockServerResponses(endDateString, true);
+
         expectGetEnrollmentsRequestToMoodle(MOODLE_COURSE_ID);
 
         expectFindUsersRequestsToMoodle();
@@ -97,21 +97,19 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
             new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID),
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
             new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID));
-    }
-
-
-    @Test
-    public void thatCourseIsSynchronized() {
-        String endDateInFuture = getFutureDateString();
-        setUpMockServerResponses(endDateInFuture, true);
-        setUpPositiveMockServerResponses();
 
         job.execute();
     }
 
+
+    @Test
+    public void thatCourseIsSynchronizedWhenEndDataInFuture() {
+        thatCourseIsSynchronizedWithNoExistingEnrollments(getFutureDateString());
+    }
+
     @Test
     public void thatOverYearOldCourseIsRemoved() {
-        String endDateInPast = LocalDateTime.now().minusDays(1).minusYears(1).format(DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
+        String endDateInPast = DateUtil.getOverYearAgoPastDateString();
         setUpMockServerResponses(endDateInPast, true);
 
         Course course = findCourse();
@@ -127,16 +125,13 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
     }
 
     @Test
-    public void thatEndedCourseIsStillSynched() {
-        String endDateInPast = LocalDateTime.now().minusDays(1).format(DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
-        setUpMockServerResponses(endDateInPast, true);
-        setUpPositiveMockServerResponses();
+    public void thatEndedCourseIsStillSynchedIfLessThanYearHasPassed() {
 
         Course course = findCourse();
 
         assertFalse(course.removed);
 
-        job.execute();
+        thatCourseIsSynchronizedWithNoExistingEnrollments(getPastDateString());
 
         course = findCourse();
 
@@ -149,7 +144,7 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
 
         assertNull(courseEnrollmentStatusService.getCourseEnrollmentStatus(REALISATION_ID));
 
-        thatCourseIsSynchronized();
+        thatCourseIsSynchronizedWhenEndDataInFuture();
 
         assertNotNull(courseEnrollmentStatusService.getCourseEnrollmentStatus(REALISATION_ID));
 
