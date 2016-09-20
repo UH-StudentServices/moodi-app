@@ -31,9 +31,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import static fi.helsinki.moodi.service.course.Course.ImportStatus;
 import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
-import static fi.helsinki.moodi.test.util.DateUtil.getPastDateString;
+import static fi.helsinki.moodi.util.DateFormat.OODI_UTC_DATE_FORMAT;
 import static org.junit.Assert.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -84,11 +87,7 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
                 MediaType.APPLICATION_JSON));
     }
 
-    @Test
-    public void thatCourseIsSynchronized() {
-        String endDateInFuture = getFutureDateString();
-        setUpMockServerResponses(endDateInFuture, true);
-
+    private void setUpPositiveMockServerResponses() {
         expectGetEnrollmentsRequestToMoodle(MOODLE_COURSE_ID);
 
         expectFindUsersRequestsToMoodle();
@@ -98,13 +97,21 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
             new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID),
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
             new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID));
+    }
+
+
+    @Test
+    public void thatCourseIsSynchronized() {
+        String endDateInFuture = getFutureDateString();
+        setUpMockServerResponses(endDateInFuture, true);
+        setUpPositiveMockServerResponses();
 
         job.execute();
     }
 
     @Test
-    public void thatEndedCourseIsRemoved() {
-        String endDateInPast = getPastDateString();
+    public void thatOverYearOldCourseIsRemoved() {
+        String endDateInPast = LocalDateTime.now().minusDays(1).minusYears(1).format(DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
         setUpMockServerResponses(endDateInPast, true);
 
         Course course = findCourse();
@@ -117,6 +124,23 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
 
         assertTrue(course.removed);
         assertEquals(course.removedMessage, EnrichmentStatus.OODI_COURSE_ENDED.toString());
+    }
+
+    @Test
+    public void thatEndedCourseIsStillSynched() {
+        String endDateInPast = LocalDateTime.now().minusDays(1).format(DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
+        setUpMockServerResponses(endDateInPast, true);
+        setUpPositiveMockServerResponses();
+
+        Course course = findCourse();
+
+        assertFalse(course.removed);
+
+        job.execute();
+
+        course = findCourse();
+
+        assertFalse(course.removed);
     }
 
     @Test
