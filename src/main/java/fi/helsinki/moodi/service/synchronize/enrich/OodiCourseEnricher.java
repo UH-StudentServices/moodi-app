@@ -70,8 +70,8 @@ public class OodiCourseEnricher extends AbstractEnricher {
     }
 
     private boolean isCourseEnded(OodiCourseUnitRealisation oodiCourse) {
-        LocalDateTime endDate = LocalDateTime.parse(oodiCourse.endDate, DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
+        LocalDateTime endDatePlusOneYear = LocalDateTime.parse(oodiCourse.endDate, DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT)).plusYears(1);
         LocalDateTime nowDate = LocalDateTime.now();
-        return endDate.isBefore(nowDate);
+        return endDatePlusOneYear.isBefore(nowDate);
     }
 }

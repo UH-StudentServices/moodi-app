@@ -77,11 +77,7 @@ public class FullSynchronizationJobTest extends AbstractCourseControllerTest {
                 MediaType.APPLICATION_JSON));
     }
 
-    @Test
-    public void thatCourseIsSynchronized() {
-        String endDateInFuture = LocalDateTime.now().plusDays(1).format(DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
-        setUpMockServerResponses(endDateInFuture);
-
+    private void setUpPositiveMockServerResponses() {
         expectGetEnrollmentsRequestToMoodle(MOODLE_COURSE_ID);
 
         expectFindStudentRequestToEsb(STUDENT_NUMBER, "niina");
@@ -95,13 +91,21 @@ public class FullSynchronizationJobTest extends AbstractCourseControllerTest {
             new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID),
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
             new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID));
+    }
+
+
+    @Test
+    public void thatCourseIsSynchronized() {
+        String endDateInFuture = LocalDateTime.now().plusDays(1).format(DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
+        setUpMockServerResponses(endDateInFuture);
+        setUpPositiveMockServerResponses();
 
         job.execute();
     }
 
     @Test
-    public void thatEndedCourseIsRemoved() {
-        String endDateInPast = LocalDateTime.now().minusDays(1).format(DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
+    public void thatOverYearOldCourseIsRemoved() {
+        String endDateInPast = LocalDateTime.now().minusDays(1).minusYears(1).format(DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
         setUpMockServerResponses(endDateInPast);
 
         Course course = findCourse();
@@ -114,6 +118,23 @@ public class FullSynchronizationJobTest extends AbstractCourseControllerTest {
 
         assertTrue(course.removed);
         assertEquals(course.removedMessage, EnrichmentStatus.OODI_COURSE_ENDED.toString());
+    }
+
+    @Test
+    public void thatEnededCourseIsStillSynched() {
+        String endDateInPast = LocalDateTime.now().minusDays(1).format(DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
+        setUpMockServerResponses(endDateInPast);
+        setUpPositiveMockServerResponses();
+
+        Course course = findCourse();
+
+        assertFalse(course.removed);
+
+        job.execute();
+
+        course = findCourse();
+
+        assertFalse(course.removed);
     }
 
     @Test
