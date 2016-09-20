@@ -38,8 +38,8 @@ public class OodiStudent {
     @JsonProperty("email")
     public String email;
 
-    @JsonProperty("enrollment_status_code")
-    public Integer enrollmentStatusCode;
+    @JsonProperty("approved")
+    public boolean approved;
 
     @Override
     public String toString() {

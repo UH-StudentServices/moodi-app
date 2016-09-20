@@ -116,6 +116,11 @@ public final class TeacherSynchronizationItem implements EnrollmentSynchronizati
         return success;
     }
 
+    @Override
+    public boolean isApproved() {
+        return true;
+    }
+
     public String getMessage() {
         return message;
     }

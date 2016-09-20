@@ -34,12 +34,14 @@ interface EnrollmentSynchronizationItem {
 
     boolean isSuccess();
 
+    boolean isApproved();
+
     long getMoodleRoleId();
 
     long getMoodleCourseId();
 
     String getMessage();
 
-    <T extends EnrollmentSynchronizationItem> T setCompleted(boolean newSuccess, String newMessage, EnrollmentSynchronizationStatus newEnrollmentSynchronizationStatus);
+    EnrollmentSynchronizationItem setCompleted(boolean newSuccess, String newMessage, EnrollmentSynchronizationStatus newEnrollmentSynchronizationStatus);
 
 }

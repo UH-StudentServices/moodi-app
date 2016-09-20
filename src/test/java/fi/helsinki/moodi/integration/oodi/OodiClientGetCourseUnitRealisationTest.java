@@ -134,9 +134,9 @@ public class OodiClientGetCourseUnitRealisationTest extends AbstractMoodiIntegra
 
     private void assertStudents(final OodiCourseUnitRealisation cur) {
         assertEquals(3, cur.students.size());
-        assertStudent(cur.students.get(0), "040-1234321", null, "Niina Johanna", "Sulin", "010342729", 3);
-        assertStudent(cur.students.get(1), "040-1234321", null, "Milla Maaret", "Uromo", "011119854", 3);
-        assertStudent(cur.students.get(2), "040-1234321", null, "Virpi Tuulikki", "Kontinen", "011524656", 3);
+        assertStudent(cur.students.get(0), "040-1234321", null, "Niina Johanna", "Sulin", "010342729");
+        assertStudent(cur.students.get(1), "040-1234321", null, "Milla Maaret", "Uromo", "011119854");
+        assertStudent(cur.students.get(2), "040-1234321", null, "Virpi Tuulikki", "Kontinen", "011524656");
     }
 
     private void assertStudent(
@@ -145,14 +145,12 @@ public class OodiClientGetCourseUnitRealisationTest extends AbstractMoodiIntegra
             final String email,
             final String firstNames,
             final String lastName,
-            final String studentNumber,
-            final Integer enrollmentStatusCode) {
+            final String studentNumber) {
 
         assertEquals(mobilePhone, s.mobilePhone);
         assertEquals(email, s.email);
         assertEquals(firstNames, s.firstNames);
         assertEquals(lastName, s.lastName);
         assertEquals(studentNumber, s.studentNumber);
-        assertEquals(enrollmentStatusCode, s.enrollmentStatusCode);
     }
 }

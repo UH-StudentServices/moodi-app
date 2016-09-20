@@ -21,9 +21,9 @@ import com.google.common.collect.ImmutableMap;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
+import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
 import fi.helsinki.moodi.test.util.DateUtil;
-import fi.helsinki.moodi.web.AbstractCourseControllerTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -33,7 +33,7 @@ import java.util.Optional;
 import static org.junit.Assert.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-public class OodiCourseEnricherTest extends AbstractCourseControllerTest {
+public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
 
     private static final long REALISATION_ID = 12345L;
 
