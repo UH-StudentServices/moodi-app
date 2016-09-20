@@ -52,6 +52,6 @@
       }
     ],
     "realisationname": "{{ realisationname }}",
-    "removed": "{{ removed }}"
+    "deleted": "{{ deleted }}"
   }
 }

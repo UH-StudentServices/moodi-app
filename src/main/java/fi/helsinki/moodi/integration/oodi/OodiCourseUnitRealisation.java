@@ -73,7 +73,7 @@ public class OodiCourseUnitRealisation {
     @JsonProperty("last_changed")
     public String lastChanged;
 
-    @JsonProperty("removed")
+    @JsonProperty("deleted")
     public boolean removed;
 
     @Override

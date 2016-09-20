@@ -40,15 +40,14 @@ public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
     @Autowired
     private OodiCourseEnricher oodiCourseEnricher;
 
-    private void setUpMockServerResponse(String endDate, boolean removed) {
+    private void setUpMockServerResponse(String endDate, boolean deleted) {
         expectGetCourseRealisationUnitRequestToOodi(
             REALISATION_ID,
             withSuccess(Fixtures.asString(
                     "/oodi/parameterized-course-realisation.json",
                     new ImmutableMap.Builder()
-
                         .put("endDate", endDate)
-                        .put("removed", removed)
+                        .put("deleted", deleted)
                         .build()),
                 MediaType.APPLICATION_JSON));
     }

@@ -78,7 +78,7 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
                         .put("studentnumber", STUDENT_NUMBER)
                         .put("teacherid", TEACHER_ID)
                         .put("endDate", endDate)
-                        .put("removed", false)
+                        .put("deleted", false)
                         .put("approved", approved)
                         .build()),
                 MediaType.APPLICATION_JSON));

@@ -33,13 +33,15 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 public class OodiClientGetCourseUnitRealisationTest extends AbstractMoodiIntegrationTest {
 
+    private static final long REALISATION_ID = 102374742;
+
     @Autowired
     private OodiClient oodiClient;
 
     @Test
     public void deserializeRespose() {
         oodiMockServer.expect(
-                requestTo("https://oprek4.it.helsinki.fi:30039/courseunitrealisations/102374742"))
+                requestTo(getOodiCourseUnitRealisationRequestUrl(102374742)))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(Fixtures.asString("/oodi/course-realisation.json"), MediaType.APPLICATION_JSON));
 

@@ -99,9 +99,16 @@ public abstract class AbstractMoodiIntegrationTest {
     protected String getMoodleBaseUrl() {
         return environment.getProperty("integration.moodle.baseUrl");
     }
+    protected String getOodiUrl() {
+        return environment.getProperty("integration.oodi.url");
+    }
 
     protected String getMoodleRestUrl() {
         return environment.getProperty("integration.moodle.url");
+    }
+
+    protected String getOodiCourseUnitRealisationRequestUrl(final long realisationId) {
+        return String.format("%s/courseunitrealisations/%s?include_deleted=true", getOodiUrl(), realisationId);
     }
 
     protected long getStudentRoleId() {
@@ -238,7 +245,7 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     protected final void expectGetCourseRealisationUnitRequestToOodi(final long realisationId, final ResponseCreator responseCreator) {
-        final String url = "https://oprek4.it.helsinki.fi:30039/courseunitrealisations/" + realisationId;
+        final String url = getOodiCourseUnitRealisationRequestUrl(realisationId);
         oodiMockServer.expect(requestTo(url))
             .andExpect(method(HttpMethod.GET))
             .andRespond(responseCreator);
