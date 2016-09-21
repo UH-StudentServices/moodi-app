@@ -85,7 +85,7 @@ public class EnrollmentExecutor {
 
             final List<EnrollmentWarning> enrollmentWarnings = persistMoodleEnrollments(moodleCourseId, enrollmentsWithMoodleIds);
 
-            courseEnrollmentStatusService.persistCourseEnrollmentStatuses(
+            courseEnrollmentStatusService.persistCourseEnrollmentStatus(
                 course.id,
                 course.realisationId,
                 enrollmentsWithMoodleIds,

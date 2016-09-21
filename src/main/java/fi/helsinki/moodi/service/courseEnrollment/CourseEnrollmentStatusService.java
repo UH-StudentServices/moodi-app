@@ -110,7 +110,7 @@ public class CourseEnrollmentStatusService {
         courseEnrollmentStatusRepository.save(createCourseEnrolmentStatusFromSynchronizationItem(synchronizationItem));
     }
 
-    public void persistCourseEnrollmentStatuses(
+    public void persistCourseEnrollmentStatus(
         Long courseId,
         Long realisationId,
         List<Enrollment> enrollments,
