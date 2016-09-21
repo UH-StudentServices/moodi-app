@@ -108,7 +108,7 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     protected String getOodiCourseUnitRealisationRequestUrl(final long realisationId) {
-        return String.format("%s/courseunitrealisations/%s?include_deleted=true", getOodiUrl(), realisationId);
+        return String.format("%s/courseunitrealisations/%s?include_deleted=true&include_approved_status=true", getOodiUrl(), realisationId);
     }
 
     protected long getStudentRoleId() {

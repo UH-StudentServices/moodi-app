@@ -43,7 +43,7 @@ public class OodiClient {
 
     public Optional<OodiCourseUnitRealisation> getCourseUnitRealisation(final long courseRealisationId) {
         return getOodiData(
-                "{baseUrl}/courseunitrealisations/{realisationId}?include_deleted=true",
+                "{baseUrl}/courseunitrealisations/{realisationId}?include_deleted=true&include_approved_status=true",
                 new ParameterizedTypeReference<OodiResponse<OodiCourseUnitRealisation>>() {
                 },
                 baseUrl,
