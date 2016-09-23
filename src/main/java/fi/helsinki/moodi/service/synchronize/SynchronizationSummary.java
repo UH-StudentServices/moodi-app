@@ -17,9 +17,7 @@
 
 package fi.helsinki.moodi.service.synchronize;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Stopwatch;
-import fi.helsinki.moodi.service.util.JsonViews;
 
 import java.util.List;
 
@@ -44,17 +42,14 @@ public final class SynchronizationSummary {
     public SynchronizationStatus getStatus() {
         return (getItemCount() == getSuccessfulItemsCount()) ? COMPLETED_SUCCESS : COMPLETED_FAILURE;
     }
-    @JsonView(JsonViews.FileLogging.class)
     public SynchronizationType getType() {
         return type;
     }
 
-    @JsonView(JsonViews.FileLogging.class)
     public long getItemCount() {
         return items.size();
     }
 
-    @JsonView(JsonViews.FileLogging.class)
     public String getElapsedTime() {
         return stopwatch.toString();
     }
@@ -63,17 +58,14 @@ public final class SynchronizationSummary {
         return items.stream().filter(SynchronizationItem::isSuccess).count();
     }
 
-    @JsonView(JsonViews.FileLogging.class)
     public long getFailedItemsCount() {
         return getItemCount() - getSuccessfulItemsCount();
     }
 
-    @JsonView(JsonViews.FileLogging.class)
     public String getMessage() {
         return getStatus().name();
     }
 
-    @JsonView(JsonViews.FileLogging.class)
     public List<SynchronizationItem> getItems() {
         return items;
     }

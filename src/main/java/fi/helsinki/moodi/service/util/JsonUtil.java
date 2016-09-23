@@ -20,7 +20,6 @@ package fi.helsinki.moodi.service.util;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
@@ -39,7 +38,6 @@ public class JsonUtil {
         .setSerializationInclusion(JsonInclude.Include.ALWAYS)
         .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-        .disable(MapperFeature.DEFAULT_VIEW_INCLUSION)
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     public <T> String objectToJsonString(T o) throws JsonProcessingException {

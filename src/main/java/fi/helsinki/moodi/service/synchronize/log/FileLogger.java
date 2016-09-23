@@ -19,7 +19,6 @@ package fi.helsinki.moodi.service.synchronize.log;
 
 import fi.helsinki.moodi.service.time.TimeService;
 import fi.helsinki.moodi.service.util.JsonUtil;
-import fi.helsinki.moodi.service.util.JsonViews;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -77,7 +76,6 @@ public class FileLogger implements MoodiLogger {
                     logEntry.getTimestamp() + ": " + logEntry.getTitle(),
                     jsonUtil.getObjectMapper()
                         .writerWithDefaultPrettyPrinter()
-                        .withView(JsonViews.FileLogging.class)
                         .writeValueAsString(logEntry.getData())),
                 Charset.forName("UTF-8"),
                 StandardOpenOption.WRITE,
@@ -117,7 +115,7 @@ public class FileLogger implements MoodiLogger {
     private String getFileName() {
         final LocalDateTime now = timeService.getCurrentDateTime();
         final String date = DATE_FORMATTER.format(now);
-        return String.format("%s.json", date);
+        return String.format("%s.log", date);
     }
 
 }

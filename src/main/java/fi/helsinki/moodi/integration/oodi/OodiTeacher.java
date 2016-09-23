@@ -18,8 +18,6 @@
 package fi.helsinki.moodi.integration.oodi;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import fi.helsinki.moodi.service.util.JsonViews;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -36,7 +34,6 @@ public class OodiTeacher implements Serializable {
     public String firstNames;
 
     @JsonProperty("teacher_id")
-    @JsonView(JsonViews.FileLogging.class)
     public String teacherId;
 
     @JsonProperty("last_name")

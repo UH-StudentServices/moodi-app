@@ -18,8 +18,6 @@
 package fi.helsinki.moodi.service.courseEnrollment;
 
 import com.fasterxml.jackson.annotation.JsonRawValue;
-import com.fasterxml.jackson.annotation.JsonView;
-import fi.helsinki.moodi.service.util.JsonViews;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
@@ -36,21 +34,17 @@ public class CourseEnrollmentStatus {
 
     @NotNull
     @Column(name = "course_id")
-    @JsonView(JsonViews.FileLogging.class)
     public Long courseId;
 
     @NotNull
     @Column(name = "course_realisation_id")
-    @JsonView(JsonViews.FileLogging.class)
     public long realisationId;
 
     @Column(name = "student_enrollments")
-    @JsonView(JsonViews.FileLogging.class)
     @JsonRawValue
     public String studentEnrollments;
 
     @Column(name = "teacher_enrollments")
-    @JsonView(JsonViews.FileLogging.class)
     @JsonRawValue
     public String teacherEnrollments;
 
