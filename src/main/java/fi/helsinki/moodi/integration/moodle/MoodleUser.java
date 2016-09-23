@@ -18,6 +18,8 @@
 package fi.helsinki.moodi.integration.moodle;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import fi.helsinki.moodi.service.util.JsonViews;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -28,6 +30,7 @@ public final class MoodleUser implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @JsonView(JsonViews.FileLogging.class)
     @JsonProperty("id")
     public Long id;
 

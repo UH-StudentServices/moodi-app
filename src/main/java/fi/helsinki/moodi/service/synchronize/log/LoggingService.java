@@ -17,10 +17,17 @@
 
 package fi.helsinki.moodi.service.synchronize.log;
 
+import fi.helsinki.moodi.service.course.Course;
+import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatus;
 import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
+import fi.helsinki.moodi.service.synchronize.log.importing.CourseEnrollmentLogEntry;
+import fi.helsinki.moodi.service.synchronize.log.importing.ImportCourseLogEntry;
+import fi.helsinki.moodi.service.synchronize.log.synchronization.SynchronizationLogEntry;
+import fi.helsinki.moodi.service.time.TimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -29,22 +36,47 @@ import java.util.List;
 @Service
 public class LoggingService {
 
-    private final List<SynchronizationSummaryLogger> loggers;
+    private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH.mm.ss");
+
+    private static final String SYNCHRONIZATION_SUMMARY_TITLE = "Synchronization run completed:";
+    private static final String COURSE_IMPORT_TITLE = "Course import completed:";
+    private static final String COURSE_ENROLLMENT_TITLE = "Course import user enrollments completed:";
+
+    private final List<MoodiLogger> loggers;
+    private final TimeService timeService;
 
     @Autowired
-    public LoggingService(List<SynchronizationSummaryLogger> loggers) {
+    public LoggingService(List<MoodiLogger> loggers, TimeService timeService) {
         this.loggers = loggers;
+        this.timeService = timeService;
     }
 
     public void logSynchronizationSummary(final SynchronizationSummary summary) {
-        for (final SynchronizationSummaryLogger logger : loggers) {
-            logger.log(summary);
+        for (final MoodiLogger logger : loggers) {
+            logger.log(new SynchronizationLogEntry(summary, SYNCHRONIZATION_SUMMARY_TITLE, getCurrentDateTime()));
+        }
+    }
+
+    public void logCourseImport(Course course) {
+        for (final MoodiLogger logger : loggers) {
+            logger.log(new ImportCourseLogEntry(course, COURSE_IMPORT_TITLE, getCurrentDateTime()));
+        }
+    }
+
+    public void logCourseImportEnrollments(CourseEnrollmentStatus courseEnrollmentStatus) {
+        for (final MoodiLogger logger : loggers) {
+            logger.log(new CourseEnrollmentLogEntry(courseEnrollmentStatus, COURSE_ENROLLMENT_TITLE, getCurrentDateTime()));
         }
     }
 
     public void cleanOldLogs() {
-        for (final SynchronizationSummaryLogger logger : loggers) {
+        for (final MoodiLogger logger : loggers) {
             logger.cleanOldLogs();
         }
+    }
+
+    private String getCurrentDateTime() {
+        return DATETIME_FORMATTER.format(timeService.getCurrentDateTime());
+
     }
 }

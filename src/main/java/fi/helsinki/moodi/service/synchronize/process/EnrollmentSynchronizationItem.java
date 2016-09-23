@@ -22,7 +22,7 @@ import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 
 import java.util.Optional;
 
-interface EnrollmentSynchronizationItem {
+public interface EnrollmentSynchronizationItem {
 
     Optional<String> getUsername();
 
@@ -41,5 +41,7 @@ interface EnrollmentSynchronizationItem {
     String getMessage();
 
     <T extends EnrollmentSynchronizationItem> T setCompleted(boolean newSuccess, String newMessage, EnrollmentSynchronizationStatus newEnrollmentSynchronizationStatus);
+
+    EnrollmentSynchronizationStatus getEnrollmentSynchronizationStatus();
 
 }

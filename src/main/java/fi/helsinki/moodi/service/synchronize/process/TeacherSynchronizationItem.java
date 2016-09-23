@@ -17,9 +17,11 @@
 
 package fi.helsinki.moodi.service.synchronize.process;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import fi.helsinki.moodi.integration.moodle.MoodleUser;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.integration.oodi.OodiTeacher;
+import fi.helsinki.moodi.service.util.JsonViews;
 
 import java.util.Optional;
 
@@ -80,14 +82,18 @@ public final class TeacherSynchronizationItem implements EnrollmentSynchronizati
     public TeacherSynchronizationItem setMoodleEnrollments(Optional<MoodleUserEnrollments> newMoodleEnrollments) {
         return new TeacherSynchronizationItem(teacher, moodleRoleId, moodleCourseId, completed, success, message, enrollmentSynchronizationStatus, username, moodleUser, newMoodleEnrollments);
     }
+
+    @JsonView(JsonViews.FileLogging.class)
     public OodiTeacher getTeacher() {
         return teacher;
     }
 
+    @JsonView(JsonViews.FileLogging.class)
     public Optional<String> getUsername() {
         return username;
     }
 
+    @JsonView(JsonViews.FileLogging.class)
     public Optional<MoodleUser> getMoodleUser() {
         return moodleUser;
     }
@@ -108,6 +114,7 @@ public final class TeacherSynchronizationItem implements EnrollmentSynchronizati
         return moodleEnrollments;
     }
 
+    @JsonView(JsonViews.FileLogging.class)
     public boolean isSuccess() {
         if (!completed) {
             throw new IllegalStateException("Not yet completed");
@@ -116,6 +123,7 @@ public final class TeacherSynchronizationItem implements EnrollmentSynchronizati
         return success;
     }
 
+    @JsonView(JsonViews.FileLogging.class)
     public String getMessage() {
         return message;
     }
@@ -128,6 +136,7 @@ public final class TeacherSynchronizationItem implements EnrollmentSynchronizati
         return new TeacherSynchronizationItem(teacher, moodleRoleId, moodleCourseId, true, newSuccess, newMessage, newEnrollmentSynchronizationStatus, username, moodleUser, moodleEnrollments);
     }
 
+    @JsonView(JsonViews.FileLogging.class)
     public EnrollmentSynchronizationStatus getEnrollmentSynchronizationStatus() {
         return enrollmentSynchronizationStatus;
     }

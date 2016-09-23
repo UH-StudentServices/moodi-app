@@ -17,6 +17,7 @@
 
 package fi.helsinki.moodi.service.synchronize;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import fi.helsinki.moodi.integration.moodle.MoodleFullCourse;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
@@ -25,6 +26,7 @@ import fi.helsinki.moodi.service.synchronize.enrich.EnrichmentStatus;
 import fi.helsinki.moodi.service.synchronize.process.ProcessingStatus;
 import fi.helsinki.moodi.service.synchronize.process.StudentSynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.process.TeacherSynchronizationItem;
+import fi.helsinki.moodi.service.util.JsonViews;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,20 +40,16 @@ import static java.util.Optional.empty;
  * @see StudentSynchronizationItem
  */
 public final class SynchronizationItem {
-
     private final Course course;
     private final boolean success;
     private final String message;
-
     private final Optional<OodiCourseUnitRealisation> oodiCourse;
     private final Optional<MoodleFullCourse> moodleCourse;
     private final Optional<List<MoodleUserEnrollments>> moodleEnrollments;
     private final Optional<List<TeacherSynchronizationItem>> teacherItems;
     private final Optional<List<StudentSynchronizationItem>> studentItems;
-
     private final EnrichmentStatus enrichmentStatus;
     private final ProcessingStatus processingStatus;
-
     private final boolean removed;
 
     public SynchronizationItem(Course course) {
@@ -130,6 +128,7 @@ public final class SynchronizationItem {
         return new SynchronizationItem(course, newSuccess, newMessage, oodiCourse, moodleCourse, moodleEnrollments, teacherItems, studentItems, enrichmentStatus, newProcessingStatus, newRemoved);
     }
 
+    @JsonView(JsonViews.FileLogging.class)
     public Course getCourse() {
         return course;
     }
@@ -138,26 +137,32 @@ public final class SynchronizationItem {
         return success;
     }
 
+    @JsonView(JsonViews.FileLogging.class)
     public String getMessage() {
         return message;
     }
 
+    @JsonView(JsonViews.FileLogging.class)
     public EnrichmentStatus getEnrichmentStatus() {
         return enrichmentStatus;
     }
 
+    @JsonView(JsonViews.FileLogging.class)
     public ProcessingStatus getProcessingStatus() {
         return processingStatus;
     }
 
+    @JsonView(JsonViews.FileLogging.class)
     public Optional<List<TeacherSynchronizationItem>> getTeacherItems() {
         return teacherItems;
     }
 
+    @JsonView(JsonViews.FileLogging.class)
     public Optional<List<StudentSynchronizationItem>> getStudentItems() {
         return studentItems;
     }
 
+    @JsonView(JsonViews.FileLogging.class)
     public boolean isRemoved() {
         return removed;
     }

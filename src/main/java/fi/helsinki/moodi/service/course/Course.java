@@ -17,6 +17,8 @@
 
 package fi.helsinki.moodi.service.course;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import fi.helsinki.moodi.service.util.JsonViews;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
@@ -43,10 +45,12 @@ public class Course implements Serializable {
 
     @Column(name = "realisation_id")
     @NotNull
+    @JsonView(JsonViews.FileLogging.class)
     public long realisationId;
 
     @Column(name = "moodle_id")
     @NotNull
+    @JsonView(JsonViews.FileLogging.class)
     public long moodleId;
 
     @Column(name = "created")

@@ -17,9 +17,11 @@
 
 package fi.helsinki.moodi.service.synchronize.process;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import fi.helsinki.moodi.integration.moodle.MoodleUser;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.integration.oodi.OodiStudent;
+import fi.helsinki.moodi.service.util.JsonViews;
 
 import java.util.Optional;
 
@@ -82,14 +84,17 @@ public final class StudentSynchronizationItem implements EnrollmentSynchronizati
         return new StudentSynchronizationItem(student, moodleRoleId, moodleCourseId, completed, success, message, enrollmentSynchronizationStatus, username, moodleUser, newMoodleEnrollments);
     }
 
+    @JsonView(JsonViews.FileLogging.class)
     public OodiStudent getStudent() {
         return student;
     }
 
+    @JsonView(JsonViews.FileLogging.class)
     public Optional<String> getUsername() {
         return username;
     }
 
+    @JsonView(JsonViews.FileLogging.class)
     public Optional<MoodleUser> getMoodleUser() {
         return moodleUser;
     }
@@ -106,6 +111,7 @@ public final class StudentSynchronizationItem implements EnrollmentSynchronizati
         return moodleCourseId;
     }
 
+    @JsonView(JsonViews.FileLogging.class)
     public EnrollmentSynchronizationStatus getEnrollmentSynchronizationStatus() {
         return enrollmentSynchronizationStatus;
     }
@@ -114,6 +120,7 @@ public final class StudentSynchronizationItem implements EnrollmentSynchronizati
         return moodleEnrollments;
     }
 
+    @JsonView(JsonViews.FileLogging.class)
     public boolean isSuccess() {
         if (!completed) {
             throw new IllegalStateException("Not yet completed");
@@ -122,6 +129,7 @@ public final class StudentSynchronizationItem implements EnrollmentSynchronizati
         return success;
     }
 
+    @JsonView(JsonViews.FileLogging.class)
     public String getMessage() {
         return message;
     }

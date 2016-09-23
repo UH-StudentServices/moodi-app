@@ -9,11 +9,16 @@ spring.datasource:
 auth.client.testclient: xxx123
 auth.enabled: true
 
-synchronize.logging.file.path: /tmp/log/moodi
-
 integration:
   moodle:
     baseUrl: https://mdl-bak.it.helsinki.fi
     url: https://mdl-bak.it.helsinki.fi/webservice/rest/server.php
   oodi.url: https://oprek4.it.helsinki.fi:30039
   esb.url: https://esbmt1.it.helsinki.fi
+
+synchronize.FULL.enabled: true
+synchronize.INCREMENTAL.enabled: false
+
+logging:
+  retain-logs: PT30M
+  file-logging-path: /tmp/log/moodi-import-sync-log
