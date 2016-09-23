@@ -64,7 +64,7 @@ public class FileLogger implements MoodiLogger {
     }
 
     @Override
-    public void log(LogEntry logEntry) {
+    public void log(String timestamp, String title, Object data) {
 
         try {
             final File file = new File(this.path, getFileName());
@@ -73,10 +73,10 @@ public class FileLogger implements MoodiLogger {
             Files.write(
                 Paths.get(file.getPath()),
                 Arrays.asList(
-                    logEntry.getTimestamp() + ": " + logEntry.getTitle(),
+                    timestamp + ": " + title,
                     jsonUtil.getObjectMapper()
                         .writerWithDefaultPrettyPrinter()
-                        .writeValueAsString(logEntry.getData())),
+                        .writeValueAsString(data)),
                 Charset.forName("UTF-8"),
                 StandardOpenOption.WRITE,
                 StandardOpenOption.CREATE,

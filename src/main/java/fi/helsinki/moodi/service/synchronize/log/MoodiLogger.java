@@ -18,6 +18,6 @@
 package fi.helsinki.moodi.service.synchronize.log;
 
 public interface MoodiLogger {
-    void log(LogEntry logEntry);
+    void log(String timestamp, String title, Object data);
     void cleanOldLogs();
 }

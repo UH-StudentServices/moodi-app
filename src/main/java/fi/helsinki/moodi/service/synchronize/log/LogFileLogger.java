@@ -41,14 +41,14 @@ public class LogFileLogger implements MoodiLogger {
     }
 
     @Override
-    public void log(LogEntry logEntry) {
+    public void log(String timestamp, String title, Object data) {
         try {
-            final String data = jsonUtil
+            final String jsonData = jsonUtil
                 .getObjectMapper()
                 .writerWithDefaultPrettyPrinter()
-                .writeValueAsString(logEntry.getData());
-            LOGGER.info(logEntry.getTimestamp() + ": " + logEntry.getTitle());
-            LOGGER.info(data);
+                .writeValueAsString(data);
+            LOGGER.info(title);
+            LOGGER.info(jsonData);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Could not write summary", e);
         }

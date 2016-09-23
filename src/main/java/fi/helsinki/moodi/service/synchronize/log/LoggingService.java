@@ -20,9 +20,6 @@ package fi.helsinki.moodi.service.synchronize.log;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatus;
 import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
-import fi.helsinki.moodi.service.synchronize.log.importing.CourseEnrollmentLogEntry;
-import fi.helsinki.moodi.service.synchronize.log.importing.ImportCourseLogEntry;
-import fi.helsinki.moodi.service.synchronize.log.synchronization.SynchronizationLogEntry;
 import fi.helsinki.moodi.service.time.TimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,21 +49,15 @@ public class LoggingService {
     }
 
     public void logSynchronizationSummary(final SynchronizationSummary summary) {
-        for (final MoodiLogger logger : loggers) {
-            logger.log(new SynchronizationLogEntry(summary, SYNCHRONIZATION_SUMMARY_TITLE, getCurrentDateTime()));
-        }
+        log(SYNCHRONIZATION_SUMMARY_TITLE, summary);
     }
 
     public void logCourseImport(Course course) {
-        for (final MoodiLogger logger : loggers) {
-            logger.log(new ImportCourseLogEntry(course, COURSE_IMPORT_TITLE, getCurrentDateTime()));
-        }
+        log(COURSE_IMPORT_TITLE, course);
     }
 
     public void logCourseImportEnrollments(CourseEnrollmentStatus courseEnrollmentStatus) {
-        for (final MoodiLogger logger : loggers) {
-            logger.log(new CourseEnrollmentLogEntry(courseEnrollmentStatus, COURSE_ENROLLMENT_TITLE, getCurrentDateTime()));
-        }
+        log(COURSE_ENROLLMENT_TITLE, courseEnrollmentStatus);
     }
 
     public void cleanOldLogs() {
@@ -75,8 +66,13 @@ public class LoggingService {
         }
     }
 
+    private void log(String title, Object data) {
+        for (final MoodiLogger logger : loggers) {
+            logger.log(getCurrentDateTime(), title, data);
+        }
+    }
+
     private String getCurrentDateTime() {
         return DATETIME_FORMATTER.format(timeService.getCurrentDateTime());
-
     }
 }
