@@ -17,7 +17,6 @@
 
 package fi.helsinki.moodi.service.synchronize;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import fi.helsinki.moodi.integration.moodle.MoodleFullCourse;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
@@ -38,7 +37,6 @@ import static java.util.Optional.empty;
  * @see TeacherSynchronizationItem
  * @see StudentSynchronizationItem
  */
-@JsonIgnoreProperties({"oodiCourse", "moodleCourse", "moodleEnrollments"})
 public final class SynchronizationItem {
     private final Course course;
     private final boolean success;

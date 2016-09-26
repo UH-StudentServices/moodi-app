@@ -20,6 +20,7 @@ package fi.helsinki.moodi.service.synchronize.log;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatus;
 import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
+import fi.helsinki.moodi.service.synchronize.log.synchronizationSummary.SynchronizationSummaryLog;
 import fi.helsinki.moodi.service.time.TimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,7 +50,7 @@ public class LoggingService {
     }
 
     public void logSynchronizationSummary(final SynchronizationSummary summary) {
-        log(SYNCHRONIZATION_SUMMARY_TITLE, summary);
+        log(SYNCHRONIZATION_SUMMARY_TITLE, new SynchronizationSummaryLog(summary));
     }
 
     public void logCourseImport(Course course) {
