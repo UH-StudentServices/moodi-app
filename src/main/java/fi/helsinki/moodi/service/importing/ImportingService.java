@@ -28,10 +28,10 @@ import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatusService;
 import fi.helsinki.moodi.service.dto.CourseDto;
+import fi.helsinki.moodi.service.synchronize.log.LoggingService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StopWatch;
 
 import java.util.Optional;
 
@@ -50,6 +50,7 @@ public class ImportingService {
     private final CourseEnrollmentStatusService courseEnrollmentStatusService;
     private final MoodleCourseBuilder moodleCourseBuilder;
     private final EnrollmentExecutor enrollmentExecutor;
+    private final LoggingService loggingService;
 
     @Autowired
     public ImportingService(
@@ -59,7 +60,8 @@ public class ImportingService {
         CourseConverter courseConverter,
         CourseEnrollmentStatusService courseEnrollmentStatusService,
         MoodleCourseBuilder moodleCourseBuilder,
-        EnrollmentExecutor enrollmentExecutor) {
+        EnrollmentExecutor enrollmentExecutor,
+        LoggingService loggingService) {
 
         this.moodleService = moodleService;
         this.courseService = courseService;
@@ -68,18 +70,13 @@ public class ImportingService {
         this.courseEnrollmentStatusService = courseEnrollmentStatusService;
         this.moodleCourseBuilder = moodleCourseBuilder;
         this.enrollmentExecutor = enrollmentExecutor;
+        this.loggingService = loggingService;
     }
 
     public Result<ImportCourseResponse, String> importCourse(final ImportCourseRequest request) {
-
-        LOGGER.info("Create course started with course realisation id {}", request.realisationId);
-
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
-
         final Optional<Course> existingCourse = courseService.findByRealisationId(request.realisationId);
+
         if (existingCourse.isPresent()) {
-            LOGGER.info("Course already created with realisation id {}", request.realisationId);
             throw new CourseAlreadyCreatedException(request.realisationId);
         }
 
@@ -88,36 +85,17 @@ public class ImportingService {
                         .orElseThrow(notFoundException("Oodi course not found with realisation id " + request
                             .realisationId));
 
-        logOodiCourse(courseUnitRealisation);
-
         final MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(courseUnitRealisation);
-        final long moodleCourseId = createMoodleCourse(moodleCourse);
+        final long moodleCourseId = moodleService.createCourse(moodleCourse);
 
         Course savedCourse = courseService.createCourse(request.realisationId, moodleCourseId);
 
         enrollmentExecutor.processEnrollments(savedCourse, courseUnitRealisation, moodleCourseId);
 
-        stopWatch.stop();
-
-        LOGGER.info("Course created for realisation id {} in {} seconds", request.realisationId, stopWatch.getTotalTimeSeconds());
+        loggingService.logCourseImport(savedCourse);
 
         return Result.success(new ImportCourseResponse(moodleCourseId));
 
-    }
-
-    private void logMoodleCourse(final MoodleCourse moodleCourse) {
-        LOGGER.info("About to create course to Moodle:\n{}", moodleCourse);
-    }
-
-    private void logOodiCourse(final OodiCourseUnitRealisation cur) {
-        LOGGER.debug("Got course realisation from Oodi:\n{}", cur);
-        LOGGER.debug("Number of students: {}", cur.students.size());
-        LOGGER.debug("Number of teachers: {}", cur.teachers.size());
-    }
-
-    private long createMoodleCourse(final MoodleCourse moodleCourse) {
-        logMoodleCourse(moodleCourse);
-        return moodleService.createCourse(moodleCourse);
     }
 
     public CourseDto getCourse(Long realisationId) {

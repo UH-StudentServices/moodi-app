@@ -24,7 +24,9 @@ import fi.helsinki.moodi.integration.moodle.MoodleService;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
+import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatus;
 import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatusService;
+import fi.helsinki.moodi.service.synchronize.log.LoggingService;
 import fi.helsinki.moodi.service.util.MapperService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +53,7 @@ public class EnrollmentExecutor {
     private final MapperService mapperService;
     private final CourseEnrollmentStatusService courseEnrollmentStatusService;
     private final CourseService courseService;
+    private final LoggingService loggingService;
 
     @Autowired
     public EnrollmentExecutor(
@@ -58,12 +61,14 @@ public class EnrollmentExecutor {
         EsbService esbService,
         MapperService mapperService,
         CourseEnrollmentStatusService courseEnrollmentStatusService,
-        CourseService courseService) {
+        CourseService courseService,
+        LoggingService loggingService) {
         this.moodleService = moodleService;
         this.esbService = esbService;
         this.mapperService = mapperService;
         this.courseEnrollmentStatusService = courseEnrollmentStatusService;
         this.courseService = courseService;
+        this.loggingService = loggingService;
     }
 
 
@@ -73,7 +78,7 @@ public class EnrollmentExecutor {
                                    final long moodleCourseId) {
         try {
 
-            LOGGER.info("Enrollment executor started for realisationId {} ", course.realisationId);
+            LOGGER.debug("Enrollment executor started for realisationId {} ", course.realisationId);
 
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
@@ -85,7 +90,7 @@ public class EnrollmentExecutor {
 
             final List<EnrollmentWarning> enrollmentWarnings = persistMoodleEnrollments(moodleCourseId, enrollmentsWithMoodleIds);
 
-            courseEnrollmentStatusService.persistCourseEnrollmentStatuses(
+            CourseEnrollmentStatus courseEnrollmentStatus = courseEnrollmentStatusService.persistCourseEnrollmentStatus(
                 course.id,
                 course.realisationId,
                 enrollmentsWithMoodleIds,
@@ -95,7 +100,9 @@ public class EnrollmentExecutor {
 
             stopWatch.stop();
 
-            LOGGER.info("Enrollment executor for realisationId {} finished in {} seconds", course.realisationId, stopWatch.getTotalTimeSeconds());
+            loggingService.logCourseImportEnrollments(courseEnrollmentStatus);
+
+            LOGGER.debug("Enrollment executor for realisationId {} finished in {} seconds", course.realisationId, stopWatch.getTotalTimeSeconds());
 
         } catch(Exception e) {
             courseService.completeCourseImport(course.realisationId, false);

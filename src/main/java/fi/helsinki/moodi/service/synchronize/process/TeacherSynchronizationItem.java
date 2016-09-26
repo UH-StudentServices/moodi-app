@@ -80,6 +80,7 @@ public final class TeacherSynchronizationItem implements EnrollmentSynchronizati
     public TeacherSynchronizationItem setMoodleEnrollments(Optional<MoodleUserEnrollments> newMoodleEnrollments) {
         return new TeacherSynchronizationItem(teacher, moodleRoleId, moodleCourseId, completed, success, message, enrollmentSynchronizationStatus, username, moodleUser, newMoodleEnrollments);
     }
+
     public OodiTeacher getTeacher() {
         return teacher;
     }

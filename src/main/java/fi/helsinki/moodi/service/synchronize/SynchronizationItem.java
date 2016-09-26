@@ -38,20 +38,16 @@ import static java.util.Optional.empty;
  * @see StudentSynchronizationItem
  */
 public final class SynchronizationItem {
-
     private final Course course;
     private final boolean success;
     private final String message;
-
     private final Optional<OodiCourseUnitRealisation> oodiCourse;
     private final Optional<MoodleFullCourse> moodleCourse;
     private final Optional<List<MoodleUserEnrollments>> moodleEnrollments;
     private final Optional<List<TeacherSynchronizationItem>> teacherItems;
     private final Optional<List<StudentSynchronizationItem>> studentItems;
-
     private final EnrichmentStatus enrichmentStatus;
     private final ProcessingStatus processingStatus;
-
     private final boolean removed;
 
     public SynchronizationItem(Course course) {
