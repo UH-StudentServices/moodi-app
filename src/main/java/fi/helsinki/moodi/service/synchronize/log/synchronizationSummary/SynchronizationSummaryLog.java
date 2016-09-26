@@ -50,6 +50,7 @@ public class SynchronizationSummaryLog {
     private Object mapItem(SynchronizationItem item) {
         return new Object() {
             public long realisationId = Optional.ofNullable(item.getCourse()).map(course -> course.realisationId).orElse(null);
+            public long moodleId = item.getMoodleCourse().map(course -> course.id).orElse(null);
             public String enrichmentStatus = item.getEnrichmentStatus().name();
             public String processingStatus = item.getProcessingStatus().name();
             public List<Object> syncedStudents = item.getStudentItems().map(SynchronizationSummaryLog::getSyncedStudents).orElse(null);
