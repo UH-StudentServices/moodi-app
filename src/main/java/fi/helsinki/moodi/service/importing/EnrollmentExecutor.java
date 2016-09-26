@@ -180,7 +180,7 @@ public class EnrollmentExecutor {
     }
 
     private boolean isUsernamePresent(final Enrollment enrollment) {
-        return enrollment.usernameList.size() > 0;
+        return enrollment.usernameList != null && enrollment.usernameList.size() > 0;
     }
 
     private List<Enrollment> filterEnrollmentsAndCreateWarnings(

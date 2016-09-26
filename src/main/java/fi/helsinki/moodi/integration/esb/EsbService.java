@@ -40,22 +40,28 @@ public class EsbService {
     }
 
     public List<String> getStudentUsernameList(final String studentNumber) {
-        return Optional
-            .ofNullable(esbClient.getStudentUsernameList(studentNumber))
-            .orElse(null)
-            .stream()
-            .map(this::appendDomain)
-            .collect(Collectors.toList());
+        List<String> usernameList = esbClient.getStudentUsernameList(studentNumber);
+
+        if (usernameList != null) {
+            return usernameList.stream()
+                .map(this::appendDomain)
+                .collect(Collectors.toList());
+        } else {
+            return null;
+        }
     }
 
     public List<String> getTeacherUsernameList(final String teacherId) {
         final String normalizedTeacherId = "9" + teacherId;
-        return Optional
-            .ofNullable(esbClient.getTeacherUsernameList(normalizedTeacherId))
-            .orElse(null)
-            .stream()
-            .map(this::appendDomain)
-            .collect(Collectors.toList());
+        List<String> usernameList = esbClient.getTeacherUsernameList(normalizedTeacherId);
+
+        if (usernameList != null) {
+            return usernameList.stream()
+                .map(this::appendDomain)
+                .collect(Collectors.toList());
+        } else {
+            return null;
+        }
     }
 
     private String appendDomain(final String username) {

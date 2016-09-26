@@ -67,4 +67,14 @@ public class EsbClientGetStudentUsernameTest extends AbstractMoodiIntegrationTes
         assertNull(esbClient.getStudentUsernameList("009"));
     }
 
+    @Test
+    public void thatEmptyArrayIsHandled() {
+        esbMockServer.expect(
+                requestTo("https://esbmt1.it.helsinki.fi/iam/findStudent/0010"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
+
+        assertNull(esbClient.getStudentUsernameList("0010"));
+    }
+
 }

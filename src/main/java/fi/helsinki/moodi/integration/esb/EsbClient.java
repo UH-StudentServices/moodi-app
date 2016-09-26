@@ -57,11 +57,10 @@ public class EsbClient {
                     studentNumber)
                 .getBody());
 
-            if (result.isPresent()) {
+            if (result.isPresent() && result.get().size() > 0) {
                 return
                     result
-                        .filter(r -> r.size() > 0)
-                        .orElse(null)
+                        .get()
                         .stream()
                         .map(s -> s.username)
                         .collect(Collectors.toList());
@@ -86,11 +85,10 @@ public class EsbClient {
                     teacherId)
                 .getBody());
 
-            if (result.isPresent()) {
+            if (result.isPresent() && result.get().size() > 0) {
                 return
                     result
-                        .filter(r -> r.size() > 0)
-                        .orElse(null)
+                        .get()
                         .stream()
                         .map(s -> s.username)
                         .collect(Collectors.toList());
