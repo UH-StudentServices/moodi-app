@@ -142,11 +142,11 @@ public class DevModeController {
         final OodiCourseUnitRealisation realisation = getOodiCourse(realisationId);
 
         final List<MoodleUser> students = realisation.students.stream()
-                .map(s -> new MoodleUser("student", s.firstNames, s.lastName, esbService.getStudentUsername(s.studentNumber).orElse(null), s.studentNumber))
+                .map(s -> new MoodleUser("student", s.firstNames, s.lastName, esbService.getStudentUsernameList(s.studentNumber).get(0), s.studentNumber))
                 .collect(Collectors.toList());
 
         final List<MoodleUser> teachers = realisation.teachers.stream()
-                .map(s -> new MoodleUser("teacher", s.firstNames, s.lastName, esbService.getTeacherUsername(s.teacherId).orElse(null), null))
+                .map(s -> new MoodleUser("teacher", s.firstNames, s.lastName, esbService.getTeacherUsernameList(s.teacherId).get(0), null))
                 .collect(Collectors.toList());
 
         final List<MoodleUser> users = new ArrayList<>();
@@ -160,7 +160,7 @@ public class DevModeController {
 
     private long getMoodleId(String username) {
         try {
-            return moodleService.getUser(username).get().id;
+            return moodleService.getUser(Arrays.asList(username)).get().id;
         } catch (Exception e) {
             return 0;
         }

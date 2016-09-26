@@ -21,6 +21,7 @@ import fi.helsinki.moodi.integration.moodle.MoodleUser;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.integration.oodi.OodiStudent;
 
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.empty;
@@ -38,12 +39,12 @@ public final class StudentSynchronizationItem implements EnrollmentSynchronizati
     private final String message;
     private final EnrollmentSynchronizationStatus enrollmentSynchronizationStatus;
 
-    private final Optional<String> username;
+    private final List<String> usernameList;
     private final Optional<MoodleUser> moodleUser;
     private final Optional<MoodleUserEnrollments> moodleEnrollments;
 
     public StudentSynchronizationItem(OodiStudent student, long moodleRoleId, long moodleCourse) {
-        this(student, moodleRoleId, moodleCourse, false, false, "Started", EnrollmentSynchronizationStatus.STARTED, empty(), empty(), empty());
+        this(student, moodleRoleId, moodleCourse, false, false, "Started", EnrollmentSynchronizationStatus.STARTED, null, empty(), empty());
     }
 
     private StudentSynchronizationItem(
@@ -54,7 +55,7 @@ public final class StudentSynchronizationItem implements EnrollmentSynchronizati
             boolean success,
             String message,
             EnrollmentSynchronizationStatus enrollmentSynchronizationStatus,
-            Optional<String> username,
+            List<String> usernameList,
             Optional<MoodleUser> moodleUser,
             Optional<MoodleUserEnrollments> moodleEnrollments) {
 
@@ -65,29 +66,29 @@ public final class StudentSynchronizationItem implements EnrollmentSynchronizati
         this.success = success;
         this.message = message;
         this.enrollmentSynchronizationStatus = enrollmentSynchronizationStatus;
-        this.username = username;
+        this.usernameList = usernameList;
         this.moodleUser = moodleUser;
         this.moodleEnrollments = moodleEnrollments;
     }
 
-    public StudentSynchronizationItem setUsername(Optional<String> newUsername) {
-        return new StudentSynchronizationItem(student, moodleRoleId, moodleCourseId, completed, success, message, enrollmentSynchronizationStatus, newUsername, moodleUser, moodleEnrollments);
+    public StudentSynchronizationItem setUsernameList(List<String> newUsernameList) {
+        return new StudentSynchronizationItem(student, moodleRoleId, moodleCourseId, completed, success, message, enrollmentSynchronizationStatus, newUsernameList, moodleUser, moodleEnrollments);
     }
 
     public StudentSynchronizationItem setMoodleUser(Optional<MoodleUser> newMoodleUser) {
-        return new StudentSynchronizationItem(student, moodleRoleId, moodleCourseId, completed, success, message, enrollmentSynchronizationStatus, username, newMoodleUser, moodleEnrollments);
+        return new StudentSynchronizationItem(student, moodleRoleId, moodleCourseId, completed, success, message, enrollmentSynchronizationStatus, usernameList, newMoodleUser, moodleEnrollments);
     }
 
     public StudentSynchronizationItem setMoodleEnrollments(Optional<MoodleUserEnrollments> newMoodleEnrollments) {
-        return new StudentSynchronizationItem(student, moodleRoleId, moodleCourseId, completed, success, message, enrollmentSynchronizationStatus, username, moodleUser, newMoodleEnrollments);
+        return new StudentSynchronizationItem(student, moodleRoleId, moodleCourseId, completed, success, message, enrollmentSynchronizationStatus, usernameList, moodleUser, newMoodleEnrollments);
     }
 
     public OodiStudent getStudent() {
         return student;
     }
 
-    public Optional<String> getUsername() {
-        return username;
+    public List<String> getUsernameList() {
+        return usernameList;
     }
 
     public Optional<MoodleUser> getMoodleUser() {
@@ -131,6 +132,6 @@ public final class StudentSynchronizationItem implements EnrollmentSynchronizati
             throw new IllegalStateException("Already completed");
         }
 
-        return new StudentSynchronizationItem(student, moodleRoleId, moodleCourseId, true, newSuccess, newMessage, newEnrollmentSynchronizationStatus, username, moodleUser, moodleEnrollments);
+        return new StudentSynchronizationItem(student, moodleRoleId, moodleCourseId, true, newSuccess, newMessage, newEnrollmentSynchronizationStatus, usernameList, moodleUser, moodleEnrollments);
     }
 }

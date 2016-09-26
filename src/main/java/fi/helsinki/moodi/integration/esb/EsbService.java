@@ -21,7 +21,9 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -37,17 +39,23 @@ public class EsbService {
         this.esbClient = esbClient;
     }
 
-    public Optional<String> getStudentUsername(final String studentNumber) {
+    public List<String> getStudentUsernameList(final String studentNumber) {
         return Optional
-            .ofNullable(esbClient.getStudentUsername(studentNumber))
-            .map(this::appendDomain);
+            .ofNullable(esbClient.getStudentUsernameList(studentNumber))
+            .orElse(null)
+            .stream()
+            .map(this::appendDomain)
+            .collect(Collectors.toList());
     }
 
-    public Optional<String> getTeacherUsername(final String teacherId) {
+    public List<String> getTeacherUsernameList(final String teacherId) {
         final String normalizedTeacherId = "9" + teacherId;
         return Optional
-            .ofNullable(esbClient.getTeacherUsername(normalizedTeacherId))
-            .map(this::appendDomain);
+            .ofNullable(esbClient.getTeacherUsernameList(normalizedTeacherId))
+            .orElse(null)
+            .stream()
+            .map(this::appendDomain)
+            .collect(Collectors.toList());
     }
 
     private String appendDomain(final String username) {

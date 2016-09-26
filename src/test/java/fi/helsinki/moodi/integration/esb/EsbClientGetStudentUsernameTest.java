@@ -24,6 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
+import java.util.Arrays;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
@@ -36,23 +38,33 @@ public class EsbClientGetStudentUsernameTest extends AbstractMoodiIntegrationTes
     private EsbClient esbClient;
 
     @Test
-    public void deserializeResponse() {
+    public void deserializeResponseWithOneAccount() {
         esbMockServer.expect(
             requestTo("https://esbmt1.it.helsinki.fi/iam/findStudent/007"))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess(Fixtures.asString("/esb/student-username-007.json"), MediaType.APPLICATION_JSON));
 
-        assertEquals("aunesluo", esbClient.getStudentUsername("007"));
+        assertEquals(Arrays.asList("aunesluo"), esbClient.getStudentUsernameList("007"));
+    }
+
+    @Test
+    public void deserializeResponseWithSeveralAccounts() {
+        esbMockServer.expect(
+                requestTo("https://esbmt1.it.helsinki.fi/iam/findStudent/008"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess(Fixtures.asString("/esb/student-username-008.json"), MediaType.APPLICATION_JSON));
+
+        assertEquals(Arrays.asList("auneslu1","aunesluo"), esbClient.getStudentUsernameList("008"));
     }
 
     @Test
     public void thatEmptyResponseIsHandled() {
         esbMockServer.expect(
-            requestTo("https://esbmt1.it.helsinki.fi/iam/findStudent/007"))
+            requestTo("https://esbmt1.it.helsinki.fi/iam/findStudent/009"))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess("", MediaType.APPLICATION_JSON));
 
-        assertNull(esbClient.getStudentUsername("007"));
+        assertNull(esbClient.getStudentUsernameList("009"));
     }
 
 }
