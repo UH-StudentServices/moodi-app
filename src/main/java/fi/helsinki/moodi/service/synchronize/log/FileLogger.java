@@ -21,6 +21,7 @@ import fi.helsinki.moodi.service.time.TimeService;
 import fi.helsinki.moodi.service.util.JsonUtil;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -41,6 +42,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  * Implementation that logs to separate files.
  */
 @Component
+@Profile("!test")
 public class FileLogger implements MoodiLogger {
     private static final Logger LOGGER = getLogger(FileLogger.class);
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -96,19 +98,12 @@ public class FileLogger implements MoodiLogger {
     }
 
     private void cleanOldLogs(final File rootDirectory, final long timestamp) {
+        LOGGER.debug("Clean old logs in directory {} with timestamp {}", rootDirectory, timestamp);
         for (final File file : rootDirectory.listFiles()) {
-
-            if(file.isDirectory()) {
-                cleanOldLogs(file, timestamp);
-            } else if (file.lastModified() < timestamp) {
+            if(!file.isDirectory() && file.lastModified() < timestamp) {
                 LOGGER.debug("Delete old summary file: {}", file.getAbsolutePath());
                 file.delete();
             }
-        }
-
-        if(rootDirectory.listFiles().length == 0) {
-            LOGGER.debug("Delete empty summary dir: {}", rootDirectory.getAbsolutePath());
-            rootDirectory.delete();
         }
     }
 
