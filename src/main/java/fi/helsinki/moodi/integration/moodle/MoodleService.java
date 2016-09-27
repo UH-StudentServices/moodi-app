@@ -43,7 +43,11 @@ public class MoodleService {
     }
 
     public Optional<MoodleUser> getUser(final List<String> username) {
-        return Optional.ofNullable(moodleClient.getUser(username));
+        if (username != null && username.size() > 0) {
+            return Optional.ofNullable(moodleClient.getUser(username));
+        } else {
+            return Optional.empty();
+        }
     };
 
     public void enrollToCourse(final List<MoodleEnrollment> moodleEnrollments) {
