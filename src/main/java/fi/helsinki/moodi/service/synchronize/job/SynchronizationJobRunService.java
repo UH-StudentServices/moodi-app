@@ -66,7 +66,7 @@ public class SynchronizationJobRunService {
     public long begin(final SynchronizationType type) {
         final SynchronizationJobRun job = new SynchronizationJobRun();
         job.message = "Started";
-        job.started = timeService.getCurrentDateTime();
+        job.started = timeService.getCurrentUTCDateTime();
         job.status = STARTED;
         job.type = type;
 
@@ -78,7 +78,7 @@ public class SynchronizationJobRunService {
 
         job.status = status;
         job.message = message;
-        job.completed = timeService.getCurrentDateTime();
+        job.completed = timeService.getCurrentUTCDateTime();
 
         synchronizationJobRunRepository.save(job);
     }
@@ -88,7 +88,7 @@ public class SynchronizationJobRunService {
             final String key = String.format("synchronize.%s.retain.logs", type);
             final String retainLogsDurationString = environment.getRequiredProperty(key);
             final Duration duration = Duration.parse(retainLogsDurationString);
-            final LocalDateTime date = timeService.getCurrentDateTime().minusSeconds(duration.getSeconds());
+            final LocalDateTime date = timeService.getCurrentUTCDateTime().minusSeconds(duration.getSeconds());
             synchronizationJobRunRepository.deleteByTypeAndDate(type, date);
         }
     }

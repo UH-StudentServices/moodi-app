@@ -32,7 +32,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 
@@ -91,8 +91,8 @@ public class FileLogger implements MoodiLogger {
 
 
     public void cleanOldLogs() {
-        final LocalDateTime date = timeService.getCurrentDateTime().minusSeconds(retainLogsDuration.getSeconds());
-        final long timestamp = date.atZone(ZoneOffset.UTC).toInstant().toEpochMilli();
+        final ZonedDateTime date = ZonedDateTime.now().minusSeconds(retainLogsDuration.getSeconds());
+        final long timestamp = date.toInstant().toEpochMilli();
 
         cleanOldLogs(path, timestamp);
     }

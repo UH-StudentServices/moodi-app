@@ -25,11 +25,18 @@ import java.time.ZoneOffset;
 @Service
 public class SystemTimeService implements TimeService {
 
-    public LocalDateTime getCurrentDateTime() {
+    @Override
+    public LocalDateTime getCurrentUTCDateTime() {
         return LocalDateTime.now(ZoneOffset.UTC);
     }
 
-    public long getCurrentTimestamp() {
-        return getCurrentDateTime().toInstant(ZoneOffset.UTC).getEpochSecond();
+    @Override
+    public long getCurrentUTCTimestamp() {
+        return getCurrentUTCDateTime().toInstant(ZoneOffset.UTC).getEpochSecond();
+    }
+
+    @Override
+    public LocalDateTime getCurrentDateTime() {
+        return LocalDateTime.now();
     }
 }
