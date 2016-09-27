@@ -26,12 +26,12 @@ import org.springframework.stereotype.Component;
  * Scheduled job that cleans synchronization summary history.
  */
 @Component
-public class CleanSynchronizationSummaryHistoryJob {
+public class CleanOldFileLogsJob {
 
     private final LoggingService loggingService;
 
     @Autowired
-    public CleanSynchronizationSummaryHistoryJob(LoggingService loggingService) {
+    public CleanOldFileLogsJob(LoggingService loggingService) {
         this.loggingService = loggingService;
     }
 

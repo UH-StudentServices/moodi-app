@@ -128,10 +128,10 @@ public class MoodleClient {
     }
 
     @Cacheable(value="moodle-client.moodle-user-by-username", unless="#result == null")
-    public MoodleUser getUser(final String username) {
+    public MoodleUser getUser(final List<String> username) {
         final MultiValueMap<String, String> params = createParametersForFunction("core_user_get_users_by_field");
         params.set("field", "username");
-        params.add("values[]", username);
+        setListParameters(params, "values[%s]", username, String::valueOf);
 
         try {
             return execute(params, new TypeReference<List<MoodleUser>>() {}, DEFAULT_EVALUATION)

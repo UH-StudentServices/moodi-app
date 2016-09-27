@@ -94,7 +94,7 @@ public class CourseEnrollmentStatusServiceTest extends AbstractMoodiIntegrationT
 
         List<EnrollmentWarning> enrollmentWarnings = Lists.newArrayList();
 
-        courseEnrollmentStatusService.persistCourseEnrollmentStatuses(1L, 1L, enrollments, enrollmentWarnings);
+        courseEnrollmentStatusService.persistCourseEnrollmentStatus(1L, 1L, enrollments, enrollmentWarnings);
 
         CourseEnrollmentStatus courseEnrollmentStatus = courseEnrollmentStatusRepository.findTop1ByRealisationIdOrderByCreatedDesc(1L).get();
 
@@ -133,7 +133,7 @@ public class CourseEnrollmentStatusServiceTest extends AbstractMoodiIntegrationT
 
         List<EnrollmentWarning> enrollmentWarnings = Lists.newArrayList(studentEnrollmentWarning, teacherEnrollmentWarning);
 
-        courseEnrollmentStatusService.persistCourseEnrollmentStatuses(1L, 1L, enrollments, enrollmentWarnings);
+        courseEnrollmentStatusService.persistCourseEnrollmentStatus(1L, 1L, enrollments, enrollmentWarnings);
 
         CourseEnrollmentStatus courseEnrollmentStatus = courseEnrollmentStatusRepository.findTop1ByRealisationIdOrderByCreatedDesc(1L).get();
 
@@ -182,7 +182,7 @@ public class CourseEnrollmentStatusServiceTest extends AbstractMoodiIntegrationT
 
         List<EnrollmentWarning> enrollmentWarnings = Lists.newArrayList(enrollmentWarning1, enrollmentWarning2, enrollmentWarning3);
 
-        courseEnrollmentStatusService.persistCourseEnrollmentStatuses(1L, 1L, enrollments, enrollmentWarnings);
+        courseEnrollmentStatusService.persistCourseEnrollmentStatus(1L, 1L, enrollments, enrollmentWarnings);
 
         CourseEnrollmentStatus courseEnrollmentStatus = courseEnrollmentStatusRepository.findTop1ByRealisationIdOrderByCreatedDesc(1L).get();
 

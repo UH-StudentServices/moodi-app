@@ -24,6 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
+import java.util.Arrays;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
@@ -38,16 +40,32 @@ public class MoodleClientGetUsersTest extends AbstractMoodiIntegrationTest {
     public void deserializeRespose() {
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
                 .andExpect(method(HttpMethod.POST))
-                .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_user_get_users_by_field&moodlewsrestformat=json&field=username&values%5B%5D=integraatio"))
+                .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_user_get_users_by_field&moodlewsrestformat=json&field=username&values%5B0%5D=integraatio"))
                 .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
-                .andRespond(withSuccess(Fixtures.asString("/moodle/get-users.json"), MediaType.APPLICATION_JSON));
+                .andRespond(withSuccess(Fixtures.asString("/moodle/get-users-one-username.json"), MediaType.APPLICATION_JSON));
 
-        final MoodleUser user = moodleClient.getUser("integraatio");
+        final MoodleUser user = moodleClient.getUser(Arrays.asList("integraatio"));
         assertNotNull(user);
 
         assertEquals("marja.kari@iki.fi", user.email);
         assertEquals("Testi Integraatio", user.fullname);
         assertEquals("integraatio", user.username);
         assertEquals(Long.valueOf(3), user.id);
+    }
+
+    @Test
+    public void getWithTheSecondUsername() {
+        moodleMockServer.expect(requestTo(getMoodleRestUrl()))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_user_get_users_by_field&moodlewsrestformat=json&field=username&values%5B0%5D=first&values%5B1%5D=second"))
+                .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
+                .andRespond(withSuccess(Fixtures.asString("/moodle/get-users-second-username.json"), MediaType.APPLICATION_JSON));
+
+        final MoodleUser user = moodleClient.getUser(Arrays.asList("first", "second"));
+        assertNotNull(user);
+
+        assertEquals("Second Username", user.fullname);
+        assertEquals("second", user.username);
+        assertEquals(Long.valueOf(2), user.id);
     }
 }

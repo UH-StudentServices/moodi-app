@@ -147,9 +147,9 @@ public class SynchronizingProcessor extends AbstractProcessor {
                                                                         final MoodleFullCourse moodleCourse,
                                                                         final Map<Long, MoodleUserEnrollments> moodleEnrollmentsByUserId) {
         final StudentSynchronizationItem studentItem = new StudentSynchronizationItem(student,  mapperService.getStudentRoleId(), moodleCourse.id);
-        final StudentSynchronizationItem studentItemWithUsername = studentItem.setUsername(getUsername(student));
+        final StudentSynchronizationItem studentItemWithUsername = studentItem.setUsernameList(getUsernameList(student));
         final StudentSynchronizationItem studentItemWithMoodleUser =
-            studentItemWithUsername.setMoodleUser(studentItemWithUsername.getUsername().flatMap(this::getMoodleUser));
+            studentItemWithUsername.setMoodleUser(getMoodleUser(studentItemWithUsername.getUsernameList()));
 
         final StudentSynchronizationItem studentItemWithMoodleEnrollment =
             studentItemWithMoodleUser.setMoodleEnrollments(studentItemWithMoodleUser.getMoodleUser().map(u -> u.id).map(moodleEnrollmentsByUserId::get));
@@ -164,7 +164,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
         final TeacherSynchronizationItem teacherItem = new TeacherSynchronizationItem(teacher, mapperService.getTeacherRoleId(), moodleCourse.id);
         final TeacherSynchronizationItem teacherItemWithUsername = teacherItem.setUsername(getUsername(teacher));
         final TeacherSynchronizationItem teacherItemWithMoodleUser =
-            teacherItemWithUsername.setMoodleUser(teacherItemWithUsername.getUsername().flatMap(this::getMoodleUser));
+            teacherItemWithUsername.setMoodleUser(getMoodleUser(teacherItemWithUsername.getUsernameList()));
 
         final TeacherSynchronizationItem teacherItemWithMoodleEnrollment =
             teacherItemWithMoodleUser.setMoodleEnrollments(teacherItemWithMoodleUser.getMoodleUser().map(u -> u.id).map(moodleEnrollmentsByUserId::get));
@@ -218,7 +218,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
     }
 
     private EnrollmentSynchronizationItem checkEnrollmentPrerequisites(final EnrollmentSynchronizationItem item) {
-        if (!item.getUsername().isPresent()) {
+        if (item.getUsernameList().size() == 0) {
             return item.setCompleted(false, MESSAGE_USERNAME_NOT_FOUND, EnrollmentSynchronizationStatus.USERNAME_NOT_FOUND);
         }
 
@@ -260,12 +260,12 @@ public class SynchronizingProcessor extends AbstractProcessor {
         return SynchronizationAction.NONE;
     }
 
-    private Optional<String> getUsername(OodiStudent student) {
-        return esbService.getStudentUsername(student.studentNumber);
+    private List<String> getUsernameList(OodiStudent student) {
+        return esbService.getStudentUsernameList(student.studentNumber);
     }
 
-    private Optional<String> getUsername(OodiTeacher teacher) {
-        return esbService.getTeacherUsername(teacher.teacherId);
+    private List<String> getUsername(OodiTeacher teacher) {
+        return esbService.getTeacherUsernameList(teacher.teacherId);
     }
 
     private List<EnrollmentSynchronizationItem> updateEnrollments(final List<EnrollmentSynchronizationItem> items, final boolean addition) {
@@ -296,8 +296,8 @@ public class SynchronizingProcessor extends AbstractProcessor {
             .collect(Collectors.toList());
     }
 
-    private Optional<MoodleUser> getMoodleUser(final String username) {
-        return moodleService.getUser(username);
+    private Optional<MoodleUser> getMoodleUser(final List<String> usernameList) {
+        return moodleService.getUser(usernameList);
     }
 
     private List<EnrollmentSynchronizationItem> addEnrollments(final List<EnrollmentSynchronizationItem> items) {

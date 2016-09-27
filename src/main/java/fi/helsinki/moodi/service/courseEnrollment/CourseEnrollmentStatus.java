@@ -17,6 +17,7 @@
 
 package fi.helsinki.moodi.service.courseEnrollment;
 
+import com.fasterxml.jackson.annotation.JsonRawValue;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
@@ -40,9 +41,11 @@ public class CourseEnrollmentStatus {
     public long realisationId;
 
     @Column(name = "student_enrollments")
+    @JsonRawValue
     public String studentEnrollments;
 
     @Column(name = "teacher_enrollments")
+    @JsonRawValue
     public String teacherEnrollments;
 
     @Column(name = "created")

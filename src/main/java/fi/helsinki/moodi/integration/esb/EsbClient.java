@@ -27,6 +27,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -43,48 +44,54 @@ public class EsbClient {
     }
 
     @Cacheable(value="esb-client.student-username-by-student-number", unless="#result == null")
-    public String getStudentUsername(final String studentNumber) {
+    public List<String> getStudentUsernameList(final String studentNumber) {
         LOGGER.debug("Get student username by student number {}", studentNumber);
 
         try {
-            Optional<List<EsbStudent>> result = Optional.ofNullable(restTemplate.exchange(
+            List<EsbStudent> result = restTemplate.exchange(
                     "{baseUrl}/iam/findStudent/{studentNumber}",
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<List<EsbStudent>>() {
-                    },
+                    new ParameterizedTypeReference<List<EsbStudent>>() {},
                     baseUrl,
                     studentNumber)
-                .getBody());
+                .getBody();
 
-            return
-                result
-                    .filter(r -> r.size() > 0)
-                    .map(r -> r.get(0).username)
-                    .orElse(null);
+            if (result != null && result.size() > 0) {
+                return result
+                    .stream()
+                    .map(s -> s.username)
+                    .collect(Collectors.toList());
+            } else {
+                return null;
+            }
         } catch (ResourceAccessException e) {
             throw new IntegrationConnectionException("ESB connection failure", e);
         }
     }
+
     @Cacheable(value="esb-client.teacher-username-by-teacher-id", unless="#result == null")
-    public String getTeacherUsername(final String teacherId) {
+    public List<String> getTeacherUsernameList(final String teacherId) {
         LOGGER.debug("Get teacher username by teacher id {}", teacherId);
 
         try {
-            Optional<List<EsbEmployee>> result = Optional.ofNullable(restTemplate.exchange(
+            List<EsbEmployee> result = restTemplate.exchange(
                     "{baseUrl}/iam/findEmployee/{employeeId}",
                     HttpMethod.GET,
                     null,
                     new ParameterizedTypeReference<List<EsbEmployee>>() {},
                     baseUrl,
                     teacherId)
-                .getBody());
+                .getBody();
 
-                return
-                    result
-                        .filter(r -> r.size() > 0)
-                        .map(r -> r.get(0).username)
-                        .orElse(null);
+            if (result != null && result.size() > 0) {
+                return result
+                    .stream()
+                    .map(s -> s.username)
+                    .collect(Collectors.toList());
+            } else {
+                return null;
+            }
         } catch (ResourceAccessException e) {
             throw new IntegrationConnectionException("ESB connection failure", e);
         }

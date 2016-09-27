@@ -15,11 +15,14 @@ spring:
 
 integration.oodi.url: https://oprek2.it.helsinki.fi:30039
 
-synchronize.INCREMENTAL.retain.logs: PT30M
-
-synchronize.logging.file.path: /tmp/log/moodi-sync
-
 auth.client.user: password
 auth.enabled: true
 
 dev.mode.enabled: true
+
+synchronize.FULL.enabled: false
+synchronize.INCREMENTAL.enabled: false
+
+logging:
+  retain-logs: PT30M
+  file-logging-path: /tmp/log/moodi-import-sync-log
