@@ -24,6 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
+import java.util.Arrays;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
@@ -43,7 +45,7 @@ public class EsbClientGetTeacherUsernameTest extends AbstractMoodiIntegrationTes
             .andRespond(withSuccess(Fixtures.asString("/esb/employee-username-19691981.json"),
                 MediaType.APPLICATION_JSON));
 
-        assertEquals("arytkone", esbClient.getTeacherUsername("19691981"));
+        assertEquals(Arrays.asList("arytkone"), esbClient.getTeacherUsernameList("19691981"));
     }
 
     @Test
@@ -53,7 +55,7 @@ public class EsbClientGetTeacherUsernameTest extends AbstractMoodiIntegrationTes
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess("", MediaType.APPLICATION_JSON));
 
-        assertNull(esbClient.getTeacherUsername("007"));
+        assertNull(esbClient.getTeacherUsernameList("007"));
     }
 
 }

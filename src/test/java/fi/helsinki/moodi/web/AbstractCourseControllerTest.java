@@ -74,7 +74,7 @@ public abstract class AbstractCourseControllerTest extends AbstractMoodiIntegrat
     }
 
     private void expectGetUserRequestToMoodleWithResponse(String username, String response) {
-        String payload = "wstoken=xxxx1234&wsfunction=core_user_get_users_by_field&moodlewsrestformat=json&field=username&values%5B%5D=" + urlEncode(username);
+        String payload = "wstoken=xxxx1234&wsfunction=core_user_get_users_by_field&moodlewsrestformat=json&field=username&values%5B0%5D=" + urlEncode(username);
 
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))

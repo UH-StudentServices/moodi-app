@@ -99,7 +99,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
     private void expectGetMoodleUser() {
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
-            .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_user_get_users_by_field&moodlewsrestformat=json&field=username&values%5B%5D=mag_simp%40helsinki.fi"))
+            .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_user_get_users_by_field&moodlewsrestformat=json&field=username&values%5B0%5D=mag_simp%40helsinki.fi"))
             .andRespond(withSuccess(String.format("[{\"username\" : \"mag_simp\", \"id\" : \"%s\"}]", MOODLE_USER_ID), MediaType.APPLICATION_JSON));
     }
 

@@ -42,7 +42,7 @@ public class MoodleService {
         return moodleClient.createCourse(course);
     }
 
-    public Optional<MoodleUser> getUser(final String username) {
+    public Optional<MoodleUser> getUser(final List<String> username) {
         return Optional.ofNullable(moodleClient.getUser(username));
     };
 

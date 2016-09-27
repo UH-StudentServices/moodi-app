@@ -113,9 +113,8 @@ public class EnrollmentExecutor {
 
     private List<Enrollment> enrichEnrollmentsWithMoodleIds(final List<Enrollment> enrollments) {
         enrollments.stream()
-                .filter(e -> e.username.isPresent())
                 .forEach(e -> {
-                    e.moodleId = moodleService.getUser(e.username.get()).map(user -> user.id);
+                    e.moodleId = moodleService.getUser(e.usernameList).map(user -> user.id);
                 });
 
         return enrollments;
@@ -128,9 +127,9 @@ public class EnrollmentExecutor {
     }
 
     private Enrollment enrichEnrollmentWithUsername(final Enrollment enrollment) {
-        enrollment.username = Enrollment.ROLE_TEACHER.equals(enrollment.role) ?
-            esbService.getTeacherUsername(enrollment.teacherId.get()) :
-            esbService.getStudentUsername(enrollment.studentNumber.get());
+        enrollment.usernameList = Enrollment.ROLE_TEACHER.equals(enrollment.role) ?
+            esbService.getTeacherUsernameList(enrollment.teacherId.get()) :
+            esbService.getStudentUsernameList(enrollment.studentNumber.get());
 
         return enrollment;
     }
@@ -181,7 +180,7 @@ public class EnrollmentExecutor {
     }
 
     private boolean isUsernamePresent(final Enrollment enrollment) {
-        return enrollment.username.isPresent();
+        return enrollment.usernameList != null && enrollment.usernameList.size() > 0;
     }
 
     private List<Enrollment> filterEnrollmentsAndCreateWarnings(

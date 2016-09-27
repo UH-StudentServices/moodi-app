@@ -21,6 +21,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Optional;
 
 public final class Enrollment implements Serializable {
@@ -34,21 +35,21 @@ public final class Enrollment implements Serializable {
     public Optional<String> teacherId;
     public Optional<String> studentNumber;
     public Optional<Long> moodleId;
-    public Optional<String> username;
+    public List<String> usernameList;
 
     public static Enrollment forStudent(final String studentNumber) {
-        return new Enrollment(ROLE_STUDENT, Optional.empty(), Optional.of(studentNumber), Optional.empty(), Optional.empty());
+        return new Enrollment(ROLE_STUDENT, Optional.empty(), Optional.of(studentNumber), null, Optional.empty());
     }
 
     public static Enrollment forTeacher(final String teacherId) {
-        return new Enrollment(ROLE_TEACHER, Optional.of(teacherId), Optional.empty(), Optional.empty(), Optional.empty());
+        return new Enrollment(ROLE_TEACHER, Optional.of(teacherId), Optional.empty(), null, Optional.empty());
     }
 
-    private Enrollment(String role, Optional<String> teacherId, Optional<String> studentNumber, Optional<String> username, Optional<Long> moodleId) {
+    private Enrollment(String role, Optional<String> teacherId, Optional<String> studentNumber, List<String> usernameList, Optional<Long> moodleId) {
         this.role = role;
         this.teacherId = teacherId;
         this.studentNumber = studentNumber;
-        this.username = username;
+        this.usernameList = usernameList;
         this.moodleId = moodleId;
     }
 
