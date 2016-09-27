@@ -8,7 +8,8 @@
         "first_names": "Niina Johanna",
         "last_name": "Sulin",
         "enrollment_status_code": 3,
-        "student_number": "{{ studentnumber}}"
+        "student_number": "{{ studentnumber}}",
+        "approved" : "{{ approved }}"
       }
     ],
     "subcourses": [],
@@ -50,6 +51,7 @@
         "code": "H5510"
       }
     ],
-    "realisationname": "{{ realisationname }}"
+    "realisationname": "{{ realisationname }}",
+    "deleted": "{{ deleted }}"
   }
 }

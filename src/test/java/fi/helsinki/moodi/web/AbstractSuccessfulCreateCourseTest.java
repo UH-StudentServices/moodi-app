@@ -19,6 +19,7 @@ package fi.helsinki.moodi.web;
 
 import com.google.common.collect.Lists;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
+import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
 import org.springframework.http.MediaType;
 
@@ -28,7 +29,7 @@ import java.util.stream.Stream;
 
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-public abstract class AbstractSuccessfulCreateCourseTest extends AbstractCourseControllerTest {
+public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIntegrationTest {
 
     protected static final long COURSE_REALISATION_ID = 102374742L;
     protected final static long MOODLE_COURSE_ID = 988888L;

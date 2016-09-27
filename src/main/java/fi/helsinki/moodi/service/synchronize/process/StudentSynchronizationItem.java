@@ -123,6 +123,11 @@ public final class StudentSynchronizationItem implements EnrollmentSynchronizati
         return success;
     }
 
+    @Override
+    public boolean isApproved() {
+        return student.approved;
+    }
+
     public String getMessage() {
         return message;
     }
