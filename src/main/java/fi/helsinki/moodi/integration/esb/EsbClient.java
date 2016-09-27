@@ -48,22 +48,20 @@ public class EsbClient {
         LOGGER.debug("Get student username by student number {}", studentNumber);
 
         try {
-            Optional<List<EsbStudent>> result = Optional.ofNullable(restTemplate.exchange(
+            List<EsbStudent> result = restTemplate.exchange(
                     "{baseUrl}/iam/findStudent/{studentNumber}",
                     HttpMethod.GET,
                     null,
                     new ParameterizedTypeReference<List<EsbStudent>>() {},
                     baseUrl,
                     studentNumber)
-                .getBody());
+                .getBody();
 
-            if (result.isPresent() && result.get().size() > 0) {
-                return
-                    result
-                        .get()
-                        .stream()
-                        .map(s -> s.username)
-                        .collect(Collectors.toList());
+            if (result != null) {
+                return result
+                    .stream()
+                    .map(s -> s.username)
+                    .collect(Collectors.toList());
             } else {
                 return null;
             }
@@ -71,12 +69,13 @@ public class EsbClient {
             throw new IntegrationConnectionException("ESB connection failure", e);
         }
     }
+
     @Cacheable(value="esb-client.teacher-username-by-teacher-id", unless="#result == null")
     public List<String> getTeacherUsernameList(final String teacherId) {
         LOGGER.debug("Get teacher username by teacher id {}", teacherId);
 
         try {
-            Optional<List<EsbEmployee>> result = Optional.ofNullable(restTemplate.exchange(
+            List<EsbEmployee> result = restTemplate.exchange(
                     "{baseUrl}/iam/findEmployee/{employeeId}",
                     HttpMethod.GET,
                     null,
@@ -85,13 +84,11 @@ public class EsbClient {
                     teacherId)
                 .getBody());
 
-            if (result.isPresent() && result.get().size() > 0) {
-                return
-                    result
-                        .get()
-                        .stream()
-                        .map(s -> s.username)
-                        .collect(Collectors.toList());
+            if (result != null) {
+                return result
+                    .stream()
+                    .map(s -> s.username)
+                    .collect(Collectors.toList());
             } else {
                 return null;
             }
