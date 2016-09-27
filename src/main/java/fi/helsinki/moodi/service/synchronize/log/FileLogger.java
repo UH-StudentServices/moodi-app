@@ -21,7 +21,6 @@ import fi.helsinki.moodi.service.time.TimeService;
 import fi.helsinki.moodi.service.util.JsonUtil;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +31,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 
@@ -91,8 +90,8 @@ public class FileLogger implements MoodiLogger {
 
 
     public void cleanOldLogs() {
-        final LocalDateTime date = timeService.getCurrentDateTime().minusSeconds(retainLogsDuration.getSeconds());
-        final long timestamp = date.atZone(ZoneOffset.UTC).toInstant().toEpochMilli();
+        final ZonedDateTime date = ZonedDateTime.now().minusSeconds(retainLogsDuration.getSeconds());
+        final long timestamp = date.toInstant().toEpochMilli();
 
         cleanOldLogs(path, timestamp);
     }

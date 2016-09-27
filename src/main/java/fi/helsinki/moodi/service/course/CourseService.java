@@ -59,7 +59,7 @@ public class CourseService {
 
     public Course createCourse(final long realisationId, final long moodleCourseId) {
         final Course course = new Course();
-        course.created = timeService.getCurrentDateTime();
+        course.created = timeService.getCurrentUTCDateTime();
         course.moodleId = moodleCourseId;
         course.realisationId = realisationId;
         course.importStatus = IN_PROGRESS;
@@ -96,11 +96,11 @@ public class CourseService {
     private boolean isImportExpired(Course course) {
         return course.created
             .plusSeconds(MAX_IMPORT_TIME_SECONDS)
-            .isBefore(timeService.getCurrentDateTime());
+            .isBefore(timeService.getCurrentUTCDateTime());
     }
 
     private Course saveCourse(Course course) {
-        course.modified = timeService.getCurrentDateTime();
+        course.modified = timeService.getCurrentUTCDateTime();
         return courseRepository.save(course);
     }
 }

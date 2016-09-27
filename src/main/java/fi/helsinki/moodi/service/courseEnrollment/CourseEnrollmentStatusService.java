@@ -91,7 +91,7 @@ public class CourseEnrollmentStatusService {
         CourseEnrollmentStatus courseEnrollmentStatus = new CourseEnrollmentStatus();
         courseEnrollmentStatus.courseId = synchronizationItem.getCourse().id;
         courseEnrollmentStatus.realisationId = synchronizationItem.getCourse().realisationId;
-        courseEnrollmentStatus.created = timeService.getCurrentDateTime();
+        courseEnrollmentStatus.created = timeService.getCurrentUTCDateTime();
 
         courseEnrollmentStatus.studentEnrollments = synchronizationItem.getStudentItems()
                 .map(this::createStudentEnrollmentStatuses)
@@ -119,7 +119,7 @@ public class CourseEnrollmentStatusService {
         CourseEnrollmentStatus courseEnrollmentStatus = new CourseEnrollmentStatus();
         courseEnrollmentStatus.courseId = courseId;
         courseEnrollmentStatus.realisationId = realisationId;
-        courseEnrollmentStatus.created = timeService.getCurrentDateTime();
+        courseEnrollmentStatus.created = timeService.getCurrentUTCDateTime();
 
         Map<String, List<Enrollment>> successFullEnrollementsByRole = enrollments.stream()
             .filter(e -> enrollmentWarnings.stream().noneMatch(w -> w.enrollment.equals(e)))

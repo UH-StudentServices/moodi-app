@@ -32,7 +32,7 @@ public class TestConfig {
         return new SystemTimeService() {
 
             @Override
-            public LocalDateTime getCurrentDateTime() {
+            public LocalDateTime getCurrentUTCDateTime() {
                 return LocalDateTime.of(2015, 5, 18, 10, 15, 0);
             }
         };

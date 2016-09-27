@@ -21,7 +21,9 @@ import java.time.LocalDateTime;
 
 public interface TimeService {
 
-    LocalDateTime getCurrentDateTime();
+    LocalDateTime getCurrentUTCDateTime();
 
-    long getCurrentTimestamp();
+    long getCurrentUTCTimestamp();
+
+    LocalDateTime getCurrentDateTime();
 }

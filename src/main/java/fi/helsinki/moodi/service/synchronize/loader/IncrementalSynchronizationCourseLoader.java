@@ -68,7 +68,7 @@ public class IncrementalSynchronizationCourseLoader implements CourseLoader {
         final Optional<SynchronizationJobRun> lastRun =
                 synchronizationJobRunService.findLatestCompletedIncrementalJob();
         final LocalDateTime afterDate =
-                lastRun.map(s -> s.completed).orElse(timeService.getCurrentDateTime().minusDays(1));
+                lastRun.map(s -> s.completed).orElse(timeService.getCurrentUTCDateTime().minusDays(1));
 
         LOGGER.debug("Last successful synchronization run at {}", FORMATTER.format(afterDate));
 
