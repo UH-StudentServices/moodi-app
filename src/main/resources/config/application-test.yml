@@ -22,4 +22,3 @@ synchronize.INCREMENTAL.enabled: false
 logging:
   retain-logs: PT30M
   file-logging-path: /tmp/log/moodi-import-sync-log
->>>>>>> 17053385f116f60c2cd6b701b26b938d5bc999b4
