@@ -57,7 +57,7 @@ public class EsbClient {
                     studentNumber)
                 .getBody();
 
-            if (result != null) {
+            if (result != null && result.size() > 0) {
                 return result
                     .stream()
                     .map(s -> s.username)
@@ -82,9 +82,9 @@ public class EsbClient {
                     new ParameterizedTypeReference<List<EsbEmployee>>() {},
                     baseUrl,
                     teacherId)
-                .getBody());
+                .getBody();
 
-            if (result != null) {
+            if (result != null && result.size() > 0) {
                 return result
                     .stream()
                     .map(s -> s.username)
