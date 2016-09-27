@@ -21,6 +21,7 @@ import fi.helsinki.moodi.service.time.TimeService;
 import fi.helsinki.moodi.service.util.JsonUtil;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
