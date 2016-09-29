@@ -41,14 +41,14 @@ public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
     @Autowired
     private OodiCourseEnricher oodiCourseEnricher;
 
-    private void setUpMockServerResponse(String endDate, boolean deleted) {
+    private void setUpMockServerResponse(String endDate) {
         expectGetCourseRealisationUnitRequestToOodi(
             REALISATION_ID,
             withSuccess(Fixtures.asString(
                     "/oodi/parameterized-course-realisation.json",
                     new ImmutableMap.Builder()
                         .put("endDate", endDate)
-                        .put("deleted", deleted)
+                        .put("deleted", false)
                         .build()),
                 MediaType.APPLICATION_JSON));
     }
@@ -57,6 +57,14 @@ public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
         expectGetCourseRealisationUnitRequestToOodi(
             REALISATION_ID,
             withSuccess("{}",
+                MediaType.APPLICATION_JSON));
+    }
+
+    private void setUpMockServerDeletedResponse() {
+        expectGetCourseRealisationUnitRequestToOodi(
+            REALISATION_ID,
+            withSuccess(Fixtures.asString(
+                    "/oodi/deleted-course-realisation.json"),
                 MediaType.APPLICATION_JSON));
     }
 
@@ -70,7 +78,7 @@ public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
     @Test
     public void thatOodiCourseIsFound() {
         String endDateInFuture = getFutureDateString();
-        setUpMockServerResponse(endDateInFuture, false);
+        setUpMockServerResponse(endDateInFuture);
 
         SynchronizationItem synchronizationItem = createSynchronizationItem(REALISATION_ID);
 
@@ -99,7 +107,7 @@ public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
     @Test
     public void thatOodiCourseIsEnded() {
         String endDateInPast = getOverYearAgoPastDateString();
-        setUpMockServerResponse(endDateInPast, false);
+        setUpMockServerResponse(endDateInPast);
 
         SynchronizationItem synchronizationItem = createSynchronizationItem(REALISATION_ID);
 
@@ -110,8 +118,7 @@ public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
 
     @Test
     public void thatOodiCourseIsRemoved() {
-        String endDateInFuture = getFutureDateString();
-        setUpMockServerResponse(endDateInFuture, true);
+        setUpMockServerDeletedResponse();
 
         SynchronizationItem synchronizationItem = createSynchronizationItem(REALISATION_ID);
 

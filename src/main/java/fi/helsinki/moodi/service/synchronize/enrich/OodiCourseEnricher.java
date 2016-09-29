@@ -49,21 +49,19 @@ public class OodiCourseEnricher extends AbstractEnricher {
     protected SynchronizationItem doEnrich(final SynchronizationItem item) {
         final Course course = item.getCourse();
         final Optional<OodiCourseUnitRealisation> oodiCourse = oodiService.getOodiCourseUnitRealisation(course.realisationId);
-        final boolean courseEnded = oodiCourse.map(this::isCourseEnded).orElse(false);
-        final boolean courseRemoved = oodiCourse.map(c -> c.removed).orElse(false);
 
         if(!oodiCourse.isPresent()) {
             return item.completeEnrichmentPhase(
                 EnrichmentStatus.ERROR,
                 String.format("Course not found from Oodi with id %s", course.realisationId));
-        } else if(courseEnded) {
-            return item.completeEnrichmentPhase(
-                EnrichmentStatus.OODI_COURSE_ENDED,
-                String.format("Course with realisation id %s has ended", course.realisationId));
-        } else if(courseRemoved) {
+        } else if(oodiCourse.map(c -> c.removed).orElse(false)) {
             return item.completeEnrichmentPhase(
                 EnrichmentStatus.OODI_COURSE_REMOVED,
                 String.format("Course with id %s removed from Oodi", course.realisationId));
+        } else if(oodiCourse.map(this::isCourseEnded).orElse(false)) {
+            return item.completeEnrichmentPhase(
+                EnrichmentStatus.OODI_COURSE_ENDED,
+                String.format("Course with realisation id %s has ended", course.realisationId));
         } else {
             return item.setOodiCourse(oodiCourse);
         }
