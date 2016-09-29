@@ -55,6 +55,7 @@ public class SynchronizationSummaryLog {
             public String processingStatus = item.getProcessingStatus().name();
             public List<Object> syncedStudents = item.getStudentItems().map(SynchronizationSummaryLog::getSyncedStudents).orElse(null);
             public List<Object> syncedTeachers = item.getTeacherItems().map(SynchronizationSummaryLog::getSyncedTeachers).orElse(null);
+            public String message = item.getMessage();
         };
     }
 
