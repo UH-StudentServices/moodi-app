@@ -218,7 +218,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
     }
 
     private EnrollmentSynchronizationItem checkEnrollmentPrerequisites(final EnrollmentSynchronizationItem item) {
-        if (item.getUsernameList().size() == 0) {
+        if (item.getUsernameList() == null || item.getUsernameList().size() == 0) {
             return item.setCompleted(false, MESSAGE_USERNAME_NOT_FOUND, EnrollmentSynchronizationStatus.USERNAME_NOT_FOUND);
         }
 
