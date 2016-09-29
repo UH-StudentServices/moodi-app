@@ -41,8 +41,8 @@ public class FullSynchronizationJob {
         this.synchronizationService = synchronizationService;
     }
 
-    // Run once every day at midnight
-    @Scheduled(cron = "0 0 0 * * ?")
+    // Run every 2 hours
+    @Scheduled(initialDelay = 60000, fixedDelay = 7200000)
     public void execute() {
         if (isEnabled()) {
             synchronizationService.synchronize(FULL);
