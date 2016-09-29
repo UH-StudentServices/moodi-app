@@ -154,7 +154,7 @@ public abstract class AbstractMoodiIntegrationTest {
 
     protected final void expectAssignRolesToMoodle(boolean isAssign, MoodleEnrollment... enrollments) {
         final String coreFunctionName = isAssign ? "core_role_assign_roles" : "core_role_unassign_roles";
-        expectEnrollmentRequestToMoodle(coreFunctionName, this::assignRolesPartsBuilder, enrollments);
+        expectEnrollmentRequestToMoodle(coreFunctionName, isAssign ? this::assignRolesPartsBuilder : this::unAssignRolesPartsBuilder, enrollments);
     }
 
     private Stream<String> enrollUsersPartsBuilder(MoodleEnrollment enrollment, int index) {
@@ -166,14 +166,20 @@ public abstract class AbstractMoodiIntegrationTest {
             createEnrollmentRequestPart(property, "userid", String.valueOf(enrollment.moodleUserId), index));
     }
 
-    private Stream<String> assignRolesPartsBuilder(MoodleEnrollment enrollment, int index) {
-        final String property = "assignments";
-
+    private Stream<String> updateRolesPartsBuilder(MoodleEnrollment enrollment, int index, String property) {
         return Stream.of(
             createEnrollmentRequestPart(property, "userid", String.valueOf(enrollment.moodleUserId), index),
             createEnrollmentRequestPart(property, "roleid", String.valueOf(enrollment.moodleRoleId), index),
             createEnrollmentRequestPart(property, "instanceid", String.valueOf(enrollment.moodleCourseId), index),
             createEnrollmentRequestPart(property, "contextlevel", "course", index));
+    }
+
+    private Stream<String> assignRolesPartsBuilder(MoodleEnrollment enrollment, int index) {
+        return updateRolesPartsBuilder(enrollment, index, "assignments");
+    }
+
+    private Stream<String> unAssignRolesPartsBuilder(MoodleEnrollment enrollment, int index) {
+       return updateRolesPartsBuilder(enrollment, index, "unassignments");
     }
 
     private void expectEnrollmentRequestToMoodle(String coreFunctionName,
