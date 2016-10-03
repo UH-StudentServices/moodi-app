@@ -25,6 +25,7 @@ import fi.helsinki.moodi.service.importing.MoodleCourseBuilder;
 import fi.helsinki.moodi.service.util.MapperService;
 import fi.helsinki.moodi.test.web.RequestLoggerFilter;
 import org.flywaydb.core.Flyway;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -289,5 +290,12 @@ public abstract class AbstractMoodiIntegrationTest {
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @After
+    public void verify() {
+        oodiMockServer.verify();
+        moodleMockServer.verify();
+        esbMockServer.verify();
     }
 }

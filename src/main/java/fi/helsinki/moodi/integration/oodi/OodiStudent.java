@@ -39,7 +39,7 @@ public class OodiStudent {
     public String email;
 
     @JsonProperty("approved")
-    public boolean approved;
+    public boolean approved = true;
 
     @Override
     public String toString() {

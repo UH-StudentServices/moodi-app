@@ -40,8 +40,5 @@ public class SuccessfulCreateCourseTest extends AbstractSuccessfulCreateCourseTe
     @Test
     public void successfulCreateCourseInvokesCorrectIntegrationServices() throws Exception {
         makeCreateCourseRequest(COURSE_REALISATION_ID).andReturn();
-        oodiMockServer.verify();
-        moodleMockServer.verify();
-        esbMockServer.verify();
     }
 }
