@@ -1,0 +1,33 @@
+{
+  "status": 200,
+  "data": {
+    "end_date": "{{ endDate }}",
+    "students": [
+      {
+        "student_number": "010342729",
+        "approved" : "false"
+      },
+      {
+        "student_number": "0103427291",
+        "approved" : "true"
+      },
+      {
+        "student_number": "0103427292",
+        "approved" : "true"
+      },
+      {
+        "student_number": "0103427293",
+        "approved" : "true"
+      }],
+    "teachers": [
+      {
+        "teacher_id": "110588",
+        "teacher_role_code": 3
+      },
+      {
+        "teacher_id": "1105881",
+        "teacher_role_code": 3
+      }
+    ]
+  }
+}

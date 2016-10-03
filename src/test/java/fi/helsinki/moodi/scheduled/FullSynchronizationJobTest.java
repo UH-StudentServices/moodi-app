@@ -65,12 +65,18 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
     private MapperService mapperService;
 
     private void setUpMockServerResponses(String endDate, boolean approved) {
+        setupMoodleGetCourseResponse();
+        setupOodiCourseUnitRealisationResponse(endDate, approved);
+    }
 
+    private void setupMoodleGetCourseResponse() {
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andRespond(withSuccess(Fixtures.asString("/moodle/get-courses-12345.json"), MediaType.APPLICATION_JSON));
+    }
 
+    private void setupOodiCourseUnitRealisationResponse(String endDate, boolean approved) {
         expectGetCourseRealisationUnitRequestToOodi(
             REALISATION_ID,
             withSuccess(Fixtures.asString(
@@ -81,6 +87,17 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
                         .put("endDate", endDate)
                         .put("deleted", false)
                         .put("approved", approved)
+                        .build()),
+                MediaType.APPLICATION_JSON));
+    }
+
+    private void setupOodiCourseUnitRealisationResponse(String responseJson) {
+        expectGetCourseRealisationUnitRequestToOodi(
+            REALISATION_ID,
+            withSuccess(Fixtures.asString(
+                    responseJson,
+                    new ImmutableMap.Builder()
+                        .put("endDate", getFutureDateString())
                         .build()),
                 MediaType.APPLICATION_JSON));
     }
@@ -101,7 +118,6 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
         job.execute();
     }
 
-
     @Test
     public void thatCourseIsSynchronizedWhenEndDataInFuture() {
         thatCourseIsSynchronizedWithNoExistingEnrollments(getFutureDateString());
@@ -110,7 +126,7 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
     @Test
     public void thatOverYearOldCourseIsRemoved() {
         String endDateInPast = DateUtil.getOverYearAgoPastDateString();
-        setUpMockServerResponses(endDateInPast, true);
+        setupOodiCourseUnitRealisationResponse(endDateInPast, true);
 
         Course course = findCourse();
 
@@ -151,7 +167,7 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
         assertImportStatus(ImportStatus.COMPLETED);
     }
 
-    @Test
+    /*@Test
     public void thatUnApprovedStudentIsNotEnrolledToMoodle() {
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, false);
@@ -165,7 +181,7 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
             new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID));
 
         job.execute();
-    }
+    }*/
 
     @Test
     public void thatApprovedStudentIsAssignedStudentRoleInMoodleIfAlreadyEnrolledForAnotherRole() {
@@ -187,7 +203,7 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
         job.execute();
     }
 
-    @Test
+    /*@Test
     public void thatUnApprovedStudentHasStudentRoleUnassignedFromMoodle() {
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, false);
@@ -205,7 +221,86 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
         expectAssignRolesToMoodle(false, new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
 
         job.execute();
+    }*/
+
+    /*@Test
+    public void thatMultipleStudentsAndTeachersAreSyncedCorrectly() {
+
+        setupMoodleGetCourseResponse();
+
+        setupOodiCourseUnitRealisationResponse("/oodi/course-realisation-multiple-students.json");
+
+        expectGetEnrollmentsRequestToMoodle(
+            MOODLE_COURSE_ID,
+            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
+
+        expectFindStudentRequestToMoodle(STUDENT_NUMBER, STUDENT_USERNAME, STUDENT_USER_MOODLE_ID);
+        expectFindStudentRequestToMoodle(STUDENT_NUMBER + "1", STUDENT_USERNAME + "1", STUDENT_USER_MOODLE_ID + 1);
+        expectFindStudentRequestToMoodle(STUDENT_NUMBER + "2", STUDENT_USERNAME + "2", STUDENT_USER_MOODLE_ID + 2);
+        expectFindStudentRequestToMoodle(STUDENT_NUMBER + "3", STUDENT_USERNAME + "3", STUDENT_USER_MOODLE_ID + 3);
+
+        expectFindTeacherRequestToMoodle(TEACHER_ID_WITH_PREFIX, TEACHER_USERNAME, TEACHER_USER_MOODLE_ID);
+        expectFindTeacherRequestToMoodle(TEACHER_ID_WITH_PREFIX + "1", TEACHER_USERNAME + "1", TEACHER_USER_MOODLE_ID + 1);
+
+        expectEnrollmentRequestToMoodle(
+            new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID + 1, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID + 1, MOODLE_COURSE_ID),
+
+            new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID + 2, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID + 2, MOODLE_COURSE_ID),
+
+            new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID + 3, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID + 3, MOODLE_COURSE_ID),
+
+            new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
+
+            new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID + 1, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID + 1, MOODLE_COURSE_ID));
+
+        expectAssignRolesToMoodle(false, new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
+
+        job.execute();
+    }*/
+
+    @Test
+    public void thatIfApprovedIsMissingOnStudentItIsConsideredTrue() {
+
+        setupMoodleGetCourseResponse();
+
+        setupOodiCourseUnitRealisationResponse("/oodi/course-realisation-missing-approved.json");
+
+        expectGetEnrollmentsRequestToMoodle(
+            MOODLE_COURSE_ID,
+            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
+
+        expectFindStudentRequestToMoodle(STUDENT_NUMBER, STUDENT_USERNAME, STUDENT_USER_MOODLE_ID);
+        expectFindStudentRequestToMoodle(STUDENT_NUMBER + "1", STUDENT_USERNAME + "1", STUDENT_USER_MOODLE_ID + 1);
+        expectFindStudentRequestToMoodle(STUDENT_NUMBER + "2", STUDENT_USERNAME + "2", STUDENT_USER_MOODLE_ID + 2);
+        expectFindStudentRequestToMoodle(STUDENT_NUMBER + "3", STUDENT_USERNAME + "3", STUDENT_USER_MOODLE_ID + 3);
+
+        expectFindTeacherRequestToMoodle(TEACHER_ID_WITH_PREFIX, TEACHER_USERNAME, TEACHER_USER_MOODLE_ID);
+        expectFindTeacherRequestToMoodle(TEACHER_ID_WITH_PREFIX + "1", TEACHER_USERNAME + "1", TEACHER_USER_MOODLE_ID + 1);
+
+        expectEnrollmentRequestToMoodle(
+            new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID + 1, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID + 1, MOODLE_COURSE_ID),
+
+            new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID + 2, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID + 2, MOODLE_COURSE_ID),
+
+            new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID + 3, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID + 3, MOODLE_COURSE_ID),
+
+            new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
+
+            new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID + 1, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID + 1, MOODLE_COURSE_ID));
+
+        job.execute();
     }
+
 
     private String getEnrollmentsResponse(int moodleUserId, long moodleRoleId, long moodiRoleId) {
         return String.format(
@@ -216,12 +311,20 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
     }
 
     private void expectFindUsersRequestsToMoodle() {
-        expectFindStudentRequestToEsb(STUDENT_NUMBER, STUDENT_USERNAME);
-        expectGetUserRequestToMoodle(STUDENT_USERNAME + USERNAME_SUFFIX, STUDENT_USER_MOODLE_ID);
-
-        expectFindEmployeeRequestToEsb(TEACHER_ID_WITH_PREFIX, TEACHER_USERNAME);
-        expectGetUserRequestToMoodle(TEACHER_USERNAME + USERNAME_SUFFIX, TEACHER_USER_MOODLE_ID);
+        expectFindStudentRequestToMoodle(STUDENT_NUMBER, STUDENT_USERNAME, STUDENT_USER_MOODLE_ID);
+        expectFindTeacherRequestToMoodle(TEACHER_ID_WITH_PREFIX, TEACHER_USERNAME, TEACHER_USER_MOODLE_ID);
     }
+
+    private void expectFindStudentRequestToMoodle(String studentNumber, String username, int moodleId) {
+        expectFindStudentRequestToEsb(studentNumber, username);
+        expectGetUserRequestToMoodle(username + USERNAME_SUFFIX, moodleId);
+    }
+
+    private void expectFindTeacherRequestToMoodle(String teacherId, String username, int moodleId) {
+        expectFindEmployeeRequestToEsb(teacherId, username);
+        expectGetUserRequestToMoodle(username + USERNAME_SUFFIX, moodleId);
+    }
+
 
     private Course findCourse() {
         return courseService.findByRealisationId(REALISATION_ID).get();
