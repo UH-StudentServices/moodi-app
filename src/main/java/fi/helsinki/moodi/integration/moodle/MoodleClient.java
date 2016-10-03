@@ -188,8 +188,8 @@ public class MoodleClient {
     }
 
     public void updateEnrollments(final List<MoodleEnrollment> moodleEnrollments, final boolean addRole) {
-        final String function = addRole ? "core_role_assign_roles" : "core_role_unassign_roles";
-        final String array = addRole ? "assignments" : "unassignments";
+        final String function = "core_role_assign_roles"; // addRole ? "core_role_assign_roles" : "core_role_unassign_roles"; //Unassigning is commented out for now just in case.
+        final String array = "assignments"; //addRole ? "assignments" : "unassignments";
 
         final MultiValueMap<String, String> params = createParametersForFunction(function);
 
