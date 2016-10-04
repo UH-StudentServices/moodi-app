@@ -27,6 +27,7 @@ import fi.helsinki.moodi.service.util.MapperService;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
 import fi.helsinki.moodi.test.util.DateUtil;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -167,7 +168,7 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
         assertImportStatus(ImportStatus.COMPLETED);
     }
 
-    /*@Test
+    @Test
     public void thatUnApprovedStudentIsNotEnrolledToMoodle() {
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, false);
@@ -181,7 +182,7 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
             new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID));
 
         job.execute();
-    }*/
+    }
 
     @Test
     public void thatApprovedStudentIsAssignedStudentRoleInMoodleIfAlreadyEnrolledForAnotherRole() {
@@ -203,7 +204,8 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
         job.execute();
     }
 
-    /*@Test
+    @Ignore
+    @Test
     public void thatUnApprovedStudentHasStudentRoleUnassignedFromMoodle() {
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, false);
@@ -221,9 +223,10 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
         expectAssignRolesToMoodle(false, new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
 
         job.execute();
-    }*/
+    }
 
-    /*@Test
+    @Ignore
+    @Test
     public void thatMultipleStudentsAndTeachersAreSyncedCorrectly() {
 
         setupMoodleGetCourseResponse();
@@ -261,7 +264,7 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
         expectAssignRolesToMoodle(false, new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
 
         job.execute();
-    }*/
+    }
 
     @Test
     public void thatIfApprovedIsMissingOnStudentItIsConsideredTrue() {
