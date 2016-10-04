@@ -49,12 +49,13 @@ import static java.util.stream.Collectors.toMap;
 public class SynchronizingProcessor extends AbstractProcessor {
 
     private static final String MESSAGE_NOT_CHANGED = "Not changed";
-    private static final String MESSAGE_ENROLLMENT_SUCCEEDED = "Enrollment succeeded";
-    private static final String MESSAGE_ENROLLMENT_FAILED = "Enrollment failed";
+    private static final String MESSAGE_ENROLLMENT_SUCCEEDED = "Enrolment succeeded";
+    private static final String MESSAGE_ENROLLMENT_FAILED = "Enrolment failed";
     private static final String MESSAGE_USERNAME_NOT_FOUND = "Username not found from ESB";
     private static final String MESSAGE_MOODLE_USER_NOT_FOUND = "Moodle user not found";
-    private static final String MESSAGE_UPDATE_SUCCEEDED = "Enrollment %s succeeded";
-    private static final String MESSAGE_UPDATE_FAILED = "Enrollment %s failed";
+    private static final String MESSAGE_DROP_DISABLED = "Role drop requested but was not executed";
+    private static final String MESSAGE_UPDATE_SUCCEEDED = "Role %s succeeded";
+    private static final String MESSAGE_UPDATE_FAILED = "Role %s failed";
     private static final String UPDATE_ADD = "add";
     private static final String UPDATE_DROP = "drop";
 
@@ -190,7 +191,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
             case ADD_ROLE:
                 return updateEnrollments(items, true);
             case REMOVE_ROLE:
-                return updateEnrollments(items, false);
+                return completeItemsAfterUpdate(items, true, MESSAGE_DROP_DISABLED);
             default:
                 return processUnchanged(items);
         }
@@ -284,14 +285,17 @@ public class SynchronizingProcessor extends AbstractProcessor {
             LOGGER.error("Error while updating enrollment", e);
         }
 
-        return completeItemsAfterUpdate(items, updateSuccess, action);
+        String message = updateSuccess ? String.format(MESSAGE_UPDATE_SUCCEEDED, action) : String.format(MESSAGE_UPDATE_FAILED, action);
+
+        return completeItemsAfterUpdate(items, updateSuccess, message);
     }
 
-    private List<EnrollmentSynchronizationItem> completeItemsAfterUpdate(final List<EnrollmentSynchronizationItem> items, final boolean success, String action) {
+    private List<EnrollmentSynchronizationItem> completeItemsAfterUpdate(final List<EnrollmentSynchronizationItem> items, final boolean success, String message) {
         return items
             .stream()
-            .map(item -> item.setCompleted(success,
-                String.format(success ? MESSAGE_UPDATE_SUCCEEDED : MESSAGE_ENROLLMENT_FAILED, action),
+            .map(item -> item.setCompleted(
+                success,
+                message,
                 success ? EnrollmentSynchronizationStatus.COMPLETED : EnrollmentSynchronizationStatus.ERROR))
             .collect(Collectors.toList());
     }

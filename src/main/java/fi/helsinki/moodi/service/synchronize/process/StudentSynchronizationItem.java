@@ -125,8 +125,7 @@ public final class StudentSynchronizationItem implements EnrollmentSynchronizati
 
     @Override
     public boolean isApproved() {
-        //return student.approved; //Uncomment when Oodi api is updated
-        return true;
+        return student.approved;
     }
 
     public String getMessage() {
