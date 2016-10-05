@@ -18,6 +18,7 @@
 package fi.helsinki.moodi.service.importing;
 
 import fi.helsinki.moodi.exception.CourseAlreadyCreatedException;
+import fi.helsinki.moodi.exception.CourseNotFoundException;
 import fi.helsinki.moodi.integration.moodle.MoodleCourse;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
@@ -102,6 +103,6 @@ public class ImportingService {
         Optional<Course> course = courseService.findByRealisationId(realisationId);
         return course
             .map(c -> courseConverter.toDto(c, courseEnrollmentStatusService.getCourseEnrollmentStatus(realisationId)))
-            .orElseThrow(notFoundException("Course not found in Moodi"));
+            .orElseThrow(() -> new CourseNotFoundException(realisationId));
     }
 }
