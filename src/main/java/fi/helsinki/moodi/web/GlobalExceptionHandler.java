@@ -17,10 +17,7 @@
 
 package fi.helsinki.moodi.web;
 
-import fi.helsinki.moodi.exception.IntegrationConnectionException;
-import fi.helsinki.moodi.exception.MoodiException;
-import fi.helsinki.moodi.exception.NotFoundException;
-import fi.helsinki.moodi.exception.UnauthorizedException;
+import fi.helsinki.moodi.exception.*;
 import fi.helsinki.moodi.service.Result;
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -34,35 +31,45 @@ import static org.slf4j.LoggerFactory.getLogger;
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
+    private static String STATUS_ERROR = "error";
+    private static String STATUS_CONNECTION_ERROR = "connection-error";
+    private static String STATUS_NOT_FOUND = "not-found";
+
     private static final Logger LOGGER = getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(value = IntegrationConnectionException.class)
     public ResponseEntity<Result<?, String>> handleIntegrationConnectionException(IntegrationConnectionException e) throws Exception {
         LOGGER.error("Caught an exception", e);
-        return new ResponseEntity(Result.error("Connection error", "connection-error", e.getMessage()), HttpStatus.BAD_GATEWAY);
+        return new ResponseEntity(Result.error("Connection error", STATUS_CONNECTION_ERROR, e.getMessage()), HttpStatus.BAD_GATEWAY);
     }
 
     @ExceptionHandler(value = NotFoundException.class)
     public ResponseEntity<Result<?, String>> handleNotFoundException(NotFoundException e) throws Exception {
         LOGGER.error("Caught an exception", e);
-        return new ResponseEntity(Result.error(e.getMessage(), "not-found", e.getMessage()), HttpStatus.NOT_FOUND);
+        return new ResponseEntity(Result.error(e.getMessage(), STATUS_NOT_FOUND, e.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(value = CourseNotFoundException.class)
+    public ResponseEntity<Result<?, String>> handleCourseNotFoundException(CourseNotFoundException e) throws Exception {
+        LOGGER.error(e.getMessage());
+        return new ResponseEntity(Result.error(e.getMessage(), STATUS_NOT_FOUND, e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(value = MoodiException.class)
     public ResponseEntity<Result<?, String>> handleMoodiException(MoodiException e) throws Exception {
         LOGGER.error("Caught an exception", e);
-        return new ResponseEntity(Result.error("Error", "error", e.getMessage()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity(Result.error("Error", STATUS_ERROR, e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = UnauthorizedException.class)
     public ResponseEntity<Result<?, String>> handleUnauthorizedException(Exception e) throws Exception {
         LOGGER.error("Caught an exception", e);
-        return new ResponseEntity(Result.error("Error", "error", e.getMessage()), HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity(Result.error("Error", STATUS_ERROR, e.getMessage()), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<Result<?, String>> handleException(Exception e) throws Exception {
         LOGGER.error("Caught an exception", e);
-        return new ResponseEntity(Result.error("Error", "error", "Internal server error"), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity(Result.error("Error", STATUS_ERROR, "Internal server error"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

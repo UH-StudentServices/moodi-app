@@ -17,21 +17,23 @@
 
 package fi.helsinki.moodi.web;
 
-import org.junit.Before;
 import org.junit.Test;
-import static java.lang.Math.toIntExact;
+import org.springframework.http.MediaType;
 
+import static java.lang.Math.toIntExact;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class SuccessfulCreateCourseTest extends AbstractSuccessfulCreateCourseTest {
-    @Before
-    public void setUp() {
-        setUpMockServerResponses();
-    }
+public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
+
+    private static long NON_EXISTING_COURSE_REALISATION_ID = 54321;
+    private static String COURSE_NOT_FOUND_MESSAGE = "Oodi course not found with realisation id %s";
 
     @Test
     public void successfulCreateCourseReturnsCorrectResponse() throws Exception {
+        setUpMockServerResponses();
+
         makeCreateCourseRequest(COURSE_REALISATION_ID)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.moodleCourseId").value(toIntExact(MOODLE_COURSE_ID)));
@@ -39,6 +41,21 @@ public class SuccessfulCreateCourseTest extends AbstractSuccessfulCreateCourseTe
 
     @Test
     public void successfulCreateCourseInvokesCorrectIntegrationServices() throws Exception {
+        setUpMockServerResponses();
+
         makeCreateCourseRequest(COURSE_REALISATION_ID).andReturn();
+    }
+
+    @Test
+    public void thatImportFailsWithIncorrectRealisationId() throws Exception {
+
+        expectGetCourseRealisationUnitRequestToOodi(
+            NON_EXISTING_COURSE_REALISATION_ID,
+            withSuccess("{\"data\": null}", MediaType.APPLICATION_JSON));
+
+        makeCreateCourseRequest(NON_EXISTING_COURSE_REALISATION_ID)
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.error")
+                .value(String.format(COURSE_NOT_FOUND_MESSAGE, NON_EXISTING_COURSE_REALISATION_ID)));
     }
 }
