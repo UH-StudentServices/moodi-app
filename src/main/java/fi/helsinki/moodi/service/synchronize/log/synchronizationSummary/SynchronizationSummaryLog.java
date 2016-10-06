@@ -18,6 +18,8 @@
 package fi.helsinki.moodi.service.synchronize.log.synchronizationSummary;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import fi.helsinki.moodi.integration.moodle.MoodleRole;
+import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
 import fi.helsinki.moodi.service.synchronize.process.EnrollmentSynchronizationItem;
@@ -56,6 +58,7 @@ public class SynchronizationSummaryLog {
             public List<Object> syncedStudents = item.getStudentItems().map(SynchronizationSummaryLog::getSyncedStudents).orElse(null);
             public List<Object> syncedTeachers = item.getTeacherItems().map(SynchronizationSummaryLog::getSyncedTeachers).orElse(null);
             public String message = item.getMessage();
+            public List<MoodleUserEnrollments> moodleEnrollments = item.getMoodleEnrollments().orElse(null);
         };
     }
 
@@ -86,10 +89,14 @@ public class SynchronizationSummaryLog {
     private static class SyncronizationItemLogEntry {
         private final String status;
         private final String message;
+        private final List<MoodleRole> moodleRoles;
+        private final Long moodleUserId;
 
         private SyncronizationItemLogEntry(EnrollmentSynchronizationItem item) {
             this.status = item.getEnrollmentSynchronizationStatus().name();
             this.message = item.getMessage();
+            this.moodleRoles = item.getMoodleEnrollments().map(enrollment -> enrollment.roles).orElse(null);
+            this.moodleUserId = item.getMoodleUser().map(user -> user.id).orElse(null);
         }
 
         public String getStatus() {
@@ -98,6 +105,14 @@ public class SynchronizationSummaryLog {
 
         public String getMessage() {
             return message;
+        }
+
+        public List<MoodleRole> getMoodleRoles() {
+            return moodleRoles;
+        }
+
+        public Long getMoodleUserId() {
+            return moodleUserId;
         }
     }
 }
