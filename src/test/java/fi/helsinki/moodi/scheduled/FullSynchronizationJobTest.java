@@ -22,7 +22,14 @@ import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatusService;
+import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
+import fi.helsinki.moodi.service.synchronize.SynchronizationService;
+import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
+import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.service.synchronize.enrich.EnrichmentStatus;
+import fi.helsinki.moodi.service.synchronize.process.EnrollmentSynchronizationStatus;
+import fi.helsinki.moodi.service.synchronize.process.StudentSynchronizationItem;
+import fi.helsinki.moodi.service.synchronize.process.TeacherSynchronizationItem;
 import fi.helsinki.moodi.service.util.MapperService;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
@@ -37,6 +44,7 @@ import static fi.helsinki.moodi.service.course.Course.ImportStatus;
 import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
 import static fi.helsinki.moodi.test.util.DateUtil.getPastDateString;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
@@ -53,6 +61,11 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
     private static final String TEACHER_USERNAME = "jukkapalmu";
     private static final String USERNAME_SUFFIX = "@helsinki.fi";
 
+    private static final String SUMMARY_MESSAGE_ENROLLMENT_FAILED = "Enrolment failed";
+    private static final String SUMMARY_MESSAGE_ENROLLMENT_SUCCEEDED = "Enrolment succeeded";
+    private static final String SUMMARY_MESSAGE_ROLE_ADD_FAILED = "Role add failed";
+    private static final String SUMMARY_MESSAGE_ROLE_ADD_SUCCEEDED = "Role add succeeded";
+
     @Autowired
     private FullSynchronizationJob job;
 
@@ -64,6 +77,9 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
 
     @Autowired
     private MapperService mapperService;
+
+    @Autowired
+    private SynchronizationService synchronizationService;
 
     private void setUpMockServerResponses(String endDate, boolean approved) {
         setupMoodleGetCourseResponse();
@@ -120,7 +136,7 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
     }
 
     @Test
-    public void thatCourseIsSynchronizedWhenEndDataInFuture() {
+    public void thatCourseIsSynchronizedWhenEndDateInFuture() {
         thatCourseIsSynchronizedWithNoExistingEnrollments(getFutureDateString());
     }
 
@@ -161,7 +177,7 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
 
         assertNull(courseEnrollmentStatusService.getCourseEnrollmentStatus(REALISATION_ID));
 
-        thatCourseIsSynchronizedWhenEndDataInFuture();
+        thatCourseIsSynchronizedWhenEndDateInFuture();
 
         assertNotNull(courseEnrollmentStatusService.getCourseEnrollmentStatus(REALISATION_ID));
 
@@ -264,6 +280,54 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
         expectAssignRolesToMoodle(false, new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
 
         job.execute();
+    }
+
+    private void testSynchronizationSummary(String moodleResponse, boolean expectErrors) {
+        String endDateInFuture = getFutureDateString();
+        setUpMockServerResponses(endDateInFuture, true);
+
+        expectGetEnrollmentsRequestToMoodle(
+            MOODLE_COURSE_ID,
+            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId()));
+
+        expectFindUsersRequestsToMoodle();
+
+        expectEnrollmentRequestToMoodleWithResponse(moodleResponse,
+            new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID));
+
+        expectAssignRolesToMoodleWithResponse(moodleResponse, true, new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
+
+        SynchronizationSummary summary = synchronizationService.synchronize(SynchronizationType.FULL);
+
+        SynchronizationItem item =  summary.getItems().get(0);
+        TeacherSynchronizationItem teacherSynchronizationItem = item.getTeacherItems().get().get(0);
+        StudentSynchronizationItem studentSynchronizationItem = item.getStudentItems().get().get(0);
+
+        EnrollmentSynchronizationStatus expectedStatus = expectErrors ? EnrollmentSynchronizationStatus.ERROR : EnrollmentSynchronizationStatus.COMPLETED;
+
+        assertEquals(teacherSynchronizationItem.getEnrollmentSynchronizationStatus(), expectedStatus);
+        assertEquals(studentSynchronizationItem.getEnrollmentSynchronizationStatus(), expectedStatus);
+
+        assertEquals(expectErrors ?
+            SUMMARY_MESSAGE_ENROLLMENT_FAILED : SUMMARY_MESSAGE_ENROLLMENT_SUCCEEDED, teacherSynchronizationItem.getMessage());
+        assertEquals(expectErrors ?
+            SUMMARY_MESSAGE_ROLE_ADD_FAILED : SUMMARY_MESSAGE_ROLE_ADD_SUCCEEDED, studentSynchronizationItem.getMessage());
+    }
+
+    @Test
+    public void thatSynchronizationSummaryContainsErrorStatusesAndMessagesWhenMoodleResponseWithError() {
+        testSynchronizationSummary(ERROR_RESPONSE, true);
+    }
+
+    @Test
+    public void thatSynchronizationSummaryContainsOkStatusesAndMessagesWhenMoodleResponseWithEmptyString() {
+        testSynchronizationSummary(EMPTY_OK_RESPONSE, false);
+    }
+
+    @Test
+    public void thatSynchronizationSummaryContainsOkStatusesAndMessagesWhenMoodleResponseWithNull() {
+        testSynchronizationSummary(NULL_OK_RESPONSE, false);
     }
 
     @Test

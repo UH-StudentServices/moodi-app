@@ -64,9 +64,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 })
 @ActiveProfiles("test")
 public abstract class AbstractMoodiIntegrationTest {
-
     private static final String EMPTY_LIST_RESPONSE = "[]";
     private static final String EXPECTED_COURSE_ID = MoodleCourseBuilder.MOODLE_COURSE_ID_PREFIX + 102374742;
+    protected static final String ERROR_RESPONSE = "{\"exception\":\"webservice_access_exception\",\"errorcode\":\"accessexception\",\"message\":\"P\\u00e4\\u00e4syn hallinnan poikkeus\"}";
+    protected static final String EMPTY_OK_RESPONSE = "";
+    protected static final String NULL_OK_RESPONSE = "null";
 
     private static final ObjectMapper testObjectMapper = new ObjectMapper();
 
@@ -149,13 +151,21 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     protected final void expectEnrollmentRequestToMoodle(final MoodleEnrollment... enrollments) {
+        expectEnrollmentRequestToMoodleWithResponse(EMPTY_OK_RESPONSE, enrollments);
+    }
+
+    protected final void expectEnrollmentRequestToMoodleWithResponse(String response, final MoodleEnrollment... enrollments) {
         final String coreFunctionName = "enrol_manual_enrol_users";
-        expectEnrollmentRequestToMoodle(coreFunctionName, this::enrollUsersPartsBuilder, enrollments);
+        expectEnrollmentRequestToMoodleWithResponse(response, coreFunctionName, this::enrollUsersPartsBuilder, enrollments);
     }
 
     protected final void expectAssignRolesToMoodle(boolean isAssign, MoodleEnrollment... enrollments) {
+        expectAssignRolesToMoodleWithResponse(EMPTY_OK_RESPONSE, isAssign, enrollments);
+    }
+
+    protected final void expectAssignRolesToMoodleWithResponse(String response, boolean isAssign, MoodleEnrollment... enrollments) {
         final String coreFunctionName = isAssign ? "core_role_assign_roles" : "core_role_unassign_roles";
-        expectEnrollmentRequestToMoodle(coreFunctionName, isAssign ? this::assignRolesPartsBuilder : this::unAssignRolesPartsBuilder, enrollments);
+        expectEnrollmentRequestToMoodleWithResponse(response, coreFunctionName, isAssign ? this::assignRolesPartsBuilder : this::unAssignRolesPartsBuilder, enrollments);
     }
 
     private Stream<String> enrollUsersPartsBuilder(MoodleEnrollment enrollment, int index) {
@@ -183,7 +193,7 @@ public abstract class AbstractMoodiIntegrationTest {
        return updateRolesPartsBuilder(enrollment, index, "unassignments");
     }
 
-    private void expectEnrollmentRequestToMoodle(String coreFunctionName,
+    private void expectEnrollmentRequestToMoodleWithResponse(String response, String coreFunctionName,
                                                  BiFunction<MoodleEnrollment, Integer, Stream<String>> partsBuilder,
                                                  MoodleEnrollment... enrollments) {
         String partsSring = IntStream
@@ -198,7 +208,13 @@ public abstract class AbstractMoodiIntegrationTest {
             .andExpect(method(HttpMethod.POST))
             .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andExpect(content().string(payload))
-            .andRespond(withSuccess("", MediaType.APPLICATION_JSON));
+            .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
+    }
+
+    private void expectEnrollmentRequestToMoodle(String coreFunctionName,
+                                                 BiFunction<MoodleEnrollment, Integer, Stream<String>> partsBuilder,
+                                                 MoodleEnrollment... enrollments) {
+        expectEnrollmentRequestToMoodleWithResponse(EMPTY_OK_RESPONSE, coreFunctionName, partsBuilder, enrollments);
     }
 
     private String createEnrollmentRequestPart(String property, String childProperty, String value, int index) {
