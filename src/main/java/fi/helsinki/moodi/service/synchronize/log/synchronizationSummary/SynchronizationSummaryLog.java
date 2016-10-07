@@ -81,8 +81,7 @@ public class SynchronizationSummaryLog {
                 public String message = item.getMessage();
             };
         } catch (Exception e) {
-            LOGGER.error("Could not create log entry for synchronizationItem");
-            e.printStackTrace();
+            LOGGER.error("Could not create log entry for synchronizationItem", e);
             return null;
         }
     }
@@ -95,8 +94,7 @@ public class SynchronizationSummaryLog {
                 try {
                     return logEntryBuilder.apply(item);
                 } catch (Exception e) {
-                    LOGGER.error("Could not create log entry for enrolmentSynchronizationItem");
-                    e.printStackTrace();
+                    LOGGER.error("Could not create log entry for enrolmentSynchronizationItem", e);
                     return null;
                 }
             })

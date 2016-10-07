@@ -316,17 +316,17 @@ public class FullSynchronizationJobTest extends AbstractMoodiIntegrationTest {
     }
 
     @Test
-    public void thatSynchronizationSummaryContainsErrorStatusesAndMessagesWhenMoodleResponsWithError() {
+    public void thatSynchronizationSummaryContainsErrorStatusesAndMessagesWhenMoodleResponseWithError() {
         testSynchronizationSummary(ERROR_RESPONSE, true);
     }
 
     @Test
-    public void thatSynchronizationSummaryContainsOkStatusesAndMessagesWhenMoodleResponsWithEmptyString() {
+    public void thatSynchronizationSummaryContainsOkStatusesAndMessagesWhenMoodleResponseWithEmptyString() {
         testSynchronizationSummary(EMPTY_OK_RESPONSE, false);
     }
 
     @Test
-    public void thatSynchronizationSummaryContainsOkStatusesAndMessagesWhenMoodleResponsWithNull() {
+    public void thatSynchronizationSummaryContainsOkStatusesAndMessagesWhenMoodleResponseWithNull() {
         testSynchronizationSummary(NULL_OK_RESPONSE, false);
     }
 
