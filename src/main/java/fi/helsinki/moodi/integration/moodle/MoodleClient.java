@@ -118,10 +118,8 @@ public class MoodleClient {
             params.set("enrolments[" + i + "][userid]", String.valueOf(moodleEnrollment.moodleUserId));
         }
 
-        final ResponseBodyEvaluator evaluation = s -> StringUtils.isEmpty(s) || "null".equals(s) ? RETURN_NULL : ERROR;
-
         try {
-            execute(params, new TypeReference<Void>() {}, evaluation);
+            execute(params, new TypeReference<Void>() {}, EMPTY_OK_RESPONSE_EVALUATION);
         } catch (Exception e) {
             handleException("Error executing method: enrollToCourse", e);
         }
@@ -202,7 +200,7 @@ public class MoodleClient {
         }
 
         try {
-            execute(params, null, s -> RETURN_NULL);
+            execute(params, null, EMPTY_OK_RESPONSE_EVALUATION);
         } catch (Exception e) {
             handleException("Error executing method: updateEnrollments", e);
         }
@@ -267,7 +265,7 @@ public class MoodleClient {
     }
 
     private MoodleClientException createMoodleClientException(final String body) throws IOException {
-        LOGGER.warn("Got unexpected response body " + body);
+        LOGGER.error("Got unexpected response body " + body);
         final Map<String, String> map = objectMapper.readValue(body, Map.class);
         return new MoodleClientException(map.get("message"), map.get("exception"), map.get("errorcode"));
     }
@@ -286,6 +284,8 @@ public class MoodleClient {
     }
 
     private static ResponseBodyEvaluator DEFAULT_EVALUATION = s -> CONTINUE;
+
+    private static ResponseBodyEvaluator EMPTY_OK_RESPONSE_EVALUATION =  s -> StringUtils.isEmpty(s) || "null".equals(s) ? RETURN_NULL : ERROR;
 
     private static String paramsToString(final MultiValueMap<String, String> params) {
         final StringBuilder sb = new StringBuilder();
