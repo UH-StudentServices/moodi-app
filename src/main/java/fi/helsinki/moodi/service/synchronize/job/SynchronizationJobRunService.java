@@ -85,8 +85,7 @@ public class SynchronizationJobRunService {
 
     public void cleanOldRuns() {
         for (final SynchronizationType type : SynchronizationType.values()) {
-            final String key = String.format("synchronize.%s.retain.logs", type);
-            final String retainLogsDurationString = environment.getRequiredProperty(key);
+            final String retainLogsDurationString = environment.getRequiredProperty("logging.retain-logs");
             final Duration duration = Duration.parse(retainLogsDurationString);
             final LocalDateTime date = timeService.getCurrentUTCDateTime().minusSeconds(duration.getSeconds());
             synchronizationJobRunRepository.deleteByTypeAndDate(type, date);
