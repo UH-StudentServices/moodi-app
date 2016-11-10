@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -48,6 +49,8 @@ public class SynchronizationSummaryLog {
         return new Object() {
             public String elapsedTime = fullSummary.getElapsedTime();
             public String type = fullSummary.getType().name();
+            public long successfulItemsCount = fullSummary.getSuccessfulItemsCount();
+            public long failedItemsCount = fullSummary.getFailedItemsCount();
             public List<Object> courses = fullSummary.getItems()
                 .stream()
                 .map(item -> mapItem(item))
@@ -63,19 +66,11 @@ public class SynchronizationSummaryLog {
                 public String enrichmentStatus = item.getEnrichmentStatus().name();
                 public String processingStatus = item.getProcessingStatus().name();
 
-                public List<Object> syncedStudents = item
-                    .getStudentItems()
-                    .map(studentItems ->
-                        getSynchronizationItemLogEntries(studentItems,
-                            SynchronizationSummaryLog::getStudentSynchronizationItemLogEntry))
-                    .orElse(null);
+                public Object students = getEnrollmentDetails(
+                    item.getStudentItems().map(SynchronizationSummaryLog::getStudentSynchronizationItemLogEntries).orElse(null));
 
-                public List<Object> syncedTeachers = item
-                    .getTeacherItems()
-                    .map(teacherItems ->
-                        getSynchronizationItemLogEntries(teacherItems,
-                            SynchronizationSummaryLog::getTeacherSynchronizationItemLogEntry))
-                    .orElse(null);
+                public Object teachers = getEnrollmentDetails(
+                    item.getTeacherItems().map(SynchronizationSummaryLog::getTeacherSynchronizationItemLogEntries).orElse(null));
 
                 public List<MoodleUserEnrollments> moodleEnrollments = item.getMoodleEnrollments().orElse(null);
                 public String message = item.getMessage();
@@ -84,6 +79,25 @@ public class SynchronizationSummaryLog {
             LOGGER.error("Could not create log entry for synchronizationItem", e);
             return null;
         }
+    }
+
+    private static <S extends SyncronizationItemLogEntry> Object getEnrollmentDetails(List<S> items) {
+        if(items != null) {
+            return new Object() {
+                public Map<String, Long> summary = getEnrollmentDetailsSummary(items);
+                public Map<String, List<S>> results = getEnrollmentResults(items);
+            };
+        } else {
+            return null;
+        }
+    }
+
+    private static <S extends SyncronizationItemLogEntry> Map<String, Long> getEnrollmentDetailsSummary(List<S> items) {
+        return items.stream().collect(Collectors.groupingBy(S::getMessage, Collectors.counting()));
+    }
+
+    private static <S extends SyncronizationItemLogEntry> Map<String, List<S>> getEnrollmentResults(List<S> items) {
+        return items.stream().collect(Collectors.groupingBy(S::getMessage));
     }
 
     private static <T extends EnrollmentSynchronizationItem> List<Object> getSynchronizationItemLogEntries(List<T> items,
@@ -101,17 +115,34 @@ public class SynchronizationSummaryLog {
             .collect(Collectors.toList());
     }
 
-    private static Object getStudentSynchronizationItemLogEntry(StudentSynchronizationItem item) {
-        return new SyncronizationItemLogEntry(item) {
-            public String studentNumber = item.getStudent().studentNumber;
-            public boolean approved = item.getStudent().approved;
-        };
+    private static List<StudentSyncronizationItemLogEntry> getStudentSynchronizationItemLogEntries(List<StudentSynchronizationItem> items) {
+        return items.stream().map(StudentSyncronizationItemLogEntry::new).collect(Collectors.toList());
     }
 
-    private static Object getTeacherSynchronizationItemLogEntry(TeacherSynchronizationItem item) {
-        return new SyncronizationItemLogEntry(item) {
-            public String teacherId = item.getTeacher().teacherId;
-        };
+    private static List<TeacherSyncronizationItemLogEntry> getTeacherSynchronizationItemLogEntries(List<TeacherSynchronizationItem> items) {
+        return items.stream().map(TeacherSyncronizationItemLogEntry::new).collect(Collectors.toList());
+    }
+
+    private static class StudentSyncronizationItemLogEntry extends SyncronizationItemLogEntry {
+
+        public final String studentNumber;
+        public final boolean approved;
+
+        public StudentSyncronizationItemLogEntry(StudentSynchronizationItem item) {
+            super(item);
+            studentNumber = item.getStudent().studentNumber;
+            approved = item.getStudent().approved;
+        }
+    }
+
+    private static class TeacherSyncronizationItemLogEntry extends SyncronizationItemLogEntry {
+
+        public final String teacherId;
+
+        public TeacherSyncronizationItemLogEntry(TeacherSynchronizationItem item) {
+            super(item);
+            teacherId = item.getTeacher().teacherId;
+        }
     }
 
     private static class SyncronizationItemLogEntry {
