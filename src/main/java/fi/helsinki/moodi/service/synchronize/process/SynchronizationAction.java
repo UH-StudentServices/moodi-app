@@ -17,29 +17,12 @@
 
 package fi.helsinki.moodi.service.synchronize.process;
 
-import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
-
 /**
- * Resolves which {@link Action} to perform for {@link SynchronizationItem}
- * after enrichment phase.
- *
- * @see Action
- * @see SynchronizationItem
+ * Created by markorautajoki on 15/11/16.
  */
-public final class ActionResolver {
-
-    public static Action resolve(final SynchronizationItem item) {
-
-        switch (item.getEnrichmentStatus()) {
-            case SUCCESS:
-                return Action.SYNCHRONIZE;
-            case OODI_COURSE_REMOVED:
-            case OODI_COURSE_ENDED:
-                return Action.REMOVE;
-            case MOODLE_COURSE_NOT_FOUND:
-            case LOCKED:
-            default:
-                return Action.SKIP;
-        }
-    }
+public enum SynchronizationAction {
+    ADD_ENROLLMENT,
+    ADD_ROLE,
+    REMOVE_ROLE,
+    NONE
 }

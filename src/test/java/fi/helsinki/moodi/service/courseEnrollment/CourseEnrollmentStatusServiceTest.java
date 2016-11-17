@@ -25,6 +25,7 @@ import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.importing.Enrollment;
 import fi.helsinki.moodi.service.importing.EnrollmentWarning;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
+import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.service.synchronize.process.EnrollmentSynchronizationStatus;
 import fi.helsinki.moodi.service.synchronize.process.StudentSynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.process.TeacherSynchronizationItem;
@@ -75,7 +76,7 @@ public class CourseEnrollmentStatusServiceTest extends AbstractMoodiIntegrationT
     private SynchronizationItem createSynchronizationItem(List<StudentSynchronizationItem> studentSynchronizationItems, List<TeacherSynchronizationItem> teacherSynchronizationItems) {
         Course course = createCourse();
 
-        SynchronizationItem synchronizationItem = new SynchronizationItem(course);
+        SynchronizationItem synchronizationItem = new SynchronizationItem(course, SynchronizationType.FULL);
 
         SynchronizationItem synchronizationItemWithStudentItems = synchronizationItem.setStudentItems(Optional.of(studentSynchronizationItems));
 

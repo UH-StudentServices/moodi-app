@@ -24,6 +24,7 @@ public enum EnrichmentStatus {
     OODI_COURSE_REMOVED,
     OODI_COURSE_ENDED,
     SUCCESS,
-    ERROR
+    ERROR,
+    LOCKED
 
 }

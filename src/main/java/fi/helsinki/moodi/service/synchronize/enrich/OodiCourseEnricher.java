@@ -41,7 +41,7 @@ public class OodiCourseEnricher extends AbstractEnricher {
 
     @Autowired
     public OodiCourseEnricher(OodiService oodiService) {
-        super(0);
+        super(1);
         this.oodiService = oodiService;
     }
 

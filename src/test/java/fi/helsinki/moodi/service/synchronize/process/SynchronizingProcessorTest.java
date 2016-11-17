@@ -28,6 +28,7 @@ import fi.helsinki.moodi.integration.oodi.OodiTeacher;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
+import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,7 +128,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
         expectGetMoodleUser();
         expectNewEnrollmentToMoodle();
 
-        SynchronizationItem synchronizationItem = new SynchronizationItem(getCourse());
+        SynchronizationItem synchronizationItem = new SynchronizationItem(getCourse(), SynchronizationType.FULL);
         SynchronizationItem synchronizationItemWithMoodleEnrollments = synchronizationItem.setMoodleEnrollments(Optional.of((creatMoodleUserEnrollmentsWithoutRole())));
         SynchronizationItem synchronizationItemWithOodiCourse = synchronizationItemWithMoodleEnrollments.setOodiCourse(Optional.of(createOodiCourse()));
         SynchronizationItem synchronizationItemWithMoodleCourse = synchronizationItemWithOodiCourse.setMoodleCourse(Optional.of(createMoodleCourse()));
@@ -141,7 +142,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
         expectGetMoodleUser();
         expectRoleAssignToMoodle();
 
-        SynchronizationItem synchronizationItem = new SynchronizationItem(getCourse());
+        SynchronizationItem synchronizationItem = new SynchronizationItem(getCourse(), SynchronizationType.FULL);
         SynchronizationItem synchronizationItemWithMoodleEnrollments = synchronizationItem.setMoodleEnrollments(Optional.of((creatMoodleUserEnrollmentsWithRole())));
         SynchronizationItem synchronizationItemWithOodiCourse = synchronizationItemWithMoodleEnrollments.setOodiCourse(Optional.of(createOodiCourse()));
         SynchronizationItem synchronizationItemWithMoodleCourse = synchronizationItemWithOodiCourse.setMoodleCourse(Optional.of(createMoodleCourse()));

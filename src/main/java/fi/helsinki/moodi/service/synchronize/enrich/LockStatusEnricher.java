@@ -17,36 +17,38 @@
 
 package fi.helsinki.moodi.service.synchronize.enrich;
 
-import fi.helsinki.moodi.integration.moodle.MoodleService;
-import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
-import fi.helsinki.moodi.service.course.Course;
+import fi.helsinki.moodi.service.syncLock.SyncLockService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
+import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Optional;
-
 @Component
-public class MoodleEnrollmentsEnricher extends AbstractEnricher {
+public class LockStatusEnricher extends AbstractEnricher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MoodleEnrollmentsEnricher.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LockStatusEnricher.class);
 
-    private final MoodleService moodleService;
+    private final SyncLockService syncLockService;
 
     @Autowired
-    public MoodleEnrollmentsEnricher(MoodleService moodleService) {
-        super(3);
-        this.moodleService = moodleService;
+    public LockStatusEnricher(SyncLockService syncLockService) {
+        super(0);
+        this.syncLockService = syncLockService;
     }
 
     @Override
-    protected SynchronizationItem doEnrich(final SynchronizationItem item) {
-        final Course course = item.getCourse();
-        final List<MoodleUserEnrollments> moodleEnrollments = moodleService.getEnrolledUsers(course.moodleId);
-        return item.setMoodleEnrollments(Optional.of(moodleEnrollments));
+    protected SynchronizationItem doEnrich(SynchronizationItem item) {
+        final boolean isLocked = syncLockService.isLocked(item.getCourse());
+
+        if(SynchronizationType.UNLOCK.equals(item.getSynchronizationType())) {
+            return item.setUnlock(true);
+        } else if(isLocked) {
+            return item.completeEnrichmentPhase(EnrichmentStatus.LOCKED, "Item locked. Will not synchronize.");
+        } else {
+            return item;
+        }
     }
 
     @Override

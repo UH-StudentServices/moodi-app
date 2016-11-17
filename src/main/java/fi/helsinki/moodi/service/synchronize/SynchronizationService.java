@@ -68,7 +68,7 @@ public class SynchronizationService {
         final long jobId  = begin(type);
 
         final List<Course> courses = loadCourses(type);
-        final List<SynchronizationItem> items = makeItems(courses);
+        final List<SynchronizationItem> items = makeItems(courses, type);
         final List<SynchronizationItem> enrichedItems = enrichItems(items);
         final List<SynchronizationItem> processedItems = processItems(enrichedItems);
 
@@ -92,8 +92,8 @@ public class SynchronizationService {
      * Convert courses into synchronization items to be enriched with
      * data required to perform the actual synchronization.
      */
-    private List<SynchronizationItem> makeItems(final List<Course> courses) {
-        return courses.stream().map(SynchronizationItem::new).collect(toList());
+    private List<SynchronizationItem> makeItems(final List<Course> courses, SynchronizationType type) {
+        return courses.stream().map(c -> new SynchronizationItem(c, type)).collect(toList());
     }
 
     /**
