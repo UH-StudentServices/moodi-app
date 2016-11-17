@@ -18,9 +18,12 @@
 package fi.helsinki.moodi.service.syncLock;
 
 import fi.helsinki.moodi.service.course.Course;
+import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotBlank;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name="sync_lock")
@@ -39,5 +42,15 @@ public class SyncLock {
     public Course course;
 
     public boolean active = true;
+
+    @Column(name = "created")
+    @NotNull
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentLocalDateTime")
+    public LocalDateTime created;
+
+    @Column(name = "modified")
+    @NotNull
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentLocalDateTime")
+    public LocalDateTime modified;
 
 }

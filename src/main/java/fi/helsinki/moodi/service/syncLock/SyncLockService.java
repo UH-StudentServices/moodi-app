@@ -18,10 +18,12 @@
 package fi.helsinki.moodi.service.syncLock;
 
 import fi.helsinki.moodi.service.course.Course;
+import fi.helsinki.moodi.service.time.TimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,10 +32,12 @@ import java.util.stream.Collectors;
 public class SyncLockService {
 
     private final SyncLockRepository syncLockRepository;
+    private final TimeService timeService;
 
     @Autowired
-    public SyncLockService(SyncLockRepository syncLockRepository) {
+    public SyncLockService(SyncLockRepository syncLockRepository, TimeService timeService) {
         this.syncLockRepository = syncLockRepository;
+        this.timeService = timeService;
     }
 
     public boolean isLocked(Course course) {
@@ -41,16 +45,23 @@ public class SyncLockService {
     }
 
     public void setLock(Course course, String reason) {
+        LocalDateTime localDateTime = timeService.getCurrentDateTime();
+
         SyncLock syncLock = new SyncLock();
         syncLock.course = course;
         syncLock.reason = reason;
+        syncLock.created = localDateTime;
+        syncLock.modified = localDateTime;
         syncLockRepository.save(syncLock);
     }
 
     public List<Course> getAndUnlockLockedCourses() {
         List<SyncLock> locks = syncLockRepository.findAllByActiveTrue();
 
-        locks.forEach(l -> l.active = false);
+        locks.forEach(l -> {
+            l.active = false;
+            l.modified = timeService.getCurrentDateTime();
+        });
 
         syncLockRepository.save(locks);
 
