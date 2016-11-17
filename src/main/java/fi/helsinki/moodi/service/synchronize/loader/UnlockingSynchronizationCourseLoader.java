@@ -15,29 +15,33 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.service.synchronize.enrich;
+package fi.helsinki.moodi.service.synchronize.loader;
 
-import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import fi.helsinki.moodi.service.course.Course;
+import fi.helsinki.moodi.service.syncLock.SyncLockService;
+import fi.helsinki.moodi.service.synchronize.SynchronizationType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
-public class CompletingEnricher extends AbstractEnricher {
+public class UnlockingSynchronizationCourseLoader implements CourseLoader {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompletingEnricher.class);
+    private final SyncLockService syncLockService;
 
-    protected CompletingEnricher() {
-        super(4);
+    @Autowired
+    public UnlockingSynchronizationCourseLoader(SyncLockService syncLockService) {
+        this.syncLockService = syncLockService;
     }
 
     @Override
-    protected SynchronizationItem doEnrich(SynchronizationItem item) {
-        return item.completeEnrichmentPhase(EnrichmentStatus.SUCCESS, "Enrichment successfull");
+    public List<Course> load() {
+        return syncLockService.getAndUnlockLockedCourses();
     }
 
     @Override
-    protected Logger getLogger() {
-        return LOGGER;
+    public SynchronizationType getType() {
+        return SynchronizationType.UNLOCK;
     }
 }

@@ -15,16 +15,29 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.service.synchronize.enrich;
+package fi.helsinki.moodi.service.syncLock;
 
-public enum EnrichmentStatus {
+import fi.helsinki.moodi.service.course.Course;
+import org.hibernate.validator.constraints.NotBlank;
 
-    IN_PROGESS,
-    MOODLE_COURSE_NOT_FOUND,
-    OODI_COURSE_REMOVED,
-    OODI_COURSE_ENDED,
-    SUCCESS,
-    ERROR,
-    LOCKED
+import javax.persistence.*;
+
+@Entity
+@Table(name="sync_lock")
+public class SyncLock {
+
+    @Id
+    @SequenceGenerator(name = "sync_lock_id_seq_generator", sequenceName = "sync_lock_id_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sync_lock_id_seq_generator")
+    public Long id;
+
+    @NotBlank
+    public String reason;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name="course_id")
+    public Course course;
+
+    public boolean active = true;
 
 }

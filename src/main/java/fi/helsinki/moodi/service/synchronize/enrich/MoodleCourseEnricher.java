@@ -38,7 +38,7 @@ public class MoodleCourseEnricher extends AbstractEnricher {
 
     @Autowired
     public MoodleCourseEnricher(MoodleService moodleService) {
-        super(10);
+        super(2);
         this.moodleService = moodleService;
     }
 

@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableMap;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
+import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
 import org.junit.Test;
@@ -72,7 +73,7 @@ public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
         Course course = new Course();
         course.realisationId = realisationId;
 
-        return new SynchronizationItem(course);
+        return new SynchronizationItem(course, SynchronizationType.FULL);
     }
 
     @Test

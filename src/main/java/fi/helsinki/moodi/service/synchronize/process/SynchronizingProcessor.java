@@ -17,7 +17,7 @@
 
 package fi.helsinki.moodi.service.synchronize.process;
 
-import com.google.common.collect.Lists;
+import fi.helsinki.moodi.exception.ThresholdReachedException;
 import fi.helsinki.moodi.integration.esb.EsbService;
 import fi.helsinki.moodi.integration.moodle.*;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
@@ -25,6 +25,7 @@ import fi.helsinki.moodi.integration.oodi.OodiStudent;
 import fi.helsinki.moodi.integration.oodi.OodiTeacher;
 import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatusService;
+import fi.helsinki.moodi.service.syncLock.SyncLockService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.util.MapperService;
 import org.slf4j.Logger;
@@ -33,12 +34,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
 
@@ -58,13 +61,9 @@ public class SynchronizingProcessor extends AbstractProcessor {
     private static final String MESSAGE_UPDATE_FAILED = "Role %s failed";
     private static final String UPDATE_ADD = "add";
     private static final String UPDATE_DROP = "drop";
+    private static final String THRESHOLD_EXCEEDED_MESSAGE = "Action %s for %s items exceeds threshold";
+    private static final String PREVENT_ACTION_ON_ALL_MESSAGE = "Action %s is not permitted for all items";
 
-    private enum SynchronizationAction {
-        ADD_ENROLLMENT,
-        ADD_ROLE,
-        REMOVE_ROLE,
-        NONE
-    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SynchronizingProcessor.class);
 
@@ -73,19 +72,25 @@ public class SynchronizingProcessor extends AbstractProcessor {
     private final MoodleService moodleService;
     private final CourseEnrollmentStatusService courseEnrollmentStatusService;
     private final CourseService courseService;
+    private final SynchronizationThreshold synchronizationThreshold;
+    private final SyncLockService syncLockService;
 
     @Autowired
     public SynchronizingProcessor(EsbService esbService,
                                   MapperService mapperService,
                                   MoodleService moodleService,
                                   CourseEnrollmentStatusService courseEnrollmentStatusService,
-                                  CourseService courseService) {
+                                  CourseService courseService,
+                                  SynchronizationThreshold synchronizationThreshold,
+                                  SyncLockService syncLockService) {
         super(Action.SYNCHRONIZE);
         this.esbService = esbService;
         this.mapperService = mapperService;
         this.moodleService = moodleService;
         this.courseEnrollmentStatusService = courseEnrollmentStatusService;
         this.courseService = courseService;
+        this.synchronizationThreshold = synchronizationThreshold;
+        this.syncLockService = syncLockService;
     }
 
     @Override
@@ -117,10 +122,10 @@ public class SynchronizingProcessor extends AbstractProcessor {
     }
 
     private List<EnrollmentSynchronizationItem> synchronizeEnrollments(
-        final SynchronizationItem item,
+        final SynchronizationItem parentItem,
         final Map<Long, MoodleUserEnrollments> moodleEnrollmentsByUserId) {
 
-        final List<EnrollmentSynchronizationItem> enrollmentSynchronizationItems = createSynchronizationItems(item, moodleEnrollmentsByUserId);
+        final List<EnrollmentSynchronizationItem> enrollmentSynchronizationItems = createSynchronizationItems(parentItem, moodleEnrollmentsByUserId);
 
         final List<EnrollmentSynchronizationItem> preProcessedItems = enrollmentSynchronizationItems.stream()
             .map(this::checkEnrollmentPrerequisites)
@@ -134,13 +139,63 @@ public class SynchronizingProcessor extends AbstractProcessor {
             .filter(EnrollmentSynchronizationItem::isCompleted)
             .collect(Collectors.toList());
 
+        processedItems.addAll(checkThresholdsAndProcessItems(itemsByAction));
+
+        return processedItems;
+
+    }
+
+    private List<EnrollmentSynchronizationItem> checkThresholdsAndProcessItems(
+        Map<SynchronizationAction, List<EnrollmentSynchronizationItem>> itemsByAction) {
+
+        checkThresholdLimitsForItemType(itemsByAction, StudentSynchronizationItem.class);
+        checkThresholdLimitsForItemType(itemsByAction, TeacherSynchronizationItem.class);
+
+        return processItems(itemsByAction);
+
+    }
+
+    private List<EnrollmentSynchronizationItem> processItems(Map<SynchronizationAction, List<EnrollmentSynchronizationItem>> itemsByAction) {
+        List<EnrollmentSynchronizationItem> processedItems = newArrayList();
+
         for(SynchronizationAction action : SynchronizationAction.values()) {
             if(itemsByAction.containsKey(action)) {
-                processedItems.addAll(processItems(action, itemsByAction.get(action)));
+                processedItems.addAll(processItemsByAction(action, itemsByAction.get(action)));
             }
         }
 
         return processedItems;
+    }
+
+    private <T> void checkThresholdLimitsForItemType(Map<SynchronizationAction, List<EnrollmentSynchronizationItem>> itemsByAction, Class<T> itemType) {
+        Map<SynchronizationAction, List<EnrollmentSynchronizationItem>> itemsOfTypeByAction = new HashMap<>();
+
+        itemsByAction.forEach((action, items) -> {
+            itemsOfTypeByAction.put(action, items.stream().filter(i -> itemType.isInstance(i)).collect(Collectors.toList()));
+        });
+
+        checkThresholdLimits(itemsOfTypeByAction);
+    }
+
+
+
+    private void checkThresholdLimits(Map<SynchronizationAction, List<EnrollmentSynchronizationItem>> itemsByAction) {
+
+        List<EnrollmentSynchronizationItem> allItems = newArrayList();
+
+        itemsByAction.values().forEach(allItems::addAll);
+
+        long allItemsCount = allItems.size();
+
+        itemsByAction.forEach((action, items) -> {
+            long itemsCount = items.size();
+
+            if(synchronizationThreshold.isLimitedByThreshold(action, itemsCount)) {
+                throw new ThresholdReachedException(String.format(THRESHOLD_EXCEEDED_MESSAGE, action, itemsCount));
+            } else if(itemsCount == allItemsCount && synchronizationThreshold.isActionPreventedToAllItems(action)) {
+                throw new ThresholdReachedException(String.format(PREVENT_ACTION_ON_ALL_MESSAGE, action));
+            }
+        });
 
     }
 
@@ -184,7 +239,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
         return enrollments.stream().collect(toMap(e -> e.id, Function.identity(), (a, b) -> b));
     }
 
-    private List<EnrollmentSynchronizationItem> processItems(SynchronizationAction action, List<EnrollmentSynchronizationItem> items) {
+    private List<EnrollmentSynchronizationItem> processItemsByAction(SynchronizationAction action, List<EnrollmentSynchronizationItem> items) {
         switch(action) {
             case ADD_ENROLLMENT:
                 return addEnrollments(items);
@@ -322,7 +377,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
                                                               boolean success,
                                                               String message,
                                                               EnrollmentSynchronizationStatus status) {
-        List<EnrollmentSynchronizationItem> resultItems = Lists.newArrayList();
+        List<EnrollmentSynchronizationItem> resultItems = newArrayList();
 
         for (EnrollmentSynchronizationItem item : items) {
             resultItems.add(item.setCompleted(success, message, status));

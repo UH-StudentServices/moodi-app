@@ -15,29 +15,19 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.service.synchronize.enrich;
+package fi.helsinki.moodi.scheduled;
 
-import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.junit.Test;
+import org.springframework.test.context.TestPropertySource;
 
-@Component
-public class CompletingEnricher extends AbstractEnricher {
+@TestPropertySource(properties = {"syncTresholds.REMOVE_ROLE.preventAll = true",
+                                  "syncTresholds.REMOVE_ROLE.limit = 10"})
+public class SynchronizationActionLimitAllTest extends AbstractSynchronizationJobTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompletingEnricher.class);
+    private static final String EXPECTED_REMOVE_ROLE_FROM_ALL_NOT_PERMITTED_MESSAGE = "Action REMOVE_ROLE is not permitted for all items";
 
-    protected CompletingEnricher() {
-        super(4);
-    }
-
-    @Override
-    protected SynchronizationItem doEnrich(SynchronizationItem item) {
-        return item.completeEnrichmentPhase(EnrichmentStatus.SUCCESS, "Enrichment successfull");
-    }
-
-    @Override
-    protected Logger getLogger() {
-        return LOGGER;
+    @Test
+    public void thatRemovingRolesActionIsLimitedByThreshold() {
+        testTresholdCheckFailed(EXPECTED_REMOVE_ROLE_FROM_ALL_NOT_PERMITTED_MESSAGE);
     }
 }

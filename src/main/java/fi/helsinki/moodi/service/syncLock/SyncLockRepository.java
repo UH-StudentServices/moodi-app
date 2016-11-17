@@ -15,29 +15,14 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.service.synchronize.enrich;
+package fi.helsinki.moodi.service.syncLock;
 
-import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-@Component
-public class CompletingEnricher extends AbstractEnricher {
+import java.util.List;
+import java.util.Optional;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompletingEnricher.class);
-
-    protected CompletingEnricher() {
-        super(4);
-    }
-
-    @Override
-    protected SynchronizationItem doEnrich(SynchronizationItem item) {
-        return item.completeEnrichmentPhase(EnrichmentStatus.SUCCESS, "Enrichment successfull");
-    }
-
-    @Override
-    protected Logger getLogger() {
-        return LOGGER;
-    }
+public interface SyncLockRepository extends JpaRepository<SyncLock, Long> {
+    Optional<SyncLock> findByCourseIdAndActiveTrue(Long courseId);
+    List<SyncLock> findAllByActiveTrue();
 }
