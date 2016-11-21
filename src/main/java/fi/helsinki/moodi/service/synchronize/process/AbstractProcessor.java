@@ -17,6 +17,7 @@
 
 package fi.helsinki.moodi.service.synchronize.process;
 
+import fi.helsinki.moodi.exception.ProcessingException;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import org.slf4j.Logger;
 
@@ -44,10 +45,16 @@ abstract class AbstractProcessor implements Processor {
     private SynchronizationItem safeProces(final SynchronizationItem item) {
         try {
             return doProcess(item);
+        } catch (ProcessingException e) {
+            return synchronizationError(item, e.getStatus(), e.getMessage());
         } catch (Exception e) {
-            getLogger().error("Error while processing item", e);
-            return item.completeProcessingPhase(ProcessingStatus.ERROR, e.getMessage());
+            return synchronizationError(item, ProcessingStatus.ERROR, e.getMessage());
         }
+    }
+
+    private SynchronizationItem synchronizationError(SynchronizationItem item, ProcessingStatus status, String message) {
+        getLogger().error("Error while processing item", message);
+        return item.completeProcessingPhase(status, message);
     }
 
     @Override

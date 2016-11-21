@@ -54,16 +54,9 @@ public class OodiClientGetCourseUnitRealisationTest extends AbstractMoodiIntegra
 
         final OodiCourseUnitRealisation cur = curOptional.get();
 
-        assertEquals("590346", cur.baseCode);
         assertEquals("05.12.2014", cur.endDate);
-        assertEquals("27.10.2014T235900", cur.enrollmentEndDate);
-        assertEquals("01.08.2014T080000", cur.enrollmentStartDate);
-        assertEquals("27.06.2014", cur.lastChanged);
         assertEquals("Lapsuus ja yhteiskunta", cur.realisationName.get(0).text);
-        assertEquals("27.10.2014", cur.startDate);
-        assertEquals(Integer.valueOf(3), cur.creditPoints);
         assertEquals(Integer.valueOf(102374742), cur.realisationId);
-        assertEquals(Integer.valueOf(5), cur.realisationTypeCode);
 
         assertDescriptions(cur);
         assertLanguages(cur);

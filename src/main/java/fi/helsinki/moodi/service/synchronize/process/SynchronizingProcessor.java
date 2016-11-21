@@ -17,7 +17,7 @@
 
 package fi.helsinki.moodi.service.synchronize.process;
 
-import fi.helsinki.moodi.exception.ThresholdReachedException;
+import fi.helsinki.moodi.exception.ProcessingException;
 import fi.helsinki.moodi.integration.esb.EsbService;
 import fi.helsinki.moodi.integration.moodle.*;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
@@ -191,9 +191,9 @@ public class SynchronizingProcessor extends AbstractProcessor {
             long itemsCount = items.size();
 
             if(synchronizationThreshold.isLimitedByThreshold(action, itemsCount)) {
-                throw new ThresholdReachedException(String.format(THRESHOLD_EXCEEDED_MESSAGE, action, itemsCount));
+                throw new ProcessingException(ProcessingStatus.LOCKED, String.format(THRESHOLD_EXCEEDED_MESSAGE, action, itemsCount));
             } else if(itemsCount == allItemsCount && synchronizationThreshold.isActionPreventedToAllItems(action)) {
-                throw new ThresholdReachedException(String.format(PREVENT_ACTION_ON_ALL_MESSAGE, action));
+                throw new ProcessingException(ProcessingStatus.LOCKED, String.format(PREVENT_ACTION_ON_ALL_MESSAGE, action));
             }
         });
 

@@ -74,3 +74,7 @@ syncTresholds:
   REMOVE_ROLE:
     limit: 10
     preventAll: true
+
+mailNotification:
+  from: moodi-app
+  lockedMessageSubject: Synchronization locked

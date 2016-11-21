@@ -15,10 +15,12 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.exception;
+package fi.helsinki.moodi.service.synchronize.notify;
 
-public class ThresholdReachedException extends MoodiException {
-    public ThresholdReachedException(String message) {
-        super(message);
-    }
+import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
+
+import java.util.List;
+
+public interface SynchronizationItemNotifier {
+    public void applyNotificationsForItems(List<SynchronizationItem> synchronizationItems);
 }

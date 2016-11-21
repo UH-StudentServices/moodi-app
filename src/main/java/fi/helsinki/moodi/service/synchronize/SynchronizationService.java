@@ -23,6 +23,7 @@ import fi.helsinki.moodi.service.synchronize.enrich.EnricherService;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRunService;
 import fi.helsinki.moodi.service.synchronize.loader.CourseLoaderService;
 import fi.helsinki.moodi.service.synchronize.log.LoggingService;
+import fi.helsinki.moodi.service.synchronize.notify.SynchronizationItemNotifier;
 import fi.helsinki.moodi.service.synchronize.process.ProcessorService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,7 @@ public class SynchronizationService {
     private final SynchronizationJobRunService synchronizationJobRunService;
     private final CourseLoaderService courseLoaderService;
     private final LoggingService loggingService;
+    private final List<SynchronizationItemNotifier> notifiers;
 
 
     @Autowired
@@ -54,13 +56,15 @@ public class SynchronizationService {
             ProcessorService processorService,
             SynchronizationJobRunService synchronizationJobRunService,
             CourseLoaderService courseLoaderService,
-            LoggingService loggingService) {
+            LoggingService loggingService,
+            List<SynchronizationItemNotifier> notifiers) {
 
         this.enricherService = enricherService;
         this.processorService = processorService;
         this.synchronizationJobRunService = synchronizationJobRunService;
         this.courseLoaderService = courseLoaderService;
         this.loggingService = loggingService;
+        this.notifiers = notifiers;
     }
 
     public SynchronizationSummary synchronize(final SynchronizationType type) {
@@ -73,6 +77,8 @@ public class SynchronizationService {
         final List<SynchronizationItem> processedItems = processItems(enrichedItems);
 
         final SynchronizationSummary summary = complete(type, jobId, stopwatch, processedItems);
+
+        applyNotifiers(processedItems);
 
         return logSummary(summary);
     }
@@ -116,6 +122,10 @@ public class SynchronizationService {
         final SynchronizationSummary summary = new SynchronizationSummary(type, items, stopwatch.stop());
         synchronizationJobRunService.complete(jobId, summary.getStatus(), summary.getMessage());
         return summary;
+    }
+
+    private void applyNotifiers(final List<SynchronizationItem> items) {
+        notifiers.forEach(notifier -> notifier.applyNotificationsForItems(items));
     }
 
     private SynchronizationSummary logSummary(final SynchronizationSummary summary) {

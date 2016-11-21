@@ -21,8 +21,11 @@ import fi.helsinki.moodi.service.time.SystemTimeService;
 import fi.helsinki.moodi.service.time.TimeService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.mail.MailSender;
 
 import java.time.LocalDateTime;
+
+import static org.mockito.Mockito.mock;
 
 @Configuration
 public class TestConfig {
@@ -36,5 +39,10 @@ public class TestConfig {
                 return LocalDateTime.of(2015, 5, 18, 10, 15, 0);
             }
         };
+    }
+
+    @Bean
+    public MailSender mailSender() {
+        return mock(MailSender.class);
     }
 }
