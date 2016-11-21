@@ -15,14 +15,20 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.service.synchronize.process;
+package fi.helsinki.moodi.config;
 
-public enum ProcessingStatus {
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 
-    IN_PROGRESS,
-    SUCCESS,
-    SKIPPED,
-    ERROR,
-    ENROLLMENT_FAILURES,
-    LOCKED
+@Configuration
+public class MailerConfig {
+
+    @Bean
+    public MailSender mailSender() {
+        return new JavaMailSenderImpl();
+    }
+
+
 }

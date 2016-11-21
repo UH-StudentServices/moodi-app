@@ -26,3 +26,6 @@ synchronize.INCREMENTAL.enabled: false
 logging:
   retain-logs: PT30M
   file-logging-path: /tmp/log/moodi-import-sync-log
+
+mailNotification:
+  from: moodi-app (local)

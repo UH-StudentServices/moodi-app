@@ -15,3 +15,8 @@ integration:
     url: https://moodle.helsinki.fi/webservice/rest/server.php
   oodi.url: https://oprek4.it.helsinki.fi:30040
   esb.url: https://esbmt1.it.helsinki.fi
+
+mailNotification.to: nonexistingemail@helsinki.fi
+
+mailNotification:
+  from: moodi-app (prod)

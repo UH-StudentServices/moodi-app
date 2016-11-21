@@ -17,7 +17,12 @@
 
 package fi.helsinki.moodi.scheduled;
 
+import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
+import fi.helsinki.moodi.service.synchronize.notify.LockedSynchronizationItemMessageBuilder;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailSender;
 import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(properties = {"syncTresholds.REMOVE_ROLE.preventAll = true",
@@ -27,8 +32,15 @@ public class SynchronizationActionThresholdLimitTest extends AbstractSynchroniza
 
     private static final String EXPECTED_THRESHOLD_CROSSED_REMOVE_ROLE_MESSAGE = "Action REMOVE_ROLE for 1 items exceeds threshold";
 
+    @Autowired
+    private MailSender mailSender;
+
+    @Autowired
+    private LockedSynchronizationItemMessageBuilder lockedSynchronizationItemMessageBuilder;
+
     @Test
     public void thatRemovingRolesActionIsLimitedByThreshold() {
-        testTresholdCheckFailed(EXPECTED_THRESHOLD_CROSSED_REMOVE_ROLE_MESSAGE);
+        SynchronizationSummary summary = testTresholdCheckFailed(EXPECTED_THRESHOLD_CROSSED_REMOVE_ROLE_MESSAGE);
+        Mockito.verify(mailSender).send(lockedSynchronizationItemMessageBuilder.buildMessage(summary.getItems()));
     }
 }

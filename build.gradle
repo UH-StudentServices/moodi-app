@@ -91,6 +91,7 @@ dependencies {
     compile "org.apache.httpcomponents:httpclient:4.4.1"
     compile "org.trimou:trimou-core:1.7.3.Final"
     compile "commons-pool:commons-pool:1.6"
+    compile "javax.mail:mail:1.4.7"
 
     testCompile "org.springframework.boot:spring-boot-starter-test"
     testCompile "com.jayway.jsonpath:json-path-assert:0.9.1"

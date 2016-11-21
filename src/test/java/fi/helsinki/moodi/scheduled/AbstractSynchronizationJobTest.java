@@ -39,9 +39,7 @@ import org.springframework.http.MediaType;
 
 import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
 import static org.junit.Assert.assertEquals;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegrationTest {
@@ -137,7 +135,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
             SUMMARY_MESSAGE_ROLE_ADD_FAILED : SUMMARY_MESSAGE_ROLE_ADD_SUCCEEDED, studentSynchronizationItem.getMessage());
     }
 
-    protected void testTresholdCheckFailed(String expectedMessage) {
+    protected SynchronizationSummary testTresholdCheckFailed(String expectedMessage) {
         setUpMockServerResponses(getFutureDateString(), false);
 
         expectGetEnrollmentsRequestToMoodle(
@@ -150,9 +148,11 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
 
         SynchronizationItem item = summary.getItems().get(0);
 
-        assertEquals(item.getProcessingStatus(), ProcessingStatus.ERROR);
+        assertEquals(item.getProcessingStatus(), ProcessingStatus.LOCKED);
 
         assertEquals(item.getMessage(), expectedMessage);
+
+        return summary;
     }
 
     protected void setupOodiCourseUnitRealisationResponse(String responseJson) {

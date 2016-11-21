@@ -15,14 +15,20 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.service.synchronize.process;
+package fi.helsinki.moodi.exception;
 
-public enum ProcessingStatus {
+import fi.helsinki.moodi.service.synchronize.process.ProcessingStatus;
 
-    IN_PROGRESS,
-    SUCCESS,
-    SKIPPED,
-    ERROR,
-    ENROLLMENT_FAILURES,
-    LOCKED
+public class ProcessingException extends MoodiException {
+
+    private ProcessingStatus status;
+
+    public ProcessingException(ProcessingStatus status, String message) {
+        super(message);
+        this.status = status;
+    }
+
+    public ProcessingStatus getStatus() {
+        return status;
+    }
 }

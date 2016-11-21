@@ -10,3 +10,6 @@ spring:
     database: PostgreSQL
 
 dev.mode.enabled: true
+
+mailNotification:
+  from: moodi-app (dev)

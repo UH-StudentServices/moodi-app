@@ -34,20 +34,8 @@ public class OodiCourseUnitRealisation {
     @JsonProperty("languages")
     public List<OodiLanguage> languages = newArrayList();
 
-    @JsonProperty("credit_points")
-    public Integer creditPoints;
-
     @JsonProperty("students")
     public List<OodiStudent> students = newArrayList();
-
-    @JsonProperty("realisation_type_code")
-    public Integer realisationTypeCode;
-
-    @JsonProperty("enroll_end_date")
-    public String enrollmentEndDate;
-
-    @JsonProperty("start_date")
-    public String startDate;
 
     @JsonProperty("descriptions")
     public List<OodiDescription> descriptions = newArrayList();
@@ -58,20 +46,11 @@ public class OodiCourseUnitRealisation {
     @JsonProperty("end_date")
     public String endDate;
 
-    @JsonProperty("basecode")
-    public String baseCode;
-
     @JsonProperty("teachers")
     public List<OodiTeacher> teachers = newArrayList();
 
-    @JsonProperty("enroll_start_date")
-    public String enrollmentStartDate;
-
     @JsonProperty("course_id")
     public Integer realisationId;
-
-    @JsonProperty("last_changed")
-    public String lastChanged;
 
     @JsonProperty("deleted")
     public boolean removed;
