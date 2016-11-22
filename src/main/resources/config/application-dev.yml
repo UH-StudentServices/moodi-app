@@ -12,4 +12,4 @@ spring:
 dev.mode.enabled: true
 
 mailNotification:
-  from: moodi-app (dev)
+  from: moodi-app-dev
