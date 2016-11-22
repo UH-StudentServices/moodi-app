@@ -72,7 +72,6 @@ dev.mode.enabled: false
 
 syncTresholds:
   REMOVE_ROLE:
-    limit: 10
     preventAll: true
 
 mailNotification:

@@ -18,6 +18,7 @@
 package fi.helsinki.moodi.service.synchronize.notify;
 
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
+import fi.helsinki.moodi.service.synchronize.process.ProcessingStatus;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
@@ -49,7 +50,7 @@ public class LockedSynchronizationItemNotifier implements SynchronizationItemNot
 
         List<SynchronizationItem> lockedItems = synchronizationItems
             .stream()
-            //.filter(i -> i.getProcessingStatus().equals(ProcessingStatus.LOCKED))
+            .filter(i -> i.getProcessingStatus().equals(ProcessingStatus.LOCKED))
             .collect(Collectors.toList());
 
         if(lockedItems.size() > 0) {
