@@ -99,53 +99,29 @@ public class OodiClientGetCourseUnitRealisationTest extends AbstractMoodiIntegra
     private void assertTeachers(final OodiCourseUnitRealisation cur) {
         assertEquals(1, cur.teachers.size());
         assertTeacher(cur.teachers.get(0),
-                "Kotivuori Tuomas Olavi",
-                "Kotivuori",
-                "Tuomas",
-                "Tuomas Olavi",
-                null,
                 "110588",
                 3);
     }
 
     private void assertTeacher(
             final OodiTeacher t,
-            final String fullName,
-            final String lastName,
-            final String callingName,
-            final String firstNames,
-            final String email,
             final String teacherId,
             final Integer teacherRoleCode) {
 
-        assertEquals(fullName, t.fullName);
-        assertEquals(lastName, t.lastName);
-        assertEquals(callingName, t.callingName);
-        assertEquals(firstNames, t.firstNames);
-        assertEquals(email, t.email);
         assertEquals(teacherId, t.teacherId);
         assertEquals(teacherRoleCode, t.teacherRoleCode);
     }
 
     private void assertStudents(final OodiCourseUnitRealisation cur) {
         assertEquals(3, cur.students.size());
-        assertStudent(cur.students.get(0), "040-1234321", null, "Niina Johanna", "Sulin", "010342729");
-        assertStudent(cur.students.get(1), "040-1234321", null, "Milla Maaret", "Uromo", "011119854");
-        assertStudent(cur.students.get(2), "040-1234321", null, "Virpi Tuulikki", "Kontinen", "011524656");
+        assertStudent(cur.students.get(0), "010342729");
+        assertStudent(cur.students.get(1), "011119854");
+        assertStudent(cur.students.get(2), "011524656");
     }
 
     private void assertStudent(
             final OodiStudent s,
-            final String mobilePhone,
-            final String email,
-            final String firstNames,
-            final String lastName,
             final String studentNumber) {
-
-        assertEquals(mobilePhone, s.mobilePhone);
-        assertEquals(email, s.email);
-        assertEquals(firstNames, s.firstNames);
-        assertEquals(lastName, s.lastName);
         assertEquals(studentNumber, s.studentNumber);
     }
 }

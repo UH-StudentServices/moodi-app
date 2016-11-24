@@ -47,9 +47,6 @@ public class MoodleClientGetUsersTest extends AbstractMoodiIntegrationTest {
         final MoodleUser user = moodleClient.getUser(Arrays.asList("integraatio"));
         assertNotNull(user);
 
-        assertEquals("marja.kari@iki.fi", user.email);
-        assertEquals("Testi Integraatio", user.fullname);
-        assertEquals("integraatio", user.username);
         assertEquals(Long.valueOf(3), user.id);
     }
 
@@ -64,8 +61,6 @@ public class MoodleClientGetUsersTest extends AbstractMoodiIntegrationTest {
         final MoodleUser user = moodleClient.getUser(Arrays.asList("first", "second"));
         assertNotNull(user);
 
-        assertEquals("Second Username", user.fullname);
-        assertEquals("second", user.username);
         assertEquals(Long.valueOf(2), user.id);
     }
 }

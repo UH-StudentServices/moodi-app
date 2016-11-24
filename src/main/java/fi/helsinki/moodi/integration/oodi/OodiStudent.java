@@ -29,14 +29,8 @@ public class OodiStudent {
     @JsonProperty("student_number")
     public String studentNumber;
 
-    @JsonProperty("mobile_phone")
-    public String mobilePhone;
-
     @JsonProperty("last_name")
     public String lastName;
-
-    @JsonProperty("email")
-    public String email;
 
     @JsonProperty("approved")
     public boolean approved = true;

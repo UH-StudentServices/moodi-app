@@ -30,9 +30,6 @@ public class OodiCourseChange implements Serializable {
     @JsonProperty("course_id")
     public long courseUnitRealisationId;
 
-    @JsonProperty("learningopportunity_id")
-    public String learningOpportunityId;
-
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);

@@ -45,7 +45,7 @@ public class EsbClientGetTeacherUsernameTest extends AbstractMoodiIntegrationTes
             .andRespond(withSuccess(Fixtures.asString("/esb/employee-username-19691981.json"),
                 MediaType.APPLICATION_JSON));
 
-        assertEquals(Arrays.asList("arytkone"), esbClient.getTeacherUsernameList("19691981"));
+        assertEquals(Arrays.asList("employee-username"), esbClient.getTeacherUsernameList("19691981"));
     }
 
     @Test

@@ -1,20 +1,6 @@
 [
   {
     "id": 5,
-    "username": "jannetim@helsinki.fi",
-    "firstname": "Janne",
-    "lastname": "Timonen",
-    "fullname": "Janne Timonen",
-    "email": "test@invalid.com",
-    "department": "",
-    "idnumber": "13592864",
-    "firstaccess": 0,
-    "lastaccess": 0,
-    "description": "",
-    "descriptionformat": 1,
-    "profileimageurlsmall": "http:\/\/o-moodle.it.helsinki.fi\/moodle\/pluginfile.php?file=%2F67%2Fuser%2Ficon%2Ff2",
-    "profileimageurl": "http:\/\/o-moodle.it.helsinki.fi\/moodle\/pluginfile.php?file=%2F67%2Fuser%2Ficon%2Ff1",
-    "groups": [],
     "roles": [
       {
         "roleid": 5,
@@ -25,97 +11,11 @@
         "roleid": 11,
         "name": "Moodi synced",
         "shortname": "o-moodi"
-      }
-    ],
-    "enrolledcourses": [
-      {
-        "id": 46,
-        "fullname": "Exam2 - kurssi, kolme tasoa 1",
-        "shortname": "Exam2 -  103131357"
-      },
-      {
-        "id": 45,
-        "fullname": "Exam1 - tentti2",
-        "shortname": "Exam1 -  103131320"
-      },
-      {
-        "id": 44,
-        "fullname": "Exam1 - tentti2",
-        "shortname": "Exxon1 - 103131320"
-      },
-      {
-        "id": 33,
-        "fullname": "3333333",
-        "shortname": "3333333"
-      },
-      {
-        "id": 29,
-        "fullname": "0007",
-        "shortname": "0007"
-      },
-      {
-        "id": 28,
-        "fullname": "434354",
-        "shortname": "434354"
-      },
-      {
-        "id": 27,
-        "fullname": "323232",
-        "shortname": "323232"
-      },
-      {
-        "id": 26,
-        "fullname": "1234",
-        "shortname": "1234"
-      },
-      {
-        "id": 25,
-        "fullname": "test100",
-        "shortname": "test100"
-      },
-      {
-        "id": 24,
-        "fullname": "test101",
-        "shortname": "test101"
-      },
-      {
-        "id": 17,
-        "fullname": "test8",
-        "shortname": "test8"
-      },
-      {
-        "id": 16,
-        "fullname": "aaaa",
-        "shortname": "ssss"
-      },
-      {
-        "id": 15,
-        "fullname": "test6",
-        "shortname": "test6"
-      },
-      {
-        "id": 14,
-        "fullname": "test5",
-        "shortname": "test5"
       }
     ]
   },
   {
     "id": 6,
-    "username": "umlehton@helsinki.fi",
-    "firstname": "Ulla",
-    "lastname": "Lehtonen",
-    "fullname": "Ulla Lehtonen",
-    "email": "test@invalid.com",
-    "department": "",
-    "idnumber": "11821113",
-    "firstaccess": 0,
-    "lastaccess": 0,
-    "description": "",
-    "descriptionformat": 1,
-    "profileimageurlsmall": "http:\/\/o-moodle.it.helsinki.fi\/moodle\/pluginfile.php?file=%2F68%2Fuser%2Ficon%2Ff2",
-    "profileimageurl": "http:\/\/o-moodle.it.helsinki.fi\/moodle\/pluginfile.php?file=%2F68%2Fuser%2Ficon%2Ff1",
-    "groups": [],
     "roles": [
       {
         "roleid": 5,
@@ -126,82 +26,11 @@
         "roleid": 11,
         "name": "Moodi synced",
         "shortname": "o-moodi"
-      }
-    ],
-    "enrolledcourses": [
-      {
-        "id": 45,
-        "fullname": "Exam1 - tentti2",
-        "shortname": "Exam1 -  103131320"
-      },
-      {
-        "id": 44,
-        "fullname": "Exam1 - tentti2",
-        "shortname": "Exxon1 - 103131320"
-      },
-      {
-        "id": 33,
-        "fullname": "3333333",
-        "shortname": "3333333"
-      },
-      {
-        "id": 29,
-        "fullname": "0007",
-        "shortname": "0007"
-      },
-      {
-        "id": 28,
-        "fullname": "434354",
-        "shortname": "434354"
-      },
-      {
-        "id": 26,
-        "fullname": "1234",
-        "shortname": "1234"
-      },
-      {
-        "id": 24,
-        "fullname": "test101",
-        "shortname": "test101"
-      },
-      {
-        "id": 17,
-        "fullname": "test8",
-        "shortname": "test8"
-      },
-      {
-        "id": 16,
-        "fullname": "aaaa",
-        "shortname": "ssss"
-      },
-      {
-        "id": 15,
-        "fullname": "test6",
-        "shortname": "test6"
-      },
-      {
-        "id": 14,
-        "fullname": "test5",
-        "shortname": "test5"
       }
     ]
   },
   {
     "id": 8,
-    "username": "kbkivine@helsinki.fi",
-    "firstname": "Birgitta",
-    "lastname": "Kivinen",
-    "fullname": "Birgitta Kivinen",
-    "email": "test@invalid.com",
-    "department": "",
-    "idnumber": "11189143",
-    "firstaccess": 0,
-    "lastaccess": 0,
-    "description": "",
-    "descriptionformat": 1,
-    "profileimageurlsmall": "http:\/\/o-moodle.it.helsinki.fi\/moodle\/pluginfile.php?file=%2F70%2Fuser%2Ficon%2Ff2",
-    "profileimageurl": "http:\/\/o-moodle.it.helsinki.fi\/moodle\/pluginfile.php?file=%2F70%2Fuser%2Ficon%2Ff1",
-    "groups": [],
     "roles": [
       {
         "roleid": 5,
@@ -213,86 +42,10 @@
         "name": "Moodi synced",
         "shortname": "o-moodi"
       }
-    ],
-    "enrolledcourses": [
-      {
-        "id": 45,
-        "fullname": "Exam1 - tentti2",
-        "shortname": "Exam1 -  103131320"
-      },
-      {
-        "id": 44,
-        "fullname": "Exam1 - tentti2",
-        "shortname": "Exxon1 - 103131320"
-      },
-      {
-        "id": 33,
-        "fullname": "3333333",
-        "shortname": "3333333"
-      },
-      {
-        "id": 29,
-        "fullname": "0007",
-        "shortname": "0007"
-      },
-      {
-        "id": 28,
-        "fullname": "434354",
-        "shortname": "434354"
-      },
-      {
-        "id": 26,
-        "fullname": "1234",
-        "shortname": "1234"
-      },
-      {
-        "id": 24,
-        "fullname": "test101",
-        "shortname": "test101"
-      },
-      {
-        "id": 17,
-        "fullname": "test8",
-        "shortname": "test8"
-      },
-      {
-        "id": 16,
-        "fullname": "aaaa",
-        "shortname": "ssss"
-      },
-      {
-        "id": 15,
-        "fullname": "test6",
-        "shortname": "test6"
-      },
-      {
-        "id": 14,
-        "fullname": "test5",
-        "shortname": "test5"
-      },
-      {
-        "id": 13,
-        "fullname": "test004",
-        "shortname": "test004"
-      }
     ]
   },
   {
     "id": 9,
-    "username": "koskikot@helsinki.fi",
-    "firstname": "Sari",
-    "lastname": "Koski-Kotiranta",
-    "fullname": "Sari Koski-Kotiranta",
-    "email": "test@invalid.com",
-    "department": "",
-    "idnumber": "10604386",
-    "firstaccess": 0,
-    "lastaccess": 0,
-    "description": "",
-    "descriptionformat": 1,
-    "profileimageurlsmall": "http:\/\/o-moodle.it.helsinki.fi\/moodle\/pluginfile.php?file=%2F71%2Fuser%2Ficon%2Ff2",
-    "profileimageurl": "http:\/\/o-moodle.it.helsinki.fi\/moodle\/pluginfile.php?file=%2F71%2Fuser%2Ficon%2Ff1",
-    "groups": [],
     "roles": [
       {
         "roleid": 5,
@@ -304,86 +57,10 @@
         "name": "Moodi synced",
         "shortname": "o-moodi"
       }
-    ],
-    "enrolledcourses": [
-      {
-        "id": 45,
-        "fullname": "Exam1 - tentti2",
-        "shortname": "Exam1 -  103131320"
-      },
-      {
-        "id": 44,
-        "fullname": "Exam1 - tentti2",
-        "shortname": "Exxon1 - 103131320"
-      },
-      {
-        "id": 33,
-        "fullname": "3333333",
-        "shortname": "3333333"
-      },
-      {
-        "id": 29,
-        "fullname": "0007",
-        "shortname": "0007"
-      },
-      {
-        "id": 28,
-        "fullname": "434354",
-        "shortname": "434354"
-      },
-      {
-        "id": 26,
-        "fullname": "1234",
-        "shortname": "1234"
-      },
-      {
-        "id": 24,
-        "fullname": "test101",
-        "shortname": "test101"
-      },
-      {
-        "id": 17,
-        "fullname": "test8",
-        "shortname": "test8"
-      },
-      {
-        "id": 16,
-        "fullname": "aaaa",
-        "shortname": "ssss"
-      },
-      {
-        "id": 15,
-        "fullname": "test6",
-        "shortname": "test6"
-      },
-      {
-        "id": 14,
-        "fullname": "test5",
-        "shortname": "test5"
-      },
-      {
-        "id": 13,
-        "fullname": "test004",
-        "shortname": "test004"
-      }
     ]
   },
   {
     "id": 10,
-    "username": "taina@helsinki.fi",
-    "firstname": "Juha",
-    "lastname": "Taina",
-    "fullname": "Juha Taina",
-    "email": "test@invalid.com",
-    "department": "",
-    "idnumber": "10852617",
-    "firstaccess": 0,
-    "lastaccess": 0,
-    "description": "",
-    "descriptionformat": 1,
-    "profileimageurlsmall": "http:\/\/o-moodle.it.helsinki.fi\/moodle\/pluginfile.php?file=%2F72%2Fuser%2Ficon%2Ff2",
-    "profileimageurl": "http:\/\/o-moodle.it.helsinki.fi\/moodle\/pluginfile.php?file=%2F72%2Fuser%2Ficon%2Ff1",
-    "groups": [],
     "roles": [
       {
         "roleid": 5,
@@ -394,87 +71,11 @@
         "roleid": 11,
         "name": "Moodi synced",
         "shortname": "o-moodi"
-      }
-    ],
-    "enrolledcourses": [
-      {
-        "id": 45,
-        "fullname": "Exam1 - tentti2",
-        "shortname": "Exam1 -  103131320"
-      },
-      {
-        "id": 44,
-        "fullname": "Exam1 - tentti2",
-        "shortname": "Exxon1 - 103131320"
-      },
-      {
-        "id": 33,
-        "fullname": "3333333",
-        "shortname": "3333333"
-      },
-      {
-        "id": 29,
-        "fullname": "0007",
-        "shortname": "0007"
-      },
-      {
-        "id": 28,
-        "fullname": "434354",
-        "shortname": "434354"
-      },
-      {
-        "id": 26,
-        "fullname": "1234",
-        "shortname": "1234"
-      },
-      {
-        "id": 24,
-        "fullname": "test101",
-        "shortname": "test101"
-      },
-      {
-        "id": 17,
-        "fullname": "test8",
-        "shortname": "test8"
-      },
-      {
-        "id": 16,
-        "fullname": "aaaa",
-        "shortname": "ssss"
-      },
-      {
-        "id": 15,
-        "fullname": "test6",
-        "shortname": "test6"
-      },
-      {
-        "id": 14,
-        "fullname": "test5",
-        "shortname": "test5"
-      },
-      {
-        "id": 13,
-        "fullname": "test004",
-        "shortname": "test004"
       }
     ]
   },
   {
     "id": 11,
-    "username": "kklindqv@helsinki.fi",
-    "firstname": "Kristian",
-    "lastname": "Lindqvist",
-    "fullname": "Kristian Lindqvist",
-    "email": "test@invalid.com",
-    "department": "",
-    "idnumber": "11671185",
-    "firstaccess": 0,
-    "lastaccess": 0,
-    "description": "",
-    "descriptionformat": 1,
-    "profileimageurlsmall": "http:\/\/o-moodle.it.helsinki.fi\/moodle\/pluginfile.php?file=%2F73%2Fuser%2Ficon%2Ff2",
-    "profileimageurl": "http:\/\/o-moodle.it.helsinki.fi\/moodle\/pluginfile.php?file=%2F73%2Fuser%2Ficon%2Ff1",
-    "groups": [],
     "roles": [
       {
         "roleid": 5,
@@ -485,82 +86,11 @@
         "roleid": 11,
         "name": "Moodi synced",
         "shortname": "o-moodi"
-      }
-    ],
-    "enrolledcourses": [
-      {
-        "id": 45,
-        "fullname": "Exam1 - tentti2",
-        "shortname": "Exam1 -  103131320"
-      },
-      {
-        "id": 44,
-        "fullname": "Exam1 - tentti2",
-        "shortname": "Exxon1 - 103131320"
-      },
-      {
-        "id": 33,
-        "fullname": "3333333",
-        "shortname": "3333333"
-      },
-      {
-        "id": 29,
-        "fullname": "0007",
-        "shortname": "0007"
-      },
-      {
-        "id": 28,
-        "fullname": "434354",
-        "shortname": "434354"
-      },
-      {
-        "id": 26,
-        "fullname": "1234",
-        "shortname": "1234"
-      },
-      {
-        "id": 24,
-        "fullname": "test101",
-        "shortname": "test101"
-      },
-      {
-        "id": 17,
-        "fullname": "test8",
-        "shortname": "test8"
-      },
-      {
-        "id": 16,
-        "fullname": "aaaa",
-        "shortname": "ssss"
-      },
-      {
-        "id": 15,
-        "fullname": "test6",
-        "shortname": "test6"
-      },
-      {
-        "id": 14,
-        "fullname": "test5",
-        "shortname": "test5"
       }
     ]
   },
   {
     "id": 12,
-    "username": "aunesluo@helsinki.fi",
-    "firstname": "Antero",
-    "lastname": "Aunesluoma",
-    "fullname": "Antero Aunesluoma",
-    "email": "test@invalid.com",
-    "department": "",
-    "idnumber": "11124988",
-    "firstaccess": 0,
-    "lastaccess": 0,
-    "description": "",
-    "descriptionformat": 1,
-    "profileimageurlsmall": "http:\/\/o-moodle.it.helsinki.fi\/moodle\/pluginfile.php?file=%2F74%2Fuser%2Ficon%2Ff2",
-    "profileimageurl": "http:\/\/o-moodle.it.helsinki.fi\/moodle\/pluginfile.php?file=%2F74%2Fuser%2Ficon%2Ff1",
-    "groups": [],
     "roles": [
       {
         "roleid": 5,
@@ -572,80 +102,10 @@
         "name": "Moodi synced",
         "shortname": "o-moodi"
       }
-    ],
-    "enrolledcourses": [
-      {
-        "id": 45,
-        "fullname": "Exam1 - tentti2",
-        "shortname": "Exam1 -  103131320"
-      },
-      {
-        "id": 44,
-        "fullname": "Exam1 - tentti2",
-        "shortname": "Exxon1 - 103131320"
-      },
-      {
-        "id": 33,
-        "fullname": "3333333",
-        "shortname": "3333333"
-      },
-      {
-        "id": 29,
-        "fullname": "0007",
-        "shortname": "0007"
-      },
-      {
-        "id": 28,
-        "fullname": "434354",
-        "shortname": "434354"
-      },
-      {
-        "id": 26,
-        "fullname": "1234",
-        "shortname": "1234"
-      },
-      {
-        "id": 24,
-        "fullname": "test101",
-        "shortname": "test101"
-      },
-      {
-        "id": 17,
-        "fullname": "test8",
-        "shortname": "test8"
-      },
-      {
-        "id": 16,
-        "fullname": "aaaa",
-        "shortname": "ssss"
-      },
-      {
-        "id": 15,
-        "fullname": "test6",
-        "shortname": "test6"
-      },
-      {
-        "id": 14,
-        "fullname": "test5",
-        "shortname": "test5"
-      }
     ]
   },
   {
     "id": 13,
-    "username": "arytkone@helsinki.fi",
-    "firstname": "Anni",
-    "lastname": "Rytk\u00f6nen",
-    "fullname": "Anni Rytk\u00f6nen",
-    "email": "test@invalid.com",
-    "department": "",
-    "firstaccess": 0,
-    "lastaccess": 0,
-    "description": "",
-    "descriptionformat": 1,
-    "profileimageurlsmall": "http:\/\/o-moodle.it.helsinki.fi\/moodle\/pluginfile.php?file=%2F75%2Fuser%2Ficon%2Ff2",
-    "profileimageurl": "http:\/\/o-moodle.it.helsinki.fi\/moodle\/pluginfile.php?file=%2F75%2Fuser%2Ficon%2Ff1",
-    "groups": [],
     "roles": [
       {
         "roleid": 3,
@@ -656,93 +116,6 @@
         "roleid": 11,
         "name": "Moodi synced",
         "shortname": "o-moodi"
-      }
-    ],
-    "enrolledcourses": [
-      {
-        "id": 48,
-        "fullname": "Exam2 - tentti1",
-        "shortname": "Exam2 -  103127925"
-      },
-      {
-        "id": 46,
-        "fullname": "Exam2 - kurssi, kolme tasoa 1",
-        "shortname": "Exam2 -  103131357"
-      },
-      {
-        "id": 45,
-        "fullname": "Exam1 - tentti2",
-        "shortname": "Exam1 -  103131320"
-      },
-      {
-        "id": 44,
-        "fullname": "Exam1 - tentti2",
-        "shortname": "Exxon1 - 103131320"
-      },
-      {
-        "id": 33,
-        "fullname": "3333333",
-        "shortname": "3333333"
-      },
-      {
-        "id": 32,
-        "fullname": "090909",
-        "shortname": "090909"
-      },
-      {
-        "id": 29,
-        "fullname": "0007",
-        "shortname": "0007"
-      },
-      {
-        "id": 28,
-        "fullname": "434354",
-        "shortname": "434354"
-      },
-      {
-        "id": 27,
-        "fullname": "323232",
-        "shortname": "323232"
-      },
-      {
-        "id": 26,
-        "fullname": "1234",
-        "shortname": "1234"
-      },
-      {
-        "id": 25,
-        "fullname": "test100",
-        "shortname": "test100"
-      },
-      {
-        "id": 24,
-        "fullname": "test101",
-        "shortname": "test101"
-      },
-      {
-        "id": 23,
-        "fullname": "test102",
-        "shortname": "test102"
-      },
-      {
-        "id": 17,
-        "fullname": "test8",
-        "shortname": "test8"
-      },
-      {
-        "id": 16,
-        "fullname": "aaaa",
-        "shortname": "ssss"
-      },
-      {
-        "id": 15,
-        "fullname": "test6",
-        "shortname": "test6"
-      },
-      {
-        "id": 14,
-        "fullname": "test5",
-        "shortname": "test5"
       }
     ]
   }

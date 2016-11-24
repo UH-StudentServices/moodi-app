@@ -45,11 +45,9 @@ public class MoodleClientGetCoursesTest extends AbstractMoodiIntegrationTest {
                 .andRespond(withSuccess(Fixtures.asString("/moodle/get-courses.json"), MediaType.APPLICATION_JSON));
 
         final List<MoodleFullCourse> courses = moodleClient.getCourses(new ArrayList<>());
-        assertEquals(36, courses.size());
+        assertEquals(1, courses.size());
 
         final MoodleFullCourse course = courses.get(0);
         assertEquals(new Long(9), course.id);
-        assertEquals("LYH", course.shortName);
-        assertEquals(new Integer(1), course.categoryId);
     }
 }
