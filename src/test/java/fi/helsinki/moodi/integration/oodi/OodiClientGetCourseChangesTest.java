@@ -46,6 +46,6 @@ public class OodiClientGetCourseChangesTest extends AbstractMoodiIntegrationTest
 
 
         final List<OodiCourseChange> changes = oodiClient.getCourseChanges(LocalDateTime.of(2015, 1, 20, 0, 0, 0));
-        assertEquals(161, changes.size());
+        assertEquals(1, changes.size());
     }
 }

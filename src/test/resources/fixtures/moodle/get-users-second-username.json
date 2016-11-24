@@ -1,37 +1,5 @@
 [
   {
-    "id": 2,
-    "username": "second",
-    "fullname": "Second Username",
-    "email": "second.user@example.com.invalid",
-    "department": "",
-    "firstaccess": 0,
-    "lastaccess": 1430910909,
-    "description": "",
-    "descriptionformat": 1,
-    "profileimageurlsmall": "http:\/\/o-moodle.it.helsinki.fi\/moodle\/pluginfile.php?file=%2F18%2Fuser%2Ficon%2Ff2",
-    "profileimageurl": "http:\/\/o-moodle.it.helsinki.fi\/moodle\/pluginfile.php?file=%2F18%2Fuser%2Ficon%2Ff1",
-    "preferences": [
-      {
-        "name": "auth_forcepasswordchange",
-        "value": "0"
-      },
-      {
-        "name": "htmleditor",
-        "value": ""
-      },
-      {
-        "name": "email_bounce_count",
-        "value": "1"
-      },
-      {
-        "name": "email_send_count",
-        "value": "1"
-      },
-      {
-        "name": "_lastloaded",
-        "value": 1432100593
-      }
-    ]
+    "id": 2
   }
 ]
