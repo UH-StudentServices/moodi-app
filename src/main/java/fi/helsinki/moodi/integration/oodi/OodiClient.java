@@ -67,7 +67,9 @@ public class OodiClient {
 
         try {
             return Optional.ofNullable(
-                    restOperations.exchange(url, HttpMethod.GET, null, typeReference, uriVariables).getBody().data);
+                    restOperations
+                        .exchange(url, HttpMethod.GET, null, typeReference, uriVariables).getBody())
+                .map(body -> body.data);
         } catch (ResourceAccessException e) {
             throw new IntegrationConnectionException("Oodi connection failure", e);
         }
