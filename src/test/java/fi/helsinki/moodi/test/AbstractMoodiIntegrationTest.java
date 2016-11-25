@@ -69,6 +69,7 @@ public abstract class AbstractMoodiIntegrationTest {
     protected static final String ERROR_RESPONSE = "{\"exception\":\"webservice_access_exception\",\"errorcode\":\"accessexception\",\"message\":\"P\\u00e4\\u00e4syn hallinnan poikkeus\"}";
     protected static final String EMPTY_OK_RESPONSE = "";
     protected static final String NULL_OK_RESPONSE = "null";
+    protected static final String NULL_DATA_RESPONSE = "{\"data\": null}";
 
     private static final ObjectMapper testObjectMapper = new ObjectMapper();
 
@@ -266,7 +267,7 @@ public abstract class AbstractMoodiIntegrationTest {
             .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
     }
 
-    protected final void expectGetCourseRealisationUnitRequestToOodi(final long realisationId, final ResponseCreator responseCreator) {
+    protected final void expectGetCourseUnitRealisationRequestToOodi(final long realisationId, final ResponseCreator responseCreator) {
         final String url = getOodiCourseUnitRealisationRequestUrl(realisationId);
         oodiMockServer.expect(requestTo(url))
             .andExpect(method(HttpMethod.GET))

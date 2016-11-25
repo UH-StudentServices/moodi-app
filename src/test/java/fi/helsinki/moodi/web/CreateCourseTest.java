@@ -27,7 +27,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
 
-    private static long NON_EXISTING_COURSE_REALISATION_ID = 54321;
     private static String COURSE_NOT_FOUND_MESSAGE = "Oodi course not found with realisation id %s";
 
     @Test
@@ -35,8 +34,8 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
         setUpMockServerResponses();
 
         makeCreateCourseRequest(COURSE_REALISATION_ID)
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.moodleCourseId").value(toIntExact(MOODLE_COURSE_ID)));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.moodleCourseId").value(toIntExact(MOODLE_COURSE_ID)));
     }
 
     @Test
@@ -47,15 +46,25 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
     }
 
     @Test
-    public void thatImportFailsWithIncorrectRealisationId() throws Exception {
+    public void thatImportFailsIfOodiReturnsNullForData() throws Exception {
+        testEmptyOodiResponse(NULL_DATA_RESPONSE);
+    }
 
-        expectGetCourseRealisationUnitRequestToOodi(
-            NON_EXISTING_COURSE_REALISATION_ID,
-            withSuccess("{\"data\": null}", MediaType.APPLICATION_JSON));
+    @Test
+    public void thatImportFailsIfOodiReturnsEmptyString() throws Exception {
+        testEmptyOodiResponse(EMPTY_OK_RESPONSE);
+    }
 
-        makeCreateCourseRequest(NON_EXISTING_COURSE_REALISATION_ID)
+    private void testEmptyOodiResponse(String response) throws Exception{
+        expectGetCourseUnitRealisationRequestToOodi(
+            COURSE_REALISATION_ID,
+            withSuccess(response, MediaType.APPLICATION_JSON));
+
+        makeCreateCourseRequest(COURSE_REALISATION_ID)
             .andExpect(status().isNotFound())
             .andExpect(jsonPath("$.error")
-                .value(String.format(COURSE_NOT_FOUND_MESSAGE, NON_EXISTING_COURSE_REALISATION_ID)));
+                .value(String.format(COURSE_NOT_FOUND_MESSAGE, COURSE_REALISATION_ID)));
     }
 }
+
+

@@ -88,7 +88,7 @@ public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIn
     }
 
     private void setupCommonResponses() {
-        expectGetCourseRealisationUnitRequestToOodi(
+        expectGetCourseUnitRealisationRequestToOodi(
             COURSE_REALISATION_ID,
             withSuccess(Fixtures.asString("/oodi/course-realisation.json"), MediaType.APPLICATION_JSON));
 

@@ -88,7 +88,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
     }
 
     protected void setupOodiCourseUnitRealisationResponse(String endDate, boolean approved) {
-        expectGetCourseRealisationUnitRequestToOodi(
+        expectGetCourseUnitRealisationRequestToOodi(
             REALISATION_ID,
             withSuccess(Fixtures.asString(
                     "/oodi/parameterized-course-realisation.json",
@@ -156,7 +156,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
     }
 
     protected void setupOodiCourseUnitRealisationResponse(String responseJson) {
-        expectGetCourseRealisationUnitRequestToOodi(
+        expectGetCourseUnitRealisationRequestToOodi(
             REALISATION_ID,
             withSuccess(Fixtures.asString(
                     responseJson,
