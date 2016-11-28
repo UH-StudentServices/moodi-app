@@ -224,8 +224,8 @@ public class EnrollmentExecutor {
     }
 
     private void persistMoodleEnrollments(final long courseId,
-                                                             final List<Enrollment> enrollments,
-                                                             final List<EnrollmentWarning> enrollmentWarnings) {
+                                          final List<Enrollment> enrollments,
+                                          final List<EnrollmentWarning> enrollmentWarnings) {
 
         final List<Enrollment> enrollmentsWithUsernames = filterOutEnrollmentsWithoutUsername(enrollments, enrollmentWarnings);
         final List<Enrollment> enrollmentsWithMoodleIds = filterOutEnrollmentsWithoutMoodleIds(enrollmentsWithUsernames, enrollmentWarnings);
