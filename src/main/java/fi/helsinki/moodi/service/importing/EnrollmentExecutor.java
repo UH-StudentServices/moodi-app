@@ -17,7 +17,6 @@
 
 package fi.helsinki.moodi.service.importing;
 
-import com.google.common.collect.Lists;
 import fi.helsinki.moodi.integration.esb.EsbService;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
