@@ -40,6 +40,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -84,7 +85,7 @@ public class EnrollmentExecutor {
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
 
-            final List<EnrollmentWarning> enrollmentWarnings = Lists.newArrayList();
+            final List<EnrollmentWarning> enrollmentWarnings = newArrayList();
 
             final List<Enrollment> enrollments = createEnrollments(courseUnitRealisation);
 
@@ -139,7 +140,7 @@ public class EnrollmentExecutor {
     }
 
     private List<Enrollment> createEnrollments(final OodiCourseUnitRealisation cur) {
-        final List<Enrollment> enrollments = Lists.newArrayList();
+        final List<Enrollment> enrollments = newArrayList();
 
         enrollments.addAll(cur.students.stream()
             .map(s -> Enrollment.forStudent(s.studentNumber, s.approved))
@@ -211,12 +212,12 @@ public class EnrollmentExecutor {
         final Map<Boolean, List<Enrollment>> partitions =
                 enrollments.stream().collect(partitioningBy(partitionPredicate));
 
-        partitions.getOrDefault(false, Lists.newArrayList())
+        partitions.getOrDefault(false, newArrayList())
                 .stream()
                 .map(warningCreator)
                 .forEach(enrollmentWarnings::add);
 
-        return partitions.getOrDefault(true, Lists.newArrayList());
+        return partitions.getOrDefault(true, newArrayList());
     }
 
     private long countEnrollmentsByRole(List<Enrollment> enrollments, String role) {
