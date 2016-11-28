@@ -40,6 +40,8 @@ public class EnrollmentStatus {
                 return CourseEnrollmentStatusCode.FAILED_NO_USERNAME;
             case EnrollmentWarning.CODE_USER_NOT_FOUND_FROM_MOODLE:
                 return CourseEnrollmentStatusCode.FAILED_NO_MOODLE_USER;
+            case EnrollmentWarning.CODE_USER_NOT_APPROVED:
+                return CourseEnrollmentStatusCode.FAILED_NOT_APPROVED;
             default:
                 return CourseEnrollmentStatusCode.FAILED;
         }

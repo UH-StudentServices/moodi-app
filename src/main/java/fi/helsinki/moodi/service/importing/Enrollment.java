@@ -36,21 +36,27 @@ public final class Enrollment implements Serializable {
     public Optional<String> studentNumber;
     public Optional<Long> moodleId;
     public List<String> usernameList;
+    public boolean approved;
 
     public static Enrollment forStudent(final String studentNumber) {
-        return new Enrollment(ROLE_STUDENT, Optional.empty(), Optional.of(studentNumber), null, Optional.empty());
+        return forStudent(studentNumber, true);
+    }
+
+    public static Enrollment forStudent(final String studentNumber, boolean approved) {
+        return new Enrollment(ROLE_STUDENT, Optional.empty(), Optional.of(studentNumber), null, Optional.empty(), approved);
     }
 
     public static Enrollment forTeacher(final String teacherId) {
-        return new Enrollment(ROLE_TEACHER, Optional.of(teacherId), Optional.empty(), null, Optional.empty());
+        return new Enrollment(ROLE_TEACHER, Optional.of(teacherId), Optional.empty(), null, Optional.empty(), true);
     }
 
-    private Enrollment(String role, Optional<String> teacherId, Optional<String> studentNumber, List<String> usernameList, Optional<Long> moodleId) {
+    private Enrollment(String role, Optional<String> teacherId, Optional<String> studentNumber, List<String> usernameList, Optional<Long> moodleId, boolean approved) {
         this.role = role;
         this.teacherId = teacherId;
         this.studentNumber = studentNumber;
         this.usernameList = usernameList;
         this.moodleId = moodleId;
+        this.approved = approved;
     }
 
     @Override

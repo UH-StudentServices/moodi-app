@@ -17,7 +17,6 @@
 
 package fi.helsinki.moodi.service.importing;
 
-import com.google.common.collect.Lists;
 import fi.helsinki.moodi.integration.esb.EsbService;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
@@ -38,7 +37,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -83,12 +84,15 @@ public class EnrollmentExecutor {
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
 
+            final List<EnrollmentWarning> enrollmentWarnings = newArrayList();
+
             final List<Enrollment> enrollments = createEnrollments(courseUnitRealisation);
 
-            final List<Enrollment> enrollmentsWithUsernames = enrichEnrollmentsWithUsernames(enrollments);
+            final List<Enrollment> approvedEnrollments = filterApprovedEnrollments(enrollments, enrollmentWarnings);
+            final List<Enrollment> enrollmentsWithUsernames = enrichEnrollmentsWithUsernames(approvedEnrollments);
             final List<Enrollment> enrollmentsWithMoodleIds = enrichEnrollmentsWithMoodleIds(enrollmentsWithUsernames);
 
-            final List<EnrollmentWarning> enrollmentWarnings = persistMoodleEnrollments(moodleCourseId, enrollmentsWithMoodleIds);
+            persistMoodleEnrollments(moodleCourseId, enrollmentsWithMoodleIds, enrollmentWarnings);
 
             CourseEnrollmentStatus courseEnrollmentStatus = courseEnrollmentStatusService.persistCourseEnrollmentStatus(
                 course.id,
@@ -135,15 +139,15 @@ public class EnrollmentExecutor {
     }
 
     private List<Enrollment> createEnrollments(final OodiCourseUnitRealisation cur) {
-        final List<Enrollment> enrollments = Lists.newArrayList();
+        final List<Enrollment> enrollments = newArrayList();
 
         enrollments.addAll(cur.students.stream()
-                .map(s -> Enrollment.forStudent(s.studentNumber))
-                .collect(toList()));
+            .map(s -> Enrollment.forStudent(s.studentNumber, s.approved))
+            .collect(toList()));
 
         enrollments.addAll(cur.teachers.stream()
-                .map(s -> Enrollment.forTeacher(s.teacherId))
-                .collect(toList()));
+            .map(s -> Enrollment.forTeacher(s.teacherId))
+            .collect(toList()));
 
         return enrollments;
     }
@@ -157,6 +161,21 @@ public class EnrollmentExecutor {
         return enrollments.stream()
                 .map(e -> new MoodleEnrollment(mapperService.getMoodleRole(e.role), e.moodleId.get(), courseId))
                 .collect(toList());
+    }
+
+    private List<Enrollment> filterApprovedEnrollments(
+        final List<Enrollment> enrollments,
+        final List<EnrollmentWarning> enrollmentWarnings) {
+
+        return enrollments
+            .stream()
+            .filter(e -> {
+                if(!e.approved) {
+                    enrollmentWarnings.add(EnrollmentWarning.userNotApproved(e));
+                }
+                return e.approved;
+            })
+            .collect(Collectors.toList());
     }
 
     private List<Enrollment> filterOutEnrollmentsWithoutUsername(
@@ -192,21 +211,21 @@ public class EnrollmentExecutor {
         final Map<Boolean, List<Enrollment>> partitions =
                 enrollments.stream().collect(partitioningBy(partitionPredicate));
 
-        partitions.getOrDefault(false, Lists.newArrayList())
+        partitions.getOrDefault(false, newArrayList())
                 .stream()
                 .map(warningCreator)
                 .forEach(enrollmentWarnings::add);
 
-        return partitions.getOrDefault(true, Lists.newArrayList());
+        return partitions.getOrDefault(true, newArrayList());
     }
 
     private long countEnrollmentsByRole(List<Enrollment> enrollments, String role) {
         return enrollments.stream().filter(e -> role.equals(e.role)).count();
     }
 
-    private List<EnrollmentWarning> persistMoodleEnrollments(final long courseId, final List<Enrollment> enrollments) {
-
-        final List<EnrollmentWarning> enrollmentWarnings = Lists.newArrayList();
+    private void persistMoodleEnrollments(final long courseId,
+                                          final List<Enrollment> enrollments,
+                                          final List<EnrollmentWarning> enrollmentWarnings) {
 
         final List<Enrollment> enrollmentsWithUsernames = filterOutEnrollmentsWithoutUsername(enrollments, enrollmentWarnings);
         final List<Enrollment> enrollmentsWithMoodleIds = filterOutEnrollmentsWithoutMoodleIds(enrollmentsWithUsernames, enrollmentWarnings);
@@ -225,8 +244,6 @@ public class EnrollmentExecutor {
                     .map(EnrollmentWarning::enrollFailed)
                     .forEach(enrollmentWarnings::add);
         }
-
-        return enrollmentWarnings;
     }
 
     private boolean enrollToCourse(final long courseId, final List<Enrollment> enrollments) {
