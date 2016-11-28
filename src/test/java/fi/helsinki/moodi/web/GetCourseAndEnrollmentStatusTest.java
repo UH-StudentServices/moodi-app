@@ -17,6 +17,7 @@
 
 package fi.helsinki.moodi.web;
 
+import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatusCode;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.MediaType;
@@ -45,13 +46,14 @@ public class GetCourseAndEnrollmentStatusTest extends AbstractSuccessfulCreateCo
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.url").value(getMoodleBaseUrl() + "/course/view.php?id=988888"))
             .andExpect(jsonPath("$.importStatus").value(COMPLETED.toString()))
-            .andExpect(jsonPath("$.courseEnrollmentStatus.studentEnrollments[0].courseEnrollmentStatusCode").value("OK"))
+            .andExpect(jsonPath("$.courseEnrollmentStatus.studentEnrollments[0].courseEnrollmentStatusCode").value(CourseEnrollmentStatusCode.OK.toString()))
             .andExpect(jsonPath("$.courseEnrollmentStatus.studentEnrollments[0].studentNumber").value("010342729"))
-            .andExpect(jsonPath("$.courseEnrollmentStatus.studentEnrollments[1].courseEnrollmentStatusCode").value("OK"))
+            .andExpect(jsonPath("$.courseEnrollmentStatus.studentEnrollments[1].courseEnrollmentStatusCode").value(CourseEnrollmentStatusCode.OK.toString()))
             .andExpect(jsonPath("$.courseEnrollmentStatus.studentEnrollments[1].studentNumber").value("011119854"))
-            .andExpect(jsonPath("$.courseEnrollmentStatus.studentEnrollments[2].courseEnrollmentStatusCode").value("FAILED_NO_MOODLE_USER"))
-            .andExpect(jsonPath("$.courseEnrollmentStatus.studentEnrollments[2].studentNumber").value("011524656"))
-            .andExpect(jsonPath("$.courseEnrollmentStatus.teacherEnrollments[0].courseEnrollmentStatusCode").value("OK"))
+            .andExpect(jsonPath("$.courseEnrollmentStatus.studentEnrollments[2].courseEnrollmentStatusCode").value(CourseEnrollmentStatusCode.FAILED_NOT_APPROVED.toString()))
+            .andExpect(jsonPath("$.courseEnrollmentStatus.studentEnrollments[2].studentNumber").value("011524658"))
+            .andExpect(jsonPath("$.courseEnrollmentStatus.studentEnrollments[3].courseEnrollmentStatusCode").value(CourseEnrollmentStatusCode.FAILED_NO_MOODLE_USER.toString()))
+            .andExpect(jsonPath("$.courseEnrollmentStatus.studentEnrollments[3].studentNumber").value("011524656"))
             .andExpect(jsonPath("$.courseEnrollmentStatus.teacherEnrollments[0].teacherId").value("110588"));
     }
 

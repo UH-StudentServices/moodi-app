@@ -3,13 +3,20 @@
   "data": {
     "students": [
       {
-        "student_number": "010342729"
+        "student_number": "010342729",
+        "approved": true
       },
       {
-        "student_number": "011119854"
+        "student_number": "011119854",
+        "approved": true
       },
       {
-        "student_number": "011524656"
+        "student_number": "011524656",
+        "approved": true
+      },
+      {
+        "student_number": "011524658",
+        "approved": false
       }
     ],
     "realisation_type_code": 5,

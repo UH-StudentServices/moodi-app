@@ -21,5 +21,6 @@ public enum CourseEnrollmentStatusCode {
     OK,
     FAILED,
     FAILED_NO_USERNAME,
-    FAILED_NO_MOODLE_USER
+    FAILED_NO_MOODLE_USER,
+    FAILED_NOT_APPROVED
 }

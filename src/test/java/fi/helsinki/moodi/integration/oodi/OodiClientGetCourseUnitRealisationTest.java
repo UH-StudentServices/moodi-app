@@ -39,7 +39,7 @@ public class OodiClientGetCourseUnitRealisationTest extends AbstractMoodiIntegra
     private OodiClient oodiClient;
 
     @Test
-    public void deserializeRespose() {
+    public void deserializeResponse() {
         oodiMockServer.expect(
                 requestTo(getOodiCourseUnitRealisationRequestUrl(102374742)))
                 .andExpect(method(HttpMethod.GET))
@@ -113,10 +113,11 @@ public class OodiClientGetCourseUnitRealisationTest extends AbstractMoodiIntegra
     }
 
     private void assertStudents(final OodiCourseUnitRealisation cur) {
-        assertEquals(3, cur.students.size());
+        assertEquals(4, cur.students.size());
         assertStudent(cur.students.get(0), "010342729");
         assertStudent(cur.students.get(1), "011119854");
         assertStudent(cur.students.get(2), "011524656");
+        assertStudent(cur.students.get(3), "011524658");
     }
 
     private void assertStudent(

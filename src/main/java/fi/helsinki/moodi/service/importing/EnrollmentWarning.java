@@ -22,6 +22,7 @@ public class EnrollmentWarning {
     public static final String CODE_USER_NOT_FOUND_FROM_ESB = "user-not-found-from-esb";
     public static final String CODE_USER_NOT_FOUND_FROM_MOODLE = "user-not-found-from-moodle";
     public static final String CODE_ENROLLMENT_FAILED = "enrollment-failed";
+    public static final String CODE_USER_NOT_APPROVED = "user-not-approved";
 
     public final String code;
     public final Enrollment enrollment;
@@ -44,5 +45,9 @@ public class EnrollmentWarning {
 
     public static EnrollmentWarning enrollFailed(final Enrollment enrollment) {
         return new EnrollmentWarning(CODE_ENROLLMENT_FAILED, enrollment);
+    }
+
+    public static EnrollmentWarning userNotApproved(final Enrollment enrollment) {
+        return new EnrollmentWarning(CODE_USER_NOT_APPROVED, enrollment);
     }
 }
