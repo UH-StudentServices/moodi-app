@@ -13,5 +13,5 @@ integration:
   moodle:
     baseUrl: https://mdl-bak.it.helsinki.fi
     url: https://mdl-bak.it.helsinki.fi/webservice/rest/server.php
-  oodi.url: https://oprek4.it.helsinki.fi:30040
+  oodi.url: https://oprek2.it.helsinki.fi:30039
   esb.url: https://esbmt1.it.helsinki.fi
