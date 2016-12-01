@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    dataSourceClassName: org.postgresql.ds.PGSimpleDataSource
+    url: jdbc:postgresql://localhost:5432/moodi
+    username: ${datasource.username}
+    password: ${datasource.password}
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database: PostgreSQL
+
+integration:
+  moodle:
+    baseUrl: https://mdl-bak.it.helsinki.fi
+    url: https://mdl-bak.it.helsinki.fi/webservice/rest/server.php
+  oodi.url: https://oprek4.it.helsinki.fi:30040
+  esb.url: https://esbmt1.it.helsinki.fi
