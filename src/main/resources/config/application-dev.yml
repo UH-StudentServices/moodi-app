@@ -10,3 +10,5 @@ spring:
     database: PostgreSQL
 
 dev.mode.enabled: true
+
+synchronize.FULL.enabled: false
