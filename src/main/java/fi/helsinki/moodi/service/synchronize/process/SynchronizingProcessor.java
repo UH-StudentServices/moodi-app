@@ -139,17 +139,17 @@ public class SynchronizingProcessor extends AbstractProcessor {
             .filter(EnrollmentSynchronizationItem::isCompleted)
             .collect(Collectors.toList());
 
-        processedItems.addAll(checkThresholdsAndProcessItems(itemsByAction));
+        processedItems.addAll(checkThresholdsAndProcessItems(itemsByAction, parentItem));
 
         return processedItems;
 
     }
 
     private List<EnrollmentSynchronizationItem> checkThresholdsAndProcessItems(
-        Map<SynchronizationAction, List<EnrollmentSynchronizationItem>> itemsByAction) {
+        Map<SynchronizationAction, List<EnrollmentSynchronizationItem>> itemsByAction, SynchronizationItem parentItem) {
 
-        checkThresholdLimitsForItemType(itemsByAction, StudentSynchronizationItem.class);
-        checkThresholdLimitsForItemType(itemsByAction, TeacherSynchronizationItem.class);
+        checkThresholdLimitsForItemType(itemsByAction, StudentSynchronizationItem.class, parentItem);
+        checkThresholdLimitsForItemType(itemsByAction, TeacherSynchronizationItem.class, parentItem);
 
         return processItems(itemsByAction);
 
@@ -167,19 +167,22 @@ public class SynchronizingProcessor extends AbstractProcessor {
         return processedItems;
     }
 
-    private <T> void checkThresholdLimitsForItemType(Map<SynchronizationAction, List<EnrollmentSynchronizationItem>> itemsByAction, Class<T> itemType) {
+    private <T> void checkThresholdLimitsForItemType(Map<SynchronizationAction, List<EnrollmentSynchronizationItem>> itemsByAction,
+                                                     Class<T> itemType,
+                                                     SynchronizationItem parentItem) {
         Map<SynchronizationAction, List<EnrollmentSynchronizationItem>> itemsOfTypeByAction = new HashMap<>();
 
         itemsByAction.forEach((action, items) -> {
             itemsOfTypeByAction.put(action, items.stream().filter(i -> itemType.isInstance(i)).collect(Collectors.toList()));
         });
 
-        checkThresholdLimits(itemsOfTypeByAction);
+        checkThresholdLimits(itemsOfTypeByAction, parentItem);
     }
 
 
 
-    private void checkThresholdLimits(Map<SynchronizationAction, List<EnrollmentSynchronizationItem>> itemsByAction) {
+    private void checkThresholdLimits(Map<SynchronizationAction, List<EnrollmentSynchronizationItem>> itemsByAction,
+                                      SynchronizationItem parentItem) {
 
         List<EnrollmentSynchronizationItem> allItems = newArrayList();
 
@@ -191,12 +194,17 @@ public class SynchronizingProcessor extends AbstractProcessor {
             long itemsCount = items.size();
 
             if(synchronizationThreshold.isLimitedByThreshold(action, itemsCount)) {
-                throw new ProcessingException(ProcessingStatus.LOCKED, String.format(THRESHOLD_EXCEEDED_MESSAGE, action, itemsCount));
+                lockItem(parentItem, String.format(THRESHOLD_EXCEEDED_MESSAGE, action, itemsCount));
             } else if(itemsCount == allItemsCount && synchronizationThreshold.isActionPreventedToAllItems(action)) {
-                throw new ProcessingException(ProcessingStatus.LOCKED, String.format(PREVENT_ACTION_ON_ALL_MESSAGE, action));
+                lockItem(parentItem, String.format(PREVENT_ACTION_ON_ALL_MESSAGE, action));
             }
         });
 
+    }
+
+    private void lockItem(SynchronizationItem parentItem, String message) {
+        syncLockService.setLock(parentItem.getCourse(), message);
+        throw new ProcessingException(ProcessingStatus.LOCKED, message);
     }
 
     private StudentSynchronizationItem createStudentSynchronizationItem(final OodiStudent student,

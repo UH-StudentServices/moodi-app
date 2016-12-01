@@ -17,6 +17,8 @@
 
 package fi.helsinki.moodi.scheduled;
 
+import fi.helsinki.moodi.service.course.Course;
+import fi.helsinki.moodi.service.syncLock.SyncLockService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
 import fi.helsinki.moodi.service.synchronize.notify.LockedSynchronizationItemMessageBuilder;
 import org.junit.Test;
@@ -25,11 +27,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
 import org.springframework.test.context.TestPropertySource;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 @TestPropertySource(properties = {"syncTresholds.REMOVE_ROLE.preventAll = true",
                                   "syncTresholds.REMOVE_ROLE.limit = 10"})
 public class SynchronizationActionLimitAllTest extends AbstractSynchronizationJobTest {
 
     private static final String EXPECTED_REMOVE_ROLE_FROM_ALL_NOT_PERMITTED_MESSAGE = "Action REMOVE_ROLE is not permitted for all items";
+
+    @Autowired
+    private SyncLockService syncLockService;
 
     @Autowired
     private MailSender mailSender;
@@ -39,7 +47,12 @@ public class SynchronizationActionLimitAllTest extends AbstractSynchronizationJo
 
     @Test
     public void thatRemovingRolesActionIsLimitedByThreshold() {
+        Course course = findCourse();
+        assertFalse(syncLockService.isLocked(course));
+
         SynchronizationSummary summary = testTresholdCheckFailed(EXPECTED_REMOVE_ROLE_FROM_ALL_NOT_PERMITTED_MESSAGE);
         Mockito.verify(mailSender).send(lockedSynchronizationItemMessageBuilder.buildMessage(summary.getItems()));
+
+        assertTrue(syncLockService.isLocked(course));
     }
 }
