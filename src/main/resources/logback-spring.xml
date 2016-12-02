@@ -35,7 +35,7 @@
         <logger name="fi.helsinki.moodi" level="DEBUG"/>
     </springProfile>
 
-    <springProfile name="prod">
+    <springProfile name="qa, prod">
         <include resource="logback-rolling-file-appender.xml"/>
         <root level="INFO">
             <appender-ref ref="FILE"/>
@@ -56,7 +56,6 @@
         </root>
         <logger name="fi.helsinki.moodi" level="DEBUG"/>
         <logger name="fi.helsinki.moodi.test" level="TRACE"/>
-
     </springProfile>
 
 </configuration>
