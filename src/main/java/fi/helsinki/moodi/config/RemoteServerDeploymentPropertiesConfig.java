@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@PropertySource(value = { "file:/opt/moodi/config/moodi.yml" })
+@PropertySource(value = { "file:/opt/moodi/config/moodi.properties" })
 @Conditional(RemoteServerDeploymentCondition.class)
 public class RemoteServerDeploymentPropertiesConfig {
 }
