@@ -55,10 +55,10 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
     protected static final String TEACHER_USERNAME = "jukkapalmu";
     protected static final String USERNAME_SUFFIX = "@helsinki.fi";
 
-    private static final String SUMMARY_MESSAGE_ENROLLMENT_FAILED = "Enrolment failed";
-    private static final String SUMMARY_MESSAGE_ENROLLMENT_SUCCEEDED = "Enrolment succeeded";
-    private static final String SUMMARY_MESSAGE_ROLE_ADD_FAILED = "Role add failed";
-    private static final String SUMMARY_MESSAGE_ROLE_ADD_SUCCEEDED = "Role add succeeded";
+    private static final String SUMMARY_MESSAGE_ENROLLMENT_FAILED = "ADD_ENROLLMENT_WITH_MOODI_ROLE failed";
+    private static final String SUMMARY_MESSAGE_ENROLLMENT_SUCCEEDED = "ADD_ENROLLMENT_WITH_MOODI_ROLE succeeded";
+    private static final String SUMMARY_MESSAGE_ROLE_ADD_FAILED = "ADD_ROLE failed";
+    private static final String SUMMARY_MESSAGE_ROLE_ADD_SUCCEEDED = "ADD_ROLE succeeded";
 
     @Autowired
     protected CourseService courseService;
@@ -148,9 +148,9 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
 
         SynchronizationItem item = summary.getItems().get(0);
 
-        assertEquals(item.getProcessingStatus(), ProcessingStatus.LOCKED);
+        assertEquals(ProcessingStatus.LOCKED, item.getProcessingStatus());
 
-        assertEquals(item.getMessage(), expectedMessage);
+        assertEquals(expectedMessage, item.getMessage());
 
         return summary;
     }

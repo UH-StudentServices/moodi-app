@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.partitioningBy;
@@ -160,6 +161,9 @@ public class EnrollmentExecutor {
     private List<MoodleEnrollment> buildMoodleEnrollments(final long courseId, final List<Enrollment> enrollments) {
         return enrollments.stream()
                 .map(e -> new MoodleEnrollment(mapperService.getMoodleRole(e.role), e.moodleId.get(), courseId))
+                .flatMap(enrollment -> Stream.of(
+                    enrollment,
+                    new MoodleEnrollment(mapperService.getMoodiRoleId(), enrollment.moodleUserId, enrollment.moodleCourseId)))
                 .collect(toList());
     }
 
@@ -254,7 +258,7 @@ public class EnrollmentExecutor {
         try {
             final List<MoodleEnrollment> moodleEnrollments = buildMoodleEnrollments(courseId, enrollments);
             logMoodleEnrollments(moodleEnrollments);
-            moodleService.enrollToCourse(moodleEnrollments);
+            moodleService.addEnrollments(moodleEnrollments);
             return true;
         } catch (Exception e) {
             LOGGER.error("An error occurred while enrolling", e);

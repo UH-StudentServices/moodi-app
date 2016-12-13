@@ -48,7 +48,7 @@ public class MoodleClientEnrollToCourseTest extends AbstractMoodiIntegrationTest
                 .andRespond(withSuccess(Fixtures.asString("/moodle/enrol-user-no-permissions.json"), MediaType.APPLICATION_JSON));
 
         try {
-            moodleClient.enrollToCourse(Lists.newArrayList(new MoodleEnrollment(9, 3, 12345)));
+            moodleClient.addEnrollments(Lists.newArrayList(new MoodleEnrollment(9, 3, 12345)));
             fail("We want an exception!");
         } catch (MoodleClientException e) {
             assertEquals("You don't have the permission to assign this role (9) to this user (5) in this course(12).", e.getMessage());
