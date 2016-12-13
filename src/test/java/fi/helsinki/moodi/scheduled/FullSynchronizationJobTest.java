@@ -22,14 +22,15 @@ import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.service.synchronize.enrich.EnrichmentStatus;
 import fi.helsinki.moodi.test.util.DateUtil;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.test.context.TestPropertySource;
 
 import static fi.helsinki.moodi.service.course.Course.ImportStatus;
 import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
 import static fi.helsinki.moodi.test.util.DateUtil.getPastDateString;
 import static org.junit.Assert.*;
 
+@TestPropertySource(properties = {"syncTresholds.REMOVE_ROLE.preventAll = false"})
 public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
     private void thatCourseIsSynchronizedWithNoExistingEnrollments(String endDateString) {
@@ -133,7 +134,6 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         job.execute();
     }
 
-    @Ignore
     @Test
     public void thatUnApprovedStudentHasStudentRoleUnassignedFromMoodle() {
         String endDateInFuture = getFutureDateString();
@@ -149,12 +149,12 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
             new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID));
 
-        expectAssignRolesToMoodle(false, new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
+        expectAssignRolesToMoodle(false,
+            new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
 
         job.execute();
     }
 
-    @Ignore
     @Test
     public void thatMultipleStudentsAndTeachersAreSyncedCorrectly() {
 
@@ -190,7 +190,8 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID + 1, MOODLE_COURSE_ID),
             new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID + 1, MOODLE_COURSE_ID));
 
-        expectAssignRolesToMoodle(false, new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
+        expectAssignRolesToMoodle(false,
+            new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
 
         job.execute();
     }

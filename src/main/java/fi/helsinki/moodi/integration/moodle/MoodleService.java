@@ -23,8 +23,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class MoodleService {
@@ -50,18 +48,6 @@ public class MoodleService {
         }
     };
 
-    public void enrollToCourse(final List<MoodleEnrollment> moodleEnrollments) {
-        moodleClient.enrollToCourse(addEnrollmentsToDefaultMoodiRole(moodleEnrollments));
-    }
-
-    private List<MoodleEnrollment> addEnrollmentsToDefaultMoodiRole(final List<MoodleEnrollment> moodleEnrollments) {
-        return moodleEnrollments.stream()
-            .flatMap(enrollment -> Stream.of(
-                enrollment,
-                new MoodleEnrollment(mapperService.getMoodiRoleId(), enrollment.moodleUserId, enrollment.moodleCourseId)))
-            .collect(Collectors.toList());
-    }
-
     public long createUser(final String username, final String firstName, final String lastName,
                            final String email, final String password, final String idNumber) {
         return moodleClient.createUser(username, firstName, lastName, email, password, idNumber);
@@ -79,7 +65,15 @@ public class MoodleService {
         return moodleClient.getEnrolledUsers(courseId);
     }
 
-    public void updateEnrollments(final List<MoodleEnrollment> moodleEnrollments, final boolean addition) {
-        moodleClient.updateEnrollments(moodleEnrollments, addition);
+    public void addRoles(final List<MoodleEnrollment> moodleEnrollments) {
+        moodleClient.addRoles(moodleEnrollments);
+    }
+
+    public void removeRoles(final List<MoodleEnrollment> moodleEnrollments) {
+        moodleClient.removeRoles(moodleEnrollments);
+    }
+
+    public void addEnrollments(final List<MoodleEnrollment> moodleEnrollments) {
+        moodleClient.addEnrollments(moodleEnrollments);
     }
 }

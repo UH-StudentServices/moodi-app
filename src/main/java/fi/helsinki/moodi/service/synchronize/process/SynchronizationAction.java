@@ -17,12 +17,10 @@
 
 package fi.helsinki.moodi.service.synchronize.process;
 
-/**
- * Created by markorautajoki on 15/11/16.
- */
 public enum SynchronizationAction {
-    ADD_ENROLLMENT,
-    ADD_ROLE,
+    ADD_ENROLLMENT_WITH_MOODI_ROLE,
     REMOVE_ROLE,
+    ADD_ROLE,
+    ADD_MOODI_ROLE,
     NONE
 }

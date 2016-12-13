@@ -17,6 +17,7 @@
 
 package fi.helsinki.moodi.service.synchronize.process;
 
+import com.google.common.collect.Lists;
 import fi.helsinki.moodi.exception.ProcessingException;
 import fi.helsinki.moodi.integration.esb.EsbService;
 import fi.helsinki.moodi.integration.moodle.*;
@@ -38,8 +39,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.groupingBy;
@@ -52,18 +55,12 @@ import static java.util.stream.Collectors.toMap;
 public class SynchronizingProcessor extends AbstractProcessor {
 
     private static final String MESSAGE_NOT_CHANGED = "Not changed";
-    private static final String MESSAGE_ENROLLMENT_SUCCEEDED = "Enrolment succeeded";
-    private static final String MESSAGE_ENROLLMENT_FAILED = "Enrolment failed";
     private static final String MESSAGE_USERNAME_NOT_FOUND = "Username not found from ESB";
     private static final String MESSAGE_MOODLE_USER_NOT_FOUND = "Moodle user not found";
-    private static final String MESSAGE_DROP_DISABLED = "Role drop requested but was not executed";
-    private static final String MESSAGE_UPDATE_SUCCEEDED = "Role %s succeeded";
-    private static final String MESSAGE_UPDATE_FAILED = "Role %s failed";
-    private static final String UPDATE_ADD = "add";
-    private static final String UPDATE_DROP = "drop";
     private static final String THRESHOLD_EXCEEDED_MESSAGE = "Action %s for %s items exceeds threshold";
     private static final String PREVENT_ACTION_ON_ALL_MESSAGE = "Action %s is not permitted for all items";
-
+    private static final String MESSAGE_ACTION_FAILED = "%s failed";
+    private static final String MESSAGE_ACTION_SUCCEEDED = "%s succeeded";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SynchronizingProcessor.class);
 
@@ -74,6 +71,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
     private final CourseService courseService;
     private final SynchronizationThreshold synchronizationThreshold;
     private final SyncLockService syncLockService;
+    private final SynchronizationActionResolver synchronizationActionResolver;
 
     @Autowired
     public SynchronizingProcessor(EsbService esbService,
@@ -82,7 +80,8 @@ public class SynchronizingProcessor extends AbstractProcessor {
                                   CourseEnrollmentStatusService courseEnrollmentStatusService,
                                   CourseService courseService,
                                   SynchronizationThreshold synchronizationThreshold,
-                                  SyncLockService syncLockService) {
+                                  SyncLockService syncLockService,
+                                  SynchronizationActionResolver synchronizationActionResolver) {
         super(Action.SYNCHRONIZE);
         this.esbService = esbService;
         this.mapperService = mapperService;
@@ -91,6 +90,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
         this.courseService = courseService;
         this.synchronizationThreshold = synchronizationThreshold;
         this.syncLockService = syncLockService;
+        this.synchronizationActionResolver = synchronizationActionResolver;
     }
 
     @Override
@@ -133,7 +133,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
         Map<SynchronizationAction, List<EnrollmentSynchronizationItem>> itemsByAction = preProcessedItems.stream()
             .filter(i -> !i.isCompleted())
-            .collect(groupingBy(this::getSynchronizationAction));
+            .collect(groupingBy(synchronizationActionResolver::resolveSynchronizationAction));
 
         List<EnrollmentSynchronizationItem> processedItems = preProcessedItems.stream()
             .filter(EnrollmentSynchronizationItem::isCompleted)
@@ -145,6 +145,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
     }
 
+
     private List<EnrollmentSynchronizationItem> checkThresholdsAndProcessItems(
         Map<SynchronizationAction, List<EnrollmentSynchronizationItem>> itemsByAction, SynchronizationItem parentItem) {
 
@@ -152,7 +153,6 @@ public class SynchronizingProcessor extends AbstractProcessor {
         checkThresholdLimitsForItemType(itemsByAction, TeacherSynchronizationItem.class, parentItem);
 
         return processItems(itemsByAction);
-
     }
 
     private List<EnrollmentSynchronizationItem> processItems(Map<SynchronizationAction, List<EnrollmentSynchronizationItem>> itemsByAction) {
@@ -178,8 +178,6 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
         checkThresholdLimits(itemsOfTypeByAction, parentItem);
     }
-
-
 
     private void checkThresholdLimits(Map<SynchronizationAction, List<EnrollmentSynchronizationItem>> itemsByAction,
                                       SynchronizationItem parentItem) {
@@ -249,15 +247,44 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
     private List<EnrollmentSynchronizationItem> processItemsByAction(SynchronizationAction action, List<EnrollmentSynchronizationItem> items) {
         switch(action) {
-            case ADD_ENROLLMENT:
-                return addEnrollments(items);
+            case ADD_ENROLLMENT_WITH_MOODI_ROLE:
+                return processEnrollments(items, action, this::buildMoodleEnrollmentsWithMoodiRoleEnrollments, moodleService::addEnrollments);
             case ADD_ROLE:
-                return updateEnrollments(items, true);
+                return processEnrollments(items, action, this::buildMoodleEnrollments, moodleService::addRoles);
             case REMOVE_ROLE:
-                return completeItemsAfterUpdate(items, true, MESSAGE_DROP_DISABLED);
+                return processEnrollments(items, action, this::buildMoodleEnrollments, moodleService::removeRoles);
+            case ADD_MOODI_ROLE:
+                return processEnrollments(items, action, this::buildMoodiRoleEnrollments, moodleService::addRoles);
             default:
                 return processUnchanged(items);
         }
+    }
+
+    private MoodleEnrollment createMoodleEnrollment(EnrollmentSynchronizationItem item, long moodleRoleId) {
+        return new MoodleEnrollment(
+            moodleRoleId,
+            item.getMoodleUser().map(user -> user.id).orElseThrow(() -> new RuntimeException("MoodleUser not found!")),
+            item.getMoodleCourseId());
+    }
+
+    private List<MoodleEnrollment> buildMoodiRoleEnrollments(List<EnrollmentSynchronizationItem> items) {
+        return items.stream()
+            .map(item -> createMoodleEnrollment(item, mapperService.getMoodiRoleId()))
+            .collect(Collectors.toList());
+    }
+
+    private List<MoodleEnrollment> buildMoodleEnrollments(List<EnrollmentSynchronizationItem> items) {
+        return items.stream()
+            .map(item -> createMoodleEnrollment(item, item.getMoodleRoleId()))
+            .collect(Collectors.toList());
+    }
+
+    private List<MoodleEnrollment> buildMoodleEnrollmentsWithMoodiRoleEnrollments(List<EnrollmentSynchronizationItem> items) {
+        return items.stream()
+            .flatMap(item -> Stream.of(
+                createMoodleEnrollment(item, item.getMoodleRoleId()),
+                createMoodleEnrollment(item, mapperService.getMoodiRoleId())))
+            .collect(Collectors.toList());
     }
 
     private List<EnrollmentSynchronizationItem> createSynchronizationItems(final SynchronizationItem item,
@@ -293,37 +320,6 @@ public class SynchronizingProcessor extends AbstractProcessor {
         return item;
     }
 
-    private boolean isAddRole(MoodleUserEnrollments moodleUserEnrollments, long moodleRoleId, boolean approved) {
-        return moodleUserEnrollments != null
-            && approved
-            && !moodleUserEnrollments.hasRole(moodleRoleId);
-    }
-
-    private boolean isAddEnrollment(MoodleUserEnrollments moodleUserEnrollments, boolean approved) {
-        return moodleUserEnrollments == null
-            && approved;
-    }
-
-    private boolean isRemoveRole(MoodleUserEnrollments moodleUserEnrollments, long moodleRoleId, boolean approved) {
-        return moodleUserEnrollments != null
-            && !approved && moodleUserEnrollments.hasRole(moodleRoleId);
-    }
-
-    private SynchronizationAction getSynchronizationAction(final EnrollmentSynchronizationItem item) {
-        final long moodleRoleId = item.getMoodleRoleId();
-        final MoodleUserEnrollments moodleUserEnrollments = item.getMoodleEnrollments().orElse(null);
-        final boolean approved = item.isApproved();
-
-        if(isAddRole(moodleUserEnrollments, moodleRoleId, approved)) {
-            return SynchronizationAction.ADD_ROLE;
-        } else if(isRemoveRole(moodleUserEnrollments, moodleRoleId, approved)) {
-            return SynchronizationAction.REMOVE_ROLE;
-        } else if(isAddEnrollment(moodleUserEnrollments, approved)) {
-            return SynchronizationAction.ADD_ENROLLMENT;
-        }
-        return SynchronizationAction.NONE;
-    }
-
     private List<String> getUsernameList(OodiStudent student) {
         return esbService.getStudentUsernameList(student.studentNumber);
     }
@@ -332,65 +328,38 @@ public class SynchronizingProcessor extends AbstractProcessor {
         return esbService.getTeacherUsernameList(teacher.teacherId);
     }
 
-    private List<EnrollmentSynchronizationItem> updateEnrollments(final List<EnrollmentSynchronizationItem> items, final boolean addition) {
-        final String action = addition ? UPDATE_ADD : UPDATE_DROP;
-        boolean updateSuccess = false;
+    private List<EnrollmentSynchronizationItem> processEnrollments(final List<EnrollmentSynchronizationItem> items,
+                                                                   SynchronizationAction action,
+                                                                   Function<List<EnrollmentSynchronizationItem>, List<MoodleEnrollment>> enrollmentsBuilder,
+                                                                   Consumer<List<MoodleEnrollment>> moodleServiceMethod) {
+        final List<MoodleEnrollment> moodleEnrollments = enrollmentsBuilder.apply(items);
 
-        List<MoodleEnrollment> enrollments = items
-            .stream()
-            .map(item -> new MoodleEnrollment(item.getMoodleRoleId(), item.getMoodleUser().get().id, item.getMoodleCourseId()))
-            .collect(Collectors.toList());
+        boolean success = false;
 
         try {
-            moodleService.updateEnrollments(enrollments, addition);
-            updateSuccess = true;
+            moodleServiceMethod.accept(moodleEnrollments);
+            success = true;
         } catch (Exception e) {
             LOGGER.error("Error while updating enrollment", e);
         }
 
-        String message = updateSuccess ? String.format(MESSAGE_UPDATE_SUCCEEDED, action) : String.format(MESSAGE_UPDATE_FAILED, action);
+        String message = String.format(success ? MESSAGE_ACTION_SUCCEEDED : MESSAGE_ACTION_FAILED, action.toString());
+        EnrollmentSynchronizationStatus status = success ? EnrollmentSynchronizationStatus.COMPLETED : EnrollmentSynchronizationStatus.ERROR;
 
-        return completeItemsAfterUpdate(items, updateSuccess, message);
-    }
+        return completeItems(items, success, message, status);
 
-    private List<EnrollmentSynchronizationItem> completeItemsAfterUpdate(final List<EnrollmentSynchronizationItem> items, final boolean success, String message) {
-        return items
-            .stream()
-            .map(item -> item.setCompleted(
-                success,
-                message,
-                success ? EnrollmentSynchronizationStatus.COMPLETED : EnrollmentSynchronizationStatus.ERROR))
-            .collect(Collectors.toList());
     }
 
     private Optional<MoodleUser> getMoodleUser(final List<String> usernameList) {
         return moodleService.getUser(usernameList);
     }
 
-    private List<EnrollmentSynchronizationItem> addEnrollments(final List<EnrollmentSynchronizationItem> items) {
-
-        List<MoodleEnrollment> moodleEnrollments = items.stream()
-            .map(item -> new MoodleEnrollment(item.getMoodleRoleId(), item.getMoodleUser().get().id, item.getMoodleCourseId()))
-            .collect(Collectors.toList());
-
-        try {
-            moodleService.enrollToCourse(moodleEnrollments);
-            return completeItems(items, true, MESSAGE_ENROLLMENT_SUCCEEDED, EnrollmentSynchronizationStatus.COMPLETED);
-        } catch (Exception e) {
-            return completeItems(items, false, MESSAGE_ENROLLMENT_FAILED, EnrollmentSynchronizationStatus.ERROR);
-        }
-    }
-
     private List<EnrollmentSynchronizationItem> completeItems(List<EnrollmentSynchronizationItem> items,
                                                               boolean success,
                                                               String message,
                                                               EnrollmentSynchronizationStatus status) {
-        List<EnrollmentSynchronizationItem> resultItems = newArrayList();
-
-        for (EnrollmentSynchronizationItem item : items) {
-            resultItems.add(item.setCompleted(success, message, status));
-        }
-
-        return resultItems;
+        return items.stream()
+            .map(item -> item.setCompleted(success, message, status))
+            .collect(Collectors.toList());
     }
 }

@@ -34,6 +34,9 @@ public class EsbService {
 
     private final EsbClient esbClient;
 
+    public static final String TEACHER_ID_PREFIX = "9";
+    public static final String DOMAIN_SUFFIX = "@helsinki.fi";
+
     @Autowired
     public EsbService(EsbClient esbClient) {
         this.esbClient = esbClient;
@@ -52,7 +55,7 @@ public class EsbService {
     }
 
     public List<String> getTeacherUsernameList(final String teacherId) {
-        final String normalizedTeacherId = "9" + teacherId;
+        final String normalizedTeacherId = TEACHER_ID_PREFIX + teacherId;
         List<String> usernameList = esbClient.getTeacherUsernameList(normalizedTeacherId);
 
         if (usernameList != null) {
@@ -65,6 +68,6 @@ public class EsbService {
     }
 
     private String appendDomain(final String username) {
-        return username + "@helsinki.fi";
+        return username + DOMAIN_SUFFIX;
     }
 }

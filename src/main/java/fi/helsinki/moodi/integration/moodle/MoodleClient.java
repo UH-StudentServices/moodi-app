@@ -108,7 +108,7 @@ public class MoodleClient {
         }
     }
 
-    public void enrollToCourse(final List<MoodleEnrollment> moodleEnrollments) {
+    public void addEnrollments(final List<MoodleEnrollment> moodleEnrollments) {
         final MultiValueMap<String, String> params = createParametersForFunction("enrol_manual_enrol_users");
 
         for (int i = 0; i < moodleEnrollments.size(); i++) {
@@ -121,7 +121,7 @@ public class MoodleClient {
         try {
             execute(params, new TypeReference<Void>() {}, EMPTY_OK_RESPONSE_EVALUATION);
         } catch (Exception e) {
-            handleException("Error executing method: enrollToCourse", e);
+            handleException("Error executing method: addEnrollments", e);
         }
     }
 
@@ -185,9 +185,17 @@ public class MoodleClient {
         }
     }
 
-    public void updateEnrollments(final List<MoodleEnrollment> moodleEnrollments, final boolean addRole) {
-        final String function = "core_role_assign_roles"; // addRole ? "core_role_assign_roles" : "core_role_unassign_roles"; //Unassigning is commented out for now just in case.
-        final String array = "assignments"; //addRole ? "assignments" : "unassignments";
+    public void addRoles(final List<MoodleEnrollment> moodleEnrollments) {
+        assignRoles(moodleEnrollments, true);
+    }
+
+    public void removeRoles(final List<MoodleEnrollment> moodleEnrollments) {
+        assignRoles(moodleEnrollments, false);
+    }
+
+    private void assignRoles(final List<MoodleEnrollment> moodleEnrollments, final boolean addition) {
+        final String function = addition ? "core_role_assign_roles" : "core_role_unassign_roles";
+        final String array = addition ? "assignments" : "unassignments";
 
         final MultiValueMap<String, String> params = createParametersForFunction(function);
 
@@ -202,9 +210,11 @@ public class MoodleClient {
         try {
             execute(params, null, EMPTY_OK_RESPONSE_EVALUATION);
         } catch (Exception e) {
-            handleException("Error executing method: updateEnrollments", e);
+            handleException("Error executing method: assignRoles", e);
         }
     }
+
+
 
     private <T> T handleException(final String message, final Exception e) {
         if (e instanceof MoodiException) {

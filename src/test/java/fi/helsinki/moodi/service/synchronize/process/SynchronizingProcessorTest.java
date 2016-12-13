@@ -17,7 +17,7 @@
 
 package fi.helsinki.moodi.service.synchronize.process;
 
-import com.google.common.collect.Lists;
+import fi.helsinki.moodi.integration.esb.EsbService;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.integration.moodle.MoodleFullCourse;
 import fi.helsinki.moodi.integration.moodle.MoodleRole;
@@ -25,30 +25,27 @@ import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
 import fi.helsinki.moodi.integration.oodi.OodiStudent;
 import fi.helsinki.moodi.integration.oodi.OodiTeacher;
-import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static com.google.common.collect.Lists.newArrayList;
 
 
+@TestPropertySource(properties = {"syncTresholds.REMOVE_ROLE.preventAll = false"})
 public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
 
-    private static final long MOODLE_COURSE_ID = 54321L;
     private static final long MOODLE_USER_ID = 1L;
-    private static final long REALISATION_ID = 12345L;
+    private static final long MOODLE_COURSE_ID = 54321L;
 
     @Autowired
     private SynchronizingProcessor synchronizingProcessor;
@@ -56,103 +53,296 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
     @Autowired
     private CourseService courseService;
 
-    public OodiCourseUnitRealisation createOodiCourse() {
-        OodiStudent oodiStudent = new OodiStudent();
-        oodiStudent.studentNumber = "1";
-
-        OodiTeacher oodiTeacher = new OodiTeacher();
-        oodiTeacher.teacherId = "1";
-
-        OodiCourseUnitRealisation oodiCourseUnitRealisation = new OodiCourseUnitRealisation();
-        oodiCourseUnitRealisation.students = Lists.newArrayList(oodiStudent);
-        oodiCourseUnitRealisation.teachers = Lists.newArrayList();
-
-        return oodiCourseUnitRealisation;
-    }
-
-    public MoodleFullCourse createMoodleCourse() {
-        MoodleFullCourse moodleFullCourse = new MoodleFullCourse();
-        moodleFullCourse.id = MOODLE_COURSE_ID;
-        return moodleFullCourse;
-    }
-
-    public List<MoodleUserEnrollments> creatMoodleUserEnrollmentsWithoutRole() {
-        return Lists.newArrayList();
-    }
-
-    public List<MoodleUserEnrollments> creatMoodleUserEnrollmentsWithRole() {
-        MoodleRole moodleRole = new MoodleRole();
-        moodleRole.roleId = getTeacherRoleId();
-
+    private List<MoodleUserEnrollments> moodleUserEnrollments(MoodleRole... roles) {
         MoodleUserEnrollments moodleUserEnrollments = new MoodleUserEnrollments();
-        moodleUserEnrollments.roles = Lists.newArrayList(moodleRole);
+
+        moodleUserEnrollments.roles = newArrayList();
+
+        for(MoodleRole role : roles) {
+            moodleUserEnrollments.roles.add(role);
+        }
+
         moodleUserEnrollments.id = MOODLE_USER_ID;
 
-        return Lists.newArrayList(moodleUserEnrollments);
+        return newArrayList(moodleUserEnrollments);
     }
 
-    private void expectGetStudentNumber() {
-        esbMockServer.expect(requestTo("https://esbmt1.it.helsinki.fi/iam/findStudent/1"))
-            .andExpect(method(HttpMethod.GET))
-            .andRespond(withSuccess("[{\"studentNumber\": \"10\", \"username\" : \"mag_simp\"}]", MediaType.APPLICATION_JSON));
+    private MoodleRole teacherRole() {
+       return createMoodleRole(getTeacherRoleId());
     }
 
-    private void expectGetMoodleUser() {
-        moodleMockServer.expect(requestTo(getMoodleRestUrl()))
-            .andExpect(method(HttpMethod.POST))
-            .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_user_get_users_by_field&moodlewsrestformat=json&field=username&values%5B0%5D=mag_simp%40helsinki.fi"))
-            .andRespond(withSuccess(String.format("[{\"username\" : \"mag_simp\", \"id\" : \"%s\"}]", MOODLE_USER_ID), MediaType.APPLICATION_JSON));
+    private MoodleRole studentRole() {
+       return createMoodleRole(getStudentRoleId());
     }
 
-    private void expectNewEnrollmentToMoodle() {
-        expectEnrollmentRequestToMoodle(
-            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_ID, MOODLE_COURSE_ID));
+    private MoodleRole moodiRole() {
+        return createMoodleRole(getMoodiRoleId());
     }
 
-    private void expectRoleAssignToMoodle() {
-        moodleMockServer.expect(requestTo(getMoodleRestUrl()))
-            .andExpect(method(HttpMethod.POST))
-            .andExpect(content().string(
-                "wstoken=xxxx1234&wsfunction=core_role_assign_roles&moodlewsrestformat=json&assignments%5B0%5D%5Buserid%5D=1&assignments%5B0%5D%5Broleid%5D="
-                    + getStudentRoleId()
-                    + "&assignments%5B0%5D%5Binstanceid%5D="
-                    + MOODLE_COURSE_ID
-                    + "&assignments%5B0%5D%5Bcontextlevel%5D=course"))
-            .andRespond(withSuccess());
+    private MoodleEnrollment studentEnrollment() {
+        return new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID, MOODLE_COURSE_ID);
+    }
+
+    private MoodleEnrollment teacherEnrollment() {
+        return new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_ID, MOODLE_COURSE_ID);
+    }
+
+    private MoodleEnrollment moodiEnrollment() {
+        return new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_ID, MOODLE_COURSE_ID);
+    }
+
+    private MoodleRole createMoodleRole(long roleId) {
+        MoodleRole role = new MoodleRole();
+        role.roleId = roleId;
+        return role;
+    }
+
+    /* Add enrollments */
+
+    @Test
+    public void studentAndMoodiRolesEnrollment() {
+        SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
+            .withOodiStudent(MOODLE_USER_ID, true)
+            .withEmptyMoodleEnrollments()
+            .expectUserRequestsToESBAndMoodle()
+            .expectAddEnrollmentsToMoodleCourse(
+                studentEnrollment(),
+                moodiEnrollment()
+            )
+            .getSynchronizationItem();
+
+        synchronizingProcessor.doProcess(item);
     }
 
     @Test
-    public void testSynchronizeStudentNotInMoodle() {
-        expectGetStudentNumber();
-        expectGetMoodleUser();
-        expectNewEnrollmentToMoodle();
+    public void teacherAndMoodiRolesEnrollment() {
+        SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
+            .withOodiTeacher(MOODLE_USER_ID)
+            .withEmptyMoodleEnrollments()
+            .expectUserRequestsToESBAndMoodle()
+            .expectAddEnrollmentsToMoodleCourse(
+                teacherEnrollment(),
+                moodiEnrollment()
+            )
+            .getSynchronizationItem();
 
-        SynchronizationItem synchronizationItem = new SynchronizationItem(getCourse(), SynchronizationType.FULL);
-        SynchronizationItem synchronizationItemWithMoodleEnrollments = synchronizationItem.setMoodleEnrollments(Optional.of((creatMoodleUserEnrollmentsWithoutRole())));
-        SynchronizationItem synchronizationItemWithOodiCourse = synchronizationItemWithMoodleEnrollments.setOodiCourse(Optional.of(createOodiCourse()));
-        SynchronizationItem synchronizationItemWithMoodleCourse = synchronizationItemWithOodiCourse.setMoodleCourse(Optional.of(createMoodleCourse()));
-
-        synchronizingProcessor.doProcess(synchronizationItemWithMoodleCourse);
+        synchronizingProcessor.doProcess(item);
     }
 
     @Test
-    public void testSynchronizeStudentAlreadyInMoodleWithDifferentRole() {
-        expectGetStudentNumber();
-        expectGetMoodleUser();
-        expectRoleAssignToMoodle();
+    public void doesNotAddStudentEnrollmentIfNotApproved() {
+        SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
+            .withOodiStudent(MOODLE_USER_ID, false)
+            .withEmptyMoodleEnrollments()
+            .expectUserRequestsToESBAndMoodle()
+            .getSynchronizationItem();
 
-        SynchronizationItem synchronizationItem = new SynchronizationItem(getCourse(), SynchronizationType.FULL);
-        SynchronizationItem synchronizationItemWithMoodleEnrollments = synchronizationItem.setMoodleEnrollments(Optional.of((creatMoodleUserEnrollmentsWithRole())));
-        SynchronizationItem synchronizationItemWithOodiCourse = synchronizationItemWithMoodleEnrollments.setOodiCourse(Optional.of(createOodiCourse()));
-        SynchronizationItem synchronizationItemWithMoodleCourse = synchronizationItemWithOodiCourse.setMoodleCourse(Optional.of(createMoodleCourse()));
-
-        synchronizingProcessor.doProcess(synchronizationItemWithMoodleCourse);
+        synchronizingProcessor.doProcess(item);
     }
 
-    private Course getCourse() {
-        return courseService.findByRealisationId(REALISATION_ID).get();
+    /* Remove roles */
+
+    @Test
+    public void removeStudentRoleIfNotApproved() {
+        SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
+            .withOodiStudent(MOODLE_USER_ID, false)
+            .withMoodleEnrollments(moodleUserEnrollments(
+                studentRole(),
+                moodiRole()))
+            .expectUserRequestsToESBAndMoodle()
+            .expectAssignRolesToMoodleCourse(
+                false,
+                studentEnrollment()
+            )
+            .getSynchronizationItem();
+
+        synchronizingProcessor.doProcess(item);
     }
 
+    @Test
+    public void removeStudentRoleIfNotApprovedAndHasAlsoTeacherRole() {
+        SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
+            .withOodiStudent(MOODLE_USER_ID, false)
+            .withOodiTeacher(MOODLE_USER_ID)
+            .withMoodleEnrollments(moodleUserEnrollments(
+                studentRole(),
+                teacherRole(),
+                moodiRole()))
+            .expectUserRequestsToESBAndMoodle()
+            .expectAssignRolesToMoodleCourse(
+                false,
+                studentEnrollment()
+            )
+            .getSynchronizationItem();
+
+        synchronizingProcessor.doProcess(item);
+    }
+
+    /* Add roles */
+
+    @Test
+    public void addStudentRoleIfApproved() {
+        SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
+            .withOodiStudent(MOODLE_USER_ID, true)
+            .withOodiTeacher(MOODLE_USER_ID)
+            .withMoodleEnrollments(moodleUserEnrollments(
+                teacherRole(),
+                moodiRole()))
+            .expectUserRequestsToESBAndMoodle()
+            .expectAssignRolesToMoodleCourse(
+                true,
+                studentEnrollment()
+            )
+            .getSynchronizationItem();
+
+        synchronizingProcessor.doProcess(item);
+    }
+
+    @Test
+    public void addTeacherRole() {
+        SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
+            .withOodiStudent(MOODLE_USER_ID, true)
+            .withOodiTeacher(MOODLE_USER_ID)
+            .withMoodleEnrollments(moodleUserEnrollments(
+                studentRole(),
+                moodiRole()))
+            .expectUserRequestsToESBAndMoodle()
+            .expectAssignRolesToMoodleCourse(
+                true,
+                teacherEnrollment()
+            )
+            .getSynchronizationItem();
+
+        synchronizingProcessor.doProcess(item);
+    }
+
+    /* Add moodi role */
+
+    @Test
+    public void addMoodiRoleIfStudent() {
+        SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
+            .withOodiStudent(MOODLE_USER_ID, true)
+            .withMoodleEnrollments(moodleUserEnrollments(
+                studentRole()))
+            .expectUserRequestsToESBAndMoodle()
+            .expectAssignRolesToMoodleCourse(
+                true,
+                moodiEnrollment()
+            )
+            .getSynchronizationItem();
+
+        synchronizingProcessor.doProcess(item);
+    }
+
+    @Test
+    public void addMoodiRoleIfTeacher() {
+        SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
+            .withOodiTeacher(MOODLE_USER_ID)
+            .withMoodleEnrollments(moodleUserEnrollments(
+                teacherRole()))
+            .expectUserRequestsToESBAndMoodle()
+            .expectAssignRolesToMoodleCourse(
+                true,
+                moodiEnrollment()
+            )
+            .getSynchronizationItem();
+
+        synchronizingProcessor.doProcess(item);
+    }
+
+    private class CourseSynchronizationRequestChain {
+
+        private static final String STUDENT_USERNAME = "studentUsername";
+        private static final String TEACHER_USERNAME = "teacherUsername";
+        private static final String TEACHER_ID = "1";
+        private static final String STUDENT_NUMBER = "1";
+        private static final long REALISATION_ID = 12345L;
+
+        private SynchronizationItem synchronizationItem;
+        private OodiCourseUnitRealisation oodiCourseUnitRealisation;
+
+        private Map<Long, OodiStudent> oodiStudentMap = new HashMap<>();
+        private Map<Long, OodiTeacher> oodiTeacherMap = new HashMap<>();
+
+        public CourseSynchronizationRequestChain(long moodleCourseId) {
+            SynchronizationItem synchronizationItem = new SynchronizationItem(
+                courseService.findByRealisationId(REALISATION_ID).get(),
+                SynchronizationType.FULL);
+
+            OodiCourseUnitRealisation oodiCourseUnitRealisation = new OodiCourseUnitRealisation();
+            oodiCourseUnitRealisation.students = newArrayList();
+            oodiCourseUnitRealisation.teachers = newArrayList();
+
+            SynchronizationItem synchronizationItemWithOodiCourse = synchronizationItem.setOodiCourse(Optional.of(oodiCourseUnitRealisation));
+            SynchronizationItem synchronizationItemWithMoodleCourse = synchronizationItemWithOodiCourse.setMoodleCourse(Optional.of(createMoodleCourse(moodleCourseId)));
+
+            this.oodiCourseUnitRealisation = oodiCourseUnitRealisation;
+            this.synchronizationItem = synchronizationItemWithMoodleCourse;
+
+        }
+
+        public CourseSynchronizationRequestChain withOodiStudent(long moodleUserId, boolean approved) {
+            OodiStudent oodiStudent = new OodiStudent();
+            oodiStudent.studentNumber = STUDENT_NUMBER;
+            oodiStudent.approved = approved;
+
+            this.oodiCourseUnitRealisation.students.add(oodiStudent);
+            oodiStudentMap.put(moodleUserId, oodiStudent);
+
+            return this;
+        }
+
+        public CourseSynchronizationRequestChain withOodiTeacher(long moodleUserId) {
+            OodiTeacher oodiTeacher = new OodiTeacher();
+            oodiTeacher.teacherId = TEACHER_ID;
+
+            this.oodiCourseUnitRealisation.teachers.add(oodiTeacher);
+            oodiTeacherMap.put(moodleUserId, oodiTeacher);
+
+            return this;
+        }
+
+        public CourseSynchronizationRequestChain withMoodleEnrollments(List<MoodleUserEnrollments> moodleEnrollments) {
+            this.synchronizationItem = this.synchronizationItem.setMoodleEnrollments(Optional.of(moodleEnrollments));
+            return this;
+        }
+
+        public CourseSynchronizationRequestChain withEmptyMoodleEnrollments() {
+            return this.withMoodleEnrollments(newArrayList());
+        }
+
+        public CourseSynchronizationRequestChain expectUserRequestsToESBAndMoodle() {
+            oodiStudentMap.forEach((moodleUserId, oodiStudent) -> expectFindStudentRequestToEsb(oodiStudent.studentNumber, STUDENT_USERNAME));
+            oodiTeacherMap.forEach((moodleUserId, oodiTeacher) -> expectFindEmployeeRequestToEsb(EsbService.TEACHER_ID_PREFIX + oodiTeacher.teacherId, TEACHER_USERNAME));
+
+            oodiStudentMap.forEach((moodleUserId, oodiStudent) -> expectGetUserRequestToMoodle(STUDENT_USERNAME + EsbService.DOMAIN_SUFFIX, moodleUserId));
+            oodiTeacherMap.forEach((moodleUserId, oodiTeacher) -> expectGetUserRequestToMoodle(TEACHER_USERNAME + EsbService.DOMAIN_SUFFIX, moodleUserId));
+
+            return this;
+        }
+
+        public CourseSynchronizationRequestChain expectAddEnrollmentsToMoodleCourse(MoodleEnrollment... enrollments) {
+            expectEnrollmentRequestToMoodle(enrollments);
+
+            return this;
+        }
+
+        public CourseSynchronizationRequestChain expectAssignRolesToMoodleCourse(boolean isAssign, MoodleEnrollment... enrollments) {
+            expectAssignRolesToMoodle(isAssign, enrollments);
+
+            return this;
+        }
+
+        public SynchronizationItem getSynchronizationItem() {
+            return this.synchronizationItem;
+        }
+
+        private MoodleFullCourse createMoodleCourse(long moodleCourseId) {
+            MoodleFullCourse moodleFullCourse = new MoodleFullCourse();
+            moodleFullCourse.id = moodleCourseId;
+            return moodleFullCourse;
+        }
+
+    }
 
 }
