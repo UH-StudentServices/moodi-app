@@ -250,6 +250,34 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
         synchronizingProcessor.doProcess(item);
     }
 
+    /* No action */
+
+    @Test
+    public void testNoActionIfAlreadyStudentInMoodle() {
+        SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
+            .withOodiStudent(MOODLE_USER_ID, true)
+            .withMoodleEnrollments(moodleUserEnrollments(
+                studentRole(),
+                moodiRole()))
+            .expectUserRequestsToESBAndMoodle()
+            .getSynchronizationItem();
+
+        synchronizingProcessor.doProcess(item);
+    }
+
+    @Test
+    public void testNoActionIfAlreadyTeacherInMoodle() {
+        SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
+            .withOodiTeacher(MOODLE_USER_ID)
+            .withMoodleEnrollments(moodleUserEnrollments(
+                teacherRole(),
+                moodiRole()))
+            .expectUserRequestsToESBAndMoodle()
+            .getSynchronizationItem();
+
+        synchronizingProcessor.doProcess(item);
+    }
+
     private class CourseSynchronizationRequestChain {
 
         private static final String STUDENT_USERNAME = "studentUsername";
