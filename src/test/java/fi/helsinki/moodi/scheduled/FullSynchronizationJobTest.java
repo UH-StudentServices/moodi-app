@@ -30,7 +30,7 @@ import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
 import static fi.helsinki.moodi.test.util.DateUtil.getPastDateString;
 import static org.junit.Assert.*;
 
-@TestPropertySource(properties = {"syncTresholds.REMOVE_ROLE.preventAll = false"})
+@TestPropertySource(properties = {"syncTresholds.REMOVE_ROLE.preventAll = 0"})
 public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
     private void thatCourseIsSynchronizedWithNoExistingEnrollments(String endDateString) {
