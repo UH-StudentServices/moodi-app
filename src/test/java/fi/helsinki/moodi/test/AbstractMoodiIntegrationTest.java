@@ -115,6 +115,10 @@ public abstract class AbstractMoodiIntegrationTest {
         return String.format("%s/courseunitrealisations/%s?include_deleted=true&include_approved_status=true", getOodiUrl(), realisationId);
     }
 
+    protected String getOodiCourseUsersRequestUrl(final long realisationId) {
+        return String.format("%s/courseunitrealisations/%s/users?include_deleted=true&include_approved_status=true", getOodiUrl(), realisationId);
+    }
+
     protected long getStudentRoleId() {
         return mapperService.getStudentRoleId();
     }
@@ -265,6 +269,13 @@ public abstract class AbstractMoodiIntegrationTest {
             .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andExpect(content().string(payload))
             .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
+    }
+
+    protected final void expectGetCourseUsersRequestToOodi(final long realisationId, final ResponseCreator responseCreator) {
+        final String url = getOodiCourseUsersRequestUrl(realisationId);
+        oodiMockServer.expect(requestTo(url))
+            .andExpect(method(HttpMethod.GET))
+            .andRespond(responseCreator);
     }
 
     protected final void expectGetCourseUnitRealisationRequestToOodi(final long realisationId, final ResponseCreator responseCreator) {

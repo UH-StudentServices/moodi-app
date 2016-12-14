@@ -22,6 +22,7 @@ import fi.helsinki.moodi.exception.ProcessingException;
 import fi.helsinki.moodi.integration.esb.EsbService;
 import fi.helsinki.moodi.integration.moodle.*;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
+import fi.helsinki.moodi.integration.oodi.OodiCourseUsers;
 import fi.helsinki.moodi.integration.oodi.OodiStudent;
 import fi.helsinki.moodi.integration.oodi.OodiTeacher;
 import fi.helsinki.moodi.service.course.CourseService;
@@ -289,7 +290,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
     private List<EnrollmentSynchronizationItem> createSynchronizationItems(final SynchronizationItem item,
                                                                            final Map<Long, MoodleUserEnrollments> moodleEnrollmentsByUserId) {
-        final OodiCourseUnitRealisation oodiCourse = item.getOodiCourse().get();
+        final OodiCourseUsers oodiCourse = item.getOodiCourse().get();
 
         final MoodleFullCourse moodleCourse = item.getMoodleCourse().get();
 

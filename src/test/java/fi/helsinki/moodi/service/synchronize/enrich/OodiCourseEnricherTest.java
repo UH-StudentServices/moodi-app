@@ -18,7 +18,7 @@
 package fi.helsinki.moodi.service.synchronize.enrich;
 
 import com.google.common.collect.ImmutableMap;
-import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
+import fi.helsinki.moodi.integration.oodi.OodiCourseUsers;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
@@ -43,7 +43,7 @@ public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
     private OodiCourseEnricher oodiCourseEnricher;
 
     private void setUpMockParameterizedResponseWithEndDate(String endDate) {
-        expectGetCourseUnitRealisationRequestToOodi(
+        expectGetCourseUsersRequestToOodi(
             REALISATION_ID,
             withSuccess(Fixtures.asString(
                     "/oodi/parameterized-course-realisation.json",
@@ -55,14 +55,14 @@ public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
     }
 
     private void setUpMockResponse(String response) {
-        expectGetCourseUnitRealisationRequestToOodi(
+        expectGetCourseUsersRequestToOodi(
             REALISATION_ID,
             withSuccess(response,
                 MediaType.APPLICATION_JSON));
     }
 
     private void setUpMockDeletedResponse() {
-        expectGetCourseUnitRealisationRequestToOodi(
+        expectGetCourseUsersRequestToOodi(
             REALISATION_ID,
             withSuccess(Fixtures.asString(
                     "/oodi/deleted-course-realisation.json"),
@@ -85,9 +85,9 @@ public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
 
         SynchronizationItem enrichedItem = oodiCourseEnricher.doEnrich(synchronizationItem);
 
-        Optional<OodiCourseUnitRealisation> oodiCourseUnitRealisation = enrichedItem.getOodiCourse();
+        Optional<OodiCourseUsers> oodiCourseUsers = enrichedItem.getOodiCourse();
 
-        assertTrue(oodiCourseUnitRealisation.isPresent());
+        assertTrue(oodiCourseUsers.isPresent());
         assertEquals(enrichedItem.getEnrichmentStatus(), EnrichmentStatus.IN_PROGESS);
     }
 
@@ -108,9 +108,9 @@ public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
 
         SynchronizationItem enrichedItem = oodiCourseEnricher.doEnrich(synchronizationItem);
 
-        Optional<OodiCourseUnitRealisation> oodiCourseUnitRealisation = enrichedItem.getOodiCourse();
+        Optional<OodiCourseUsers> oodiCourseUsers = enrichedItem.getOodiCourse();
 
-        assertFalse(oodiCourseUnitRealisation.isPresent());
+        assertFalse(oodiCourseUsers.isPresent());
         assertEquals(enrichedItem.getEnrichmentStatus(), EnrichmentStatus.ERROR);
     }
 
