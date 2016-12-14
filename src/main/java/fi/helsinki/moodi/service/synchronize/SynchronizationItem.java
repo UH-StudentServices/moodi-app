@@ -19,7 +19,7 @@ package fi.helsinki.moodi.service.synchronize;
 
 import fi.helsinki.moodi.integration.moodle.MoodleFullCourse;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
-import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
+import fi.helsinki.moodi.integration.oodi.OodiCourseUsers;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.enrich.EnrichmentStatus;
 import fi.helsinki.moodi.service.synchronize.process.ProcessingStatus;
@@ -42,7 +42,7 @@ public final class SynchronizationItem {
     private final SynchronizationType synchronizationType;
     private final boolean success;
     private final String message;
-    private final Optional<OodiCourseUnitRealisation> oodiCourse;
+    private final Optional<OodiCourseUsers> oodiCourse;
     private final Optional<MoodleFullCourse> moodleCourse;
     private final Optional<List<MoodleUserEnrollments>> moodleEnrollments;
     private final Optional<List<TeacherSynchronizationItem>> teacherItems;
@@ -57,19 +57,19 @@ public final class SynchronizationItem {
     }
 
     private SynchronizationItem(
-            Course course,
-            SynchronizationType synchronizationType,
-            boolean success,
-            String message,
-            Optional<OodiCourseUnitRealisation> oodiCourse,
-            Optional<MoodleFullCourse> moodleCourse,
-            Optional<List<MoodleUserEnrollments>> moodleEnrollments,
-            Optional<List<TeacherSynchronizationItem>> teacherItems,
-            Optional<List<StudentSynchronizationItem>> studentItems,
-            EnrichmentStatus enrichmentStatus,
-            ProcessingStatus processingStatus,
-            boolean unlock,
-            boolean removed) {
+        Course course,
+        SynchronizationType synchronizationType,
+        boolean success,
+        String message,
+        Optional<OodiCourseUsers> oodiCourse,
+        Optional<MoodleFullCourse> moodleCourse,
+        Optional<List<MoodleUserEnrollments>> moodleEnrollments,
+        Optional<List<TeacherSynchronizationItem>> teacherItems,
+        Optional<List<StudentSynchronizationItem>> studentItems,
+        EnrichmentStatus enrichmentStatus,
+        ProcessingStatus processingStatus,
+        boolean unlock,
+        boolean removed) {
 
         this.course = course;
         this.synchronizationType = synchronizationType;
@@ -90,7 +90,7 @@ public final class SynchronizationItem {
         return synchronizationType;
     }
 
-    public Optional<OodiCourseUnitRealisation> getOodiCourse() {
+    public Optional<OodiCourseUsers> getOodiCourse() {
         return oodiCourse;
     }
 
@@ -102,7 +102,7 @@ public final class SynchronizationItem {
         return moodleEnrollments;
     }
 
-    public SynchronizationItem setOodiCourse(final Optional<OodiCourseUnitRealisation> newOodiCourse) {
+    public SynchronizationItem setOodiCourse(final Optional<OodiCourseUsers> newOodiCourse) {
         return new SynchronizationItem(course, synchronizationType, success, message, newOodiCourse, moodleCourse, moodleEnrollments, teacherItems, studentItems, enrichmentStatus, processingStatus, unlock, removed);
     }
 

@@ -50,6 +50,15 @@ public class OodiClient {
                 courseRealisationId);
     }
 
+    public Optional<OodiCourseUsers> getCourseUsers(final long courseRealisationId) {
+        return getOodiData(
+            "{baseUrl}/courseunitrealisations/{realisationId}/users?include_deleted=true&include_approved_status=true",
+            new ParameterizedTypeReference<OodiResponse<OodiCourseUsers>>() {
+            },
+            baseUrl,
+            courseRealisationId);
+    }
+
     public List<OodiCourseChange> getCourseChanges(final LocalDateTime afterDate) {
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT);
         final String formattedStartDate = formatter.format(afterDate);

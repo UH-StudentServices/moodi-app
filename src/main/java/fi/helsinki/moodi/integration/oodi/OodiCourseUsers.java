@@ -17,26 +17,30 @@
 
 package fi.helsinki.moodi.integration.oodi;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.Optional;
+import java.io.Serializable;
+import java.util.List;
 
-@Service
-public class OodiService {
+import static com.google.common.collect.Lists.newArrayList;
 
-    private final OodiClient oodiClient;
+public class OodiCourseUsers implements Serializable {
 
-    @Autowired
-    public OodiService(OodiClient oodiClient) {
-        this.oodiClient = oodiClient;
-    }
+    private static final long serialVersionUID = 1L;
 
-    public Optional<OodiCourseUnitRealisation> getOodiCourseUnitRealisation(final long realisationId) {
-        return oodiClient.getCourseUnitRealisation(realisationId);
-    }
+    @JsonProperty("students")
+    public List<OodiStudent> students = newArrayList();
 
-    public Optional<OodiCourseUsers> getOodiCourseUsers(final long realisationId) {
-        return oodiClient.getCourseUsers(realisationId);
-    }
+    @JsonProperty("teachers")
+    public List<OodiTeacher> teachers = newArrayList();
+
+    @JsonProperty("end_date")
+    public String endDate;
+
+    @JsonProperty("course_id")
+    public Integer realisationId;
+
+    @JsonProperty("deleted")
+    public boolean removed;
+
 }
