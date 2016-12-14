@@ -194,7 +194,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
             if(synchronizationThreshold.isLimitedByThreshold(action, itemsCount)) {
                 lockItem(parentItem, String.format(THRESHOLD_EXCEEDED_MESSAGE, action, itemsCount));
-            } else if(itemsCount == allItemsCount && synchronizationThreshold.isActionPreventedToAllItems(action)) {
+            } else if(itemsCount == allItemsCount && synchronizationThreshold.isActionPreventedToAllItems(action, itemsCount)) {
                 lockItem(parentItem, String.format(PREVENT_ACTION_ON_ALL_MESSAGE, action));
             }
         });

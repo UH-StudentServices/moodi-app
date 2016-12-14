@@ -36,16 +36,22 @@ public class SynchronizationThreshold {
 
     private final Map<SynchronizationAction, SyncLimit> limits;
 
+    private final Environment environment;
+
     @Autowired
     public SynchronizationThreshold(Environment environment) {
+        this.environment = environment;
+
         limits = newArrayList(SynchronizationAction.values()).stream()
             .collect(Collectors.toMap(Function.identity(),
                 action -> new SyncLimit(
-                        environment.getProperty(THRESHOLD_PREFIX + "." + action + "." + THRESHOLD_LIMIT, Long.class),
-                        environment.getProperty(THRESHOLD_PREFIX + "." + action + "." + TRESHOLD_PREVENT_ALL, Boolean.class))
-                ));
+                    getProperty(action, THRESHOLD_LIMIT, Long.class),
+                    getProperty(action, TRESHOLD_PREVENT_ALL, Long.class)
+                )));
+    }
 
-
+    private <T> T getProperty(SynchronizationAction action, String keySuffix, Class<T> targetType) {
+        return environment.getProperty(THRESHOLD_PREFIX + "." + action + "." + keySuffix, targetType);
     }
 
     public boolean isLimitedByThreshold(SynchronizationAction action, Long itemCount) {
@@ -54,17 +60,19 @@ public class SynchronizationThreshold {
        return limit != null && limit <= itemCount;
     }
 
-    public boolean isActionPreventedToAllItems(SynchronizationAction action) {
-       Boolean isPreventAll = limits.get(action).isPreventAll();
+    public boolean isActionPreventedToAllItems(SynchronizationAction action, Long itemCount) {
+       Long preventAll = limits.get(action).getPreventAll();
 
-       return isPreventAll != null && isPreventAll;
+       return preventAll != null &&
+           preventAll > 0 &&
+           preventAll <= itemCount;
     }
 
     private static class SyncLimit {
-        private Long limit;
-        private Boolean preventAll;
+        private final Long limit;
+        private final Long preventAll;
 
-        private SyncLimit(Long limit, Boolean preventAll) {
+        private SyncLimit(Long limit, Long preventAll) {
             this.limit = limit;
             this.preventAll = preventAll;
         }
@@ -73,7 +81,7 @@ public class SynchronizationThreshold {
             return limit;
         }
 
-        public Boolean isPreventAll() {
+        public Long getPreventAll() {
             return preventAll;
         }
     }

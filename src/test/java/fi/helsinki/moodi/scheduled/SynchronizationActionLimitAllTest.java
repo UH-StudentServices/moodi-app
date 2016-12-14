@@ -30,7 +30,7 @@ import org.springframework.test.context.TestPropertySource;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@TestPropertySource(properties = {"syncTresholds.REMOVE_ROLE.preventAll = true",
+@TestPropertySource(properties = {"syncTresholds.REMOVE_ROLE.preventAll = 1",
                                   "syncTresholds.REMOVE_ROLE.limit = 10"})
 public class SynchronizationActionLimitAllTest extends AbstractSynchronizationJobTest {
 

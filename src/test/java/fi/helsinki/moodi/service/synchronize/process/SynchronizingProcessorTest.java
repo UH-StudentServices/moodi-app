@@ -42,7 +42,7 @@ import java.util.Optional;
 import static com.google.common.collect.Lists.newArrayList;
 
 
-@TestPropertySource(properties = {"syncTresholds.REMOVE_ROLE.preventAll = false"})
+@TestPropertySource(properties = {"syncTresholds.REMOVE_ROLE.preventAll = 0"})
 public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
 
     private static final long MOODLE_USER_ID = 1L;
