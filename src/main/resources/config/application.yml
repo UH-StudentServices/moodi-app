@@ -72,7 +72,7 @@ dev.mode.enabled: false
 
 syncTresholds:
   REMOVE_ROLE:
-    preventAll: 5
+    preventAll: 3
 
 mailNotification:
   from: moodi-app
