@@ -35,8 +35,12 @@ public final class Fixtures {
     }
 
     public static String asString(final String path, final Map<String, ?> variables) {
+        return asString(PREFIX, path, variables);
+    }
+
+    public static String asString(final String prefix, final String path, final Map<String, ?> variables) {
         try {
-            final String content = Files.toString(new File(PREFIX + path), Charset.forName("UTF-8"));
+            final String content = Files.toString(new File(prefix + path), Charset.forName("UTF-8"));
             return Templates.render(content, variables);
         } catch (IOException e) {
             throw new RuntimeException(e);
