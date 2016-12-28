@@ -31,6 +31,9 @@ public final class MoodleUserEnrollments implements Serializable {
     @JsonProperty("id")
     public Long id;
 
+    @JsonProperty("username")
+    public String username;
+
     @JsonProperty("roles")
     public List<MoodleRole> roles;
 

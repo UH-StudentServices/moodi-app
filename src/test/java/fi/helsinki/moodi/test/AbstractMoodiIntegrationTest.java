@@ -59,8 +59,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = { Application.class, TestConfig.class })
 @WebIntegrationTest({
-        "server.port:0",
-        "integration.moodle.wstoken:xxxx1234"
+        "server.port:0"
 })
 @ActiveProfiles("test")
 public abstract class AbstractMoodiIntegrationTest {
@@ -77,13 +76,13 @@ public abstract class AbstractMoodiIntegrationTest {
     private WebApplicationContext context;
 
     @Autowired
-    private RestTemplate oodiRestTemplate;
+    protected RestTemplate oodiRestTemplate;
 
     @Autowired
-    private RestTemplate moodleRestTemplate;
+    protected RestTemplate moodleRestTemplate;
 
     @Autowired
-    private RestTemplate esbRestTemplate;
+    protected RestTemplate esbRestTemplate;
 
     @Autowired
     private Flyway flyway;
@@ -145,7 +144,7 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     @Before
-    public final void setUpMockServers() {
+    public void setUpMockServers() {
         oodiMockServer = MockRestServiceServer.createServer(oodiRestTemplate);
         moodleMockServer = MockRestServiceServer.createServer(moodleRestTemplate);
         esbMockServer = MockRestServiceServer.createServer(esbRestTemplate);
