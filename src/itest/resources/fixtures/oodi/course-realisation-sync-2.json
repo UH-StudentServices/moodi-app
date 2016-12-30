@@ -1,0 +1,98 @@
+{
+  "status": 200,
+  "data": {
+    "students": [
+      {
+        "student_number": "{{ studentNumber }}",
+        "approved": "{{ studentApproved }}"
+      },
+      {
+        "student_number": "{{ studentNumber2 }}",
+        "approved": "{{ studentApproved2 }}"
+      }
+    ],
+    "realisation_type_code": 5,
+    "course_id": "{{ courseId }}",
+    "teachers": [
+      {
+        "teacher_id": "{{ teacherId }}"
+      }
+    ],
+    "end_date": "{{ endDate }}",
+    "languages": [
+      {
+        "langcode": "fi"
+      }
+    ],
+    "descriptions": [
+      {
+        "id": 22,
+        "texts": [
+          {
+            "langcode": "fi",
+            "text": "Description 1 (fi)"
+          },
+          {
+            "langcode": "sv",
+            "text": "Description 1 (sv)"
+          },
+          {
+            "langcode": "en",
+            "text": "Description 1 (en)"
+          }
+        ]
+      },
+      {
+        "id": 26,
+        "texts": [
+          {
+            "langcode": "fi",
+            "text": "Description 2 (fi)"
+          },
+          {
+            "langcode": "sv",
+            "text": "Description 2 (sv)"
+          },
+          {
+            "langcode": "en",
+            "text": "Description 2 (en)"
+          }
+        ]
+      }
+    ],
+    "organisations": [
+      {
+        "percentage": 100,
+        "name": [
+          {
+            "langcode": "fi",
+            "text": "Sosiologia"
+          },
+          {
+            "langcode": "sv",
+            "text": "Sociologiska institutionen"
+          },
+          {
+            "langcode": "en",
+            "text": "Department of Sociology"
+          }
+        ],
+        "code": "H5510"
+      }
+    ],
+    "realisation_name": [
+      {
+        "langcode": "fi",
+        "text": "Lapsuus ja yhteiskunta"
+      },
+      {
+        "langcode": "sv",
+        "text": "Barndom i samhället"
+      },
+      {
+        "langcode": "en",
+        "text": "Childhood and society"
+      }
+    ]
+  }
+}
