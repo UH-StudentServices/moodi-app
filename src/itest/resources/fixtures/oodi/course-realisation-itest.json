@@ -2,13 +2,21 @@
   "status": 200,
   "data": {
     "students": [
+      {{#students}}
+      {
+        "student_number": "{{ studentNumber }}",
+        "approved": "{{ approved }}"
+      }{{#iterHasNext}},{{/iterHasNext}}
+      {{/students}}
     ],
     "realisation_type_code": 5,
     "course_id": "{{ courseId }}",
     "teachers": [
+      {{#teachers}}
       {
         "teacher_id": "{{ teacherId }}"
-      }
+      }{{#iterHasNext}},{{/iterHasNext}}
+      {{/teachers}}
     ],
     "end_date": "{{ endDate }}",
     "languages": [

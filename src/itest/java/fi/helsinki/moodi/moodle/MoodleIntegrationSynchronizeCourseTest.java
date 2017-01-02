@@ -17,23 +17,20 @@
 
 package fi.helsinki.moodi.moodle;
 
-import com.google.common.collect.ImmutableMap;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.service.course.CourseRepository;
 import fi.helsinki.moodi.service.synchronize.SynchronizationService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
-import fi.helsinki.moodi.test.fixtures.Fixtures;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 
 import java.util.List;
 
-import static fi.helsinki.moodi.integration.esb.EsbService.TEACHER_ID_PREFIX;
-import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegrationTest {
 
@@ -43,15 +40,17 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
     @Autowired
     private CourseRepository courseRepository;
 
-    @Test
-    public void testMoodleIntegrationWhenSyncingCourse() {
+    @Before
+    public void emptyCourses() {
         courseRepository.deleteAll(); // Delete migrated courses for easier testing
+    }
 
+    @Test
+    public void testSyncNewEnrollments() {
         long oodiCourseId = getOodiCourseId();
 
-        expectCourseImport(oodiCourseId);
-
-        expectGetCourseUsers(oodiCourseId);
+        expectCourseRealisationWithUsers(oodiCourseId, newArrayList(), singletonList(teacherUser));
+        expectCourseUsersWithUsers(oodiCourseId, newArrayList(studentUser), singletonList(teacherUser));
 
         long moodleCourseId = importCourse(oodiCourseId);
 
@@ -68,50 +67,57 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
         assertTrue(studentEnrollment.hasRole(mapperService.getStudentRoleId()));
         assertTrue(studentEnrollment.hasRole(mapperService.getMoodiRoleId()));
 
+        assertEquals(2, teacherEnrollment.roles.size());
+        assertTrue(teacherEnrollment.hasRole(mapperService.getMoodiRoleId()));
+        assertTrue(teacherEnrollment.hasRole(mapperService.getTeacherRoleId()));
+    }
+
+    @Test
+    public void testSyncRoleAdditions() {
+        long oodiCourseId = getOodiCourseId();
+
+        expectCourseRealisationWithUsers(oodiCourseId, newArrayList(), singletonList(teacherUser));
+        expectCourseUsersWithUsers(oodiCourseId, newArrayList(teacherInStudentRole), singletonList(teacherUser));
+
+        long moodleCourseId = importCourse(oodiCourseId);
+
+        synchronizationService.synchronize(SynchronizationType.FULL);
+
+        List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
+
+        assertEquals(1, moodleUserEnrollmentsList.size());
+
+        MoodleUserEnrollments teacherEnrollment = findEnrollmentsByUsername(moodleUserEnrollmentsList, TEACHER_USERNAME);
+
         assertEquals(3, teacherEnrollment.roles.size());
         assertTrue(teacherEnrollment.hasRole(mapperService.getMoodiRoleId()));
         assertTrue(teacherEnrollment.hasRole(mapperService.getStudentRoleId()));
         assertTrue(teacherEnrollment.hasRole(mapperService.getTeacherRoleId()));
     }
 
-    private void expectCourseImport(long courseId) {
+    @Test
+    public void testSyncRoleRemoves() {
+        long oodiCourseId = getOodiCourseId();
 
-        expectGetCourseUnitRealisationRequestToOodi(
-            courseId,
-            withSuccess(Fixtures.asString(
-                INTEGRATION_TEST_OODI_FIXTURES_PREFIX,
-                "course-realisation-sync-1.json",
-                new ImmutableMap.Builder()
-                    .put("courseId", courseId)
-                    .put("teacherId", TEACHER_ID)
-                    .put("endDate", getFutureDateString())
-                    .build()),
-                MediaType.APPLICATION_JSON));
+        expectCourseRealisationWithUsers(oodiCourseId, singletonList(studentUser), singletonList(teacherUser));
+        expectCourseUsersWithUsers(oodiCourseId, singletonList(studentUser.setApproved(false)), singletonList(teacherUser));
 
-        expectFindEmployeeRequestToEsb(TEACHER_ID_PREFIX + TEACHER_ID, TEACHER_USERNAME);
+        long moodleCourseId = importCourse(oodiCourseId);
+
+        synchronizationService.synchronize(SynchronizationType.FULL);
+
+        List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
+
+        assertEquals(2, moodleUserEnrollmentsList.size());
+
+        MoodleUserEnrollments studentEnrollment = findEnrollmentsByUsername(moodleUserEnrollmentsList, STUDENT_USERNAME);
+        MoodleUserEnrollments teacherEnrollment = findEnrollmentsByUsername(moodleUserEnrollmentsList, TEACHER_USERNAME);
+
+        assertEquals(1, studentEnrollment.roles.size());
+        assertTrue(studentEnrollment.hasRole(mapperService.getMoodiRoleId()));
+
+        assertEquals(2, teacherEnrollment.roles.size());
+        assertTrue(teacherEnrollment.hasRole(mapperService.getMoodiRoleId()));
+        assertTrue(teacherEnrollment.hasRole(mapperService.getTeacherRoleId()));
     }
-
-    private void expectGetCourseUsers(long courseId) {
-        expectGetCourseUsersRequestToOodi(
-            courseId,
-            withSuccess(Fixtures.asString(
-                INTEGRATION_TEST_OODI_FIXTURES_PREFIX,
-                "course-realisation-sync-2.json",
-                new ImmutableMap.Builder()
-                    .put("courseId", courseId)
-                    .put("studentNumber", STUDENT_NUMBER)
-                    .put("studentApproved", true)
-                    .put("studentNumber2", STUDENT_NUMBER_2)
-                    .put("studentApproved2", true)
-                    .put("teacherId", TEACHER_ID)
-                    .put("endDate", getFutureDateString())
-                    .build()),
-                MediaType.APPLICATION_JSON));
-
-        expectFindStudentRequestToEsb(STUDENT_NUMBER, STUDENT_USERNAME);
-        expectFindStudentRequestToEsb(STUDENT_NUMBER_2, STUDENT_USERNAME_2);
-        expectFindEmployeeRequestToEsb(TEACHER_ID_PREFIX + TEACHER_ID, TEACHER_USERNAME);
-    }
-
-
 }
