@@ -11,7 +11,7 @@ spring:
 
 integration:
   moodle:
-    baseUrl: https://mdl-bak.it.helsinki.fi
-    url: https://mdl-bak.it.helsinki.fi/webservice/rest/server.php
+    baseUrl: https://moodi-2-moodle.student.helsinki.fi/moodle31
+    url: https://moodi-2-moodle.student.helsinki.fi/moodle31/webservice/rest/server.php
   oodi.url: https://oprek2.it.helsinki.fi:30039
   esb.url: https://esbmt1.it.helsinki.fi
