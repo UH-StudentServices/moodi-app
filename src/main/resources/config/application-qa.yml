@@ -13,5 +13,5 @@ integration:
   moodle:
     baseUrl: https://moodi-2-moodle.student.helsinki.fi/moodle31
     url: https://moodi-2-moodle.student.helsinki.fi/moodle31/webservice/rest/server.php
-  oodi.url: https://oprek2.it.helsinki.fi:30039
+  oodi.url: https://oprek4.it.helsinki.fi:30040
   esb.url: https://esbmt1.it.helsinki.fi
