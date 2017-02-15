@@ -252,7 +252,7 @@ public class MoodleClient {
 
         final String body = restTemplate.postForObject(baseUrl, new HttpEntity<>(params, createHeaders()), String.class);
 
-        LOGGER.info("Got response body:\n{}", body);
+        LOGGER.debug("Got response body:\n{}", body);
 
         switch (responseBodyEvaluator.evaluate(body)) {
             case CONTINUE:
