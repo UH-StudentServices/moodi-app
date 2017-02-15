@@ -21,6 +21,7 @@ package fi.helsinki.moodi.config;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import fi.helsinki.moodi.integration.http.RequestTimingInterceptor;
 import fi.helsinki.moodi.integration.moodle.MoodleClient;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -33,8 +34,9 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
+
+import static java.util.Collections.singletonList;
 
 @Configuration
 public class MoodleConfig {
@@ -55,10 +57,10 @@ public class MoodleConfig {
                 new BufferingClientHttpRequestFactory(new HttpComponentsClientHttpRequestFactory(httpClient));
 
         final RestTemplate restTemplate = new RestTemplate(requestFactory);
+        restTemplate.setInterceptors(singletonList(new RequestTimingInterceptor()));
 
         restTemplate.setMessageConverters(
                 Lists.newArrayList(
-//                        new MappingJackson2HttpMessageConverter(objectMapper()),
                         new StringHttpMessageConverter(),
                         new FormHttpMessageConverter()));
 

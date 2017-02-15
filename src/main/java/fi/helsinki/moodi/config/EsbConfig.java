@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.helsinki.moodi.integration.esb.EsbClient;
 import fi.helsinki.moodi.integration.http.LoggingInterceptor;
+import fi.helsinki.moodi.integration.http.RequestTimingInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,6 +30,8 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 @Configuration
 public class EsbConfig {
@@ -45,7 +48,7 @@ public class EsbConfig {
     public RestTemplate esbRestTemplate() {
         final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(objectMapper());
         RestTemplate restTemplate = new RestTemplate(Collections.singletonList(converter));
-        restTemplate.setInterceptors(Collections.singletonList(new LoggingInterceptor()));
+        restTemplate.setInterceptors(newArrayList(new LoggingInterceptor(), new RequestTimingInterceptor()));
         return restTemplate;
     }
 

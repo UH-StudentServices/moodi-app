@@ -107,7 +107,7 @@ public class EnrollmentExecutor {
 
             loggingService.logCourseImportEnrollments(courseEnrollmentStatus);
 
-            LOGGER.info("Enrollment executor for realisationId {} finished in {} seconds", course.realisationId, stopWatch.getTotalTimeSeconds());
+            LOGGER.info("Enrollment executor for realisationId {} finished in {}", course.realisationId, stopWatch.toString());
 
         } catch(Exception e) {
             courseService.completeCourseImport(course.realisationId, false);

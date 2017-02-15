@@ -30,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -81,7 +80,7 @@ public class SynchronizationService {
 
         final SynchronizationSummary summary = complete(type, jobId, stopwatch, processedItems);
 
-        LOGGER.info("Synchronization with jobId {} completed in {} ms", jobId, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+        LOGGER.info("Synchronization with jobId {} completed in {}", jobId, stopwatch.toString());
 
         applyNotifiers(processedItems);
 

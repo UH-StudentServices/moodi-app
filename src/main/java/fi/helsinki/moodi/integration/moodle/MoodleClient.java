@@ -248,11 +248,11 @@ public class MoodleClient {
             final ResponseBodyEvaluator responseBodyEvaluator)
             throws IOException {
 
-        LOGGER.debug("Invoke url: {} with params: {}", baseUrl, paramsToString(params));
+        LOGGER.info("Invoke url: {} with params: {}", baseUrl, paramsToString(params));
 
         final String body = restTemplate.postForObject(baseUrl, new HttpEntity<>(params, createHeaders()), String.class);
 
-        LOGGER.debug("Got response body:\n{}", body);
+        LOGGER.info("Got response body:\n{}", body);
 
         switch (responseBodyEvaluator.evaluate(body)) {
             case CONTINUE:

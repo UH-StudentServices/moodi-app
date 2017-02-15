@@ -69,10 +69,8 @@ public class ProcessorService {
             final List<SynchronizationItem> itemsToProcess = itemsByAction.getOrDefault(action, Lists.newArrayList());
             final Processor processor = processorsByAction.get(action);
             itemsToProcess.stream()
-                .map(item -> logProcessActionStart(item, action))
                 .map(item -> processExecutor.processItem(item, processor))
                 .map(this::readItem)
-                .map(item -> logProcessActionCompleted(item, action))
                 .forEach(processedItems::add);
         }
 
@@ -81,21 +79,5 @@ public class ProcessorService {
 
     private Map<Action, List<SynchronizationItem>> groupItemsByAction(final List<SynchronizationItem> items) {
         return items.stream().collect(groupingBy(ActionResolver::resolve));
-    }
-
-    private SynchronizationItem logProcessActionStart(SynchronizationItem item, Action action) {
-        LOGGER.info("Starting to process action {} for course realisationId {}",
-            action,
-            item.getCourse().realisationId);
-
-        return item;
-    }
-
-    private SynchronizationItem logProcessActionCompleted(SynchronizationItem item, Action action) {
-        LOGGER.info("Completed processing action {} for course realisationId {}",
-            action,
-            item.getCourse().realisationId);
-
-        return item;
     }
 }

@@ -49,23 +49,8 @@ public class EnricherService {
 
     public List<SynchronizationItem> enrich(final List<SynchronizationItem> items) {
         return items.stream()
-            .map(this::logEnrichStart)
             .map(enrichExecutor::enrichItem)
             .map(this::readItem)
-            .map(this::logEnrichCompleted)
             .collect(Collectors.toList());
     }
-
-    private SynchronizationItem logEnrichStart(SynchronizationItem item) {
-        LOGGER.info("Starting enrichment phase for course realisationId {}",
-            item.getCourse().realisationId);
-        return item;
-    }
-
-    private SynchronizationItem logEnrichCompleted(SynchronizationItem item) {
-        LOGGER.info("Completed enrichment phase for course realisationId {}",
-            item.getCourse().realisationId);
-        return item;
-    }
-
 }
