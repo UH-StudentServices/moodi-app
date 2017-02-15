@@ -80,7 +80,7 @@ public class EnrollmentExecutor {
                                    final long moodleCourseId) {
         try {
 
-            LOGGER.debug("Enrollment executor started for realisationId {} ", course.realisationId);
+            LOGGER.info("Enrollment executor started for realisationId {} ", course.realisationId);
 
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
@@ -107,7 +107,7 @@ public class EnrollmentExecutor {
 
             loggingService.logCourseImportEnrollments(courseEnrollmentStatus);
 
-            LOGGER.debug("Enrollment executor for realisationId {} finished in {} seconds", course.realisationId, stopWatch.getTotalTimeSeconds());
+            LOGGER.info("Enrollment executor for realisationId {} finished in {} seconds", course.realisationId, stopWatch.getTotalTimeSeconds());
 
         } catch(Exception e) {
             courseService.completeCourseImport(course.realisationId, false);
@@ -151,11 +151,6 @@ public class EnrollmentExecutor {
             .collect(toList()));
 
         return enrollments;
-    }
-
-    private void logMoodleEnrollments(final List<MoodleEnrollment> moodleEnrollments) {
-        LOGGER.info("About to create {} enrollments to Moodle", moodleEnrollments.size());
-        moodleEnrollments.forEach(e -> LOGGER.info(e.toString()));
     }
 
     private List<MoodleEnrollment> buildMoodleEnrollments(final long courseId, final List<Enrollment> enrollments) {
@@ -257,7 +252,6 @@ public class EnrollmentExecutor {
 
         try {
             final List<MoodleEnrollment> moodleEnrollments = buildMoodleEnrollments(courseId, enrollments);
-            logMoodleEnrollments(moodleEnrollments);
             moodleService.addEnrollments(moodleEnrollments);
             return true;
         } catch (Exception e) {

@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import fi.helsinki.moodi.service.util.JsonUtil;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -29,6 +30,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  * Implementation that logs to log file.
  */
 @Component
+@Profile({"test", "local"})
 public class LogFileLogger implements MoodiLogger {
 
     private final JsonUtil jsonUtil;

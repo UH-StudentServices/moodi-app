@@ -42,7 +42,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  * Implementation that logs to separate files.
  */
 @Component
-@Profile("!test")
+@Profile({"!test", "!local"})
 public class FileLogger implements MoodiLogger {
     private static final Logger LOGGER = getLogger(FileLogger.class);
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");

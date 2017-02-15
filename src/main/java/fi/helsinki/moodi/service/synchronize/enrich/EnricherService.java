@@ -18,6 +18,8 @@
 package fi.helsinki.moodi.service.synchronize.enrich;
 
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class EnricherService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnricherService.class);
 
     private final EnrichExecutor enrichExecutor;
 
@@ -45,9 +49,23 @@ public class EnricherService {
 
     public List<SynchronizationItem> enrich(final List<SynchronizationItem> items) {
         return items.stream()
+            .map(this::logEnrichStart)
             .map(enrichExecutor::enrichItem)
             .map(this::readItem)
+            .map(this::logEnrichCompleted)
             .collect(Collectors.toList());
+    }
+
+    private SynchronizationItem logEnrichStart(SynchronizationItem item) {
+        LOGGER.info("Starting enrichment phase for course realisationId {}",
+            item.getCourse().realisationId);
+        return item;
+    }
+
+    private SynchronizationItem logEnrichCompleted(SynchronizationItem item) {
+        LOGGER.info("Completed enrichment phase for course realisationId {}",
+            item.getCourse().realisationId);
+        return item;
     }
 
 }
