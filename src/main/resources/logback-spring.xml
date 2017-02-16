@@ -30,7 +30,6 @@
         <include resource="logback-rolling-file-appender.xml"/>
         <root level="INFO">
             <appender-ref ref="FILE"/>
-            <appender-ref ref="CONSOLE"/>
         </root>
         <logger name="fi.helsinki.moodi" level="DEBUG"/>
     </springProfile>
@@ -39,7 +38,6 @@
         <include resource="logback-rolling-file-appender.xml"/>
         <root level="INFO">
             <appender-ref ref="FILE"/>
-            <appender-ref ref="CONSOLE"/>
         </root>
     </springProfile>
 
