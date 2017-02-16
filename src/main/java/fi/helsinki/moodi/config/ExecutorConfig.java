@@ -29,8 +29,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @EnableAsync
 public class ExecutorConfig {
 
-    private static final int CORE_POOL_SIZE = 1;
-    private static final int MAX_POOL_SIZE = 1;
+    private static final int CORE_POOL_SIZE = 10;
+    private static final int MAX_POOL_SIZE = 20;
     private static final int KEEP_ALIVE_SECONDS = 10;
 
     @Bean
