@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -51,13 +52,9 @@ public class MoodleConfig {
 
     @Bean
     public RestTemplate moodleRestTemplate() {
-        final HttpClient httpClient = HttpClientBuilder
-            .create()
-            .setMaxConnPerRoute(10)
-            .setMaxConnTotal(10)
-            .build();
-
-        final ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+        final HttpClient httpClient = HttpClientBuilder.create().build();
+        final ClientHttpRequestFactory requestFactory =
+                new BufferingClientHttpRequestFactory(new HttpComponentsClientHttpRequestFactory(httpClient));
 
         final RestTemplate restTemplate = new RestTemplate(requestFactory);
         restTemplate.setInterceptors(singletonList(new RequestTimingInterceptor()));
