@@ -23,9 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import fi.helsinki.moodi.integration.http.RequestTimingInterceptor;
 import fi.helsinki.moodi.integration.moodle.MoodleClient;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,12 +36,10 @@ import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import static java.util.Collections.singletonList;
+import java.util.Collections;
 
 @Configuration
 public class MoodleConfig {
-
-    private static final int RETRY_COUNT = 3;
 
     @Autowired
     private Environment environment;
@@ -55,8 +52,12 @@ public class MoodleConfig {
 
     @Bean
     public RestTemplate moodleRestTemplate() {
-        final RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory());
-        restTemplate.setInterceptors(singletonList(new RequestTimingInterceptor()));
+        final HttpClient httpClient = HttpClientBuilder.create().build();
+        final ClientHttpRequestFactory requestFactory =
+                new BufferingClientHttpRequestFactory(new HttpComponentsClientHttpRequestFactory(httpClient));
+
+        final RestTemplate restTemplate = new RestTemplate(requestFactory);
+        restTemplate.setInterceptors(Collections.singletonList(new RequestTimingInterceptor()));
 
         restTemplate.setMessageConverters(
                 Lists.newArrayList(
@@ -65,27 +66,6 @@ public class MoodleConfig {
 
         return restTemplate;
     }
-
-    private ClientHttpRequestFactory clientHttpRequestFactory() {
-        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
-        factory.setReadTimeout(Integer.valueOf(environment.getProperty("httpClient.readTimeout")));
-        factory.setConnectTimeout(Integer.valueOf(environment.getProperty("httpClient.connectTimeout")));
-
-        PoolingHttpClientConnectionManager poolingHttpClientConnectionManager = new PoolingHttpClientConnectionManager();
-        poolingHttpClientConnectionManager.setMaxTotal(
-            Integer.valueOf(environment.getProperty("httpClient.maxTotal")));
-        poolingHttpClientConnectionManager.setDefaultMaxPerRoute(
-            Integer.valueOf(environment.getProperty("httpClient.defaultMaxPerRoute")));
-
-        CloseableHttpClient httpClient = HttpClientBuilder.create()
-            .setConnectionManager(poolingHttpClientConnectionManager)
-            .build();
-
-        factory.setHttpClient(httpClient);
-
-        return new BufferingClientHttpRequestFactory(factory);
-    }
-
 
     private String baseUrl() {
         return environment.getRequiredProperty("integration.moodle.url");
