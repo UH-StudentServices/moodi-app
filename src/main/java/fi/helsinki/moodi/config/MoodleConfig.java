@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import fi.helsinki.moodi.integration.http.RequestTimingInterceptor;
 import fi.helsinki.moodi.integration.moodle.MoodleClient;
 import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -41,6 +42,8 @@ import static java.util.Collections.singletonList;
 @Configuration
 public class MoodleConfig {
 
+    private static final int RETRY_COUNT = 3;
+
     @Autowired
     private Environment environment;
 
@@ -52,7 +55,11 @@ public class MoodleConfig {
 
     @Bean
     public RestTemplate moodleRestTemplate() {
-        final HttpClient httpClient = HttpClientBuilder.create().build();
+        final HttpClient httpClient = HttpClientBuilder
+            .create()
+            .setRetryHandler(new DefaultHttpRequestRetryHandler(RETRY_COUNT, true))
+            .build();
+
         final ClientHttpRequestFactory requestFactory =
                 new BufferingClientHttpRequestFactory(new HttpComponentsClientHttpRequestFactory(httpClient));
 
