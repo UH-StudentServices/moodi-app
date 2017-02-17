@@ -24,7 +24,9 @@ import com.google.common.collect.Lists;
 import fi.helsinki.moodi.integration.http.RequestTimingInterceptor;
 import fi.helsinki.moodi.integration.moodle.MoodleClient;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,10 +38,17 @@ import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.util.Collections;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 @Configuration
 public class MoodleConfig {
+
+    private static final int MAX_EXECUTION_COUNT = 3;
+
+    private static final Logger LOGGER = getLogger(MoodleConfig.class);
 
     @Autowired
     private Environment environment;
@@ -52,7 +61,11 @@ public class MoodleConfig {
 
     @Bean
     public RestTemplate moodleRestTemplate() {
-        final HttpClient httpClient = HttpClientBuilder.create().build();
+        final HttpClient httpClient = HttpClientBuilder
+            .create()
+            .setRetryHandler(new MoodleRequestRetryHandler())
+            .build();
+
         final ClientHttpRequestFactory requestFactory =
                 new BufferingClientHttpRequestFactory(new HttpComponentsClientHttpRequestFactory(httpClient));
 
@@ -78,5 +91,25 @@ public class MoodleConfig {
     private ObjectMapper objectMapper() {
         return new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
+
+    private static class MoodleRequestRetryHandler implements HttpRequestRetryHandler {
+        @Override
+        public boolean retryRequest(IOException exception,
+                                    int executionCount,
+                                    org.apache.http.protocol.HttpContext context) {
+
+            if (executionCount > MAX_EXECUTION_COUNT) {
+                LOGGER.warn("Maximum tries reached for client http pool ");
+                return false;
+            }
+
+            if (exception instanceof org.apache.http.NoHttpResponseException) {
+                LOGGER.warn("No response from server on " + executionCount + " call");
+                return true;
+            }
+            
+            return false;
+        }
     }
 }
