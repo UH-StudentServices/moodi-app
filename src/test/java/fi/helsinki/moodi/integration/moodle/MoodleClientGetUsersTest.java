@@ -38,7 +38,7 @@ public class MoodleClientGetUsersTest extends AbstractMoodiIntegrationTest {
 
     @Test
     public void deserializeRespose() {
-        moodleMockServer.expect(requestTo(getMoodleRestUrl()))
+        moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_user_get_users_by_field&moodlewsrestformat=json&field=username&values%5B0%5D=integraatio"))
                 .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
@@ -52,7 +52,7 @@ public class MoodleClientGetUsersTest extends AbstractMoodiIntegrationTest {
 
     @Test
     public void getWithTheSecondUsername() {
-        moodleMockServer.expect(requestTo(getMoodleRestUrl()))
+        moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_user_get_users_by_field&moodlewsrestformat=json&field=username&values%5B0%5D=first&values%5B1%5D=second"))
                 .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))

@@ -38,7 +38,7 @@ public class MoodleClientGetCoursesTest extends AbstractMoodiIntegrationTest {
 
     @Test
     public void deserializeRespose() {
-        moodleMockServer.expect(requestTo(getMoodleRestUrl()))
+        moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_course_get_courses&moodlewsrestformat=json"))
                 .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))

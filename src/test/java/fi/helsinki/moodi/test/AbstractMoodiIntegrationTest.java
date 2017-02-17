@@ -82,6 +82,9 @@ public abstract class AbstractMoodiIntegrationTest {
     protected RestTemplate moodleRestTemplate;
 
     @Autowired
+    protected RestTemplate moodleReadOnlyRestTemplate;
+
+    @Autowired
     protected RestTemplate esbRestTemplate;
 
     @Autowired
@@ -97,6 +100,7 @@ public abstract class AbstractMoodiIntegrationTest {
 
     protected MockRestServiceServer oodiMockServer;
     protected MockRestServiceServer moodleMockServer;
+    protected MockRestServiceServer moodleReadOnlyMockServer;
     protected MockRestServiceServer esbMockServer;
 
     protected String getMoodleBaseUrl() {
@@ -147,6 +151,7 @@ public abstract class AbstractMoodiIntegrationTest {
     public void setUpMockServers() {
         oodiMockServer = MockRestServiceServer.createServer(oodiRestTemplate);
         moodleMockServer = MockRestServiceServer.createServer(moodleRestTemplate);
+        moodleReadOnlyMockServer = MockRestServiceServer.createServer(moodleReadOnlyRestTemplate);
         esbMockServer = MockRestServiceServer.createServer(esbRestTemplate);
     }
 
@@ -263,7 +268,7 @@ public abstract class AbstractMoodiIntegrationTest {
 
     private void expectGetUserRequestToMoodleWithResponse(String username, String response) {
         String payload = "wstoken=xxxx1234&wsfunction=core_user_get_users_by_field&moodlewsrestformat=json&field=username&values%5B0%5D=" + urlEncode(username);
-        moodleMockServer.expect(requestTo(getMoodleRestUrl()))
+        moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andExpect(content().string(payload))
@@ -304,7 +309,7 @@ public abstract class AbstractMoodiIntegrationTest {
     protected final void expectGetEnrollmentsRequestToMoodle(final int courseId, final String response) {
         final String payload = "wstoken=xxxx1234&wsfunction=core_enrol_get_enrolled_users&moodlewsrestformat=json&courseid=" + courseId;
 
-        moodleMockServer.expect(requestTo(getMoodleRestUrl()))
+        moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andExpect(content().string(payload))
@@ -323,6 +328,7 @@ public abstract class AbstractMoodiIntegrationTest {
     public void verify() {
         oodiMockServer.verify();
         moodleMockServer.verify();
+        moodleReadOnlyMockServer.verify();
         esbMockServer.verify();
     }
 }

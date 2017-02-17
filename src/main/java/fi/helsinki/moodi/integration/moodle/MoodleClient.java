@@ -45,14 +45,20 @@ public class MoodleClient {
 
     private final String baseUrl;
     private final RestTemplate restTemplate;
+    private final RestTemplate readOnlyRestTemplate;
     private final ObjectMapper objectMapper;
     private final String wstoken;
 
-    public MoodleClient(String baseUrl, String wstoken, ObjectMapper objectMapper, RestTemplate restTemplate) {
+    public MoodleClient(String baseUrl,
+                        String wstoken,
+                        ObjectMapper objectMapper,
+                        RestTemplate restTemplate,
+                        RestTemplate readOnlyRestTemplate) {
         this.baseUrl = baseUrl;
         this.wstoken = wstoken;
         this.objectMapper = objectMapper;
         this.restTemplate = restTemplate;
+        this.readOnlyRestTemplate = readOnlyRestTemplate;
     }
 
     public List<MoodleFullCourse> getCourses(List<Long> ids) {
@@ -61,7 +67,7 @@ public class MoodleClient {
         setListParameters(params, "options[ids][%s]", ids, String::valueOf);
 
         try {
-            return execute(params, new TypeReference<List<MoodleFullCourse>>() {}, DEFAULT_EVALUATION);
+            return execute(params, new TypeReference<List<MoodleFullCourse>>() {}, DEFAULT_EVALUATION, true);
         } catch (Exception e) {
             return handleException("Error executing method: core_course_get_courses", e);
         }
@@ -98,7 +104,7 @@ public class MoodleClient {
         params.set("courses[0][showreports]", booleanToIntString(course.showReports));
 
         try {
-            return execute(params, new TypeReference<List<MoodleCourseData>>() {}, DEFAULT_EVALUATION)
+            return execute(params, new TypeReference<List<MoodleCourseData>>() {}, DEFAULT_EVALUATION, false)
                 .stream()
                 .findFirst()
                 .map(s -> s.id)
@@ -119,7 +125,7 @@ public class MoodleClient {
         }
 
         try {
-            execute(params, new TypeReference<Void>() {}, EMPTY_OK_RESPONSE_EVALUATION);
+            execute(params, new TypeReference<Void>() {}, EMPTY_OK_RESPONSE_EVALUATION, false);
         } catch (Exception e) {
             handleException("Error executing method: addEnrollments", e);
         }
@@ -132,7 +138,7 @@ public class MoodleClient {
         setListParameters(params, "values[%s]", username, String::valueOf);
 
         try {
-            return execute(params, new TypeReference<List<MoodleUser>>() {}, DEFAULT_EVALUATION)
+            return execute(params, new TypeReference<List<MoodleUser>>() {}, DEFAULT_EVALUATION, true)
                 .stream()
                 .findFirst()
                 .orElse(null);
@@ -156,7 +162,7 @@ public class MoodleClient {
 
         try {
             return Long.valueOf(execute(params, new TypeReference<List<Map<String, String>>>() {},
-                    DEFAULT_EVALUATION).get(0).get("id"));
+                    DEFAULT_EVALUATION, false).get(0).get("id"));
         } catch (IOException e) {
             return handleException("Error executing method: createUser", e);
         }
@@ -168,7 +174,7 @@ public class MoodleClient {
         params.set("userids[0]", String.valueOf(moodleId));
 
         try {
-            execute(params, new TypeReference<Void>() {}, DEFAULT_EVALUATION);
+            execute(params, new TypeReference<Void>() {}, DEFAULT_EVALUATION, false);
         } catch (IOException e) {
             handleException("Error executing method: deleteUser", e);
         }
@@ -179,7 +185,7 @@ public class MoodleClient {
         params.set("courseid", String.valueOf(courseId));
 
         try {
-            return execute(params, new TypeReference<List<MoodleUserEnrollments>>() {}, DEFAULT_EVALUATION);
+            return execute(params, new TypeReference<List<MoodleUserEnrollments>>() {}, DEFAULT_EVALUATION, true);
         } catch (Exception e) {
             return handleException("Error executing method: getUsers", e);
         }
@@ -208,7 +214,7 @@ public class MoodleClient {
         }
 
         try {
-            execute(params, null, EMPTY_OK_RESPONSE_EVALUATION);
+            execute(params, null, EMPTY_OK_RESPONSE_EVALUATION, false);
         } catch (Exception e) {
             handleException("Error executing method: assignRoles", e);
         }
@@ -242,15 +248,21 @@ public class MoodleClient {
         return headers;
     }
 
+    private RestTemplate getRestTemplate(final boolean readOnly) {
+        return readOnly ? readOnlyRestTemplate : restTemplate;
+    }
+
     private <T> T execute(
             final MultiValueMap<String, String> params,
             final TypeReference<T> typeReference,
-            final ResponseBodyEvaluator responseBodyEvaluator)
+            final ResponseBodyEvaluator responseBodyEvaluator,
+            final boolean readOnly)
             throws IOException {
 
         LOGGER.info("Invoke url: {} with params: {}", baseUrl, paramsToString(params));
 
-        final String body = restTemplate.postForObject(baseUrl, new HttpEntity<>(params, createHeaders()), String.class);
+        final String body = getRestTemplate(readOnly)
+            .postForObject(baseUrl, new HttpEntity<>(params, createHeaders()), String.class);
 
         LOGGER.debug("Got response body:\n{}", body);
 

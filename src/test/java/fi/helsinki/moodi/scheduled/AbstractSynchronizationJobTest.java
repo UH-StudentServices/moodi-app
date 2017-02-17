@@ -81,7 +81,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
     }
 
     protected void setupMoodleGetCourseResponse() {
-        moodleMockServer.expect(requestTo(getMoodleRestUrl()))
+        moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andRespond(withSuccess(Fixtures.asString("/moodle/get-courses-12345.json"), MediaType.APPLICATION_JSON));

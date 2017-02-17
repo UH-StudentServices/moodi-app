@@ -25,8 +25,8 @@ import fi.helsinki.moodi.integration.http.RequestTimingInterceptor;
 import fi.helsinki.moodi.integration.moodle.MoodleClient;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpRequestRetryHandler;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,17 +38,11 @@ import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.util.Collections;
-
-import static org.slf4j.LoggerFactory.getLogger;
 
 @Configuration
 public class MoodleConfig {
-
-    private static final int MAX_EXECUTION_COUNT = 3;
-
-    private static final Logger LOGGER = getLogger(MoodleConfig.class);
+    private static final int RETRY_COUNT = 3;
 
     @Autowired
     private Environment environment;
@@ -56,28 +50,44 @@ public class MoodleConfig {
     @Bean
     public MoodleClient moodleClient() {
         final ObjectMapper objectMapper = objectMapper();
-        return new MoodleClient(baseUrl(), wstoken(), objectMapper, moodleRestTemplate());
+        return new MoodleClient(
+            baseUrl(),
+            wstoken(),
+            objectMapper,
+            moodleRestTemplate(),
+            moodleReadOnlyRestTemplate());
     }
 
-    @Bean
-    public RestTemplate moodleRestTemplate() {
+    private RestTemplate createRestTemplate(HttpRequestRetryHandler httpRequestRetryHandler) {
         final HttpClient httpClient = HttpClientBuilder
             .create()
-            .setRetryHandler(new MoodleRequestRetryHandler())
+            .setRetryHandler(httpRequestRetryHandler)
             .build();
 
         final ClientHttpRequestFactory requestFactory =
-                new BufferingClientHttpRequestFactory(new HttpComponentsClientHttpRequestFactory(httpClient));
+            new BufferingClientHttpRequestFactory(new HttpComponentsClientHttpRequestFactory(httpClient));
 
         final RestTemplate restTemplate = new RestTemplate(requestFactory);
         restTemplate.setInterceptors(Collections.singletonList(new RequestTimingInterceptor()));
 
         restTemplate.setMessageConverters(
-                Lists.newArrayList(
-                        new StringHttpMessageConverter(),
-                        new FormHttpMessageConverter()));
+            Lists.newArrayList(
+                new StringHttpMessageConverter(),
+                new FormHttpMessageConverter()));
 
         return restTemplate;
+    }
+
+    //RestTemplate for requests that make modifications to Moodle. Do not get retried immediately in case of error.
+    @Bean
+    public RestTemplate moodleRestTemplate() {
+        return createRestTemplate(new DefaultHttpRequestRetryHandler(RETRY_COUNT, false));
+    }
+
+    //RestTemplate for request that only read data from Moodle. May get retried up to RETRY_COUNT times in case of failure.
+    @Bean
+    public RestTemplate moodleReadOnlyRestTemplate() {
+        return createRestTemplate(new DefaultHttpRequestRetryHandler(RETRY_COUNT, true));
     }
 
     private String baseUrl() {
@@ -90,26 +100,7 @@ public class MoodleConfig {
 
     private ObjectMapper objectMapper() {
         return new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
-    private static class MoodleRequestRetryHandler implements HttpRequestRetryHandler {
-        @Override
-        public boolean retryRequest(IOException exception,
-                                    int executionCount,
-                                    org.apache.http.protocol.HttpContext context) {
-
-            if (executionCount > MAX_EXECUTION_COUNT) {
-                LOGGER.warn("Maximum tries reached for client http pool ");
-                return false;
-            }
-
-            if (exception instanceof org.apache.http.NoHttpResponseException) {
-                LOGGER.warn("No response from server on " + executionCount + " call");
-                return true;
-            }
-            
-            return false;
-        }
-    }
 }
