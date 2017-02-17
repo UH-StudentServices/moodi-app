@@ -10,6 +10,12 @@ integration:
   oodi.url: https://oprek2.it.helsinki.fi:30039
   esb.url: https://esbmt1.it.helsinki.fi
 
+httpClient:
+  readTimeout: 15000
+  connectTimeout: 3000
+  maxTotal: 500
+  defaultMaxPerRoute: 500
+
 #
 # Map Oodi organizations to Moodle's internal category IDs.
 #
