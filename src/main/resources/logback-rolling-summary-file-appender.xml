@@ -16,20 +16,20 @@
   -->
 
 <included>
-    <property name="LOG_DIR" value="/tmp/log/moodi"/>
+    <property name="SUMMARY_LOG_DIR" value="/tmp/log/moodi-import-sync-log"/>
 
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_DIR}/moodi.log</file>
+    <appender name="SUMMARY_FILE_LOGGER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${SUMMARY_LOG_DIR}/moodi.log</file>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- daily rollover -->
-            <fileNamePattern>${LOG_DIR}/moodi.%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <fileNamePattern>${SUMMARY_LOG_DIR}/moodi.%d{yyyy-MM-dd}.gz</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
 
         <encoder>
             <charset>utf-8</charset>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %msg%n</pattern>
         </encoder>
     </appender>
 </included>

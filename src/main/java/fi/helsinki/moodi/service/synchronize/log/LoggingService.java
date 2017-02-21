@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 /**
  * Service that orchestrates logging.
@@ -40,12 +39,12 @@ public class LoggingService {
     private static final String COURSE_IMPORT_TITLE = "Course import completed:";
     private static final String COURSE_ENROLLMENT_TITLE = "Course import user enrollments completed:";
 
-    private final List<MoodiLogger> loggers;
+    private final SummaryLogger summaryLogger;
     private final TimeService timeService;
 
     @Autowired
-    public LoggingService(List<MoodiLogger> loggers, TimeService timeService) {
-        this.loggers = loggers;
+    public LoggingService(SummaryLogger summaryLogger, TimeService timeService) {
+        this.summaryLogger = summaryLogger;
         this.timeService = timeService;
     }
 
@@ -61,16 +60,8 @@ public class LoggingService {
         log(COURSE_ENROLLMENT_TITLE, courseEnrollmentStatus);
     }
 
-    public void cleanOldLogs() {
-        for (final MoodiLogger logger : loggers) {
-            logger.cleanOldLogs();
-        }
-    }
-
     private void log(String title, Object data) {
-        for (final MoodiLogger logger : loggers) {
-            logger.log(getCurrentDateTime(), title, data);
-        }
+        summaryLogger.log(title, data);
     }
 
     private String getCurrentDateTime() {
