@@ -17,11 +17,9 @@
 
 package fi.helsinki.moodi.service.synchronize.process;
 
-import com.google.common.collect.Lists;
 import fi.helsinki.moodi.exception.ProcessingException;
 import fi.helsinki.moodi.integration.esb.EsbService;
 import fi.helsinki.moodi.integration.moodle.*;
-import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUsers;
 import fi.helsinki.moodi.integration.oodi.OodiStudent;
 import fi.helsinki.moodi.integration.oodi.OodiTeacher;
@@ -54,6 +52,8 @@ import static java.util.stream.Collectors.toMap;
  */
 @Component
 public class SynchronizingProcessor extends AbstractProcessor {
+
+    private static final int ACTION_BATCH_MAX_SIZE = 300;
 
     private static final String MESSAGE_NOT_CHANGED = "Not changed";
     private static final String MESSAGE_USERNAME_NOT_FOUND = "Username not found from ESB";
@@ -161,7 +161,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
         for(SynchronizationAction action : SynchronizationAction.values()) {
             if(itemsByAction.containsKey(action)) {
-                processedItems.addAll(processItemsByAction(action, itemsByAction.get(action)));
+                processedItems.addAll(batchProcessItems(action, itemsByAction.get(action), newArrayList()));
             }
         }
 
@@ -244,6 +244,24 @@ public class SynchronizingProcessor extends AbstractProcessor {
     private Map<Long, MoodleUserEnrollments> groupMoodleEnrollmentsByUserId(final SynchronizationItem item) {
         final List<MoodleUserEnrollments> enrollments = item.getMoodleEnrollments().get();
         return enrollments.stream().collect(toMap(e -> e.id, Function.identity(), (a, b) -> b));
+    }
+
+    private List<EnrollmentSynchronizationItem> batchProcessItems(SynchronizationAction action,
+                                                                  List<EnrollmentSynchronizationItem> items,
+                                                                  List<EnrollmentSynchronizationItem> completedItems) {
+        List<EnrollmentSynchronizationItem> itemsToProcess = items
+            .stream()
+            .limit(ACTION_BATCH_MAX_SIZE)
+            .collect(Collectors.toList());
+
+        if(itemsToProcess.size() > 0) {
+            LOGGER.info("Processing action {} for a batch of {} items", action, itemsToProcess.size());
+            completedItems.addAll(processItemsByAction(action, itemsToProcess));
+            items.removeAll(itemsToProcess);
+            return batchProcessItems(action, items, completedItems);
+        } else {
+            return completedItems;
+        }
     }
 
     private List<EnrollmentSynchronizationItem> processItemsByAction(SynchronizationAction action, List<EnrollmentSynchronizationItem> items) {
