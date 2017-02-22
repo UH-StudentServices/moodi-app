@@ -18,10 +18,7 @@
 package fi.helsinki.moodi.web;
 
 import fi.helsinki.moodi.service.Result;
-import fi.helsinki.moodi.service.synchronize.SynchronizationService;
-import fi.helsinki.moodi.service.synchronize.SynchronizationStatus;
-import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
-import fi.helsinki.moodi.service.synchronize.SynchronizationType;
+import fi.helsinki.moodi.service.synchronize.*;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRunService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,13 +30,13 @@ import org.springframework.web.bind.annotation.*;
 public class SynchronizationController {
 
     private final SynchronizationJobRunService synchronizationJobRunService;
-    private final SynchronizationService synchronizationService;
+    private final SynchronizationExecutor synchronizationExecutor;
 
     @Autowired
     public SynchronizationController(SynchronizationJobRunService synchronizationJobRunService,
-                                     SynchronizationService synchronizationService) {
+                                     SynchronizationExecutor synchronizationExecutor) {
         this.synchronizationJobRunService = synchronizationJobRunService;
-        this.synchronizationService = synchronizationService;
+        this.synchronizationExecutor = synchronizationExecutor;
     }
 
     @RequestMapping(value = "/status", method = RequestMethod.GET)
@@ -59,14 +56,16 @@ public class SynchronizationController {
 
     @RequestMapping(value="/full", method = RequestMethod.POST)
     @ResponseBody
-    public SynchronizationSummary synchronizeCourses() {
-        return synchronizationService.synchronize(SynchronizationType.FULL);
+    public ResponseEntity<Result<String, Boolean>> synchronizeCourses() {
+        synchronizationExecutor.synchronize(SynchronizationType.FULL);
+        return response(Result.success("Full synchronization job started"));
     }
 
     @RequestMapping(value="/unlock", method = RequestMethod.POST)
     @ResponseBody
-    public SynchronizationSummary synchronizeAndUnlockLockedCourses() {
-        return synchronizationService.synchronize(SynchronizationType.UNLOCK);
+    public ResponseEntity<Result<String, Boolean>> synchronizeAndUnlockLockedCourses() {
+        synchronizationExecutor.synchronize(SynchronizationType.UNLOCK);
+        return response(Result.success("Unlock synchronization job started"));
     }
 
     private <D, E> ResponseEntity<Result<D, E>> response(Result<D, E> result) {

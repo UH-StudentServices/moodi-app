@@ -17,6 +17,7 @@
 
 package fi.helsinki.moodi.scheduled;
 
+import fi.helsinki.moodi.exception.SynchronizationInProgressException;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
@@ -248,4 +249,21 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
         job.execute();
     }
+
+    @Test
+    public void thatSynchronizationIsNotStartedIfAlreadyInProgress() {
+        boolean exceptionThrown = false;
+
+        synchronizationJobRunService.begin(SynchronizationType.FULL);
+
+        try {
+            job.execute();
+        } catch (SynchronizationInProgressException e) {
+            exceptionThrown = true;
+        }
+
+        assertTrue(exceptionThrown);
+    }
+
+
 }

@@ -18,6 +18,7 @@
 package fi.helsinki.moodi.service.synchronize;
 
 import com.google.common.base.Stopwatch;
+import fi.helsinki.moodi.exception.SynchronizationInProgressException;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.enrich.EnricherService;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRunService;
@@ -68,6 +69,11 @@ public class SynchronizationService {
     }
 
     public SynchronizationSummary synchronize(final SynchronizationType type) {
+
+        if(synchronizationJobRunService.isSynchronizationInProgress()) {
+            throw new SynchronizationInProgressException(type);
+        }
+
         final Stopwatch stopwatch = Stopwatch.createStarted();
         final long jobId  = begin(type);
 

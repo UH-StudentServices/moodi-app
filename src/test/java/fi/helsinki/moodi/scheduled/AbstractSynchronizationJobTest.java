@@ -26,6 +26,7 @@ import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.SynchronizationService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
+import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRunService;
 import fi.helsinki.moodi.service.synchronize.process.EnrollmentSynchronizationStatus;
 import fi.helsinki.moodi.service.synchronize.process.ProcessingStatus;
 import fi.helsinki.moodi.service.synchronize.process.StudentSynchronizationItem;
@@ -74,6 +75,9 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
 
     @Autowired
     protected SynchronizationService synchronizationService;
+
+    @Autowired
+    protected SynchronizationJobRunService synchronizationJobRunService;
 
     protected void setUpMockServerResponses(String endDate, boolean approved) {
         setupMoodleGetCourseResponse();

@@ -25,9 +25,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static fi.helsinki.moodi.service.synchronize.SynchronizationStatus.COMPLETED_FAILURE;
@@ -51,6 +53,18 @@ public class SynchronizationJobRunService {
         this.synchronizationJobRunRepository = synchronizationJobRunRepository;
         this.timeService = timeService;
         this.environment = environment;
+    }
+
+    @PostConstruct
+    public void checkForInterruptedRuns() {
+        List<SynchronizationJobRun> interruptedRuns = synchronizationJobRunRepository.findByStatus(SynchronizationStatus.STARTED);
+        interruptedRuns.stream().forEach(run -> run.status = SynchronizationStatus.INTERRUPTED);
+        synchronizationJobRunRepository.save(interruptedRuns);
+    }
+
+    public boolean isSynchronizationInProgress() {
+        List<SynchronizationJobRun> inProgressRuns = synchronizationJobRunRepository.findByStatus(SynchronizationStatus.STARTED);
+        return inProgressRuns.size() > 0;
     }
 
     public Optional<SynchronizationJobRun> findLatestCompletedIncrementalJob() {

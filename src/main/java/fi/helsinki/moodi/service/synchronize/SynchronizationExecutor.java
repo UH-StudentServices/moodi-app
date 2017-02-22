@@ -17,12 +17,22 @@
 
 package fi.helsinki.moodi.service.synchronize;
 
-/**
- * Status of synchronization run.
- */
-public enum SynchronizationStatus {
-    STARTED,
-    COMPLETED_SUCCESS,
-    COMPLETED_FAILURE,
-    INTERRUPTED
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+
+@Component
+public class SynchronizationExecutor {
+
+    private final SynchronizationService synchronizationService;
+
+    @Autowired
+    public SynchronizationExecutor(SynchronizationService synchronizationService) {
+        this.synchronizationService = synchronizationService;
+    }
+
+    @Async("taskExecutor")
+    public void synchronize(SynchronizationType type) {
+        synchronizationService.synchronize(type);
+    }
 }
