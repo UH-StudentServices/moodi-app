@@ -57,6 +57,12 @@ public class SynchronizationController {
         }
     }
 
+    @RequestMapping(value="/full", method = RequestMethod.POST)
+    @ResponseBody
+    public SynchronizationSummary synchronizeCourses() {
+        return synchronizationService.synchronize(SynchronizationType.FULL);
+    }
+
     @RequestMapping(value="/unlock", method = RequestMethod.POST)
     @ResponseBody
     public SynchronizationSummary synchronizeAndUnlockLockedCourses() {
