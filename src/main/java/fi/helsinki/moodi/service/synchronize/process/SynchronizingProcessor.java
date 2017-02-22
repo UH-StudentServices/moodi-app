@@ -28,6 +28,7 @@ import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatusService;
 import fi.helsinki.moodi.service.syncLock.SyncLockService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.util.MapperService;
+import fi.helsinki.moodi.service.batch.BatchProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +74,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
     private final SynchronizationThreshold synchronizationThreshold;
     private final SyncLockService syncLockService;
     private final SynchronizationActionResolver synchronizationActionResolver;
+    private final BatchProcessor<EnrollmentSynchronizationItem> batchProcessor;
 
     @Autowired
     public SynchronizingProcessor(EsbService esbService,
@@ -82,7 +84,8 @@ public class SynchronizingProcessor extends AbstractProcessor {
                                   CourseService courseService,
                                   SynchronizationThreshold synchronizationThreshold,
                                   SyncLockService syncLockService,
-                                  SynchronizationActionResolver synchronizationActionResolver) {
+                                  SynchronizationActionResolver synchronizationActionResolver,
+                                  BatchProcessor batchProcessor) {
         super(Action.SYNCHRONIZE);
         this.esbService = esbService;
         this.mapperService = mapperService;
@@ -92,6 +95,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
         this.synchronizationThreshold = synchronizationThreshold;
         this.syncLockService = syncLockService;
         this.synchronizationActionResolver = synchronizationActionResolver;
+        this.batchProcessor = batchProcessor;
     }
 
     @Override
@@ -161,7 +165,12 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
         for(SynchronizationAction action : SynchronizationAction.values()) {
             if(itemsByAction.containsKey(action)) {
-                processedItems.addAll(batchProcessItems(action, itemsByAction.get(action), newArrayList()));
+                processedItems.addAll(
+                    batchProcessor
+                        .process(
+                            itemsByAction.get(action),
+                            itemsToProcess -> processItemsByAction(action, itemsToProcess),
+                            ACTION_BATCH_MAX_SIZE));
             }
         }
 
@@ -244,24 +253,6 @@ public class SynchronizingProcessor extends AbstractProcessor {
     private Map<Long, MoodleUserEnrollments> groupMoodleEnrollmentsByUserId(final SynchronizationItem item) {
         final List<MoodleUserEnrollments> enrollments = item.getMoodleEnrollments().get();
         return enrollments.stream().collect(toMap(e -> e.id, Function.identity(), (a, b) -> b));
-    }
-
-    private List<EnrollmentSynchronizationItem> batchProcessItems(SynchronizationAction action,
-                                                                  List<EnrollmentSynchronizationItem> items,
-                                                                  List<EnrollmentSynchronizationItem> completedItems) {
-        List<EnrollmentSynchronizationItem> itemsToProcess = items
-            .stream()
-            .limit(ACTION_BATCH_MAX_SIZE)
-            .collect(Collectors.toList());
-
-        if(itemsToProcess.size() > 0) {
-            LOGGER.info("Processing action {} for a batch of {} items", action, itemsToProcess.size());
-            completedItems.addAll(processItemsByAction(action, itemsToProcess));
-            items.removeAll(itemsToProcess);
-            return batchProcessItems(action, items, completedItems);
-        } else {
-            return completedItems;
-        }
     }
 
     private List<EnrollmentSynchronizationItem> processItemsByAction(SynchronizationAction action, List<EnrollmentSynchronizationItem> items) {
