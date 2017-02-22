@@ -17,22 +17,22 @@
 
 package fi.helsinki.moodi.service.importing;
 
+import com.google.common.base.Stopwatch;
 import fi.helsinki.moodi.integration.esb.EsbService;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
+import fi.helsinki.moodi.service.batch.BatchProcessor;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatus;
 import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatusService;
 import fi.helsinki.moodi.service.synchronize.log.LoggingService;
 import fi.helsinki.moodi.service.util.MapperService;
-import fi.helsinki.moodi.service.batch.BatchProcessor;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StopWatch;
 
 import java.util.List;
 import java.util.Map;
@@ -88,8 +88,7 @@ public class EnrollmentExecutor {
 
             LOGGER.info("Enrollment executor started for realisationId {} ", course.realisationId);
 
-            StopWatch stopWatch = new StopWatch();
-            stopWatch.start();
+            final Stopwatch stopwatch = Stopwatch.createStarted();
 
             final List<EnrollmentWarning> enrollmentWarnings = newArrayList();
 
@@ -112,11 +111,9 @@ public class EnrollmentExecutor {
 
             courseService.completeCourseImport(course.realisationId, true);
 
-            stopWatch.stop();
-
             loggingService.logCourseImportEnrollments(courseEnrollmentStatus);
 
-            LOGGER.info("Enrollment executor for realisationId {} finished in {}", course.realisationId, stopWatch.toString());
+            LOGGER.info("Enrollment executor for realisationId {} finished in {}", course.realisationId, stopwatch.stop().toString());
 
         } catch(Exception e) {
             courseService.completeCourseImport(course.realisationId, false);
