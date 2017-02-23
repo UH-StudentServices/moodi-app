@@ -15,14 +15,12 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.service.synchronize;
+package fi.helsinki.moodi.exception;
 
-/**
- * Status of synchronization run.
- */
-public enum SynchronizationStatus {
-    STARTED,
-    COMPLETED_SUCCESS,
-    COMPLETED_FAILURE,
-    INTERRUPTED
+import fi.helsinki.moodi.service.synchronize.SynchronizationType;
+
+public class SynchronizationInProgressException extends MoodiException {
+    public SynchronizationInProgressException(SynchronizationType type) {
+        super(String.format("Synchronization of type %s not started. Synchronization already in progress", type));
+    }
 }
