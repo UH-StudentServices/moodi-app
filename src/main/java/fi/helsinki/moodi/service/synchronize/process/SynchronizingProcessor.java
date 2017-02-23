@@ -17,11 +17,9 @@
 
 package fi.helsinki.moodi.service.synchronize.process;
 
-import com.google.common.collect.Lists;
 import fi.helsinki.moodi.exception.ProcessingException;
 import fi.helsinki.moodi.integration.esb.EsbService;
 import fi.helsinki.moodi.integration.moodle.*;
-import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUsers;
 import fi.helsinki.moodi.integration.oodi.OodiStudent;
 import fi.helsinki.moodi.integration.oodi.OodiTeacher;
@@ -30,6 +28,7 @@ import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatusService;
 import fi.helsinki.moodi.service.syncLock.SyncLockService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.util.MapperService;
+import fi.helsinki.moodi.service.batch.BatchProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +54,8 @@ import static java.util.stream.Collectors.toMap;
 @Component
 public class SynchronizingProcessor extends AbstractProcessor {
 
+    private static final int ACTION_BATCH_MAX_SIZE = 300;
+
     private static final String MESSAGE_NOT_CHANGED = "Not changed";
     private static final String MESSAGE_USERNAME_NOT_FOUND = "Username not found from ESB";
     private static final String MESSAGE_MOODLE_USER_NOT_FOUND = "Moodle user not found";
@@ -73,6 +74,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
     private final SynchronizationThreshold synchronizationThreshold;
     private final SyncLockService syncLockService;
     private final SynchronizationActionResolver synchronizationActionResolver;
+    private final BatchProcessor<EnrollmentSynchronizationItem> batchProcessor;
 
     @Autowired
     public SynchronizingProcessor(EsbService esbService,
@@ -82,7 +84,8 @@ public class SynchronizingProcessor extends AbstractProcessor {
                                   CourseService courseService,
                                   SynchronizationThreshold synchronizationThreshold,
                                   SyncLockService syncLockService,
-                                  SynchronizationActionResolver synchronizationActionResolver) {
+                                  SynchronizationActionResolver synchronizationActionResolver,
+                                  BatchProcessor batchProcessor) {
         super(Action.SYNCHRONIZE);
         this.esbService = esbService;
         this.mapperService = mapperService;
@@ -92,6 +95,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
         this.synchronizationThreshold = synchronizationThreshold;
         this.syncLockService = syncLockService;
         this.synchronizationActionResolver = synchronizationActionResolver;
+        this.batchProcessor = batchProcessor;
     }
 
     @Override
@@ -161,7 +165,12 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
         for(SynchronizationAction action : SynchronizationAction.values()) {
             if(itemsByAction.containsKey(action)) {
-                processedItems.addAll(processItemsByAction(action, itemsByAction.get(action)));
+                processedItems.addAll(
+                    batchProcessor
+                        .process(
+                            itemsByAction.get(action),
+                            itemsToProcess -> processItemsByAction(action, itemsToProcess),
+                            ACTION_BATCH_MAX_SIZE));
             }
         }
 

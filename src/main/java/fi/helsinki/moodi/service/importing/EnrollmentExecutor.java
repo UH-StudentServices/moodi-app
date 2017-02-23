@@ -17,10 +17,12 @@
 
 package fi.helsinki.moodi.service.importing;
 
+import com.google.common.base.Stopwatch;
 import fi.helsinki.moodi.integration.esb.EsbService;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
+import fi.helsinki.moodi.service.batch.BatchProcessor;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatus;
@@ -31,7 +33,6 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StopWatch;
 
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Component
 public class EnrollmentExecutor {
 
+    private static final int ENROLLMENT_BATCH_MAX_SIZE = 300;
+
     private static final Logger LOGGER = getLogger(EnrollmentExecutor.class);
 
     private final MoodleService moodleService;
@@ -56,6 +59,7 @@ public class EnrollmentExecutor {
     private final CourseEnrollmentStatusService courseEnrollmentStatusService;
     private final CourseService courseService;
     private final LoggingService loggingService;
+    private final BatchProcessor<Enrollment> batchProcessor;
 
     @Autowired
     public EnrollmentExecutor(
@@ -64,13 +68,15 @@ public class EnrollmentExecutor {
         MapperService mapperService,
         CourseEnrollmentStatusService courseEnrollmentStatusService,
         CourseService courseService,
-        LoggingService loggingService) {
+        LoggingService loggingService,
+        BatchProcessor batchProcessor) {
         this.moodleService = moodleService;
         this.esbService = esbService;
         this.mapperService = mapperService;
         this.courseEnrollmentStatusService = courseEnrollmentStatusService;
         this.courseService = courseService;
         this.loggingService = loggingService;
+        this.batchProcessor = batchProcessor;
     }
 
 
@@ -82,8 +88,7 @@ public class EnrollmentExecutor {
 
             LOGGER.info("Enrollment executor started for realisationId {} ", course.realisationId);
 
-            StopWatch stopWatch = new StopWatch();
-            stopWatch.start();
+            final Stopwatch stopwatch = Stopwatch.createStarted();
 
             final List<EnrollmentWarning> enrollmentWarnings = newArrayList();
 
@@ -93,7 +98,10 @@ public class EnrollmentExecutor {
             final List<Enrollment> enrollmentsWithUsernames = enrichEnrollmentsWithUsernames(approvedEnrollments);
             final List<Enrollment> enrollmentsWithMoodleIds = enrichEnrollmentsWithMoodleIds(enrollmentsWithUsernames);
 
-            persistMoodleEnrollments(moodleCourseId, enrollmentsWithMoodleIds, enrollmentWarnings);
+            batchProcessor.process(
+                enrollmentsWithMoodleIds,
+                itemsToProcess -> persistMoodleEnrollments(moodleCourseId, itemsToProcess, enrollmentWarnings),
+                ENROLLMENT_BATCH_MAX_SIZE);
 
             CourseEnrollmentStatus courseEnrollmentStatus = courseEnrollmentStatusService.persistCourseEnrollmentStatus(
                 course.id,
@@ -103,11 +111,9 @@ public class EnrollmentExecutor {
 
             courseService.completeCourseImport(course.realisationId, true);
 
-            stopWatch.stop();
-
             loggingService.logCourseImportEnrollments(courseEnrollmentStatus);
 
-            LOGGER.info("Enrollment executor for realisationId {} finished in {}", course.realisationId, stopWatch.toString());
+            LOGGER.info("Enrollment executor for realisationId {} finished in {}", course.realisationId, stopwatch.stop().toString());
 
         } catch(Exception e) {
             courseService.completeCourseImport(course.realisationId, false);
@@ -222,7 +228,7 @@ public class EnrollmentExecutor {
         return enrollments.stream().filter(e -> role.equals(e.role)).count();
     }
 
-    private void persistMoodleEnrollments(final long courseId,
+    private List<Enrollment> persistMoodleEnrollments(final long courseId,
                                           final List<Enrollment> enrollments,
                                           final List<EnrollmentWarning> enrollmentWarnings) {
 
@@ -243,6 +249,8 @@ public class EnrollmentExecutor {
                     .map(EnrollmentWarning::enrollFailed)
                     .forEach(enrollmentWarnings::add);
         }
+
+        return enrollments;
     }
 
     private boolean enrollToCourse(final long courseId, final List<Enrollment> enrollments) {

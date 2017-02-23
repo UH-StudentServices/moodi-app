@@ -32,6 +32,8 @@ public interface SynchronizationJobRunRepository extends JpaRepository<Synchroni
     Optional<SynchronizationJobRun> findFirstByTypeAndStatusInOrderByCompletedDesc(
             SynchronizationType type, List<SynchronizationStatus> status);
 
+    List<SynchronizationJobRun> findByStatus(SynchronizationStatus status);
+
     Optional<SynchronizationJobRun> findFirstByTypeOrderByCompletedDesc(SynchronizationType type);
 
     @Modifying
