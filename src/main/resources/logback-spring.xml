@@ -61,9 +61,10 @@
             <appender-ref ref="CONSOLE"/>
         </logger>
     </springProfile>
+    
     <springProfile name="dev, qa, prod">
         <include resource="logback-rolling-summary-file-appender.xml"/>
-        <logger name="SUMMARY_LOGGER" level="INFO">
+        <logger name="SUMMARY_LOGGER" level="INFO" additivity="false">
             <appender-ref ref="SUMMARY_FILE_LOGGER"/>
         </logger>
     </springProfile>
