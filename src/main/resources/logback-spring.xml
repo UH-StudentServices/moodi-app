@@ -56,4 +56,15 @@
         <logger name="fi.helsinki.moodi.test" level="TRACE"/>
     </springProfile>
 
+    <springProfile name="local, test">
+        <logger name="SUMMARY_LOGGER" level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </logger>
+    </springProfile>
+    <springProfile name="dev, qa, prod">
+        <include resource="logback-rolling-summary-file-appender.xml"/>
+        <logger name="SUMMARY_LOGGER" level="INFO">
+            <appender-ref ref="SUMMARY_FILE_LOGGER"/>
+        </logger>
+    </springProfile>
 </configuration>

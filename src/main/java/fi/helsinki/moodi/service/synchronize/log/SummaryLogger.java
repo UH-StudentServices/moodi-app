@@ -18,35 +18,27 @@
 package fi.helsinki.moodi.service.synchronize.log;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.helsinki.moodi.service.util.JsonUtil;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-/**
- * Implementation that logs to log file.
- */
 @Component
-@Profile({"test", "local"})
-public class LogFileLogger implements MoodiLogger {
-
-    private final JsonUtil jsonUtil;
-
-    private static final Logger LOGGER = getLogger(LogFileLogger.class);
+public class SummaryLogger {
+    private static final Logger LOGGER = getLogger("SUMMARY_LOGGER");
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public LogFileLogger(JsonUtil jsonUtil) {
-        this.jsonUtil = jsonUtil;
+    public SummaryLogger(JsonUtil jsonUtil) {
+        this.objectMapper = jsonUtil.getObjectMapper();
     }
 
-    @Override
-    public void log(String timestamp, String title, Object data) {
+    public void log(String title, Object data) {
         try {
-            final String jsonData = jsonUtil
-                .getObjectMapper()
+            final String jsonData = objectMapper
                 .writerWithDefaultPrettyPrinter()
                 .writeValueAsString(data);
             LOGGER.info(title);
@@ -54,10 +46,5 @@ public class LogFileLogger implements MoodiLogger {
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Could not write summary", e);
         }
-    }
-
-    @Override
-    public void cleanOldLogs() {
-        // Do nothing
     }
 }
