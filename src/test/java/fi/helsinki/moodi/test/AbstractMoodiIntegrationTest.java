@@ -91,7 +91,7 @@ public abstract class AbstractMoodiIntegrationTest {
     private Flyway flyway;
 
     @Autowired
-    private Environment environment;
+    protected Environment environment;
 
     @Autowired
     private MapperService mapperService;

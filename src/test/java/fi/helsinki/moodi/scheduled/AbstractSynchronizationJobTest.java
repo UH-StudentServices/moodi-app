@@ -27,13 +27,12 @@ import fi.helsinki.moodi.service.synchronize.SynchronizationService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRunService;
-import fi.helsinki.moodi.service.synchronize.process.EnrollmentSynchronizationStatus;
-import fi.helsinki.moodi.service.synchronize.process.ProcessingStatus;
-import fi.helsinki.moodi.service.synchronize.process.StudentSynchronizationItem;
-import fi.helsinki.moodi.service.synchronize.process.TeacherSynchronizationItem;
+import fi.helsinki.moodi.service.synchronize.process.*;
 import fi.helsinki.moodi.service.util.MapperService;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -44,6 +43,8 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegrationTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMoodiIntegrationTest.class);
 
     protected static final long REALISATION_ID = 12345;
     protected static final int MOODLE_COURSE_ID = 54321;
@@ -140,6 +141,11 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
     }
 
     protected SynchronizationSummary testTresholdCheckFailed(String expectedMessage) {
+        LOGGER.info("Testing synchronizationSummary with " +
+                "properties syncTresholds.REMOVE_ROLE.preventAll: {}, syncTresholds.REMOVE_ROLE.limit: {}",
+            environment.getProperty("syncTresholds.REMOVE_ROLE.preventAll"),
+            environment.getProperty("syncTresholds.REMOVE_ROLE.limit"));
+
         setUpMockServerResponses(getFutureDateString(), false);
 
         expectGetEnrollmentsRequestToMoodle(

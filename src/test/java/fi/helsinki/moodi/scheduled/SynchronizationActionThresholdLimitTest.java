@@ -32,7 +32,6 @@ import static org.junit.Assert.assertTrue;
 
 @TestPropertySource(properties = {"syncTresholds.REMOVE_ROLE.preventAll = 1",
                                   "syncTresholds.REMOVE_ROLE.limit = 1"})
-
 public class SynchronizationActionThresholdLimitTest extends AbstractSynchronizationJobTest {
 
     private static final String EXPECTED_THRESHOLD_CROSSED_REMOVE_ROLE_MESSAGE = "Action REMOVE_ROLE for 1 items exceeds threshold";

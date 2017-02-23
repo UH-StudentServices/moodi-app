@@ -97,6 +97,7 @@ dependencies {
     testCompile "com.jayway.jsonpath:json-path-assert:0.9.1"
 }
 
+apply from: "gradle-build/test.gradle"
 apply from: "gradle-build/publishing.gradle"
 apply from: "gradle-build/deploy.gradle"
 apply from: "gradle-build/release.gradle"
