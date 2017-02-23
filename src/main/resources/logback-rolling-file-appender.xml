@@ -16,7 +16,7 @@
   -->
 
 <included>
-    <property name="LOG_DIR" value="/tmp/log/moodi"/>
+    <property name="LOG_DIR" value="/var/log/moodi"/>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_DIR}/moodi.log</file>
