@@ -18,6 +18,7 @@
 package fi.helsinki.moodi.web;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -32,6 +33,7 @@ public class SuccessfulCreateCourseWithEnrollmentWarningsTest extends AbstractSu
         setUpMockServerResponsesWithWarnings();
     }
 
+    @Ignore
     @Test
     public void successfulCreateCourseReturnsCorrectResponse() throws Exception {
         makeCreateCourseRequest(COURSE_REALISATION_ID)
