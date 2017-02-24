@@ -19,7 +19,6 @@ package fi.helsinki.moodi.web;
 
 import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatusCode;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 
@@ -35,7 +34,6 @@ public class GetCourseAndEnrollmentStatusTest extends AbstractSuccessfulCreateCo
        setUpMockServerResponsesWithWarnings();
     }
 
-    @Ignore
     @Test
     public void successfulCreateCourseReturnsCorrectResponse() throws Exception {
         makeCreateCourseRequest(COURSE_REALISATION_ID);

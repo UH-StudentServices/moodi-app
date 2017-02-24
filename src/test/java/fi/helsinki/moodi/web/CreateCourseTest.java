@@ -17,7 +17,6 @@
 
 package fi.helsinki.moodi.web;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 
@@ -30,7 +29,6 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
 
     private static String COURSE_NOT_FOUND_MESSAGE = "Oodi course not found with realisation id %s";
 
-    @Ignore
     @Test
     public void successfulCreateCourseReturnsCorrectResponse() throws Exception {
         setUpMockServerResponses();
@@ -40,7 +38,6 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
             .andExpect(jsonPath("$.data.moodleCourseId").value(toIntExact(MOODLE_COURSE_ID)));
     }
 
-    @Ignore
     @Test
     public void successfulCreateCourseInvokesCorrectIntegrationServices() throws Exception {
         setUpMockServerResponses();
