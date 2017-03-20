@@ -42,10 +42,10 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         expectFindUsersRequestsToMoodle();
 
         expectEnrollmentRequestToMoodle(
-            new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID),
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID));
+            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
 
         job.execute();
     }
@@ -90,17 +90,13 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
     public void thatImportStatusIsSetToCompletedAndEnrollmentStatusesAreGenerated() {
         assertImportStatus(ImportStatus.COMPLETED_FAILED);
 
-        assertNull(courseEnrollmentStatusService.getCourseEnrollmentStatus(REALISATION_ID));
-
         thatCourseIsSynchronizedWhenEndDateInFuture();
-
-        assertNotNull(courseEnrollmentStatusService.getCourseEnrollmentStatus(REALISATION_ID));
 
         assertImportStatus(ImportStatus.COMPLETED);
     }
 
     @Test
-    public void thatUnApprovedStudentIsNotEnrolledToMoodle() {
+    public void thatUnApprovedStudentIsEnrolledToMoodleOnlyWithMoodiDefaultRole() {
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, false);
 
@@ -110,7 +106,8 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
         expectEnrollmentRequestToMoodle(
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID));
+            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
 
         job.execute();
     }
@@ -176,6 +173,12 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         expectFindTeacherRequestToMoodle(TEACHER_ID_WITH_PREFIX + "1", TEACHER_USERNAME + "1", TEACHER_USER_MOODLE_ID + 1);
 
         expectEnrollmentRequestToMoodle(
+            new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
+
+            new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID + 1, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID + 1, MOODLE_COURSE_ID),
+
             new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID + 1, MOODLE_COURSE_ID),
             new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID + 1, MOODLE_COURSE_ID),
 
@@ -183,13 +186,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
             new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID + 2, MOODLE_COURSE_ID),
 
             new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID + 3, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID + 3, MOODLE_COURSE_ID),
-
-            new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
-
-            new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID + 1, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID + 1, MOODLE_COURSE_ID));
+            new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID + 3, MOODLE_COURSE_ID));
 
         expectAssignRolesToMoodle(false,
             new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
@@ -232,6 +229,12 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         expectFindTeacherRequestToMoodle(TEACHER_ID_WITH_PREFIX + "1", TEACHER_USERNAME + "1", TEACHER_USER_MOODLE_ID + 1);
 
         expectEnrollmentRequestToMoodle(
+            new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
+
+            new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID + 1, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID + 1, MOODLE_COURSE_ID),
+
             new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID + 1, MOODLE_COURSE_ID),
             new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID + 1, MOODLE_COURSE_ID),
 
@@ -239,13 +242,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
             new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID + 2, MOODLE_COURSE_ID),
 
             new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID + 3, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID + 3, MOODLE_COURSE_ID),
-
-            new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
-
-            new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID + 1, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID + 1, MOODLE_COURSE_ID));
+            new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID + 3, MOODLE_COURSE_ID));
 
         job.execute();
     }

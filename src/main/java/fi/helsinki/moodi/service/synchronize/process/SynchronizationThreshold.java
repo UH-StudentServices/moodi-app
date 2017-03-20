@@ -34,7 +34,7 @@ public class SynchronizationThreshold {
     private static final String THRESHOLD_LIMIT = "limit";
     private static final String TRESHOLD_PREVENT_ALL = "preventAll";
 
-    private final Map<SynchronizationAction, SyncLimit> limits;
+    private final Map<UserSynchronizationActionType, SyncLimit> limits;
 
     private final Environment environment;
 
@@ -42,26 +42,26 @@ public class SynchronizationThreshold {
     public SynchronizationThreshold(Environment environment) {
         this.environment = environment;
 
-        limits = newArrayList(SynchronizationAction.values()).stream()
+        limits = newArrayList(UserSynchronizationActionType.values()).stream()
             .collect(Collectors.toMap(Function.identity(),
-                action -> new SyncLimit(
-                    getProperty(action, THRESHOLD_LIMIT, Long.class),
-                    getProperty(action, TRESHOLD_PREVENT_ALL, Long.class)
+                actionType -> new SyncLimit(
+                    getProperty(actionType, THRESHOLD_LIMIT, Long.class),
+                    getProperty(actionType, TRESHOLD_PREVENT_ALL, Long.class)
                 )));
     }
 
-    private <T> T getProperty(SynchronizationAction action, String keySuffix, Class<T> targetType) {
-        return environment.getProperty(THRESHOLD_PREFIX + "." + action + "." + keySuffix, targetType);
+    private <T> T getProperty(UserSynchronizationActionType actionType, String keySuffix, Class<T> targetType) {
+        return environment.getProperty(THRESHOLD_PREFIX + "." + actionType + "." + keySuffix, targetType);
     }
 
-    public boolean isLimitedByThreshold(SynchronizationAction action, Long itemCount) {
-       Long limit = limits.get(action).getLimit();
+    public boolean isLimitedByThreshold(UserSynchronizationActionType actionType, Long itemCount) {
+       Long limit = limits.get(actionType).getLimit();
 
        return limit != null && limit <= itemCount;
     }
 
-    public boolean isActionPreventedToAllItems(SynchronizationAction action, Long itemCount) {
-       Long preventAll = limits.get(action).getPreventAll();
+    public boolean isActionPreventedToAllItems(UserSynchronizationActionType actionType, Long itemCount) {
+       Long preventAll = limits.get(actionType).getPreventAll();
 
        return preventAll != null &&
            preventAll > 0 &&

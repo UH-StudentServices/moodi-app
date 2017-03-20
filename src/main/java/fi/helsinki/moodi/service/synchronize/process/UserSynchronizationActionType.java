@@ -17,34 +17,8 @@
 
 package fi.helsinki.moodi.service.synchronize.process;
 
-import fi.helsinki.moodi.integration.moodle.MoodleUser;
-import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
-
-import java.util.List;
-import java.util.Optional;
-
-public interface EnrollmentSynchronizationItem {
-
-    List<String> getUsernameList();
-
-    Optional<MoodleUser> getMoodleUser();
-
-    Optional<MoodleUserEnrollments> getMoodleEnrollments();
-
-    boolean isCompleted();
-
-    boolean isSuccess();
-
-    boolean isApproved();
-
-    long getMoodleRoleId();
-
-    long getMoodleCourseId();
-
-    String getMessage();
-
-    EnrollmentSynchronizationItem setCompleted(boolean newSuccess, String newMessage, EnrollmentSynchronizationStatus newEnrollmentSynchronizationStatus);
-
-    EnrollmentSynchronizationStatus getEnrollmentSynchronizationStatus();
-
+public enum UserSynchronizationActionType {
+    ADD_ENROLLMENT_WITH_ROLES,
+    ADD_ROLES,
+    REMOVE_ROLES
 }

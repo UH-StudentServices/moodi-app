@@ -45,26 +45,18 @@ public class EsbService {
     public List<String> getStudentUsernameList(final String studentNumber) {
         List<String> usernameList = esbClient.getStudentUsernameList(studentNumber);
 
-        if (usernameList != null) {
-            return usernameList.stream()
+        return usernameList.stream()
                 .map(this::appendDomain)
                 .collect(Collectors.toList());
-        } else {
-            return new ArrayList<String>();
-        }
     }
 
     public List<String> getTeacherUsernameList(final String teacherId) {
         final String normalizedTeacherId = TEACHER_ID_PREFIX + teacherId;
         List<String> usernameList = esbClient.getTeacherUsernameList(normalizedTeacherId);
 
-        if (usernameList != null) {
-            return usernameList.stream()
+        return usernameList.stream()
                 .map(this::appendDomain)
                 .collect(Collectors.toList());
-        } else {
-            return new ArrayList<String>();
-        }
     }
 
     private String appendDomain(final String username) {

@@ -27,7 +27,6 @@ import fi.helsinki.moodi.service.Result;
 import fi.helsinki.moodi.service.converter.CourseConverter;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
-import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatusService;
 import fi.helsinki.moodi.service.dto.CourseDto;
 import fi.helsinki.moodi.service.synchronize.log.LoggingService;
 import org.slf4j.Logger;
@@ -48,7 +47,6 @@ public class ImportingService {
     private final CourseService courseService;
     private final OodiService oodiService;
     private final CourseConverter courseConverter;
-    private final CourseEnrollmentStatusService courseEnrollmentStatusService;
     private final MoodleCourseBuilder moodleCourseBuilder;
     private final EnrollmentExecutor enrollmentExecutor;
     private final LoggingService loggingService;
@@ -59,7 +57,6 @@ public class ImportingService {
         CourseService courseService,
         OodiService oodiService,
         CourseConverter courseConverter,
-        CourseEnrollmentStatusService courseEnrollmentStatusService,
         MoodleCourseBuilder moodleCourseBuilder,
         EnrollmentExecutor enrollmentExecutor,
         LoggingService loggingService) {
@@ -68,7 +65,6 @@ public class ImportingService {
         this.courseService = courseService;
         this.oodiService = oodiService;
         this.courseConverter = courseConverter;
-        this.courseEnrollmentStatusService = courseEnrollmentStatusService;
         this.moodleCourseBuilder = moodleCourseBuilder;
         this.enrollmentExecutor = enrollmentExecutor;
         this.loggingService = loggingService;
@@ -102,7 +98,7 @@ public class ImportingService {
     public CourseDto getCourse(Long realisationId) {
         Optional<Course> course = courseService.findByRealisationId(realisationId);
         return course
-            .map(c -> courseConverter.toDto(c, courseEnrollmentStatusService.getCourseEnrollmentStatus(realisationId)))
+            .map(courseConverter::toDto)
             .orElseThrow(() -> new CourseNotFoundException(realisationId));
     }
 }

@@ -77,7 +77,7 @@ auth.enabled: true
 dev.mode.enabled: false
 
 syncTresholds:
-  REMOVE_ROLE:
+  REMOVE_ROLES:
     preventAll: 5
 
 mailNotification:

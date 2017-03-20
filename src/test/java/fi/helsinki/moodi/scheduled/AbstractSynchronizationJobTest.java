@@ -21,13 +21,14 @@ import com.google.common.collect.ImmutableMap;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
-import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatusService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.SynchronizationService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRunService;
-import fi.helsinki.moodi.service.synchronize.process.*;
+import fi.helsinki.moodi.service.synchronize.process.ProcessingStatus;
+import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationAction.UserSynchronizationActionStatus;
+import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem;
 import fi.helsinki.moodi.service.util.MapperService;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
@@ -37,8 +38,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
+import java.util.List;
+
 import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
@@ -67,9 +71,6 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
 
     @Autowired
     protected FullSynchronizationJob job;
-
-    @Autowired
-    protected CourseEnrollmentStatusService courseEnrollmentStatusService;
 
     @Autowired
     protected MapperService mapperService;
@@ -126,18 +127,11 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
         SynchronizationSummary summary = synchronizationService.synchronize(synchronizationType);
 
         SynchronizationItem item =  summary.getItems().get(0);
-        TeacherSynchronizationItem teacherSynchronizationItem = item.getTeacherItems().get().get(0);
-        StudentSynchronizationItem studentSynchronizationItem = item.getStudentItems().get().get(0);
+        List<UserSynchronizationItem> userSynchronizationItems = item.getUserSynchronizationItems();
 
-        EnrollmentSynchronizationStatus expectedStatus = expectErrors ? EnrollmentSynchronizationStatus.ERROR : EnrollmentSynchronizationStatus.COMPLETED;
+        UserSynchronizationActionStatus expectedStatus = expectErrors ? UserSynchronizationActionStatus.ERROR : UserSynchronizationActionStatus.SUCCESS;
 
-        assertEquals(teacherSynchronizationItem.getEnrollmentSynchronizationStatus(), expectedStatus);
-        assertEquals(studentSynchronizationItem.getEnrollmentSynchronizationStatus(), expectedStatus);
-
-        assertEquals(expectErrors ?
-            SUMMARY_MESSAGE_ENROLLMENT_FAILED : SUMMARY_MESSAGE_ENROLLMENT_SUCCEEDED, teacherSynchronizationItem.getMessage());
-        assertEquals(expectErrors ?
-            SUMMARY_MESSAGE_ROLE_ADD_FAILED : SUMMARY_MESSAGE_ROLE_ADD_SUCCEEDED, studentSynchronizationItem.getMessage());
+        assertTrue(userSynchronizationItems.stream().allMatch(userItem -> expectedStatus.equals(userItem.getStatus())));
     }
 
     protected SynchronizationSummary testTresholdCheckFailed(String expectedMessage) {

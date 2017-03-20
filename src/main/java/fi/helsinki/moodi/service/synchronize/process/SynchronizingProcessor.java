@@ -19,23 +19,25 @@ package fi.helsinki.moodi.service.synchronize.process;
 
 import fi.helsinki.moodi.exception.ProcessingException;
 import fi.helsinki.moodi.integration.esb.EsbService;
-import fi.helsinki.moodi.integration.moodle.*;
+import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
+import fi.helsinki.moodi.integration.moodle.MoodleService;
+import fi.helsinki.moodi.integration.moodle.MoodleUser;
+import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUsers;
 import fi.helsinki.moodi.integration.oodi.OodiStudent;
 import fi.helsinki.moodi.integration.oodi.OodiTeacher;
+import fi.helsinki.moodi.service.batch.BatchProcessor;
 import fi.helsinki.moodi.service.course.CourseService;
-import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatusService;
 import fi.helsinki.moodi.service.syncLock.SyncLockService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.util.MapperService;
-import fi.helsinki.moodi.service.batch.BatchProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -45,8 +47,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toMap;
+import static fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem.UserSynchronizationItemStatus.*;
 
 /**
  * Processor implementation that synchronizes courses.
@@ -56,31 +57,24 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
     private static final int ACTION_BATCH_MAX_SIZE = 300;
 
-    private static final String MESSAGE_NOT_CHANGED = "Not changed";
-    private static final String MESSAGE_USERNAME_NOT_FOUND = "Username not found from ESB";
-    private static final String MESSAGE_MOODLE_USER_NOT_FOUND = "Moodle user not found";
     private static final String THRESHOLD_EXCEEDED_MESSAGE = "Action %s for %s items exceeds threshold";
     private static final String PREVENT_ACTION_ON_ALL_MESSAGE = "Action %s is not permitted for all items";
-    private static final String MESSAGE_ACTION_FAILED = "%s failed";
-    private static final String MESSAGE_ACTION_SUCCEEDED = "%s succeeded";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SynchronizingProcessor.class);
 
     private final EsbService esbService;
     private final MapperService mapperService;
     private final MoodleService moodleService;
-    private final CourseEnrollmentStatusService courseEnrollmentStatusService;
     private final CourseService courseService;
     private final SynchronizationThreshold synchronizationThreshold;
     private final SyncLockService syncLockService;
     private final SynchronizationActionResolver synchronizationActionResolver;
-    private final BatchProcessor<EnrollmentSynchronizationItem> batchProcessor;
+    private final BatchProcessor<UserSynchronizationAction> batchProcessor;
 
     @Autowired
     public SynchronizingProcessor(EsbService esbService,
                                   MapperService mapperService,
                                   MoodleService moodleService,
-                                  CourseEnrollmentStatusService courseEnrollmentStatusService,
                                   CourseService courseService,
                                   SynchronizationThreshold synchronizationThreshold,
                                   SyncLockService syncLockService,
@@ -90,7 +84,6 @@ public class SynchronizingProcessor extends AbstractProcessor {
         this.esbService = esbService;
         this.mapperService = mapperService;
         this.moodleService = moodleService;
-        this.courseEnrollmentStatusService = courseEnrollmentStatusService;
         this.courseService = courseService;
         this.synchronizationThreshold = synchronizationThreshold;
         this.syncLockService = syncLockService;
@@ -103,107 +96,120 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
         final Map<Long, MoodleUserEnrollments> moodleEnrollmentsById = groupMoodleEnrollmentsByUserId(item);
 
-        final List<EnrollmentSynchronizationItem> processedItems = synchronizeEnrollments(item, moodleEnrollmentsById);
+        final List<UserSynchronizationItem> processedItems = synchronizeUsers(item, moodleEnrollmentsById);
 
-        final List<StudentSynchronizationItem> processedStudents = filterSynchronizationItemsByType(processedItems, StudentSynchronizationItem.class);
-
-        final List<TeacherSynchronizationItem> processedTeachers = filterSynchronizationItemsByType(processedItems, TeacherSynchronizationItem.class);
+        item.setUserSynchronizationItems(processedItems);
 
         completeCourseEnrollments(item);
 
-        return item.setStudentItems(Optional.of(processedStudents))
-            .setTeacherItems(Optional.of(processedTeachers))
-            .completeProcessingPhase();
+        return item.completeProcessingPhase();
     }
 
     @Transactional
     private void completeCourseEnrollments(final SynchronizationItem item) {
-        courseEnrollmentStatusService.persistCourseEnrollmentStatus(item);
         courseService.completeCourseImport(item.getCourse().realisationId, true);
     }
 
-    private <T extends EnrollmentSynchronizationItem> List<T> filterSynchronizationItemsByType(List<EnrollmentSynchronizationItem> items, Class<T> type) {
-        return items.stream().filter(i -> type.isInstance(i)).map(i -> type.cast(i)).collect(Collectors.toList());
-    }
+    private List<UserSynchronizationItem> synchronizeUsers(
+        SynchronizationItem parentItem,
+        Map<Long, MoodleUserEnrollments> moodleEnrollmentsByUserId) {
 
-    private List<EnrollmentSynchronizationItem> synchronizeEnrollments(
-        final SynchronizationItem parentItem,
-        final Map<Long, MoodleUserEnrollments> moodleEnrollmentsByUserId) {
+        List<UserSynchronizationItem> userSynchronizationItems = createUserSyncronizationItems(parentItem, moodleEnrollmentsByUserId);
 
-        final List<EnrollmentSynchronizationItem> enrollmentSynchronizationItems = createSynchronizationItems(parentItem, moodleEnrollmentsByUserId);
+        Map<UserSynchronizationActionType, List<UserSynchronizationAction>> userSynchronizationActionMap = userSynchronizationItems.stream()
+            .filter(item -> !item.isCompleted())
+            .map(synchronizationActionResolver::enrichWithActions)
+            .flatMap(item -> item.getActions().stream())
+            .collect(Collectors.groupingBy(item -> item.getActionType()));
 
-        final List<EnrollmentSynchronizationItem> preProcessedItems = enrollmentSynchronizationItems.stream()
-            .map(this::checkEnrollmentPrerequisites)
-            .collect(Collectors.toList());
+        checkThresholdLimits(userSynchronizationActionMap, parentItem);
 
-        Map<SynchronizationAction, List<EnrollmentSynchronizationItem>> itemsByAction = preProcessedItems.stream()
-            .filter(i -> !i.isCompleted())
-            .collect(groupingBy(synchronizationActionResolver::resolveSynchronizationAction));
-
-        List<EnrollmentSynchronizationItem> processedItems = preProcessedItems.stream()
-            .filter(EnrollmentSynchronizationItem::isCompleted)
-            .collect(Collectors.toList());
-
-        processedItems.addAll(checkThresholdsAndProcessItems(itemsByAction, parentItem));
-
-        return processedItems;
-
-    }
-
-
-    private List<EnrollmentSynchronizationItem> checkThresholdsAndProcessItems(
-        Map<SynchronizationAction, List<EnrollmentSynchronizationItem>> itemsByAction, SynchronizationItem parentItem) {
-
-        checkThresholdLimitsForItemType(itemsByAction, StudentSynchronizationItem.class, parentItem);
-        checkThresholdLimitsForItemType(itemsByAction, TeacherSynchronizationItem.class, parentItem);
-
-        return processItems(itemsByAction);
-    }
-
-    private List<EnrollmentSynchronizationItem> processItems(Map<SynchronizationAction, List<EnrollmentSynchronizationItem>> itemsByAction) {
-        List<EnrollmentSynchronizationItem> processedItems = newArrayList();
-
-        for(SynchronizationAction action : SynchronizationAction.values()) {
-            if(itemsByAction.containsKey(action)) {
-                processedItems.addAll(
-                    batchProcessor
-                        .process(
-                            itemsByAction.get(action),
-                            itemsToProcess -> processItemsByAction(action, itemsToProcess),
-                            ACTION_BATCH_MAX_SIZE));
-            }
+        for(UserSynchronizationActionType actionType : UserSynchronizationActionType.values()) {
+            batchProcessActions(parentItem, actionType, userSynchronizationActionMap.getOrDefault(actionType, newArrayList()));
         }
 
-        return processedItems;
+        return userSynchronizationItems.stream()
+            .map(this::completeItem)
+            .collect(Collectors.toList());
     }
 
-    private <T> void checkThresholdLimitsForItemType(Map<SynchronizationAction, List<EnrollmentSynchronizationItem>> itemsByAction,
-                                                     Class<T> itemType,
-                                                     SynchronizationItem parentItem) {
-        Map<SynchronizationAction, List<EnrollmentSynchronizationItem>> itemsOfTypeByAction = new HashMap<>();
-
-        itemsByAction.forEach((action, items) -> {
-            itemsOfTypeByAction.put(action, items.stream().filter(i -> itemType.isInstance(i)).collect(Collectors.toList()));
-        });
-
-        checkThresholdLimits(itemsOfTypeByAction, parentItem);
+    private UserSynchronizationItem completeItem(UserSynchronizationItem item) {
+        if(item.isCompleted()) {
+            return item;
+        } else {
+            final boolean isSuccess = item.getActions().stream().allMatch(UserSynchronizationAction::isSuccess);
+            return isSuccess ? item.withStatus(SUCCESS) : item.withStatus(ERROR);
+        }
     }
 
-    private void checkThresholdLimits(Map<SynchronizationAction, List<EnrollmentSynchronizationItem>> itemsByAction,
+    private void batchProcessActions(SynchronizationItem parentItem, UserSynchronizationActionType actionType, List<UserSynchronizationAction> actions) {
+        batchProcessor
+            .process(
+                actions,
+                itemsToProcess -> processActions(parentItem, actionType, itemsToProcess),
+                ACTION_BATCH_MAX_SIZE);
+    }
+
+    private List<UserSynchronizationAction> processActions(SynchronizationItem parentItem,
+                                                         UserSynchronizationActionType actionType,
+                                                         List<UserSynchronizationAction> actions){
+
+        List<MoodleEnrollment> moodleEnrollments = actions.stream()
+            .flatMap(action -> actionsToMoodleEnrollents(parentItem, action))
+            .collect(Collectors.toList());
+
+        try {
+            moodleServiceMethodForAction(actionType).accept(moodleEnrollments);
+            return actions.stream()
+                .map(UserSynchronizationAction::withSuccessStatus)
+                .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            LOGGER.error(String.format("Error when executing action %s", e));
+            return actions.stream()
+                .map(UserSynchronizationAction::withErrorStatus)
+                .collect(Collectors.toList());
+        }
+    }
+
+    Consumer<List<MoodleEnrollment>> moodleServiceMethodForAction(UserSynchronizationActionType actionType) {
+        switch (actionType) {
+            case ADD_ENROLLMENT_WITH_ROLES:
+                return moodleService::addEnrollments;
+            case ADD_ROLES:
+                return moodleService::addRoles;
+            case REMOVE_ROLES:
+                return moodleService::removeRoles;
+            default:
+                throw new IllegalArgumentException("No service method mapped for action: " + actionType.toString());
+        }
+    }
+
+    private void checkThresholdLimits(Map<UserSynchronizationActionType, List<UserSynchronizationAction>> itemsByAction,
                                       SynchronizationItem parentItem) {
 
-        List<EnrollmentSynchronizationItem> allItems = newArrayList();
+        final OodiCourseUsers oodiCourse = parentItem.getOodiCourse().get();
+        final long studentCount = oodiCourse.students.size();
+        final long teacherCount = oodiCourse.teachers.size();
 
-        itemsByAction.values().forEach(allItems::addAll);
+        checkThresholdLimitsForRole(itemsByAction, mapperService.getStudentRoleId(), studentCount, parentItem);
+        checkThresholdLimitsForRole(itemsByAction, mapperService.getTeacherRoleId(), teacherCount, parentItem);
 
-        long allItemsCount = allItems.size();
+    }
 
-        itemsByAction.forEach((action, items) -> {
-            long itemsCount = items.size();
+    private void checkThresholdLimitsForRole(Map<UserSynchronizationActionType, List<UserSynchronizationAction>> actionsMap,
+                                             long roleId,
+                                             long userCountForRole,
+                                             SynchronizationItem parentItem) {
 
-            if(synchronizationThreshold.isLimitedByThreshold(action, itemsCount)) {
-                lockItem(parentItem, String.format(THRESHOLD_EXCEEDED_MESSAGE, action, itemsCount));
-            } else if(itemsCount == allItemsCount && synchronizationThreshold.isActionPreventedToAllItems(action, itemsCount)) {
+        actionsMap.forEach((action, items) -> {
+            final long actionCountForRole = items.stream()
+                .filter(item -> item.getRoles().contains(roleId))
+                .count();
+
+            if(synchronizationThreshold.isLimitedByThreshold(action, actionCountForRole)) {
+                lockItem(parentItem, String.format(THRESHOLD_EXCEEDED_MESSAGE, action, actionCountForRole));
+            } else if(actionCountForRole == userCountForRole && synchronizationThreshold.isActionPreventedToAllItems(action, actionCountForRole)) {
                 lockItem(parentItem, String.format(PREVENT_ACTION_ON_ALL_MESSAGE, action));
             }
         });
@@ -215,34 +221,75 @@ public class SynchronizingProcessor extends AbstractProcessor {
         throw new ProcessingException(ProcessingStatus.LOCKED, message);
     }
 
-    private StudentSynchronizationItem createStudentSynchronizationItem(final OodiStudent student,
-                                                                        final MoodleFullCourse moodleCourse,
-                                                                        final Map<Long, MoodleUserEnrollments> moodleEnrollmentsByUserId) {
-        final StudentSynchronizationItem studentItem = new StudentSynchronizationItem(student,  mapperService.getStudentRoleId(), moodleCourse.id);
-        final StudentSynchronizationItem studentItemWithUsername = studentItem.setUsernameList(getUsernameList(student));
-        final StudentSynchronizationItem studentItemWithMoodleUser =
-            studentItemWithUsername.setMoodleUser(getMoodleUser(studentItemWithUsername.getUsernameList()));
-
-        final StudentSynchronizationItem studentItemWithMoodleEnrollment =
-            studentItemWithMoodleUser.setMoodleEnrollments(studentItemWithMoodleUser.getMoodleUser().map(u -> u.id).map(moodleEnrollmentsByUserId::get));
-
-        return studentItemWithMoodleEnrollment;
-
+    private Map<Long, MoodleUserEnrollments> groupMoodleEnrollmentsByUserId(final SynchronizationItem item) {
+        final List<MoodleUserEnrollments> enrollments = item.getMoodleEnrollments().get();
+        return enrollments.stream().collect(Collectors.toMap(e -> e.id, Function.identity(), (a, b) -> b));
     }
 
-    private TeacherSynchronizationItem createrTeacherSynchronizationItem(final OodiTeacher teacher,
-                                                                         final MoodleFullCourse moodleCourse,
-                                                                         final Map<Long, MoodleUserEnrollments> moodleEnrollmentsByUserId) {
-        final TeacherSynchronizationItem teacherItem = new TeacherSynchronizationItem(teacher, mapperService.getTeacherRoleId(), moodleCourse.id);
-        final TeacherSynchronizationItem teacherItemWithUsername = teacherItem.setUsername(getUsername(teacher));
-        final TeacherSynchronizationItem teacherItemWithMoodleUser =
-            teacherItemWithUsername.setMoodleUser(getMoodleUser(teacherItemWithUsername.getUsernameList()));
+    private Stream<MoodleEnrollment> actionsToMoodleEnrollents(SynchronizationItem parentItem, UserSynchronizationAction action) {
+        return action
+            .getRoles()
+            .stream()
+            .map(role -> new MoodleEnrollment(role, action.getMoodleUserId(), parentItem.getMoodleCourse().get().id));
+    }
 
-        final TeacherSynchronizationItem teacherItemWithMoodleEnrollment =
-            teacherItemWithMoodleUser.setMoodleEnrollments(teacherItemWithMoodleUser.getMoodleUser().map(u -> u.id).map(moodleEnrollmentsByUserId::get));
+    private List<UserSynchronizationItem> createUserSyncronizationItems(final SynchronizationItem item,
+                                                                        final Map<Long, MoodleUserEnrollments> moodleEnrollmentsByUserId) {
 
-        return teacherItemWithMoodleEnrollment;
+        final OodiCourseUsers oodiCourse = item.getOodiCourse().get();
 
+        Stream<UserSynchronizationItem> studentItemStream = oodiCourse.students
+            .stream()
+            .map(UserSynchronizationItem::new);
+        Stream<UserSynchronizationItem> teacherItemStream = oodiCourse.teachers
+            .stream()
+            .map(UserSynchronizationItem::new);
+
+        Map<Boolean, List<UserSynchronizationItem>> userSynchronizationItemsByCompletedStatus = Stream
+            .concat(studentItemStream, teacherItemStream)
+            .map(this::enrichWithMoodleUser)
+            .collect(Collectors.groupingBy(UserSynchronizationItem::isCompleted));
+
+        List<UserSynchronizationItem> completedItems = userSynchronizationItemsByCompletedStatus.getOrDefault(true, newArrayList());
+        List<UserSynchronizationItem> unCompletedItems = userSynchronizationItemsByCompletedStatus.getOrDefault(false, newArrayList());
+
+        Collection<UserSynchronizationItem> combinedUncompletedItems = unCompletedItems.stream()
+            .collect(Collectors.toMap(
+                UserSynchronizationItem::getMoodleUserId,
+                Function.identity(),
+                UserSynchronizationItem::combine))
+            .values();
+
+        return Stream.concat(
+            combinedUncompletedItems.stream().map(enrichWithMoodleUserEnrollments(moodleEnrollmentsByUserId)),
+            completedItems.stream()).collect(Collectors.toList());
+    }
+
+    private Function<UserSynchronizationItem, UserSynchronizationItem> enrichWithMoodleUserEnrollments(final Map<Long, MoodleUserEnrollments> moodleEnrollmentsByUserId) {
+        return userSynchronizationItem ->
+            userSynchronizationItem.withMoodleUserEnrollments(moodleEnrollmentsByUserId
+                .getOrDefault(userSynchronizationItem.getMoodleUserId(), null));
+    }
+
+    private UserSynchronizationItem enrichWithMoodleUser(UserSynchronizationItem item) {
+        List<String> usernames = item.getOodiStudent() != null ? getUsernameList(item.getOodiStudent()) : getUsernameList(item.getOodiTeacher());
+
+        if(usernames.size() == 0) {
+            return item.withStatus(USERNAME_NOT_FOUND);
+        }
+        return getMoodleUser(usernames).map(item::withMoodleUser).orElseGet(() -> item.withStatus(MOODLE_USER_NOT_FOUND));
+    }
+
+    private List<String> getUsernameList(OodiStudent student) {
+        return esbService.getStudentUsernameList(student.studentNumber);
+    }
+
+    private List<String> getUsernameList(OodiTeacher teacher) {
+        return esbService.getTeacherUsernameList(teacher.teacherId);
+    }
+
+    private Optional<MoodleUser> getMoodleUser(final List<String> usernameList) {
+        return moodleService.getUser(usernameList);
     }
 
     @Override
@@ -250,126 +297,4 @@ public class SynchronizingProcessor extends AbstractProcessor {
         return LOGGER;
     }
 
-    private Map<Long, MoodleUserEnrollments> groupMoodleEnrollmentsByUserId(final SynchronizationItem item) {
-        final List<MoodleUserEnrollments> enrollments = item.getMoodleEnrollments().get();
-        return enrollments.stream().collect(toMap(e -> e.id, Function.identity(), (a, b) -> b));
-    }
-
-    private List<EnrollmentSynchronizationItem> processItemsByAction(SynchronizationAction action, List<EnrollmentSynchronizationItem> items) {
-        switch(action) {
-            case ADD_ENROLLMENT_WITH_MOODI_ROLE:
-                return processEnrollments(items, action, this::buildMoodleEnrollmentsWithMoodiRoleEnrollments, moodleService::addEnrollments);
-            case ADD_ROLE:
-                return processEnrollments(items, action, this::buildMoodleEnrollments, moodleService::addRoles);
-            case REMOVE_ROLE:
-                return processEnrollments(items, action, this::buildMoodleEnrollments, moodleService::removeRoles);
-            case ADD_MOODI_ROLE:
-                return processEnrollments(items, action, this::buildMoodiRoleEnrollments, moodleService::addRoles);
-            default:
-                return processUnchanged(items);
-        }
-    }
-
-    private MoodleEnrollment createMoodleEnrollment(EnrollmentSynchronizationItem item, long moodleRoleId) {
-        return new MoodleEnrollment(
-            moodleRoleId,
-            item.getMoodleUser().map(user -> user.id).orElseThrow(() -> new RuntimeException("MoodleUser not found!")),
-            item.getMoodleCourseId());
-    }
-
-    private List<MoodleEnrollment> buildMoodiRoleEnrollments(List<EnrollmentSynchronizationItem> items) {
-        return items.stream()
-            .map(item -> createMoodleEnrollment(item, mapperService.getMoodiRoleId()))
-            .collect(Collectors.toList());
-    }
-
-    private List<MoodleEnrollment> buildMoodleEnrollments(List<EnrollmentSynchronizationItem> items) {
-        return items.stream()
-            .map(item -> createMoodleEnrollment(item, item.getMoodleRoleId()))
-            .collect(Collectors.toList());
-    }
-
-    private List<MoodleEnrollment> buildMoodleEnrollmentsWithMoodiRoleEnrollments(List<EnrollmentSynchronizationItem> items) {
-        return items.stream()
-            .flatMap(item -> Stream.of(
-                createMoodleEnrollment(item, item.getMoodleRoleId()),
-                createMoodleEnrollment(item, mapperService.getMoodiRoleId())))
-            .collect(Collectors.toList());
-    }
-
-    private List<EnrollmentSynchronizationItem> createSynchronizationItems(final SynchronizationItem item,
-                                                                           final Map<Long, MoodleUserEnrollments> moodleEnrollmentsByUserId) {
-        final OodiCourseUsers oodiCourse = item.getOodiCourse().get();
-
-        final MoodleFullCourse moodleCourse = item.getMoodleCourse().get();
-
-        List<EnrollmentSynchronizationItem> synchronizationItems = oodiCourse.students.stream()
-            .map(student -> createStudentSynchronizationItem(student, moodleCourse, moodleEnrollmentsByUserId))
-            .collect(Collectors.toList());
-
-        synchronizationItems.addAll(oodiCourse.teachers.stream()
-            .map(teacher -> createrTeacherSynchronizationItem(teacher, moodleCourse, moodleEnrollmentsByUserId))
-            .collect(Collectors.toList()));
-
-        return synchronizationItems;
-    }
-
-    private List<EnrollmentSynchronizationItem> processUnchanged(List<EnrollmentSynchronizationItem> items) {
-        return completeItems(items, true, MESSAGE_NOT_CHANGED,  EnrollmentSynchronizationStatus.COMPLETED);
-    }
-
-    private EnrollmentSynchronizationItem checkEnrollmentPrerequisites(final EnrollmentSynchronizationItem item) {
-        if (item.getUsernameList() == null || item.getUsernameList().size() == 0) {
-            return item.setCompleted(false, MESSAGE_USERNAME_NOT_FOUND, EnrollmentSynchronizationStatus.USERNAME_NOT_FOUND);
-        }
-
-        if (!item.getMoodleUser().isPresent()) {
-            return item.setCompleted(false, MESSAGE_MOODLE_USER_NOT_FOUND, EnrollmentSynchronizationStatus.MOODLE_USER_NOT_FOUND);
-        }
-
-        return item;
-    }
-
-    private List<String> getUsernameList(OodiStudent student) {
-        return esbService.getStudentUsernameList(student.studentNumber);
-    }
-
-    private List<String> getUsername(OodiTeacher teacher) {
-        return esbService.getTeacherUsernameList(teacher.teacherId);
-    }
-
-    private List<EnrollmentSynchronizationItem> processEnrollments(final List<EnrollmentSynchronizationItem> items,
-                                                                   SynchronizationAction action,
-                                                                   Function<List<EnrollmentSynchronizationItem>, List<MoodleEnrollment>> enrollmentsBuilder,
-                                                                   Consumer<List<MoodleEnrollment>> moodleServiceMethod) {
-        final List<MoodleEnrollment> moodleEnrollments = enrollmentsBuilder.apply(items);
-
-        boolean success = false;
-
-        try {
-            moodleServiceMethod.accept(moodleEnrollments);
-            success = true;
-        } catch (Exception e) {
-            LOGGER.error("Error while updating enrollment", e);
-        }
-
-        String message = String.format(success ? MESSAGE_ACTION_SUCCEEDED : MESSAGE_ACTION_FAILED, action.toString());
-        EnrollmentSynchronizationStatus status = success ? EnrollmentSynchronizationStatus.COMPLETED : EnrollmentSynchronizationStatus.ERROR;
-
-        return completeItems(items, success, message, status);
-
-    }
-
-    private Optional<MoodleUser> getMoodleUser(final List<String> usernameList) {
-        return moodleService.getUser(usernameList);
-    }
-
-    private List<EnrollmentSynchronizationItem> completeItems(List<EnrollmentSynchronizationItem> items,
-                                                              boolean success,
-                                                              String message,
-                                                              EnrollmentSynchronizationStatus status) {
-        return items.stream()
-            .map(item -> item.setCompleted(success, message, status))
-            .collect(Collectors.toList());
-    }
 }

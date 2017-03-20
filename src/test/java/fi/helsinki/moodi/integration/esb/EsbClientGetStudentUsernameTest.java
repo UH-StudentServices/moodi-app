@@ -27,6 +27,7 @@ import org.springframework.http.MediaType;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -64,7 +65,7 @@ public class EsbClientGetStudentUsernameTest extends AbstractMoodiIntegrationTes
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess("", MediaType.APPLICATION_JSON));
 
-        assertNull(esbClient.getStudentUsernameList("009"));
+        assertNotNull(esbClient.getStudentUsernameList("009"));
     }
 
     @Test
@@ -74,7 +75,7 @@ public class EsbClientGetStudentUsernameTest extends AbstractMoodiIntegrationTes
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
 
-        assertNull(esbClient.getStudentUsernameList("0010"));
+        assertNotNull(esbClient.getStudentUsernameList("0010"));
     }
 
 }
