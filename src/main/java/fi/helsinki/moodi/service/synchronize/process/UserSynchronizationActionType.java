@@ -18,7 +18,7 @@
 package fi.helsinki.moodi.service.synchronize.process;
 
 public enum UserSynchronizationActionType {
-    ADD_ENROLLMENT_WITH_ROLES,
+    ADD_ENROLLMENT,
     ADD_ROLES,
     REMOVE_ROLES
 }

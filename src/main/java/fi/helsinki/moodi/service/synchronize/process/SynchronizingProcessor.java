@@ -98,11 +98,11 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
         final List<UserSynchronizationItem> processedItems = synchronizeUsers(item, moodleEnrollmentsById);
 
-        item.setUserSynchronizationItems(processedItems);
-
         completeCourseEnrollments(item);
 
-        return item.completeProcessingPhase();
+        return item
+            .setUserSynchronizationItems(processedItems)
+            .completeProcessingPhase();
     }
 
     @Transactional
@@ -174,7 +174,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
     Consumer<List<MoodleEnrollment>> moodleServiceMethodForAction(UserSynchronizationActionType actionType) {
         switch (actionType) {
-            case ADD_ENROLLMENT_WITH_ROLES:
+            case ADD_ENROLLMENT:
                 return moodleService::addEnrollments;
             case ADD_ROLES:
                 return moodleService::addRoles;

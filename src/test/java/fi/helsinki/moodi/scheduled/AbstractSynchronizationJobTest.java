@@ -29,6 +29,7 @@ import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRunService;
 import fi.helsinki.moodi.service.synchronize.process.ProcessingStatus;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationAction.UserSynchronizationActionStatus;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem;
+import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem.UserSynchronizationItemStatus;
 import fi.helsinki.moodi.service.util.MapperService;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
@@ -129,16 +130,16 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
         SynchronizationItem item =  summary.getItems().get(0);
         List<UserSynchronizationItem> userSynchronizationItems = item.getUserSynchronizationItems();
 
-        UserSynchronizationActionStatus expectedStatus = expectErrors ? UserSynchronizationActionStatus.ERROR : UserSynchronizationActionStatus.SUCCESS;
+        UserSynchronizationItemStatus expectedStatus = expectErrors ? UserSynchronizationItemStatus.ERROR : UserSynchronizationItemStatus.SUCCESS;
 
         assertTrue(userSynchronizationItems.stream().allMatch(userItem -> expectedStatus.equals(userItem.getStatus())));
     }
 
     protected SynchronizationSummary testTresholdCheckFailed(String expectedMessage) {
         LOGGER.info("Testing synchronizationSummary with " +
-                "properties syncTresholds.REMOVE_ROLE.preventAll: {}, syncTresholds.REMOVE_ROLE.limit: {}",
-            environment.getProperty("syncTresholds.REMOVE_ROLE.preventAll"),
-            environment.getProperty("syncTresholds.REMOVE_ROLE.limit"));
+                "properties syncTresholds.REMOVE_ROLES.preventAll: {}, syncTresholds.REMOVE_ROLES.limit: {}",
+            environment.getProperty("syncTresholds.REMOVE_ROLES.preventAll"),
+            environment.getProperty("syncTresholds.REMOVE_ROLES.limit"));
 
         setUpMockServerResponses(getFutureDateString(), false);
 
