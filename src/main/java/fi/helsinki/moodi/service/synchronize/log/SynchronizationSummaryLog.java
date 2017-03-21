@@ -20,6 +20,9 @@ package fi.helsinki.moodi.service.synchronize.log;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
+import fi.helsinki.moodi.service.synchronize.SynchronizationType;
+import fi.helsinki.moodi.service.synchronize.enrich.EnrichmentStatus;
+import fi.helsinki.moodi.service.synchronize.process.ProcessingStatus;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationAction;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationAction.UserSynchronizationActionStatus;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationActionType;
@@ -44,60 +47,103 @@ public class SynchronizationSummaryLog {
         this.fullSummary = fullSummary;
     }
 
-    public Object getSyncronizationSummary() {
-        return new Object() {
-            public String elapsedTime = fullSummary.getElapsedTime();
-            public String type = fullSummary.getType().name();
-            public long successfulItemsCount = fullSummary.getSuccessfulItemsCount();
-            public long failedItemsCount = fullSummary.getFailedItemsCount();
-            public List<Object> courses = fullSummary.getItems()
+    public SynchronizationSymmaryLogRoot getSyncronizationSummary() {
+        return new SynchronizationSymmaryLogRoot(
+            fullSummary.getElapsedTime(),
+            fullSummary.getType(),
+            fullSummary.getSuccessfulItemsCount(),
+            fullSummary.getFailedItemsCount(),
+            fullSummary.getItems()
                 .stream()
-                .map(item -> mapItem(item))
-                .collect(Collectors.toList());
-        };
+                .map(this::toSynchronizationItemLogEntry)
+                .collect(Collectors.toList()));
     }
 
-    private Object mapItem(SynchronizationItem item) {
+    private SynchronizationItemLogEntry toSynchronizationItemLogEntry(SynchronizationItem item) {
         try {
-            return new Object() {
-                public long realisationId = Optional.ofNullable(item.getCourse()).map(course -> course.realisationId).orElse(null);
-                public Long moodleId = Optional.ofNullable(item.getCourse()).map(course -> course.moodleId).orElse(null);
-                public String enrichmentStatus = item.getEnrichmentStatus().name();
-                public String processingStatus = item.getProcessingStatus().name();
+            List<UserSyncronizationItemLogEntry> userSyncronizationItemLogEntries = item.getUserSynchronizationItems().stream()
+                .map(UserSyncronizationItemLogEntry::new)
+                .collect(Collectors.toList());
 
-                public Object users = getEnrollmentDetails(
-                    item.getUserSynchronizationItems().stream().map(UserSyncronizationItemLogEntry::new)
-                    .collect(Collectors.toList()));
-
-
-                public String message = item.getMessage();
-            };
+            return new SynchronizationItemLogEntry(
+                Optional.ofNullable(item.getCourse()).map(course -> course.realisationId).orElse(null),
+                Optional.ofNullable(item.getCourse()).map(course -> course.moodleId).orElse(null),
+                item.getEnrichmentStatus(),
+                item.getProcessingStatus(),
+                new UserEnrollmentsLogEntry(
+                    getEnrollmentDetailsSummary(userSyncronizationItemLogEntries),
+                    getEnrollmentResults(userSyncronizationItemLogEntries)),
+                item.getMessage()
+            );
         } catch (Exception e) {
             LOGGER.error("Could not create log entry for synchronizationItem", e);
             return null;
         }
     }
 
-    private static Object getEnrollmentDetails(List<UserSyncronizationItemLogEntry> items) {
-        if(items != null) {
-            return new Object() {
-                public Map<String, Long> summary = getEnrollmentDetailsSummary(items);
-                public Map<String, List<UserSyncronizationItemLogEntry>> results = getEnrollmentResults(items);
-            };
-        } else {
-            return null;
+    private static Map<UserSynchronizationItemStatus, Long> getEnrollmentDetailsSummary(List<UserSyncronizationItemLogEntry> items) {
+        return items.stream().collect(Collectors.groupingBy(item -> item.getStatus(), Collectors.counting()));
+    }
+
+    private static Map<UserSynchronizationItemStatus, List<UserSyncronizationItemLogEntry>> getEnrollmentResults(List<UserSyncronizationItemLogEntry> items) {
+        return items.stream().collect(Collectors.groupingBy(item -> item.getStatus()));
+    }
+
+    public static class SynchronizationSymmaryLogRoot {
+        public final String elapsedTime;
+        public final SynchronizationType type;
+        public final long successfulItemsCount;
+        public final long failedItemsCount;
+        public final List<SynchronizationItemLogEntry> courses;
+
+        public SynchronizationSymmaryLogRoot(String elapsedTime,
+                                             SynchronizationType type,
+                                             long successfulItemsCount,
+                                             long failedItemsCount,
+                                             List<SynchronizationItemLogEntry> courses) {
+            this.elapsedTime = elapsedTime;
+            this.type = type;
+            this.successfulItemsCount = successfulItemsCount;
+            this.failedItemsCount = failedItemsCount;
+            this.courses = courses;
         }
     }
 
-    private static Map<String, Long> getEnrollmentDetailsSummary(List<UserSyncronizationItemLogEntry> items) {
-        return items.stream().collect(Collectors.groupingBy(item -> item.getStatus().name(), Collectors.counting()));
+    public static class SynchronizationItemLogEntry {
+        public final long realisationId;
+        public final long moodleId;
+        public final EnrichmentStatus enrichmentStatus;
+        public final ProcessingStatus processingStatus;
+        public final UserEnrollmentsLogEntry userEnrollments;
+        public final String message;
+
+        public SynchronizationItemLogEntry(long realisationId,
+                                           long moodleId,
+                                           EnrichmentStatus enrichmentStatus,
+                                           ProcessingStatus processingStatus,
+                                           UserEnrollmentsLogEntry userEnrollments,
+                                           String message) {
+            this.realisationId = realisationId;
+            this.moodleId = moodleId;
+            this.enrichmentStatus = enrichmentStatus;
+            this.processingStatus = processingStatus;
+            this.userEnrollments = userEnrollments;
+            this.message = message;
+        }
     }
 
-    private static Map<String, List<UserSyncronizationItemLogEntry>> getEnrollmentResults(List<UserSyncronizationItemLogEntry> items) {
-        return items.stream().collect(Collectors.groupingBy(item -> item.getStatus().name()));
+    public static class UserEnrollmentsLogEntry {
+        public final Map<UserSynchronizationItemStatus, Long> summary;
+        public final Map<UserSynchronizationItemStatus, List<UserSyncronizationItemLogEntry>> results;
+
+        public UserEnrollmentsLogEntry(Map<UserSynchronizationItemStatus, Long> summary,
+                                       Map<UserSynchronizationItemStatus, List<UserSyncronizationItemLogEntry>> results) {
+            this.summary = summary;
+            this.results = results;
+        }
     }
 
-    private static class UserSyncronizationItemLogEntry {
+    public static class UserSyncronizationItemLogEntry {
         private final UserSynchronizationItemStatus status;
         private final List<SyncronizationItemActionLogEntry> actions;
         private final Long moodleUserId;
@@ -121,7 +167,7 @@ public class SynchronizationSummaryLog {
         }
     }
 
-    private static class SyncronizationItemActionLogEntry {
+    public static class SyncronizationItemActionLogEntry {
         private final UserSynchronizationActionStatus status;
         private final UserSynchronizationActionType actionType;
         private final List<Long> roles;

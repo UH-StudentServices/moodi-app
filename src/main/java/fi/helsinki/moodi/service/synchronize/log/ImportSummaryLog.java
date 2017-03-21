@@ -90,7 +90,7 @@ public class ImportSummaryLog {
 
     private Map<String, Long> getReasonCountMapForRole(String role) {
         return enrollmentWarnings.stream()
-            .filter(w -> ROLE_STUDENT.equals(w.enrollment.role)).collect(Collectors.groupingBy(w -> w.code, Collectors.counting()));
+            .filter(w -> role.equals(w.enrollment.role)).collect(Collectors.groupingBy(w -> w.code, Collectors.counting()));
     }
 
     private EnrollmentEntry createStudentEnrollmentEntry(Enrollment enrollment) {
@@ -101,7 +101,7 @@ public class ImportSummaryLog {
         return new TeacherEnrollmentEntry(enrollment);
     }
 
-    private static class StudentEnrollmentEntry extends EnrollmentEntry {
+    public static class StudentEnrollmentEntry extends EnrollmentEntry {
         public final String studentNumber;
 
         public StudentEnrollmentEntry(Enrollment enrollment) {
@@ -109,7 +109,7 @@ public class ImportSummaryLog {
         }
     }
 
-    private static class TeacherEnrollmentEntry extends EnrollmentEntry {
+    public static class TeacherEnrollmentEntry extends EnrollmentEntry {
         public final String teacherId;
 
         public TeacherEnrollmentEntry(Enrollment enrollment) {
@@ -118,11 +118,11 @@ public class ImportSummaryLog {
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private static abstract class EnrollmentEntry {
+    public static abstract class EnrollmentEntry {
         public String message;
     }
 
-    private static class EnrollmentSummary {
+    public static class EnrollmentSummary {
         public final long enrolledStudents;
         public final long enrolledTeachers;
         public final Map<String, Long> failedStudents;

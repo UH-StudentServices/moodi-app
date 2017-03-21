@@ -31,13 +31,11 @@ import java.util.Optional;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Optional.empty;
 
-/**
- * Contains data needed to synchronize single course.
- *
- * @see TeacherSynchronizationItem
- * @see StudentSynchronizationItem
- */
 public final class SynchronizationItem {
+
+    public static final String SUCCESS_MESSAGE = "Success";
+    public static final String ENROLLMENT_FAILURES_MESSAGE = "Some enrollment failures";
+
     private final Course course;
     private final SynchronizationType synchronizationType;
     private final boolean success;
@@ -169,7 +167,8 @@ public final class SynchronizationItem {
 
         final boolean newSuccess = userSynchronizationItems.stream().allMatch(UserSynchronizationItem::isSuccess);
 
-        final String newMessage = (newSuccess) ? "Success" : "Some enrollment failures";
+        final String newMessage = (newSuccess) ? SUCCESS_MESSAGE : ENROLLMENT_FAILURES_MESSAGE;
+
         final ProcessingStatus newProcessingStatus =
                 (newSuccess) ? ProcessingStatus.SUCCESS : ProcessingStatus.ENROLLMENT_FAILURES;
 
