@@ -68,7 +68,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
     private final CourseService courseService;
     private final SynchronizationThreshold synchronizationThreshold;
     private final SyncLockService syncLockService;
-    private final SynchronizationActionResolver synchronizationActionResolver;
+    private final UserSynchronizationActionResolver synchronizationActionResolver;
     private final BatchProcessor<UserSynchronizationAction> batchProcessor;
 
     @Autowired
@@ -78,7 +78,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
                                   CourseService courseService,
                                   SynchronizationThreshold synchronizationThreshold,
                                   SyncLockService syncLockService,
-                                  SynchronizationActionResolver synchronizationActionResolver,
+                                  UserSynchronizationActionResolver synchronizationActionResolver,
                                   BatchProcessor batchProcessor) {
         super(Action.SYNCHRONIZE);
         this.esbService = esbService;

@@ -27,12 +27,12 @@ import java.util.stream.Collectors;
 import static com.google.common.collect.Lists.newArrayList;
 
 @Component
-public class SynchronizationActionResolver {
+public class UserSynchronizationActionResolver {
 
     private final MapperService mapperService;
 
     @Autowired
-    public SynchronizationActionResolver(MapperService mapperService) {
+    public UserSynchronizationActionResolver(MapperService mapperService) {
         this.mapperService = mapperService;
     }
 
