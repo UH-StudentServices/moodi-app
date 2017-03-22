@@ -81,7 +81,7 @@ public class UserSynchronizationItem {
     }
 
     public Long getMoodleUserId() {
-        return moodleUser.id;
+        return moodleUser != null ? moodleUser.id : null;
     }
 
     public OodiStudent getOodiStudent() {
