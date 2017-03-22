@@ -20,8 +20,12 @@ package fi.helsinki.moodi.scheduled;
 import fi.helsinki.moodi.exception.SynchronizationInProgressException;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.service.course.Course;
+import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.service.synchronize.enrich.EnrichmentStatus;
+import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationAction;
+import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem;
+import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem.UserSynchronizationItemStatus;
 import fi.helsinki.moodi.test.util.DateUtil;
 import org.junit.Test;
 import org.springframework.test.context.TestPropertySource;
@@ -262,5 +266,43 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         assertTrue(exceptionThrown);
     }
 
+    @Test
+    public void thatIfUsernameIsNotFoundFromESBSynchronizationIsNotCompleted() {
+        ExpectationsForUserThatCannotBeMappedToMoodleUser expectations = () -> {
+            expectFindStudentRequestToEsbAndRespondWithEmptyResult(STUDENT_NUMBER);
+        };
 
+        testSynchronizationForUserThatCanNotBeMappedToMoodleUser(expectations, UserSynchronizationItemStatus.USERNAME_NOT_FOUND);
+    }
+
+    @Test
+    public void thatIfUserIsNotFoundFromMoodleSynchronizationIsNotCompleted() {
+        ExpectationsForUserThatCannotBeMappedToMoodleUser expectations = () -> {
+            expectFindStudentRequestToEsb(STUDENT_NUMBER, STUDENT_USERNAME);
+            expectGetUserRequestToMoodleUserNotFound(STUDENT_USERNAME + USERNAME_SUFFIX);
+        };
+
+        testSynchronizationForUserThatCanNotBeMappedToMoodleUser(expectations, UserSynchronizationItemStatus.MOODLE_USER_NOT_FOUND);
+    }
+
+    private void testSynchronizationForUserThatCanNotBeMappedToMoodleUser(ExpectationsForUserThatCannotBeMappedToMoodleUser expectatations,
+                                                                          UserSynchronizationItemStatus expectedStatus) {
+        setupMoodleGetCourseResponse();
+
+        setupOodiCourseUnitRealisationResponse("/oodi/course-realisation-one-student.json");
+
+        expectGetEnrollmentsRequestToMoodle(MOODLE_COURSE_ID);
+
+        expectatations.apply();
+
+        SynchronizationSummary summary = synchronizationService.synchronize(SynchronizationType.FULL);
+
+        UserSynchronizationItem userSynchronizationItem = summary.getItems().get(0).getUserSynchronizationItems().get(0);
+
+        assertTrue(expectedStatus.equals(userSynchronizationItem.getStatus()));
+    }
+
+    private interface ExpectationsForUserThatCannotBeMappedToMoodleUser {
+        public void apply();
+    }
 }

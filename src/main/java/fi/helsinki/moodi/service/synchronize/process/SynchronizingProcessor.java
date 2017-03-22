@@ -274,7 +274,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
     private UserSynchronizationItem enrichWithMoodleUser(UserSynchronizationItem item) {
         List<String> usernames = item.getOodiStudent() != null ? getUsernameList(item.getOodiStudent()) : getUsernameList(item.getOodiTeacher());
 
-        if(usernames.size() == 0) {
+        if(usernames.isEmpty()) {
             return item.withStatus(USERNAME_NOT_FOUND);
         }
         return getMoodleUser(usernames).map(item::withMoodleUser).orElseGet(() -> item.withStatus(MOODLE_USER_NOT_FOUND));

@@ -1,0 +1,12 @@
+{
+  "status": 200,
+  "data": {
+    "end_date": "{{ endDate }}",
+    "students": [
+      {
+        "student_number": "010342729",
+        "approved" : "false"
+      }
+    ]
+  }
+}
