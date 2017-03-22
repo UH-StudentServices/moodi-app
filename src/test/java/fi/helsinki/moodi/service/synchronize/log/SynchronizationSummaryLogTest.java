@@ -101,18 +101,18 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
         UserSyncronizationItemLogEntry successfulEntry = successfullUserEntries.get(0);
         UserSyncronizationItemLogEntry failedEntry = failedUserEntries.get(0);
 
-        assertTrue(successfulEntry.getStatus().equals(UserSynchronizationItemStatus.SUCCESS));
-        assertTrue(successfulEntry.getMoodleUserId().equals(STUDENT_MOODLE_USER_ID));
+        assertTrue(successfulEntry.status.equals(UserSynchronizationItemStatus.SUCCESS));
+        assertTrue(successfulEntry.moodleUserId.equals(STUDENT_MOODLE_USER_ID));
         assertSingleAction(
-            successfulEntry.getActions(),
+            successfulEntry.actions,
             UserSynchronizationActionStatus.SUCCESS,
             UserSynchronizationActionType.REMOVE_ROLES,
             newArrayList(5L));
 
-        assertTrue(failedEntry.getStatus().equals(UserSynchronizationItemStatus.ERROR));
-        assertTrue(failedEntry.getMoodleUserId().equals(TEACHER_MOODLE_USER_ID));
+        assertTrue(failedEntry.status.equals(UserSynchronizationItemStatus.ERROR));
+        assertTrue(failedEntry.moodleUserId.equals(TEACHER_MOODLE_USER_ID));
         assertSingleAction(
-            failedEntry.getActions(),
+            failedEntry.actions,
             UserSynchronizationActionStatus.ERROR,
             UserSynchronizationActionType.ADD_ROLES,
             newArrayList(3L));
@@ -126,10 +126,10 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
         assertEquals(1, actions.size());
 
         SyncronizationItemActionLogEntry action = actions.get(0);
-        assertEquals(expectedStatus, action.getStatus());
-        assertEquals(expectedActionType, action.getActionType());
-        assertEquals(action.getRoles().size(), expectedRoles.size());
-        assertTrue(action.getRoles().containsAll(expectedRoles));
+        assertEquals(expectedStatus, action.status);
+        assertEquals(expectedActionType, action.actionType);
+        assertEquals(action.roles.size(), expectedRoles.size());
+        assertTrue(action.roles.containsAll(expectedRoles));
 
     }
 

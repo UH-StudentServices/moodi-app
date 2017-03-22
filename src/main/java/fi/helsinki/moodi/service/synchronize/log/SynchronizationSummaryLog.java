@@ -82,11 +82,11 @@ public class SynchronizationSummaryLog {
     }
 
     private static Map<UserSynchronizationItemStatus, Long> getEnrollmentDetailsSummary(List<UserSyncronizationItemLogEntry> items) {
-        return items.stream().collect(Collectors.groupingBy(item -> item.getStatus(), Collectors.counting()));
+        return items.stream().collect(Collectors.groupingBy(item -> item.status, Collectors.counting()));
     }
 
     private static Map<UserSynchronizationItemStatus, List<UserSyncronizationItemLogEntry>> getEnrollmentResults(List<UserSyncronizationItemLogEntry> items) {
-        return items.stream().collect(Collectors.groupingBy(item -> item.getStatus()));
+        return items.stream().collect(Collectors.groupingBy(item -> item.status));
     }
 
     public static class SynchronizationSymmaryLogRoot {
@@ -144,50 +144,26 @@ public class SynchronizationSummaryLog {
     }
 
     public static class UserSyncronizationItemLogEntry {
-        private final UserSynchronizationItemStatus status;
-        private final List<SyncronizationItemActionLogEntry> actions;
-        private final Long moodleUserId;
+        public final UserSynchronizationItemStatus status;
+        public final List<SyncronizationItemActionLogEntry> actions;
+        public final Long moodleUserId;
 
         private UserSyncronizationItemLogEntry(UserSynchronizationItem item) {
             this.status = item.getStatus();
             this.actions = item.getActions().stream().map(SyncronizationItemActionLogEntry::new).collect(Collectors.toList());
             this.moodleUserId = item.getMoodleUserId();
         }
-
-        public List<SyncronizationItemActionLogEntry> getActions() {
-            return actions;
-        }
-
-        public Long getMoodleUserId() {
-            return moodleUserId;
-        }
-
-        public UserSynchronizationItemStatus getStatus() {
-            return status;
-        }
     }
 
     public static class SyncronizationItemActionLogEntry {
-        private final UserSynchronizationActionStatus status;
-        private final UserSynchronizationActionType actionType;
-        private final List<Long> roles;
+        public final UserSynchronizationActionStatus status;
+        public final UserSynchronizationActionType actionType;
+        public final List<Long> roles;
 
         public SyncronizationItemActionLogEntry(UserSynchronizationAction action) {
             this.status = action.getStatus();
             this.actionType = action.getActionType();
             this.roles = action.getRoles();
-        }
-
-        public UserSynchronizationActionStatus getStatus() {
-            return status;
-        }
-
-        public UserSynchronizationActionType getActionType() {
-            return actionType;
-        }
-
-        public List<Long> getRoles() {
-            return roles;
         }
     }
 }
