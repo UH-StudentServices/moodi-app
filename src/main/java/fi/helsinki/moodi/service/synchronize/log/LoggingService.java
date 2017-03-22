@@ -18,14 +18,15 @@
 package fi.helsinki.moodi.service.synchronize.log;
 
 import fi.helsinki.moodi.service.course.Course;
-import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatus;
+import fi.helsinki.moodi.service.importing.Enrollment;
+import fi.helsinki.moodi.service.importing.EnrollmentWarning;
 import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
-import fi.helsinki.moodi.service.synchronize.log.synchronizationSummary.SynchronizationSummaryLog;
 import fi.helsinki.moodi.service.time.TimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 /**
  * Service that orchestrates logging.
@@ -56,8 +57,8 @@ public class LoggingService {
         log(COURSE_IMPORT_TITLE, course);
     }
 
-    public void logCourseImportEnrollments(CourseEnrollmentStatus courseEnrollmentStatus) {
-        log(COURSE_ENROLLMENT_TITLE, courseEnrollmentStatus);
+    public void logCourseImportEnrollments(List<Enrollment> enrollments, List<EnrollmentWarning> enrollmentWarnings) {
+        log(COURSE_ENROLLMENT_TITLE, new ImportSummaryLog(enrollments, enrollmentWarnings));
     }
 
     private void log(String title, Object data) {

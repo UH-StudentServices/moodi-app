@@ -131,11 +131,14 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
     }
 
     @Test
-    public void doesNotAddStudentEnrollmentIfNotApproved() {
+    public void addsOnlyDefaultMoodiRoleIfNotApproved() {
         SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
             .withOodiStudent(MOODLE_USER_ID, false)
             .withEmptyMoodleEnrollments()
             .expectUserRequestsToESBAndMoodle()
+            .expectAddEnrollmentsToMoodleCourse(
+                moodiEnrollment()
+            )
             .getSynchronizationItem();
 
         synchronizingProcessor.doProcess(item);

@@ -30,11 +30,11 @@ import org.springframework.test.context.TestPropertySource;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@TestPropertySource(properties = {"syncTresholds.REMOVE_ROLE.preventAll = 1",
-                                  "syncTresholds.REMOVE_ROLE.limit = 1"})
+@TestPropertySource(properties = {"syncTresholds.REMOVE_ROLES.preventAll = 1",
+                                  "syncTresholds.REMOVE_ROLES.limit = 1"})
 public class SynchronizationActionThresholdLimitTest extends AbstractSynchronizationJobTest {
 
-    private static final String EXPECTED_THRESHOLD_CROSSED_REMOVE_ROLE_MESSAGE = "Action REMOVE_ROLE for 1 items exceeds threshold";
+    private static final String EXPECTED_THRESHOLD_CROSSED_REMOVE_ROLE_MESSAGE = "Action REMOVE_ROLES for 1 items exceeds threshold";
 
     @Autowired
     private SyncLockService syncLockService;

@@ -23,21 +23,19 @@ import fi.helsinki.moodi.integration.oodi.OodiCourseUsers;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.enrich.EnrichmentStatus;
 import fi.helsinki.moodi.service.synchronize.process.ProcessingStatus;
-import fi.helsinki.moodi.service.synchronize.process.StudentSynchronizationItem;
-import fi.helsinki.moodi.service.synchronize.process.TeacherSynchronizationItem;
+import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem;
 
 import java.util.List;
 import java.util.Optional;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Optional.empty;
 
-/**
- * Contains data needed to synchronize single course.
- *
- * @see TeacherSynchronizationItem
- * @see StudentSynchronizationItem
- */
 public final class SynchronizationItem {
+
+    public static final String SUCCESS_MESSAGE = "Success";
+    public static final String ENROLLMENT_FAILURES_MESSAGE = "Some enrollment failures";
+
     private final Course course;
     private final SynchronizationType synchronizationType;
     private final boolean success;
@@ -45,15 +43,14 @@ public final class SynchronizationItem {
     private final Optional<OodiCourseUsers> oodiCourse;
     private final Optional<MoodleFullCourse> moodleCourse;
     private final Optional<List<MoodleUserEnrollments>> moodleEnrollments;
-    private final Optional<List<TeacherSynchronizationItem>> teacherItems;
-    private final Optional<List<StudentSynchronizationItem>> studentItems;
+    private final List<UserSynchronizationItem> userSynchronizationItems;
     private final EnrichmentStatus enrichmentStatus;
     private final ProcessingStatus processingStatus;
     private final boolean unlock;
     private final boolean removed;
 
     public SynchronizationItem(Course course, SynchronizationType synchronizationType) {
-        this(course, synchronizationType, false, "Started", empty(), empty(), empty(), empty(), empty(), EnrichmentStatus.IN_PROGESS, ProcessingStatus.IN_PROGRESS, false, false);
+        this(course, synchronizationType, false, "Started", empty(), empty(), empty(), newArrayList(), EnrichmentStatus.IN_PROGESS, ProcessingStatus.IN_PROGRESS, false, false);
     }
 
     private SynchronizationItem(
@@ -64,8 +61,7 @@ public final class SynchronizationItem {
         Optional<OodiCourseUsers> oodiCourse,
         Optional<MoodleFullCourse> moodleCourse,
         Optional<List<MoodleUserEnrollments>> moodleEnrollments,
-        Optional<List<TeacherSynchronizationItem>> teacherItems,
-        Optional<List<StudentSynchronizationItem>> studentItems,
+        List<UserSynchronizationItem> userSynchronizationItems,
         EnrichmentStatus enrichmentStatus,
         ProcessingStatus processingStatus,
         boolean unlock,
@@ -78,8 +74,7 @@ public final class SynchronizationItem {
         this.oodiCourse = oodiCourse;
         this.moodleCourse = moodleCourse;
         this.moodleEnrollments = moodleEnrollments;
-        this.teacherItems = teacherItems;
-        this.studentItems = studentItems;
+        this.userSynchronizationItems = userSynchronizationItems;
         this.enrichmentStatus = enrichmentStatus;
         this.processingStatus = processingStatus;
         this.unlock = unlock;
@@ -103,32 +98,28 @@ public final class SynchronizationItem {
     }
 
     public SynchronizationItem setOodiCourse(final Optional<OodiCourseUsers> newOodiCourse) {
-        return new SynchronizationItem(course, synchronizationType, success, message, newOodiCourse, moodleCourse, moodleEnrollments, teacherItems, studentItems, enrichmentStatus, processingStatus, unlock, removed);
+        return new SynchronizationItem(course, synchronizationType, success, message, newOodiCourse, moodleCourse, moodleEnrollments, userSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
     }
 
     public SynchronizationItem setMoodleCourse(final Optional<MoodleFullCourse> newMoodleCourse) {
-        return new SynchronizationItem(course, synchronizationType, success, message, oodiCourse, newMoodleCourse, moodleEnrollments, teacherItems, studentItems, enrichmentStatus, processingStatus, unlock, removed);
+        return new SynchronizationItem(course, synchronizationType, success, message, oodiCourse, newMoodleCourse, moodleEnrollments, userSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
     }
 
     public SynchronizationItem setMoodleEnrollments(final Optional<List<MoodleUserEnrollments>> newMoodleEnrollments) {
-        return new SynchronizationItem(course, synchronizationType, success, message, oodiCourse, moodleCourse, newMoodleEnrollments, teacherItems, studentItems, enrichmentStatus, processingStatus, unlock, removed);
+        return new SynchronizationItem(course, synchronizationType, success, message, oodiCourse, moodleCourse, newMoodleEnrollments, userSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
     }
 
-    public SynchronizationItem setTeacherItems(final Optional<List<TeacherSynchronizationItem>> newTeacherItems) {
-        return new SynchronizationItem(course, synchronizationType, success, message, oodiCourse, moodleCourse, moodleEnrollments, newTeacherItems, studentItems, enrichmentStatus, processingStatus, unlock, removed);
-    }
-
-    public SynchronizationItem setStudentItems(final Optional<List<StudentSynchronizationItem>> newStudentItems) {
-        return new SynchronizationItem(course, synchronizationType, success, message, oodiCourse, moodleCourse, moodleEnrollments, teacherItems, newStudentItems, enrichmentStatus, processingStatus, unlock, removed);
+    public SynchronizationItem setUserSynchronizationItems(final List<UserSynchronizationItem> newUserSynchronizationItems) {
+        return new SynchronizationItem(course, synchronizationType, success, message, oodiCourse, moodleCourse, moodleEnrollments, newUserSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
     }
 
     public SynchronizationItem setUnlock(final boolean newUnlock) {
-        return new SynchronizationItem(course, synchronizationType, success, message, oodiCourse, moodleCourse, moodleEnrollments, teacherItems, studentItems, enrichmentStatus, processingStatus, newUnlock, removed);
+        return new SynchronizationItem(course, synchronizationType, success, message, oodiCourse, moodleCourse, moodleEnrollments, userSynchronizationItems, enrichmentStatus, processingStatus, newUnlock, removed);
     }
 
     public SynchronizationItem completeEnrichmentPhase(final EnrichmentStatus newEnrichmentStatus, final String newMessage) {
         final boolean newSuccess = newEnrichmentStatus == EnrichmentStatus.SUCCESS;
-        return new SynchronizationItem(course, synchronizationType, newSuccess, newMessage, oodiCourse, moodleCourse, moodleEnrollments, teacherItems, studentItems, newEnrichmentStatus, processingStatus, unlock, removed);
+        return new SynchronizationItem(course, synchronizationType, newSuccess, newMessage, oodiCourse, moodleCourse, moodleEnrollments, userSynchronizationItems, newEnrichmentStatus, processingStatus, unlock, removed);
     }
 
     public SynchronizationItem completeProcessingPhase(final ProcessingStatus newProcessingStatus, final String newMessage) {
@@ -137,7 +128,7 @@ public final class SynchronizationItem {
 
     public SynchronizationItem completeProcessingPhase(final ProcessingStatus newProcessingStatus, final String newMessage, final boolean newRemoved) {
         final boolean newSuccess = newProcessingStatus == ProcessingStatus.SUCCESS;
-        return new SynchronizationItem(course, synchronizationType, newSuccess, newMessage, oodiCourse, moodleCourse, moodleEnrollments, teacherItems, studentItems, enrichmentStatus, newProcessingStatus, unlock, newRemoved);
+        return new SynchronizationItem(course, synchronizationType, newSuccess, newMessage, oodiCourse, moodleCourse, moodleEnrollments, userSynchronizationItems, enrichmentStatus, newProcessingStatus, unlock, newRemoved);
     }
 
     public Course getCourse() {
@@ -164,33 +155,20 @@ public final class SynchronizationItem {
         return unlock;
     }
 
-    public Optional<List<TeacherSynchronizationItem>> getTeacherItems() {
-        return teacherItems;
-    }
-
-    public Optional<List<StudentSynchronizationItem>> getStudentItems() {
-        return studentItems;
-    }
-
     public boolean isRemoved() {
         return removed;
     }
 
+    public List<UserSynchronizationItem> getUserSynchronizationItems() {
+        return userSynchronizationItems;
+    }
+
     public SynchronizationItem completeProcessingPhase() {
-        if (!teacherItems.isPresent() || !studentItems.isPresent()) {
-            throw new IllegalArgumentException("Student and teacher items need to be present");
-        }
 
-        final List<TeacherSynchronizationItem> processedTeacherItems = teacherItems.get();
-        final List<StudentSynchronizationItem> processedStudentItems = studentItems.get();
+        final boolean newSuccess = userSynchronizationItems.stream().allMatch(UserSynchronizationItem::isSuccess);
 
-        final long successfulTeacherItemsCount = processedTeacherItems.stream().filter(TeacherSynchronizationItem::isSuccess).count();
-        final long successfulStudentItemsCount  = processedStudentItems.stream().filter(StudentSynchronizationItem::isSuccess).count();
+        final String newMessage = (newSuccess) ? SUCCESS_MESSAGE : ENROLLMENT_FAILURES_MESSAGE;
 
-        final boolean newSuccess = successfulStudentItemsCount == processedStudentItems.size() &&
-                successfulTeacherItemsCount == processedTeacherItems.size();
-
-        final String newMessage = (newSuccess) ? "Success" : "Some enrollment failures";
         final ProcessingStatus newProcessingStatus =
                 (newSuccess) ? ProcessingStatus.SUCCESS : ProcessingStatus.ENROLLMENT_FAILURES;
 

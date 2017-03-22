@@ -18,11 +18,14 @@
 package fi.helsinki.moodi.integration.moodle;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.Serializable;
 import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 public final class MoodleUserEnrollments implements Serializable {
 
@@ -35,7 +38,7 @@ public final class MoodleUserEnrollments implements Serializable {
     public String username;
 
     @JsonProperty("roles")
-    public List<MoodleRole> roles;
+    public List<MoodleRole> roles = newArrayList();
 
     public boolean hasRole(long roleId) {
         if (roles == null) {

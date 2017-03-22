@@ -17,6 +17,7 @@
 
 package fi.helsinki.moodi.integration.esb;
 
+import com.google.common.collect.Lists;
 import fi.helsinki.moodi.exception.IntegrationConnectionException;
 import org.slf4j.Logger;
 import org.springframework.cache.annotation.Cacheable;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class EsbClient {
@@ -57,13 +59,13 @@ public class EsbClient {
                     studentNumber)
                 .getBody();
 
-            if (result != null && result.size() > 0) {
+            if (result != null){
                 return result
                     .stream()
                     .map(s -> s.username)
                     .collect(Collectors.toList());
             } else {
-                return null;
+                return newArrayList();
             }
         } catch (ResourceAccessException e) {
             throw new IntegrationConnectionException("ESB connection failure", e);
@@ -84,13 +86,13 @@ public class EsbClient {
                     teacherId)
                 .getBody();
 
-            if (result != null && result.size() > 0) {
+            if (result != null) {
                 return result
                     .stream()
                     .map(s -> s.username)
                     .collect(Collectors.toList());
             } else {
-                return null;
+                return newArrayList();
             }
         } catch (ResourceAccessException e) {
             throw new IntegrationConnectionException("ESB connection failure", e);

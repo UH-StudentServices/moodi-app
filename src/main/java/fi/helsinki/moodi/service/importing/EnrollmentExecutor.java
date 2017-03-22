@@ -25,8 +25,6 @@ import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
 import fi.helsinki.moodi.service.batch.BatchProcessor;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
-import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatus;
-import fi.helsinki.moodi.service.courseEnrollment.CourseEnrollmentStatusService;
 import fi.helsinki.moodi.service.synchronize.log.LoggingService;
 import fi.helsinki.moodi.service.util.MapperService;
 import org.slf4j.Logger;
@@ -56,7 +54,6 @@ public class EnrollmentExecutor {
     private final MoodleService moodleService;
     private final EsbService esbService;
     private final MapperService mapperService;
-    private final CourseEnrollmentStatusService courseEnrollmentStatusService;
     private final CourseService courseService;
     private final LoggingService loggingService;
     private final BatchProcessor<Enrollment> batchProcessor;
@@ -66,19 +63,16 @@ public class EnrollmentExecutor {
         MoodleService moodleService,
         EsbService esbService,
         MapperService mapperService,
-        CourseEnrollmentStatusService courseEnrollmentStatusService,
         CourseService courseService,
         LoggingService loggingService,
         BatchProcessor batchProcessor) {
         this.moodleService = moodleService;
         this.esbService = esbService;
         this.mapperService = mapperService;
-        this.courseEnrollmentStatusService = courseEnrollmentStatusService;
         this.courseService = courseService;
         this.loggingService = loggingService;
         this.batchProcessor = batchProcessor;
     }
-
 
     @Async("taskExecutor")
     public void processEnrollments(final Course course,
@@ -103,15 +97,9 @@ public class EnrollmentExecutor {
                 itemsToProcess -> persistMoodleEnrollments(moodleCourseId, itemsToProcess, enrollmentWarnings),
                 ENROLLMENT_BATCH_MAX_SIZE);
 
-            CourseEnrollmentStatus courseEnrollmentStatus = courseEnrollmentStatusService.persistCourseEnrollmentStatus(
-                course.id,
-                course.realisationId,
-                enrollmentsWithMoodleIds,
-                enrollmentWarnings);
-
             courseService.completeCourseImport(course.realisationId, true);
 
-            loggingService.logCourseImportEnrollments(courseEnrollmentStatus);
+            loggingService.logCourseImportEnrollments(enrollmentsWithMoodleIds, enrollmentWarnings);
 
             LOGGER.info("Enrollment executor for realisationId {} finished in {}", course.realisationId, stopwatch.stop().toString());
 
