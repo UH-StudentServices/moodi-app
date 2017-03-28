@@ -33,7 +33,7 @@ public class CleanImportStatuses {
     }
 
     // Run once per 2 hours
-    @Scheduled(initialDelay = 0, fixedDelay = 7200000)
+    @Scheduled(initialDelay = 30000, fixedDelay = 7200000)
     public void execute() {
         courseService.cleanImportStatuses();
     }
