@@ -15,7 +15,7 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.service.synchronize.log;
+package fi.helsinki.moodi.service.log;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
@@ -147,11 +147,17 @@ public class SynchronizationSummaryLog {
         public final UserSynchronizationItemStatus status;
         public final List<SyncronizationItemActionLogEntry> actions;
         public final Long moodleUserId;
+        public final String studentNumber;
+        public Boolean studentApproved;
+        public final String teacherId;
 
         private UserSyncronizationItemLogEntry(UserSynchronizationItem item) {
             this.status = item.getStatus();
             this.actions = item.getActions().stream().map(SyncronizationItemActionLogEntry::new).collect(Collectors.toList());
             this.moodleUserId = item.getMoodleUserId();
+            this.studentNumber = item.getOodiStudent() != null ? item.getOodiStudent().studentNumber : null;
+            this.studentApproved = item.getOodiStudent() != null ? item.getOodiStudent().approved : null;
+            this.teacherId = item.getOodiTeacher() != null ? item.getOodiTeacher().teacherId : null;
         }
     }
 

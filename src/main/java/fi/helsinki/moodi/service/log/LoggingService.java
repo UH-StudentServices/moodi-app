@@ -15,7 +15,7 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.service.synchronize.log;
+package fi.helsinki.moodi.service.log;
 
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.importing.Enrollment;
@@ -37,8 +37,8 @@ public class LoggingService {
     private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH.mm.ss");
 
     private static final String SYNCHRONIZATION_SUMMARY_TITLE = "Synchronization run completed:";
-    private static final String COURSE_IMPORT_TITLE = "Course import completed:";
-    private static final String COURSE_ENROLLMENT_TITLE = "Course import user enrollments completed:";
+    private static final String COURSE_IMPORT_TITLE = "Course import completed for realisation id %s:";
+    private static final String COURSE_ENROLLMENT_TITLE = "Course import user enrollments completed for realisation id %s:";
 
     private final SummaryLogger summaryLogger;
     private final TimeService timeService;
@@ -54,11 +54,11 @@ public class LoggingService {
     }
 
     public void logCourseImport(Course course) {
-        log(COURSE_IMPORT_TITLE, course);
+        log(String.format(COURSE_IMPORT_TITLE, course.realisationId), course);
     }
 
-    public void logCourseImportEnrollments(List<Enrollment> enrollments, List<EnrollmentWarning> enrollmentWarnings) {
-        log(COURSE_ENROLLMENT_TITLE, new ImportSummaryLog(enrollments, enrollmentWarnings));
+    public void logCourseImportEnrollments(Course course, List<Enrollment> enrollments, List<EnrollmentWarning> enrollmentWarnings) {
+        log(String.format(COURSE_ENROLLMENT_TITLE, course.realisationId), new ImportSummaryLog(enrollments, enrollmentWarnings));
     }
 
     private void log(String title, Object data) {

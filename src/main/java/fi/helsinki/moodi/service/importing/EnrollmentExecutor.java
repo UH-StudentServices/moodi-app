@@ -25,7 +25,7 @@ import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
 import fi.helsinki.moodi.service.batch.BatchProcessor;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
-import fi.helsinki.moodi.service.synchronize.log.LoggingService;
+import fi.helsinki.moodi.service.log.LoggingService;
 import fi.helsinki.moodi.service.util.MapperService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,7 +99,7 @@ public class EnrollmentExecutor {
 
             courseService.completeCourseImport(course.realisationId, true);
 
-            loggingService.logCourseImportEnrollments(enrollmentsWithMoodleIds, enrollmentWarnings);
+            loggingService.logCourseImportEnrollments(course, enrollmentsWithMoodleIds, enrollmentWarnings);
 
             LOGGER.info("Enrollment executor for realisationId {} finished in {}", course.realisationId, stopwatch.stop().toString());
 

@@ -1,4 +1,4 @@
-package fi.helsinki.moodi.service.synchronize.log;
+package fi.helsinki.moodi.service.log;
 
 public abstract class AbstractSummaryLogTest {
     protected static final String STUDENT_NUMBER = "12345";
