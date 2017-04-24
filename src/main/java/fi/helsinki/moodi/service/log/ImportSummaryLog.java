@@ -15,7 +15,7 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.service.synchronize.log;
+package fi.helsinki.moodi.service.log;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import fi.helsinki.moodi.service.importing.Enrollment;
