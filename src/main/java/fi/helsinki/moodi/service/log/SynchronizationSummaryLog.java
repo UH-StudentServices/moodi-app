@@ -151,6 +151,9 @@ public class SynchronizationSummaryLog {
         public Boolean studentApproved;
         public final String teacherId;
 
+        public String moodleUsername;
+        public List<Long> moodleRoleIds;
+
         private UserSyncronizationItemLogEntry(UserSynchronizationItem item) {
             this.status = item.getStatus();
             this.actions = item.getActions().stream().map(SyncronizationItemActionLogEntry::new).collect(Collectors.toList());
@@ -158,6 +161,14 @@ public class SynchronizationSummaryLog {
             this.studentNumber = item.getOodiStudent() != null ? item.getOodiStudent().studentNumber : null;
             this.studentApproved = item.getOodiStudent() != null ? item.getOodiStudent().approved : null;
             this.teacherId = item.getOodiTeacher() != null ? item.getOodiTeacher().teacherId : null;
+
+            if(item.getMoodleUserEnrollments() != null) {
+                this.moodleUsername = item.getMoodleUserEnrollments().username;
+                this.moodleRoleIds = item.getMoodleUserEnrollments().roles
+                    .stream()
+                    .map(role -> role.roleId)
+                    .collect(Collectors.toList());
+            }
         }
     }
 
