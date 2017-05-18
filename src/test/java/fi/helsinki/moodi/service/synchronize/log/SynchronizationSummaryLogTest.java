@@ -19,7 +19,9 @@
 package fi.helsinki.moodi.service.synchronize.log;
 
 import com.google.common.base.Stopwatch;
+import fi.helsinki.moodi.integration.moodle.MoodleRole;
 import fi.helsinki.moodi.integration.moodle.MoodleUser;
+import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.integration.oodi.OodiStudent;
 import fi.helsinki.moodi.integration.oodi.OodiTeacher;
 import fi.helsinki.moodi.service.course.Course;
@@ -37,20 +39,29 @@ import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem.Use
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
 
-    private final long TEACHER_MOODLE_USER_ID = 1;
-    private final long STUDENT_MOODLE_USER_ID = 2;
+    private static final long TEACHER_MOODLE_USER_ID = 1;
+    private static final long STUDENT_MOODLE_USER_ID = 2;
 
-    private final long COURSE_MOODLE_ID = 1;
-    private final long COURSE_REALISATION_ID = 2;
+    private static final long COURSE_MOODLE_ID = 1;
+    private static final long COURSE_REALISATION_ID = 2;
+
+    private static final String STUDENT_MOODLE_USERNAME = "studentUsername";
+    private static final String TEACHER_MOODLE_USERNAME = "teacherUsername";
+
+    private static final long STUDENT_ROLE_ID = 5;
+    private static final long TEACHER_ROLE_ID = 3;
 
     @Test
     public void thatSynchronizationSummaryLogIsCreated() {
@@ -107,7 +118,9 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
             successfulEntry.actions,
             UserSynchronizationActionStatus.SUCCESS,
             UserSynchronizationActionType.REMOVE_ROLES,
-            newArrayList(5L));
+            newArrayList(STUDENT_ROLE_ID));
+        assertEquals(STUDENT_MOODLE_USERNAME, successfulEntry.moodleUsername);
+        assertEquals(singletonList(STUDENT_ROLE_ID), successfulEntry.moodleRoleIds);
 
         assertTrue(failedEntry.status.equals(UserSynchronizationItemStatus.ERROR));
         assertTrue(failedEntry.moodleUserId.equals(TEACHER_MOODLE_USER_ID));
@@ -115,7 +128,9 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
             failedEntry.actions,
             UserSynchronizationActionStatus.ERROR,
             UserSynchronizationActionType.ADD_ROLES,
-            newArrayList(3L));
+            newArrayList(TEACHER_ROLE_ID));
+        assertEquals(TEACHER_MOODLE_USERNAME, failedEntry.moodleUsername);
+        assertEquals(emptyList(), failedEntry.moodleRoleIds);
     }
 
     private void assertSingleAction(List<SyncronizationItemActionLogEntry> actions,
@@ -145,36 +160,49 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
     private UserSynchronizationItem getSuccessfulStudentUserSynchronizationItem() {
         UserSynchronizationItem item = new UserSynchronizationItem(getOodiStudent());
 
+        MoodleUserEnrollments moodleUserEnrollments = new MoodleUserEnrollments();
+        MoodleRole moodleRole = new MoodleRole();
+        moodleRole.roleId = STUDENT_ROLE_ID;
+        moodleUserEnrollments.username = STUDENT_MOODLE_USERNAME;
+        moodleUserEnrollments.roles = singletonList(moodleRole);
+
         return enrichUserSynchronizationItem(
             item,
             UserSynchronizationItemStatus.SUCCESS,
             STUDENT_MOODLE_USER_ID,
-            newArrayList(new UserSynchronizationAction(UserSynchronizationActionType.REMOVE_ROLES, newArrayList(5L), STUDENT_MOODLE_USER_ID)
-                .withSuccessStatus()));
+            newArrayList(new UserSynchronizationAction(UserSynchronizationActionType.REMOVE_ROLES, newArrayList(STUDENT_ROLE_ID), STUDENT_MOODLE_USER_ID)
+                .withSuccessStatus()),
+            moodleUserEnrollments);
     }
 
     private UserSynchronizationItem getFailedTeacherUserStudentUserSynchronizationItem() {
         UserSynchronizationItem item = new UserSynchronizationItem(getOodiTeacher());
 
+        MoodleUserEnrollments moodleUserEnrollments = new MoodleUserEnrollments();
+        moodleUserEnrollments.username = TEACHER_MOODLE_USERNAME;
+
         return enrichUserSynchronizationItem(
             item,
             UserSynchronizationItemStatus.ERROR,
             TEACHER_MOODLE_USER_ID,
-            newArrayList(new UserSynchronizationAction(UserSynchronizationActionType.ADD_ROLES, newArrayList(3L), TEACHER_MOODLE_USER_ID)
-                .withErrorStatus()));
+            newArrayList(new UserSynchronizationAction(UserSynchronizationActionType.ADD_ROLES, newArrayList(TEACHER_ROLE_ID), TEACHER_MOODLE_USER_ID)
+                .withErrorStatus()),
+            moodleUserEnrollments);
     }
 
     private UserSynchronizationItem enrichUserSynchronizationItem(UserSynchronizationItem item,
                                                                   UserSynchronizationItemStatus status,
                                                                   Long moodleUserId,
-                                                                  List<UserSynchronizationAction> actions) {
+                                                                  List<UserSynchronizationAction> actions,
+                                                                  MoodleUserEnrollments moodleUserEnrollments) {
         MoodleUser moodleUser = new MoodleUser();
         moodleUser.id = moodleUserId;
 
         return item
             .withMoodleUser(moodleUser)
             .withStatus(status)
-            .withActions(actions);
+            .withActions(actions)
+            .withMoodleUserEnrollments(moodleUserEnrollments);
     }
 
     private OodiStudent getOodiStudent() {

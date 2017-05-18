@@ -148,10 +148,22 @@ public class SynchronizationSummaryLog {
         public final List<SyncronizationItemActionLogEntry> actions;
         public final Long moodleUserId;
 
+        public String moodleUsername;
+        public List<Long> moodleRoleIds;
+
         private UserSyncronizationItemLogEntry(UserSynchronizationItem item) {
             this.status = item.getStatus();
             this.actions = item.getActions().stream().map(SyncronizationItemActionLogEntry::new).collect(Collectors.toList());
             this.moodleUserId = item.getMoodleUserId();
+
+            if(item.getMoodleUserEnrollments() != null) {
+                this.moodleUsername = item.getMoodleUserEnrollments().username;
+                this.moodleRoleIds = item.getMoodleUserEnrollments().roles
+                    .stream()
+                    .map(role -> role.roleId)
+                    .collect(Collectors.toList());
+            }
+
         }
     }
 
