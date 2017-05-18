@@ -15,12 +15,12 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.service.synchronize.log;
+package fi.helsinki.moodi.service.log;
 
 import fi.helsinki.moodi.service.importing.Enrollment;
 import fi.helsinki.moodi.service.importing.EnrollmentWarning;
-import fi.helsinki.moodi.service.synchronize.log.ImportSummaryLog.StudentEnrollmentEntry;
-import fi.helsinki.moodi.service.synchronize.log.ImportSummaryLog.TeacherEnrollmentEntry;
+import fi.helsinki.moodi.service.log.ImportSummaryLog.StudentEnrollmentEntry;
+import fi.helsinki.moodi.service.log.ImportSummaryLog.TeacherEnrollmentEntry;
 import org.junit.Test;
 
 import java.util.List;

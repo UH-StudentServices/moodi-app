@@ -23,7 +23,7 @@ import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.enrich.EnricherService;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRunService;
 import fi.helsinki.moodi.service.synchronize.loader.CourseLoaderService;
-import fi.helsinki.moodi.service.synchronize.log.LoggingService;
+import fi.helsinki.moodi.service.log.LoggingService;
 import fi.helsinki.moodi.service.synchronize.notify.SynchronizationItemNotifier;
 import fi.helsinki.moodi.service.synchronize.process.ProcessorService;
 import org.slf4j.Logger;

@@ -16,7 +16,7 @@
  */
 
 
-package fi.helsinki.moodi.service.synchronize.log;
+package fi.helsinki.moodi.service.log;
 
 import com.google.common.base.Stopwatch;
 import fi.helsinki.moodi.integration.moodle.MoodleRole;
@@ -29,14 +29,13 @@ import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.service.synchronize.enrich.EnrichmentStatus;
-import fi.helsinki.moodi.service.synchronize.log.SynchronizationSummaryLog.*;
+import fi.helsinki.moodi.service.log.SynchronizationSummaryLog.*;
 import fi.helsinki.moodi.service.synchronize.process.ProcessingStatus;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationAction;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationAction.UserSynchronizationActionStatus;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationActionType;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem.UserSynchronizationItemStatus;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -47,6 +46,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
@@ -114,6 +114,9 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
 
         assertTrue(successfulEntry.status.equals(UserSynchronizationItemStatus.SUCCESS));
         assertTrue(successfulEntry.moodleUserId.equals(STUDENT_MOODLE_USER_ID));
+        assertEquals(STUDENT_NUMBER, successfulEntry.studentNumber);
+        assertTrue(successfulEntry.studentApproved);
+        assertNull(successfulEntry.teacherId);
         assertSingleAction(
             successfulEntry.actions,
             UserSynchronizationActionStatus.SUCCESS,
@@ -124,6 +127,9 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
 
         assertTrue(failedEntry.status.equals(UserSynchronizationItemStatus.ERROR));
         assertTrue(failedEntry.moodleUserId.equals(TEACHER_MOODLE_USER_ID));
+        assertNull(failedEntry.studentNumber);
+        assertNull(failedEntry.studentApproved);
+        assertEquals(TEACHER_ID, failedEntry.teacherId);
         assertSingleAction(
             failedEntry.actions,
             UserSynchronizationActionStatus.ERROR,
@@ -208,6 +214,7 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
     private OodiStudent getOodiStudent() {
         OodiStudent student = new OodiStudent();
         student.studentNumber = STUDENT_NUMBER;
+        student.approved = true;
         return student;
     }
 
