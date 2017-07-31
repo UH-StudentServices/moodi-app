@@ -58,13 +58,7 @@ public class MoodleCourseBuilder {
             shortName,
             moodleCategory,
             description,
-            "topics",
-            true,
-            false,
-            false,
-            20971520, // 20 MB
-            5,
-            7
+            false
         );
     }
 

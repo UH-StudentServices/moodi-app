@@ -31,13 +31,7 @@ public final class MoodleCourse implements Serializable {
     public final String shortName;
     public final String categoryId;
     public final String summary;
-    public final String format;
-    public final boolean showGrades;
     public final boolean visible;
-    public final boolean showReports;
-    public final int maxBytes;
-    public final int newsItems;
-    public final int numSections;
 
     public MoodleCourse(
             String idnumber,
@@ -45,26 +39,14 @@ public final class MoodleCourse implements Serializable {
             String shortName,
             String categoryId,
             String summary,
-            String format,
-            boolean showGrades,
-            boolean visible,
-            boolean showReports,
-            int maxBytes,
-            int newsItems,
-            int numSections) {
+            boolean visible) {
 
         this.idnumber = idnumber;
         this.fullName = fullName;
         this.shortName = shortName;
         this.categoryId = categoryId;
         this.summary = summary;
-        this.format = format;
-        this.maxBytes = maxBytes;
-        this.showGrades = showGrades;
         this.visible = visible;
-        this.newsItems = newsItems;
-        this.numSections = numSections;
-        this.showReports = showReports;
     }
 
     @Override

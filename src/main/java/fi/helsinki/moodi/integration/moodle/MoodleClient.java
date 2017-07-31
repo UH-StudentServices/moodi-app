@@ -95,13 +95,7 @@ public class MoodleClient {
         params.set("courses[0][shortname]", course.shortName);
         params.set("courses[0][categoryid]", course.categoryId);
         params.set("courses[0][summary]", course.summary);
-        params.set("courses[0][format]", course.format);
-        params.set("courses[0][maxbytes]", String.valueOf(course.maxBytes));
-        params.set("courses[0][showgrades]", booleanToIntString(course.showGrades));
         params.set("courses[0][visible]", booleanToIntString(course.visible));
-        params.set("courses[0][newsitems]", String.valueOf(course.newsItems));
-        params.set("courses[0][numsections]", String.valueOf(course.numSections));
-        params.set("courses[0][showreports]", booleanToIntString(course.showReports));
 
         try {
             return execute(params, new TypeReference<List<MoodleCourseData>>() {}, DEFAULT_EVALUATION, false)
