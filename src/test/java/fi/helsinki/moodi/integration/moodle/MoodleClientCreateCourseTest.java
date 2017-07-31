@@ -39,12 +39,12 @@ public class MoodleClientCreateCourseTest extends AbstractMoodiIntegrationTest {
 
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
                 .andExpect(method(HttpMethod.POST))
-                .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_course_create_courses&moodlewsrestformat=json&courses%5B0%5D%5Bidnumber%5D=12345&courses%5B0%5D%5Bfullname%5D=Fullname&courses%5B0%5D%5Bshortname%5D=Shortname&courses%5B0%5D%5Bcategoryid%5D=1&courses%5B0%5D%5Bsummary%5D=summary&courses%5B0%5D%5Bformat%5D=format&courses%5B0%5D%5Bmaxbytes%5D=2000&courses%5B0%5D%5Bshowgrades%5D=0&courses%5B0%5D%5Bvisible%5D=1&courses%5B0%5D%5Bnewsitems%5D=5&courses%5B0%5D%5Bnumsections%5D=4&courses%5B0%5D%5Bshowreports%5D=0"))
+                .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_course_create_courses&moodlewsrestformat=json&courses%5B0%5D%5Bidnumber%5D=12345&courses%5B0%5D%5Bfullname%5D=Fullname&courses%5B0%5D%5Bshortname%5D=Shortname&courses%5B0%5D%5Bcategoryid%5D=1&courses%5B0%5D%5Bsummary%5D=summary&courses%5B0%5D%5Bvisible%5D=0"))
                 .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
                 .andRespond(withSuccess(Fixtures.asString("/moodle/create-course-shortname-already-in-use.json"), MediaType.APPLICATION_JSON));
 
         final MoodleCourse course =
-                new MoodleCourse("12345", "Fullname", "Shortname", "1", "summary", "format", false, true, false, 2000, 5, 4);
+                new MoodleCourse("12345", "Fullname", "Shortname", "1", "summary", false);
 
         try {
             moodleClient.createCourse(course);
