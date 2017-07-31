@@ -62,17 +62,6 @@ public class OodiClientGetCourseUnitRealisationTest extends AbstractMoodiIntegra
         assertLanguages(cur);
         assertTeachers(cur);
         assertStudents(cur);
-        assertOrganisations(cur);
-    }
-
-    private void assertOrganisations(final OodiCourseUnitRealisation cur) {
-        assertEquals(1, cur.organisations.size());
-        assertOrganisation(cur.organisations.get(0), "H5510", 100);
-    }
-
-    private void assertOrganisation(final OodiOrganisation org, final String code, final Integer percentage) {
-        assertEquals(code, org.code);
-        assertEquals(percentage, org.percentage);
     }
 
     private void assertDescriptions(final OodiCourseUnitRealisation cur) {

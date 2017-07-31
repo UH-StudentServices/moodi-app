@@ -28,9 +28,6 @@ public class OodiCourseUnitRealisation {
 
     private static final long serialVersionUID = 1L;
 
-    @JsonProperty("organisations")
-    public List<OodiOrganisation> organisations = newArrayList();
-
     @JsonProperty("languages")
     public List<OodiLanguage> languages = newArrayList();
 

@@ -49,14 +49,14 @@ public class MoodleCourseBuilder {
         String preferredLanguage = getPreferredLanguage(oodiCourseUnitRealisation);
         String realisationName = getTranslation(oodiCourseUnitRealisation.realisationName, preferredLanguage);
         String shortName = getShortName(realisationName, oodiCourseUnitRealisation.realisationId);
-        String organization = getOrganisation(oodiCourseUnitRealisation);
+        String moodleCategory = mapperService.getDefaultCategory();
         String description =  getDescription(oodiCourseUnitRealisation, preferredLanguage);
 
         return new MoodleCourse(
             MOODLE_COURSE_ID_PREFIX + String.valueOf(oodiCourseUnitRealisation.realisationId),
             realisationName,
             shortName,
-            organization,
+            moodleCategory,
             description,
             "topics",
             true,
@@ -76,15 +76,6 @@ public class MoodleCourseBuilder {
 
     private String getShortName(String realisationName, int realisationId) {
         return StringUtils.substring(realisationName, 0, 8) + " " + realisationId;
-    }
-
-    private String getOrganisation(OodiCourseUnitRealisation cur) {
-        return cur.organisations.stream()
-            .sorted((a, b) -> ObjectUtils.compare(a.percentage, b.percentage))
-            .findFirst()
-            .map(o -> mapperService.getMoodleCategory(o.code))
-            .orElseThrow(() -> new MissingOrganisationException(
-                "Course realisation with realisationId " + cur.realisationId + " has no organisation"));
     }
 
     private String getTranslation(List<OodiLocalizedValue> oodiLocalizedValues, String language) {

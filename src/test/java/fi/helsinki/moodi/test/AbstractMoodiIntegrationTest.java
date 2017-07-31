@@ -307,7 +307,7 @@ public abstract class AbstractMoodiIntegrationTest {
                     EXPECTED_COURSE_ID +
                     "&courses%5B0%5D%5Bfullname%5D=Lapsuus+ja+yhteiskunta&courses%5B0%5D%5Bshortname%5D=Lapsuus++" +
                     realisationId +
-                    "&courses%5B0%5D%5Bcategoryid%5D=4&courses%5B0%5D%5Bsummary%5D=Description+1+%28fi%29+Description+2+%28fi%29&courses%5B0%5D%5Bformat%5D=topics&courses%5B0%5D%5Bmaxbytes%5D=20971520&courses%5B0%5D%5Bshowgrades%5D=1&courses%5B0%5D%5Bvisible%5D=0&courses%5B0%5D%5Bnewsitems%5D=5&courses%5B0%5D%5Bnumsections%5D=7&courses%5B0%5D%5Bshowreports%5D=0"))
+                    "&courses%5B0%5D%5Bcategoryid%5D=73&courses%5B0%5D%5Bsummary%5D=Description+1+%28fi%29+Description+2+%28fi%29&courses%5B0%5D%5Bformat%5D=topics&courses%5B0%5D%5Bmaxbytes%5D=20971520&courses%5B0%5D%5Bshowgrades%5D=1&courses%5B0%5D%5Bvisible%5D=0&courses%5B0%5D%5Bnewsitems%5D=5&courses%5B0%5D%5Bnumsections%5D=7&courses%5B0%5D%5Bshowreports%5D=0"))
             .andRespond(withSuccess("[{\"id\":\"" + moodleCourseIdToReturn + "\", \"shortname\":\"shortie\"}]", MediaType.APPLICATION_JSON));
     }
 

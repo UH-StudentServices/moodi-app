@@ -32,18 +32,8 @@ public class MapperServiceTest extends AbstractMoodiIntegrationTest {
     private MapperService mapperService;
 
     @Test
-    public void getExistingMoodleCategory() throws Exception {
-        assertEquals("12", mapperService.getMoodleCategory("H70"));
-    }
-
-    @Test
-    public void getExistingMoodleCategoryWithWildcard() throws Exception {
-        assertEquals("11", mapperService.getMoodleCategory("H1234"));
-    }
-
-    @Test
-    public void ifMappingIsNotFoundDefaultMoodleCategoryIsUsed() throws Exception {
-        assertEquals("17", mapperService.getMoodleCategory("xxxx"));
+    public void getDefaultMoodleCategory() throws Exception {
+        assertEquals("73", mapperService.getDefaultCategory());
     }
 
     @Test
@@ -55,85 +45,5 @@ public class MapperServiceTest extends AbstractMoodiIntegrationTest {
     @Test(expected = IllegalStateException.class)
     public void getNotExistingMoodleRole() throws Exception {
         mapperService.getMoodleRole("siivooja");
-    }
-
-    @Test
-    public void sortOrganisationMathcerPatterns() {
-        final List<String> patterns = Lists.newArrayList(
-                "H1*",
-                "H2*",
-                "H3*",
-                "H4*",
-                "H50*",
-                "H51*",
-                "H52*",
-                "H55*",
-                "H57*",
-                "H6*",
-                "H70",
-                "H72*",
-                "H74*",
-                "H799",
-                "H8*",
-                "H90",
-                "H901*",
-                "H902*",
-                "H906",
-                "H91*",
-                "H92",
-                "H920",
-                "H921",
-                "H922",
-                "H923",
-                "H929",
-                "H93*",
-                "H941",
-                "H955",
-                "H985*",
-                "H99");
-
-        final List<String> expected = Lists.newArrayList(
-                "H799",
-                "H906",
-                "H920",
-                "H921",
-                "H922",
-                "H923",
-                "H929",
-                "H941",
-                "H955",
-                "H70",
-                "H90",
-                "H92",
-                "H99",
-                "H901*",
-                "H902*",
-                "H985*",
-                "H50*",
-                "H51*",
-                "H52*",
-                "H55*",
-                "H57*",
-                "H72*",
-                "H74*",
-                "H91*",
-                "H93*",
-                "H1*",
-                "H2*",
-                "H3*",
-                "H4*",
-                "H6*",
-                "H8*"
-        );
-
-        patterns.sort(new MapperService.OrganisationMatcherPatternComparator());
-
-        for (int i = 0; i < patterns.size(); i++) {
-            assertEquals(
-                    String.format("Pattern '%s' in wrong index %s", patterns.get(i), i),
-                    expected.get(i),
-                    patterns.get(i));
-        }
-
     }
 }

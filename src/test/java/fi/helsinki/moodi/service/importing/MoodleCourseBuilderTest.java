@@ -37,8 +37,6 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
     private final String REALISATION_NAME_SV = "Course realisation name (sv)";
     private final String REALISATION_NAME_EN = "Course realisation name (en)";
     private final int REALISATION_ID = 1;
-    private final String ORGANISATION_1 = "H920";
-    private final String ORGANISATION_2 = "H921";
 
     private final String DESCRIPTION_1_FI = "Course description 1 (fi)";
     private final String DESCRIPTION_2_FI = "Course description 2 (fi)";
@@ -52,6 +50,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
     private final Integer DESCRIPTION_1_ID = 10;
     private final Integer DESCRIPTION_2_ID = 20;
     private final Integer DESCRIPTION_3_ID = 30;
+    private final String MOODLE_CATEGORY_ID = "73";
 
     @Autowired
     private MoodleCourseBuilder moodleCourseBuilder;
@@ -67,7 +66,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
 
         assertEquals(REALISATION_NAME_FI, moodleCourse.fullName);
         assertEquals(MoodleCourseBuilder.MOODLE_COURSE_ID_PREFIX + REALISATION_ID, moodleCourse.idnumber);
-        assertEquals("7", moodleCourse.categoryId);
+        assertEquals(MOODLE_CATEGORY_ID, moodleCourse.categoryId);
         assertEquals("Course r " + REALISATION_ID, moodleCourse.shortName);
         assertEquals(String.join(" ", DESCRIPTION_1_FI, DESCRIPTION_2_FI, DESCRIPTION_3_FI), moodleCourse.summary);
     }
@@ -110,10 +109,6 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
             getOodiLocalizedValue(REALISATION_NAME_FI, LANG_FI),
             getOodiLocalizedValue(REALISATION_NAME_SV, LANG_SV),
             getOodiLocalizedValue(REALISATION_NAME_EN, LANG_EN)
-        );
-        oodiCourseUnitRealisation.organisations = newArrayList(
-            getOodiOrganisation(20, ORGANISATION_1),
-            getOodiOrganisation(10, ORGANISATION_2)
         );
         oodiCourseUnitRealisation.descriptions = getOodiDescriptions();
         return oodiCourseUnitRealisation;
