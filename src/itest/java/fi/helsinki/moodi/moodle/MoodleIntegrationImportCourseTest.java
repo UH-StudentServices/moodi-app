@@ -22,19 +22,19 @@ import org.junit.Test;
 
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class MoodleIntegrationImportCourseTest extends AbstractMoodleIntegrationTest {
-
     @Test
-    public void testMoodleIntegrationWhenImportingCourse() {
+    public void testMoodleIntegrationWhenImportingCourseWithStudentsAndTeachers() {
         long oodiCourseId = getOodiCourseId();
 
         expectCourseRealisationWithUsers(
             oodiCourseId,
-            singletonList(studentUser),
+            newArrayList(studentUser, studentUserNotInMoodle),
             singletonList(teacherUser));
 
         long moodleCourseId = importCourse(oodiCourseId);

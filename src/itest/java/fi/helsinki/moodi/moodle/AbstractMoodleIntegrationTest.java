@@ -3,6 +3,7 @@ package fi.helsinki.moodi.moodle;
 import com.google.common.collect.ImmutableMap;
 import fi.helsinki.moodi.integration.moodle.MoodleClient;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
+import fi.helsinki.moodi.service.course.CourseRepository;
 import fi.helsinki.moodi.service.importing.ImportCourseRequest;
 import fi.helsinki.moodi.service.importing.ImportingService;
 import fi.helsinki.moodi.service.util.MapperService;
@@ -36,15 +37,26 @@ public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegra
     @Autowired
     protected MapperService mapperService;
 
+    @Autowired
+    private CourseRepository courseRepository;
+
     protected static final String STUDENT_USERNAME = "bar_simp";
+    protected static final String STUDENT_NOT_IN_MOODLE_USERNAME = "username_of_student_not_in_moodle";
     protected static final String TEACHER_USERNAME = "mag_simp";
 
     protected static final String INTEGRATION_TEST_OODI_FIXTURES_PREFIX = "src/itest/resources/fixtures/oodi/";
 
     protected final StudentUser studentUser = new StudentUser(STUDENT_USERNAME, "014010293", true);
-    protected final StudentUser teacherInStudentRole = new StudentUser(TEACHER_USERNAME, "011911609", true);
+    protected final TeacherUser studentUserInTeacherRole = new TeacherUser(STUDENT_USERNAME, "01143451");
+    protected final StudentUser studentUserNotInMoodle = new StudentUser(STUDENT_NOT_IN_MOODLE_USERNAME, "012345678", true);
     protected final TeacherUser teacherUser = new TeacherUser(TEACHER_USERNAME, "011631484");
+    protected final StudentUser teacherInStudentRole = new StudentUser(TEACHER_USERNAME, "011911609", true);
 
+
+    @Before
+    public void emptyCourses() {
+        courseRepository.deleteAll();
+    }
 
     @Before
     @Override
