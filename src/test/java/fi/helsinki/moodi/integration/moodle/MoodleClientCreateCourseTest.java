@@ -36,7 +36,6 @@ public class MoodleClientCreateCourseTest extends AbstractMoodiIntegrationTest {
 
     @Test
     public void creatingCourseWithShortnameThatIsAlreadyTaken() {
-
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_course_create_courses&moodlewsrestformat=json&courses%5B0%5D%5Bidnumber%5D=12345&courses%5B0%5D%5Bfullname%5D=Fullname&courses%5B0%5D%5Bshortname%5D=Shortname&courses%5B0%5D%5Bcategoryid%5D=1&courses%5B0%5D%5Bsummary%5D=summary&courses%5B0%5D%5Bvisible%5D=0"))

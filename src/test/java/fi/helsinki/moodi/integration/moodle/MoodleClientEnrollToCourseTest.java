@@ -38,9 +38,6 @@ public class MoodleClientEnrollToCourseTest extends AbstractMoodiIntegrationTest
 
     @Test
     public void enrollWithInsufficientPermissions() {
-
-
-
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(content().string("wstoken=xxxx1234&wsfunction=enrol_manual_enrol_users&moodlewsrestformat=json&enrolments%5B0%5D%5Bcourseid%5D=12345&enrolments%5B0%5D%5Broleid%5D=9&enrolments%5B0%5D%5Buserid%5D=3"))
