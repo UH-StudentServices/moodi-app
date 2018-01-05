@@ -29,7 +29,7 @@ import static org.junit.Assert.assertTrue;
 
 public class MoodleIntegrationImportCourseTest extends AbstractMoodleIntegrationTest {
     @Test
-    public void testMoodleIntegrationWhenImportingCourseWithStudentsAndTeachers() {
+    public void testMoodleIntegrationWhenImportingCourse() {
         long oodiCourseId = getOodiCourseId();
 
         expectCourseRealisationWithUsers(
