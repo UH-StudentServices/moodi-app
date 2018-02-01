@@ -43,7 +43,7 @@ public class ImportSummaryLogTest extends AbstractSummaryLogTest {
 
         ImportSummaryLog importSummaryLog = new ImportSummaryLog(enrollments, enrollmentWarnings);
 
-        assertEquals(11, importSummaryLog.summary.enrolledStudents);
+        assertEquals(1, importSummaryLog.summary.enrolledStudents);
         assertEquals(0, importSummaryLog.summary.enrolledTeachers);
         assertEquals(0, importSummaryLog.summary.failedStudents.size());
         assertEquals(1, importSummaryLog.summary.failedTeachers.size());
