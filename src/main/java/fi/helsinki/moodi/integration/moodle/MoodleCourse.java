@@ -32,6 +32,7 @@ public final class MoodleCourse implements Serializable {
     public final String categoryId;
     public final String summary;
     public final boolean visible;
+    public final int numberOfSections;
 
     public MoodleCourse(
             String idnumber,
@@ -39,7 +40,8 @@ public final class MoodleCourse implements Serializable {
             String shortName,
             String categoryId,
             String summary,
-            boolean visible) {
+            boolean visible,
+            int numberOfSections) {
 
         this.idnumber = idnumber;
         this.fullName = fullName;
@@ -47,6 +49,7 @@ public final class MoodleCourse implements Serializable {
         this.categoryId = categoryId;
         this.summary = summary;
         this.visible = visible;
+        this.numberOfSections = numberOfSections;
     }
 
     @Override
