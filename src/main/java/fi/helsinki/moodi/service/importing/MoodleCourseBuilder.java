@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 public class MoodleCourseBuilder {
 
     public static final String MOODLE_COURSE_ID_PREFIX = "oodi_";
+    public static final int DEFAULT_NUMBER_OF_SECTIONS = 7;
 
     private final MapperService mapperService;
 
@@ -58,7 +59,8 @@ public class MoodleCourseBuilder {
             shortName,
             moodleCategory,
             description,
-            false
+            false,
+            DEFAULT_NUMBER_OF_SECTIONS
         );
     }
 
