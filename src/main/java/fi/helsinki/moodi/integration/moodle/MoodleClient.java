@@ -96,6 +96,8 @@ public class MoodleClient {
         params.set("courses[0][categoryid]", course.categoryId);
         params.set("courses[0][summary]", course.summary);
         params.set("courses[0][visible]", booleanToIntString(course.visible));
+        params.set("courses[0][courseformatoptions][0][name]", "numsections");
+        params.set("courses[0][courseformatoptions][0][value]", String.valueOf(course.numberOfSections));
 
         try {
             return execute(params, new TypeReference<List<MoodleCourseData>>() {}, DEFAULT_EVALUATION, false)
