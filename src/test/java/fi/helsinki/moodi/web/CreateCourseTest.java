@@ -52,7 +52,7 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
     }
 
     @Test
-    public void thatAutomaticEnabledCourseHandledCorrectly() throws Exception {
+    public void thatAutomaticEnabledCourseEnrollmentsAreMadeCorrectly() throws Exception {
         expectGetCourseUnitRealisationRequestToOodi(
             COURSE_REALISATION_ID,
             withSuccess(Fixtures.asString("/oodi/course-realisation-automatic-enabled.json"), MediaType.APPLICATION_JSON));
