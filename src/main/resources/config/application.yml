@@ -16,6 +16,8 @@ httpClient:
   maxTotal: 500
   defaultMaxPerRoute: 500
 
+oodi.enrollmentApprovedStatusCodes: 3, 7, 8
+
 mapper.moodle.defaultCategory: 73
 
 #
