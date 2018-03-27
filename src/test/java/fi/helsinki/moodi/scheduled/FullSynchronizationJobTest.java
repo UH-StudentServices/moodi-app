@@ -23,7 +23,6 @@ import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.service.synchronize.enrich.EnrichmentStatus;
-import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationAction;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem.UserSynchronizationItemStatus;
 import fi.helsinki.moodi.test.util.DateUtil;
@@ -62,7 +61,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
     @Test
     public void thatOverYearOldCourseIsRemoved() {
         String endDateInPast = DateUtil.getOverYearAgoPastDateString();
-        setupOodiCourseUnitRealisationResponse(endDateInPast, true);
+        setupOodiCourseUnitRealisationResponse(endDateInPast, true, false , APPROVED_ENROLLMENT_STATUS_CODE);
 
         Course course = findCourse();
 
