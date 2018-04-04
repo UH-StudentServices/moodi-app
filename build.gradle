@@ -63,14 +63,14 @@ repositories {
 
 dependencies {
 
-    compile(group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: spring_boot_version) {
+    compile(group: 'org.springframework.boot', name: 'spring-boot-starter-web') {
         exclude module: 'spring-boot-starter-tomcat'
     }
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-undertow'
+    compile group: 'org.springframework.boot', name: 'spring-boot-actuator'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-thymeleaf'
 
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-undertow', version: spring_boot_version
-    compile group: 'org.springframework.boot', name: 'spring-boot-actuator', version: spring_boot_version
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: spring_boot_version
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-thymeleaf', version: spring_boot_version
     compile group: 'ch.qos.logback', name: 'logback-classic', version: logback_version
     compile group: 'ch.qos.logback', name: 'logback-core', version: logback_version
     compile group: 'org.springframework', name: 'spring-context-support', version: spring_framework_version
