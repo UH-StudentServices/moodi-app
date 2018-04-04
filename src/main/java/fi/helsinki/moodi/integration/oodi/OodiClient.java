@@ -20,15 +20,19 @@ package fi.helsinki.moodi.integration.oodi;
 import fi.helsinki.moodi.exception.IntegrationConnectionException;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestOperations;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static fi.helsinki.moodi.integration.util.RestUtil.buildResourceUri;
 import static fi.helsinki.moodi.util.DateFormat.OODI_UTC_DATE_FORMAT;
 
 public class OodiClient {
@@ -42,42 +46,43 @@ public class OodiClient {
     }
 
     public Optional<OodiCourseUnitRealisation> getCourseUnitRealisation(final long courseRealisationId) {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("include_deleted", String.valueOf(true));
+        params.add("include_approved_status", String.valueOf(true));
+
         return getOodiData(
-                "{baseUrl}/courseunitrealisations/{realisationId}?include_deleted=true&include_approved_status=true",
-                new ParameterizedTypeReference<OodiResponse<OodiCourseUnitRealisation>>() {
-                },
-                baseUrl,
-                courseRealisationId);
+            buildResourceUri(baseUrl, params, "courseunitrealisations", String.valueOf(courseRealisationId)),
+            new ParameterizedTypeReference<OodiResponse<OodiCourseUnitRealisation>>() {});
     }
 
     public Optional<OodiCourseUsers> getCourseUsers(final long courseRealisationId) {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("include_deleted", String.valueOf(true));
+        params.add("include_approved_status", String.valueOf(true));
+
         return getOodiData(
-            "{baseUrl}/courseunitrealisations/{realisationId}/users?include_deleted=true&include_approved_status=true",
+            buildResourceUri(baseUrl, params,"courseunitrealisations", String.valueOf(courseRealisationId), "users"),
             new ParameterizedTypeReference<OodiResponse<OodiCourseUsers>>() {
-            },
-            baseUrl,
-            courseRealisationId);
+            });
     }
 
     public List<OodiCourseChange> getCourseChanges(final LocalDateTime afterDate) {
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT);
         final String formattedStartDate = formatter.format(afterDate);
         return getOodiData(
-                "{baseUrl}/courseunitrealisations/changes/ids/{startDate}",
-                new ParameterizedTypeReference<OodiResponse<List<OodiCourseChange>>>() {},
-                baseUrl,
-                formattedStartDate).orElse(new ArrayList<>());
+            buildResourceUri(baseUrl, "courseunitrealisations", "changes", "ids", formattedStartDate),
+            new ParameterizedTypeReference<OodiResponse<List<OodiCourseChange>>>() {}
+            ).orElse(new ArrayList<>());
     }
 
     private <T> Optional<T> getOodiData(
-            final String url,
-            final ParameterizedTypeReference<OodiResponse<T>> typeReference,
-            final Object... uriVariables) {
+            final URI uri,
+            final ParameterizedTypeReference<OodiResponse<T>> typeReference) {
 
         try {
             return Optional.ofNullable(
                     restOperations
-                        .exchange(url, HttpMethod.GET, null, typeReference, uriVariables).getBody())
+                        .exchange(uri, HttpMethod.GET, null, typeReference).getBody())
                 .map(body -> body.data);
         } catch (ResourceAccessException e) {
             throw new IntegrationConnectionException("Oodi connection failure", e);

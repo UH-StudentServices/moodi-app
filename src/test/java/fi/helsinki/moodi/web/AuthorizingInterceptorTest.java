@@ -18,6 +18,7 @@
 package fi.helsinki.moodi.web;
 
 import fi.helsinki.moodi.exception.UnauthorizedException;
+import fi.helsinki.moodi.interceptor.AuthorizingInterceptor;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -17,7 +17,6 @@
 
 package fi.helsinki.moodi.integration.esb;
 
-import com.google.common.collect.Lists;
 import fi.helsinki.moodi.exception.IntegrationConnectionException;
 import org.slf4j.Logger;
 import org.springframework.cache.annotation.Cacheable;
@@ -27,10 +26,10 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static fi.helsinki.moodi.integration.util.RestUtil.buildResourceUri;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class EsbClient {
@@ -51,12 +50,10 @@ public class EsbClient {
 
         try {
             List<EsbStudent> result = restTemplate.exchange(
-                    "{baseUrl}/iam/findStudent/{studentNumber}",
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<List<EsbStudent>>() {},
-                    baseUrl,
-                    studentNumber)
+                buildResourceUri(baseUrl, "iam", "findStudent", studentNumber),
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<EsbStudent>>() {})
                 .getBody();
 
             if (result != null){
@@ -78,12 +75,10 @@ public class EsbClient {
 
         try {
             List<EsbEmployee> result = restTemplate.exchange(
-                    "{baseUrl}/iam/findEmployee/{employeeId}",
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<List<EsbEmployee>>() {},
-                    baseUrl,
-                    teacherId)
+                buildResourceUri(baseUrl, "iam", "findEmployee", teacherId),
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<EsbEmployee>>() {})
                 .getBody();
 
             if (result != null) {
