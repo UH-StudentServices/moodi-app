@@ -1,7 +1,15 @@
 server.port: 8084
 
-endpoints.enabled: false
-endpoints.health.enabled: true
+management:
+  endpoints:
+    enabled-by-default: false
+    web:
+      base-path: /
+      path-mapping:
+        health: health
+  endpoint:
+    health:
+      enabled: true
 
 integration:
   moodle:
