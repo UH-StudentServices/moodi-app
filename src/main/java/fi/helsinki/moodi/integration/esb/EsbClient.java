@@ -29,11 +29,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static fi.helsinki.moodi.integration.util.RestUtil.buildResourceUri;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class EsbClient {
-
     private static final Logger LOGGER = getLogger(EsbClient.class);
 
     private final String baseUrl;
@@ -50,7 +48,7 @@ public class EsbClient {
 
         try {
             List<EsbStudent> result = restTemplate.exchange(
-                buildResourceUri(baseUrl, "iam", "findStudent", studentNumber),
+                String.format("%s/iam/findStudent/%s", baseUrl, studentNumber),
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<List<EsbStudent>>() {})
@@ -75,7 +73,7 @@ public class EsbClient {
 
         try {
             List<EsbEmployee> result = restTemplate.exchange(
-                buildResourceUri(baseUrl, "iam", "findEmployee", teacherId),
+                String.format("%s/iam/findEmployee/%s", baseUrl, teacherId),
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<List<EsbEmployee>>() {})
