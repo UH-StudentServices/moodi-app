@@ -73,7 +73,7 @@ public class OodiClient {
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT);
         final String formattedStartDate = formatter.format(afterDate);
         return getOodiData(
-            String.format("%s/courseunitrealisations/changes/ids", baseUrl, formattedStartDate),
+            String.format("%s/courseunitrealisations/changes/ids/%s", baseUrl, formattedStartDate),
             new ParameterizedTypeReference<OodiResponse<List<OodiCourseChange>>>() {}
             ).orElse(new ArrayList<>());
     }
