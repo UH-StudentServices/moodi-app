@@ -25,11 +25,10 @@ buildscript {
 plugins {
     id "org.springframework.boot" version "2.0.0.RELEASE"
     id "net.researchgate.release" version "2.6.0"
+    id "java"
 }
 
-apply plugin: 'java'
-apply plugin: 'org.springframework.boot'
-apply plugin: 'io.spring.dependency-management'
+apply plugin: "io.spring.dependency-management"
 
 apply from: "gradle-build/required-properties.gradle"
 
