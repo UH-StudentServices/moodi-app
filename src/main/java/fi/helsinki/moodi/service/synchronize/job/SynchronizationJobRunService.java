@@ -59,7 +59,7 @@ public class SynchronizationJobRunService {
     public void checkForInterruptedRuns() {
         List<SynchronizationJobRun> interruptedRuns = synchronizationJobRunRepository.findByStatus(SynchronizationStatus.STARTED);
         interruptedRuns.stream().forEach(run -> run.status = SynchronizationStatus.INTERRUPTED);
-        synchronizationJobRunRepository.save(interruptedRuns);
+        synchronizationJobRunRepository.saveAll(interruptedRuns);
     }
 
     public boolean isSynchronizationInProgress() {
@@ -87,8 +87,10 @@ public class SynchronizationJobRunService {
         return synchronizationJobRunRepository.saveAndFlush(job).id;
     }
 
-    public void complete(final long id, final SynchronizationStatus status, final String message) {
-        final SynchronizationJobRun job = synchronizationJobRunRepository.findOne(id);
+    public void complete(final Long id, final SynchronizationStatus status, final String message) {
+        final SynchronizationJobRun job = synchronizationJobRunRepository
+            .findById(id)
+            .orElseThrow(RuntimeException::new);
 
         job.status = status;
         job.message = message;

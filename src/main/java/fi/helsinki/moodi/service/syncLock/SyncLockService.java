@@ -63,7 +63,7 @@ public class SyncLockService {
             l.modified = timeService.getCurrentDateTime();
         });
 
-        syncLockRepository.save(locks);
+        syncLockRepository.saveAll(locks);
 
         return locks
             .stream()

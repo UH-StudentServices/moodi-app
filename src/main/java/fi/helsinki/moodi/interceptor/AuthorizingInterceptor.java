@@ -15,7 +15,7 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.web;
+package fi.helsinki.moodi.interceptor;
 
 import fi.helsinki.moodi.exception.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;

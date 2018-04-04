@@ -52,10 +52,8 @@ public class SynchronizationJobRun implements Serializable {
 
     @Column(name = "started")
     @NotNull
-    @org.hibernate.annotations.Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentLocalDateTime")
     public LocalDateTime started;
 
     @Column(name = "completed")
-    @org.hibernate.annotations.Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentLocalDateTime")
     public LocalDateTime completed;
 }
