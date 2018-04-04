@@ -29,7 +29,6 @@ plugins {
 }
 
 apply plugin: "io.spring.dependency-management"
-
 apply from: "gradle-build/required-properties.gradle"
 
 bootJar {
