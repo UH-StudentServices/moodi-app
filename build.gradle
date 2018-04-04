@@ -15,35 +15,32 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-apply from: "gradle-build/required-properties.gradle"
-
-task wrapper(type: Wrapper) {
-    gradleVersion = gradleVersion
-    doLast {
-        file("gradlew.bat").delete()
-    }
-}
-
 buildscript {
     repositories {
         jcenter()
         maven { url "http://repo.spring.io/milestone" }
     }
-    dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:$spring_boot_version"
-        classpath "net.researchgate:gradle-release:2.0.0"
-    }
 }
 
-apply plugin: "java"
-apply plugin: "spring-boot"
+plugins {
+    id "org.springframework.boot" version "2.0.0.RELEASE"
+    id "net.researchgate.release" version "2.6.0"
+    id "java"
+}
 
-bootRepackage {
-    mainClass = "fi.helsinki.moodi.Application"
+apply plugin: "io.spring.dependency-management"
+apply from: "gradle-build/required-properties.gradle"
+
+bootJar {
+    mainClassName = "fi.helsinki.moodi.Application"
 }
 
 springBoot {
-    mainClass = "fi.helsinki.moodi.Application"
+    mainClassName = "fi.helsinki.moodi.Application"
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.6'
 }
 
 repositories {
@@ -64,37 +61,30 @@ repositories {
 
 dependencies {
 
-    compile(group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: spring_boot_version) {
+    compile(group: 'org.springframework.boot', name: 'spring-boot-starter-web') {
         exclude module: 'spring-boot-starter-tomcat'
     }
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-undertow'
+    compile group: 'org.springframework.boot', name: 'spring-boot-actuator'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-thymeleaf'
 
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-undertow', version: spring_boot_version
-    compile group: 'org.springframework.boot', name: 'spring-boot-actuator', version: spring_boot_version
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-thymeleaf', version: spring_boot_version
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: spring_boot_version
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-logging', version: spring_boot_version
     compile group: 'ch.qos.logback', name: 'logback-classic', version: logback_version
     compile group: 'ch.qos.logback', name: 'logback-core', version: logback_version
+    compile group: 'org.springframework', name: 'spring-context-support', version: spring_framework_version
+    compile group: 'org.hibernate', name: 'hibernate-entitymanager', version: hibernate_entitymanager_version
+    compile group: 'org.hibernate', name: 'hibernate-ehcache', version: hibernate_entitymanager_version
 
-    compile "org.springframework:spring-context-support:4.1.6.RELEASE"
-    compile "org.jadira.usertype:usertype.extended:3.2.0.GA"
-    compile "com.zaxxer:HikariCP:2.1.0"
     compile "org.apache.commons:commons-lang3:3.3.2"
     compile "com.google.guava:guava:18.0"
     compile "com.h2database:h2:1.4.187"
     compile "org.flywaydb:flyway-core:3.1"
     compile "org.postgresql:postgresql:9.4-1201-jdbc41"
-    compile "net.sf.ehcache:ehcache-core:2.6.11"
-    compile "com.fasterxml.jackson.core:jackson-core:2.6.2"
-    compile "com.fasterxml.jackson.core:jackson-databind:2.6.2"
-    compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.6.2"
-    compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.6.2"
-    compile "com.fasterxml.jackson.module:jackson-module-parameter-names:2.6.2"
-    compile "org.apache.httpcomponents:httpclient:4.4.1"
+    compile "org.apache.httpcomponents:httpclient:4.5.5"
     compile "org.trimou:trimou-core:1.7.3.Final"
-    compile "commons-pool:commons-pool:1.6"
     compile "javax.mail:mail:1.4.7"
 
+    testCompile "com.h2database:h2:1.4.187"
     testCompile "org.springframework.boot:spring-boot-starter-test"
     testCompile "com.jayway.jsonpath:json-path-assert:0.9.1"
 }

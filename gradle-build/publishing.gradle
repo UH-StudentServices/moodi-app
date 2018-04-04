@@ -60,4 +60,4 @@ tasks.withType(PublishToMavenRepository) {
 }
 
 // Ensure that jar produced by bootRepackace is published
-publish.dependsOn bootRepackage
+publish.dependsOn bootJar

@@ -15,7 +15,7 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.web;
+package fi.helsinki.moodi.interceptor;
 
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
