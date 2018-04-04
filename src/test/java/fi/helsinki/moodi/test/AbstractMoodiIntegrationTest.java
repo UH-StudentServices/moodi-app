@@ -23,14 +23,12 @@ import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.service.importing.ImportCourseRequest;
 import fi.helsinki.moodi.service.importing.MoodleCourseBuilder;
 import fi.helsinki.moodi.service.util.MapperService;
-import fi.helsinki.moodi.test.web.RequestLoggerFilter;
 import org.flywaydb.core.Flyway;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -57,10 +55,9 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = { Application.class, TestConfig.class })
-@WebIntegrationTest({
-        "server.port:0"
-})
+@SpringBootTest(
+    properties = { "server.port:0" },
+    classes = { Application.class, TestConfig.class })
 @ActiveProfiles("test")
 public abstract class AbstractMoodiIntegrationTest {
     private static final String EMPTY_LIST_RESPONSE = "[]";
@@ -140,7 +137,6 @@ public abstract class AbstractMoodiIntegrationTest {
     @Before
     public final void setUpMockMvc() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context)
-                .addFilters(new RequestLoggerFilter())
                 .build();
     }
 
@@ -234,12 +230,15 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     protected final ResultActions makeCreateCourseRequest(final long realisationId) throws Exception {
+        ImportCourseRequest importCourseRequest = new ImportCourseRequest();
+        importCourseRequest.realisationId = realisationId;
+
         return mockMvc.perform(
             post("/api/v1/courses")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("client-id", "testclient")
                 .header("client-token", "xxx123")
-                .content(toJson(new ImportCourseRequest(realisationId))));
+                .content(toJson(importCourseRequest)));
     }
 
     protected final void expectFindStudentRequestToEsb(final String studentNumber, final String username) {
