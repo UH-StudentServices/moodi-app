@@ -33,6 +33,7 @@ apply from: "gradle-build/required-properties.gradle"
 
 bootJar {
     mainClassName = "fi.helsinki.moodi.Application"
+    launchScript()
 }
 
 springBoot {
