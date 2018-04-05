@@ -77,7 +77,10 @@ public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegra
     }
 
     protected long importCourse(long courseId) {
-        return importingService.importCourse(new ImportCourseRequest(courseId)).data
+        ImportCourseRequest importCourseRequest = new ImportCourseRequest();
+        importCourseRequest.realisationId = courseId;
+
+        return importingService.importCourse(importCourseRequest).data
             .map(c -> c.moodleCourseId).orElseThrow(() -> new RuntimeException("Course import failed"));
     }
 
