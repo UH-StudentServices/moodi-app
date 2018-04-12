@@ -13,5 +13,5 @@ integration:
   moodle:
     baseUrl: https://moodle.helsinki.fi
     url: https://moodle.helsinki.fi/webservice/rest/server.php
-  oodi.url: https://oprek4.it.helsinki.fi:30040
+  oodi.url: https://esbmt1.it.helsinki.fi/doo-oodi/v1/productiondb
   esb.url: https://esbmt1.it.helsinki.fi
