@@ -14,7 +14,7 @@ integration:
     baseUrl: https://moodi-2-moodle.student.helsinki.fi/moodlecurrent
     url: https://moodi-2-moodle.student.helsinki.fi/moodlecurrent/webservice/rest/server.php
     wstoken: xxxx1234
-  oodi.url: https://oprek4.it.helsinki.fi:30039
+  oodi.url: https://esbmt1.it.helsinki.fi/doo-oodi/v1/productiondb
   esb.url: https://esbmt1.it.helsinki.fi
 
 synchronize.FULL.enabled: true
