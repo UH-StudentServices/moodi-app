@@ -48,9 +48,11 @@ repositories {
     mavenLocal()
 
     maven {
-        credentials {
-            username opintoni_artifactory_username
-            password opintoni_artifactory_password
+        if (gradle.startParameter.taskNames.size() > 0 && gradle.startParameter.taskNames.get(0).contains("publish")) {
+            credentials {
+                username opintoni_artifactory_username
+                password opintoni_artifactory_password
+            }
         }
 
         url "${opintoni_artifactory_base_url}/repo"
