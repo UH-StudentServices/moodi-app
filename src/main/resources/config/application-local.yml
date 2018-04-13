@@ -13,8 +13,6 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     database: PostgreSQL
 
-integration.oodi.url: https://esbmt2.it.helsinki.fi/doo-oodi/dev/testdb
-
 auth.client.user: password
 auth.enabled: true
 
