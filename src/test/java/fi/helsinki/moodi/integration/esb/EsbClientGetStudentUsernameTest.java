@@ -41,7 +41,7 @@ public class EsbClientGetStudentUsernameTest extends AbstractMoodiIntegrationTes
     @Test
     public void deserializeResponseWithOneAccount() {
         esbMockServer.expect(
-            requestTo("https://esbmt1.it.helsinki.fi/iam/findStudent/007"))
+            requestTo("https://esbmt2.it.helsinki.fi/iam/findStudent/007"))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess(Fixtures.asString("/esb/student-username-007.json"), MediaType.APPLICATION_JSON));
 
@@ -51,7 +51,7 @@ public class EsbClientGetStudentUsernameTest extends AbstractMoodiIntegrationTes
     @Test
     public void deserializeResponseWithSeveralAccounts() {
         esbMockServer.expect(
-                requestTo("https://esbmt1.it.helsinki.fi/iam/findStudent/008"))
+                requestTo("https://esbmt2.it.helsinki.fi/iam/findStudent/008"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(Fixtures.asString("/esb/student-username-008.json"), MediaType.APPLICATION_JSON));
 
@@ -61,7 +61,7 @@ public class EsbClientGetStudentUsernameTest extends AbstractMoodiIntegrationTes
     @Test
     public void thatEmptyResponseIsHandled() {
         esbMockServer.expect(
-            requestTo("https://esbmt1.it.helsinki.fi/iam/findStudent/009"))
+            requestTo("https://esbmt2.it.helsinki.fi/iam/findStudent/009"))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess("", MediaType.APPLICATION_JSON));
 
@@ -71,7 +71,7 @@ public class EsbClientGetStudentUsernameTest extends AbstractMoodiIntegrationTes
     @Test
     public void thatEmptyArrayIsHandled() {
         esbMockServer.expect(
-                requestTo("https://esbmt1.it.helsinki.fi/iam/findStudent/0010"))
+                requestTo("https://esbmt2.it.helsinki.fi/iam/findStudent/0010"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
 
