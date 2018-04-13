@@ -41,7 +41,7 @@ public class EsbClientGetTeacherUsernameTest extends AbstractMoodiIntegrationTes
     @Test
     public void deserializeResponse() {
         esbMockServer.expect(
-            requestTo("https://esbmt1.it.helsinki.fi/iam/findEmployee/19691981"))
+            requestTo("https://esbmt2.it.helsinki.fi/iam/findEmployee/19691981"))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess(Fixtures.asString("/esb/employee-username-19691981.json"),
                 MediaType.APPLICATION_JSON));
@@ -52,7 +52,7 @@ public class EsbClientGetTeacherUsernameTest extends AbstractMoodiIntegrationTes
     @Test
     public void thatEmptyTeacherResponseIsHandled() {
         esbMockServer.expect(
-            requestTo("https://esbmt1.it.helsinki.fi/iam/findEmployee/007"))
+            requestTo("https://esbmt2.it.helsinki.fi/iam/findEmployee/007"))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess("", MediaType.APPLICATION_JSON));
 

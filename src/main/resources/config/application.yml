@@ -16,7 +16,7 @@ integration:
     baseUrl: https://moodi-2-moodle.student.helsinki.fi/moodlecurrent
     url: https://moodi-2-moodle.student.helsinki.fi/moodlecurrent/webservice/rest/server.php
   oodi.url: https://esbmt2.it.helsinki.fi/doo-oodi/dev/testdb
-  esb.url: https://esbmt1.it.helsinki.fi
+  esb.url: https://esbmt2.it.helsinki.fi
 
 httpClient:
   readTimeout: 15000
