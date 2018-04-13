@@ -8,8 +8,6 @@ spring:
   flyway:
     locations: classpath:db/migration/common
 
-integration.oodi.url: https://oprek2.it.helsinki.fi:30039
-
 auth.client.user: password
 auth.enabled: true
 

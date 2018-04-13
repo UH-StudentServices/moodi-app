@@ -253,13 +253,13 @@ public abstract class AbstractMoodiIntegrationTest {
 
     protected final void expectFindEmployeeRequestToEsb(final String teacherId, final String username) {
         final String response = "[{\"username\":\"" + username + "\",\"personnelNumber\":\"" + teacherId + "\"}]";
-        esbMockServer.expect(requestTo("https://esbmt1.it.helsinki.fi/iam/findEmployee/" + teacherId))
+        esbMockServer.expect(requestTo("https://esbmt2.it.helsinki.fi/iam/findEmployee/" + teacherId))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
     }
 
     private final void expectFindStudentRequestToEsbWithResponse(final String studentNumber, final String response) {
-        esbMockServer.expect(requestTo("https://esbmt1.it.helsinki.fi/iam/findStudent/" + studentNumber))
+        esbMockServer.expect(requestTo("https://esbmt2.it.helsinki.fi/iam/findStudent/" + studentNumber))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
     }
