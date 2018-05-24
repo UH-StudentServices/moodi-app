@@ -22,13 +22,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.helsinki.moodi.integration.http.LoggingInterceptor;
 import fi.helsinki.moodi.integration.http.RequestTimingInterceptor;
 import fi.helsinki.moodi.integration.oodi.OodiClient;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import javax.net.ssl.SSLContext;
+import java.io.File;
+import java.security.KeyStore;
 import java.util.Collections;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -44,11 +52,42 @@ public class OodiConfig {
         return new OodiClient(baseUrl(), oodiRestTemplate());
     }
 
+    private KeyStore oodiKeyStore(String keystoreLocation, char[] keystorePassword) throws Exception {
+        KeyStore keyStore = KeyStore.getInstance("PKCS12");
+        FileSystemResource keystoreFile = new FileSystemResource(
+                new File(keystoreLocation));
+
+        keyStore.load(keystoreFile.getInputStream(), keystorePassword);
+        return keyStore;
+    }
+
+    private boolean useClientCert() {
+        return environment.containsProperty("httpClient.keystoreLocation") && environment.containsProperty("httpClient.keystorePassword");
+    }
+
+    private SSLContext sslContext() {
+        String keystoreLocation = environment.getRequiredProperty("httpClient.keystoreLocation");
+        String keystorePassword = environment.getRequiredProperty("httpClient.keystorePassword");
+        char[] keystorePasswordCharArray = keystorePassword.toCharArray();
+
+        try {
+            return SSLContextBuilder.create()
+                    .loadKeyMaterial(oodiKeyStore(keystoreLocation, keystorePasswordCharArray), keystorePasswordCharArray).build();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load client keystore");
+        }
+    }
+
     @Bean
     public RestTemplate oodiRestTemplate() {
         final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(objectMapper());
+
         RestTemplate restTemplate = new RestTemplate(Collections.singletonList(converter));
         restTemplate.setInterceptors(newArrayList(new LoggingInterceptor(), new RequestTimingInterceptor()));
+        if (useClientCert()) {
+            final HttpClient client = HttpClients.custom().setSSLContext(sslContext()).build();
+            restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(client));
+        }
         return restTemplate;
     }
 
