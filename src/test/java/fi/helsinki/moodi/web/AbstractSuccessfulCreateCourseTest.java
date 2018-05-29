@@ -33,25 +33,14 @@ public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIn
 
     protected static final long COURSE_REALISATION_ID = 102374742L;
     protected final static long MOODLE_COURSE_ID = 988888L;
-    protected static final long MOODLE_USER_ID_1 = 1L;
-    protected static final long MOODLE_USER_ID_2 = 2L;
-    protected static final long MOODLE_USER_ID_3 = 3L;
-    protected static final long TEACHER_MOODLE_USER_ID = 4L;
-
-    protected static final String MOODLE_USERNAME_1 = "niina@helsinki.fi";
-    protected static final String MOODLE_USERNAME_2 = "jukka@helsinki.fi";
-    protected static final String MOODLE_USERNAME_3 = "make@helsinki.fi";
-    protected static final String TEACHER_MOODLE_USERNAME = "hraopettaja@helsinki.fi";
-
-    protected static final String STUDENT_NUMBER_1 = "010342729";
-    protected static final String STUDENT_NUMBER_2 = "011119854";
-    protected static final String STUDENT_NUMBER_3 = "011524656";
-    protected static final String TEACHER_ID = "9110588";
-
-    protected static final String ESB_USERNAME_1 = "niina";
-    protected static final String ESB_USERNAME_2 = "jukka";
-    protected static final String ESB_USERNAME_3 = "make";
-    protected static final String TEACHER_ESB_USERNAME = "hraopettaja";
+    private static final long MOODLE_USER_ID_1 = 1L;
+    private static final long MOODLE_USER_ID_2 = 2L;
+    private static final long MOODLE_USER_ID_3 = 3L;
+    private static final long MOODLE_USER_ID_4 = 4L;
+    private static final String MOODLE_USERNAME_1 = "niina@helsinki.fi";
+    private static final String MOODLE_USERNAME_2 = "jukka@helsinki.fi";
+    private static final String MOODLE_USERNAME_3 = "make@helsinki.fi";
+    private static final String MOODLE_USERNAME_4 = "hraopettaja@helsinki.fi";
 
 
     protected void setUpMockServerResponses() {
@@ -63,17 +52,17 @@ public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIn
         expectGetUserRequestToMoodle(MOODLE_USERNAME_1, MOODLE_USER_ID_1);
         expectGetUserRequestToMoodle(MOODLE_USERNAME_2, MOODLE_USER_ID_2);
         expectGetUserRequestToMoodle(MOODLE_USERNAME_3, MOODLE_USER_ID_3);
-        expectGetUserRequestToMoodle(TEACHER_MOODLE_USERNAME, TEACHER_MOODLE_USER_ID);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_4, MOODLE_USER_ID_4);
 
         expectEnrollmentsWithAddedMoodiRoles(Lists.newArrayList(
             new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_1, MOODLE_COURSE_ID),
             new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_2, MOODLE_COURSE_ID),
             new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_3, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getTeacherRoleId(), TEACHER_MOODLE_USER_ID, MOODLE_COURSE_ID)
+            new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_ID_4, MOODLE_COURSE_ID)
             ));
     }
 
-    protected void expectEnrollmentsWithAddedMoodiRoles(List<MoodleEnrollment> moodleEnrollments) {
+    private void expectEnrollmentsWithAddedMoodiRoles(List<MoodleEnrollment> moodleEnrollments) {
         List<MoodleEnrollment> moodleEnrollmentsWithMoodiRoles = moodleEnrollments.stream()
             .flatMap(enrollment -> Stream.of(enrollment, new MoodleEnrollment(getMoodiRoleId(), enrollment.moodleUserId, enrollment.moodleCourseId)))
             .collect(Collectors.toList());
@@ -89,12 +78,12 @@ public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIn
         expectGetUserRequestToMoodle(MOODLE_USERNAME_1, MOODLE_USER_ID_1);
         expectGetUserRequestToMoodle(MOODLE_USERNAME_2, MOODLE_USER_ID_2);
         expectGetUserRequestToMoodleUserNotFound(MOODLE_USERNAME_3);
-        expectGetUserRequestToMoodle(TEACHER_MOODLE_USERNAME, TEACHER_MOODLE_USER_ID);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_4, MOODLE_USER_ID_4);
 
         expectEnrollmentsWithAddedMoodiRoles(Lists.newArrayList(
             new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_1, MOODLE_COURSE_ID),
             new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_2, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getTeacherRoleId(), TEACHER_MOODLE_USER_ID, MOODLE_COURSE_ID)
+            new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_ID_4, MOODLE_COURSE_ID)
             ));
     }
 
@@ -103,9 +92,9 @@ public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIn
             COURSE_REALISATION_ID,
             withSuccess(Fixtures.asString("/oodi/course-realisation.json"), MediaType.APPLICATION_JSON));
 
-        expectFindStudentRequestToEsb(STUDENT_NUMBER_1, ESB_USERNAME_1);
-        expectFindStudentRequestToEsb(STUDENT_NUMBER_2, ESB_USERNAME_2);
-        expectFindStudentRequestToEsb(STUDENT_NUMBER_3, ESB_USERNAME_3);
-        expectFindEmployeeRequestToEsb(TEACHER_ID, TEACHER_ESB_USERNAME);
+        expectFindStudentRequestToEsb("010342729", "niina");
+        expectFindStudentRequestToEsb("011119854", "jukka");
+        expectFindStudentRequestToEsb("011524656", "make");
+        expectFindEmployeeRequestToEsb("9110588", "hraopettaja");
     }
 }

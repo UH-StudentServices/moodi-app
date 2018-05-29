@@ -5,9 +5,7 @@
       {
         "enrollment_status_code": 3,
         "student_number": "{{ studentnumber}}",
-        "approved" : "{{ approved }}",
-        "enrollmentStatusCode": "{{ enrollmentStatusCode }}",
-        "automaticEnabled" : "{{ automaticEnabled }}"
+        "approved" : "{{ approved }}"
       }
     ],
     "realisationtypecode": 5,

@@ -35,12 +35,6 @@ public class OodiStudent {
     @JsonProperty("approved")
     public boolean approved = true;
 
-    @JsonProperty("automatic_enabled")
-    public boolean automaticEnabled;
-
-    @JsonProperty("enrollment_status_code")
-    public int enrollmentStatusCode;
-
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
