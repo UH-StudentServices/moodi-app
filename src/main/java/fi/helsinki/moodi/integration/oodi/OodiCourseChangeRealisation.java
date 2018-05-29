@@ -17,26 +17,23 @@
 
 package fi.helsinki.moodi.integration.oodi;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import java.io.Serializable;
+import java.util.List;
 
-public class OodiStudent {
+public class OodiCourseChangeRealisation implements Serializable {
 
-    @JsonProperty("first_names")
-    public String firstNames;
+    private static final long serialVersionUID = 1L;
 
-    @JsonProperty("student_number")
-    public String studentNumber;
+    public Data data;
 
-    @JsonProperty("last_name")
-    public String lastName;
+    public static class Data implements Serializable {
 
-    @JsonProperty("approved")
-    public boolean approved = true;
+        private static final long serialVersionUID = 1L;
 
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
+        public List<String> info;
+        public List<String> opettajat;
+        public List<String> alitoteutukset;
+        public List<String> organisaatiot;
+        public List<String> periodit;
     }
 }

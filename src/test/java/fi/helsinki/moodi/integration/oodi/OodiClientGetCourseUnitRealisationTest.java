@@ -98,6 +98,7 @@ public class OodiClientGetCourseUnitRealisationTest extends AbstractMoodiIntegra
             final Integer teacherRoleCode) {
 
         assertEquals(teacherId, t.teacherId);
+        assertEquals(teacherRoleCode, t.teacherRoleCode);
     }
 
     private void assertStudents(final OodiCourseUnitRealisation cur) {

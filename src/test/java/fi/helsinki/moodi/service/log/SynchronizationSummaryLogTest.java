@@ -45,7 +45,9 @@ import java.util.Map;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
 
@@ -60,8 +62,6 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
 
     private static final long STUDENT_ROLE_ID = 5;
     private static final long TEACHER_ROLE_ID = 3;
-
-    private static final int ENROLLMENT_STATUS_CODE = 2;
 
     @Test
     public void thatSynchronizationSummaryLogIsCreated() {
@@ -114,11 +114,9 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
 
         assertTrue(successfulEntry.status.equals(UserSynchronizationItemStatus.SUCCESS));
         assertTrue(successfulEntry.moodleUserId.equals(STUDENT_MOODLE_USER_ID));
-        assertEquals(STUDENT_NUMBER, successfulEntry.oodiStudent.studentNumber);
-        assertEquals(ENROLLMENT_STATUS_CODE, successfulEntry.oodiStudent.enrollmentStatusCode);
-        assertTrue(successfulEntry.oodiStudent.approved);
-        assertFalse(successfulEntry.oodiStudent.automaticEnabled);
-        assertNull(successfulEntry.oodiTeacher);
+        assertEquals(STUDENT_NUMBER, successfulEntry.studentNumber);
+        assertTrue(successfulEntry.studentApproved);
+        assertNull(successfulEntry.teacherId);
         assertSingleAction(
             successfulEntry.actions,
             UserSynchronizationActionStatus.SUCCESS,
@@ -129,8 +127,9 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
 
         assertTrue(failedEntry.status.equals(UserSynchronizationItemStatus.ERROR));
         assertTrue(failedEntry.moodleUserId.equals(TEACHER_MOODLE_USER_ID));
-        assertNull(failedEntry.oodiStudent);
-        assertEquals(TEACHER_ID, failedEntry.oodiTeacher.teacherId);
+        assertNull(failedEntry.studentNumber);
+        assertNull(failedEntry.studentApproved);
+        assertEquals(TEACHER_ID, failedEntry.teacherId);
         assertSingleAction(
             failedEntry.actions,
             UserSynchronizationActionStatus.ERROR,
@@ -216,8 +215,6 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
         OodiStudent student = new OodiStudent();
         student.studentNumber = STUDENT_NUMBER;
         student.approved = true;
-        student.automaticEnabled = false;
-        student.enrollmentStatusCode = ENROLLMENT_STATUS_CODE;
         return student;
     }
 
