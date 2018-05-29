@@ -22,7 +22,6 @@ import fi.helsinki.moodi.integration.esb.EsbService;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
-import fi.helsinki.moodi.integration.oodi.OodiStudentApprovalStatusResolver;
 import fi.helsinki.moodi.service.batch.BatchProcessor;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
@@ -58,7 +57,6 @@ public class EnrollmentExecutor {
     private final CourseService courseService;
     private final LoggingService loggingService;
     private final BatchProcessor<Enrollment> batchProcessor;
-    private final OodiStudentApprovalStatusResolver oodiStudentApprovalStatusResolver;
 
     @Autowired
     public EnrollmentExecutor(
@@ -67,15 +65,13 @@ public class EnrollmentExecutor {
         MapperService mapperService,
         CourseService courseService,
         LoggingService loggingService,
-        BatchProcessor batchProcessor,
-        OodiStudentApprovalStatusResolver oodiStudentApprovalStatusResolver) {
+        BatchProcessor batchProcessor) {
         this.moodleService = moodleService;
         this.esbService = esbService;
         this.mapperService = mapperService;
         this.courseService = courseService;
         this.loggingService = loggingService;
         this.batchProcessor = batchProcessor;
-        this.oodiStudentApprovalStatusResolver = oodiStudentApprovalStatusResolver;
     }
 
     @Async("taskExecutor")
@@ -141,9 +137,7 @@ public class EnrollmentExecutor {
         final List<Enrollment> enrollments = newArrayList();
 
         enrollments.addAll(cur.students.stream()
-            .map(s -> Enrollment.forStudent(
-                s.studentNumber,
-                oodiStudentApprovalStatusResolver.isApproved(s)))
+            .map(s -> Enrollment.forStudent(s.studentNumber, s.approved))
             .collect(toList()));
 
         enrollments.addAll(cur.teachers.stream()
@@ -166,8 +160,15 @@ public class EnrollmentExecutor {
         final List<Enrollment> enrollments,
         final List<EnrollmentWarning> enrollmentWarnings) {
 
-        return filterEnrollmentsAndCreateWarnings(
-            enrollments, enrollmentWarnings, enrollment -> enrollment.approved, EnrollmentWarning::userNotApproved);
+        return enrollments
+            .stream()
+            .filter(e -> {
+                if(!e.approved) {
+                    enrollmentWarnings.add(EnrollmentWarning.userNotApproved(e));
+                }
+                return e.approved;
+            })
+            .collect(Collectors.toList());
     }
 
     private List<Enrollment> filterOutEnrollmentsWithoutUsername(
