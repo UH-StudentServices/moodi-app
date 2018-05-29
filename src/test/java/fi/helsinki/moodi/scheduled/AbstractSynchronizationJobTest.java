@@ -27,6 +27,7 @@ import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRunService;
 import fi.helsinki.moodi.service.synchronize.process.ProcessingStatus;
+import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationAction.UserSynchronizationActionStatus;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem.UserSynchronizationItemStatus;
 import fi.helsinki.moodi.service.util.MapperService;
@@ -78,7 +79,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
 
     protected void setUpMockServerResponses(String endDate, boolean approved) {
         setupMoodleGetCourseResponse();
-        setupOodiCourseUnitRealisationResponse(endDate, approved, false, APPROVED_ENROLLMENT_STATUS_CODE);
+        setupOodiCourseUnitRealisationResponse(endDate, approved);
     }
 
     protected void setupMoodleGetCourseResponse() {
@@ -88,10 +89,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
             .andRespond(withSuccess(Fixtures.asString("/moodle/get-courses-12345.json"), MediaType.APPLICATION_JSON));
     }
 
-    protected void setupOodiCourseUnitRealisationResponse(String endDate,
-                                                          boolean approved,
-                                                          boolean automaticEnabled,
-                                                          int enrollmentStatusCode) {
+    protected void setupOodiCourseUnitRealisationResponse(String endDate, boolean approved) {
         expectGetCourseUsersRequestToOodi(
             REALISATION_ID,
             withSuccess(Fixtures.asString(
@@ -102,8 +100,6 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
                         .put("endDate", endDate)
                         .put("deleted", false)
                         .put("approved", approved)
-                        .put("automaticEnabled", automaticEnabled)
-                        .put("enrollmentStatusCode", enrollmentStatusCode)
                         .build()),
                 MediaType.APPLICATION_JSON));
     }

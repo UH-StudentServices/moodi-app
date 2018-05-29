@@ -22,6 +22,7 @@ import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.integration.moodle.MoodleFullCourse;
 import fi.helsinki.moodi.integration.moodle.MoodleRole;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
+import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUsers;
 import fi.helsinki.moodi.integration.oodi.OodiStudent;
 import fi.helsinki.moodi.integration.oodi.OodiTeacher;
@@ -100,7 +101,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
     /* Add enrollments */
 
     @Test
-    public void thatUserIsEnrolledWithStudentAndMoodiRoles() {
+    public void studentAndMoodiRolesEnrollment() {
         SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
             .withOodiStudent(MOODLE_USER_ID, true)
             .withEmptyMoodleEnrollments()
@@ -115,7 +116,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
     }
 
     @Test
-    public void thatUserIsEnrolledWithTeacherAndMoodiRoles() {
+    public void teacherAndMoodiRolesEnrollment() {
         SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
             .withOodiTeacher(MOODLE_USER_ID)
             .withEmptyMoodleEnrollments()
@@ -130,38 +131,9 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
     }
 
     @Test
-    public void thatUserIsEnrolledWithOnlyMoodiRoleIfNotApproved() {
+    public void addsOnlyDefaultMoodiRoleIfNotApproved() {
         SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
             .withOodiStudent(MOODLE_USER_ID, false)
-            .withEmptyMoodleEnrollments()
-            .expectUserRequestsToESBAndMoodle()
-            .expectAddEnrollmentsToMoodleCourse(
-                moodiEnrollment()
-            )
-            .getSynchronizationItem();
-
-        synchronizingProcessor.doProcess(item);
-    }
-
-    @Test
-    public void thatUserIsEnrolledWithStudentAndMoodiRolesWhenAutomaticEnabledAndEnrollmentStatusCodeIsApproved() {
-        SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
-            .withOodiStudent(MOODLE_USER_ID, false, true, APPROVED_ENROLLMENT_STATUS_CODE)
-            .withEmptyMoodleEnrollments()
-            .expectUserRequestsToESBAndMoodle()
-            .expectAddEnrollmentsToMoodleCourse(
-                studentEnrollment(),
-                moodiEnrollment()
-            )
-            .getSynchronizationItem();
-
-        synchronizingProcessor.doProcess(item);
-    }
-
-    @Test
-    public void thatUserIsEnrolledWithOnlyMoodiRoleWhenAutomaticEnabledAndStatusCodeIsNotApproved() {
-        SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
-            .withOodiStudent(MOODLE_USER_ID, false, true, NON_APPROVED_ENROLLMENT_STATUS_CODE)
             .withEmptyMoodleEnrollments()
             .expectUserRequestsToESBAndMoodle()
             .expectAddEnrollmentsToMoodleCourse(
@@ -175,9 +147,27 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
     /* Remove roles */
 
     @Test
-    public void thatStudentRoleIsRemovedIfNotApproved() {
+    public void removeStudentRoleIfNotApproved() {
         SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
             .withOodiStudent(MOODLE_USER_ID, false)
+            .withMoodleEnrollments(moodleUserEnrollments(
+                studentRole(),
+                moodiRole()))
+            .expectUserRequestsToESBAndMoodle()
+            .expectAssignRolesToMoodleCourse(
+                false,
+                studentEnrollment()
+            )
+            .getSynchronizationItem();
+
+        synchronizingProcessor.doProcess(item);
+    }
+
+    @Test
+    public void removeStudentRoleIfNotApprovedAndHasAlsoTeacherRole() {
+        SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
+            .withOodiStudent(MOODLE_USER_ID, false)
+            .withOodiTeacher(MOODLE_USER_ID)
             .withMoodleEnrollments(moodleUserEnrollments(
                 studentRole(),
                 teacherRole(),
@@ -192,27 +182,10 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
         synchronizingProcessor.doProcess(item);
     }
 
-    @Test
-    public void thatStudentRoleIsRemovedIfAutomaticEnabledAndStatusCodeIsNotApproved() {
-        SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
-            .withOodiStudent(MOODLE_USER_ID, true, true, NON_APPROVED_ENROLLMENT_STATUS_CODE)
-            .withMoodleEnrollments(moodleUserEnrollments(
-                studentRole(),
-                moodiRole()))
-            .expectUserRequestsToESBAndMoodle()
-            .expectAssignRolesToMoodleCourse(
-                false,
-                studentEnrollment()
-            )
-            .getSynchronizationItem();
-
-        synchronizingProcessor.doProcess(item);
-    }
-
     /* Add roles */
 
     @Test
-    public void thatStudentRoleIsAddedIfApproved() {
+    public void addStudentRoleIfApproved() {
         SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
             .withOodiStudent(MOODLE_USER_ID, true)
             .withOodiTeacher(MOODLE_USER_ID)
@@ -230,7 +203,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
     }
 
     @Test
-    public void thatTeacherRoleIsAdded() {
+    public void addTeacherRole() {
         SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
             .withOodiStudent(MOODLE_USER_ID, true)
             .withOodiTeacher(MOODLE_USER_ID)
@@ -247,28 +220,10 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
         synchronizingProcessor.doProcess(item);
     }
 
-    @Test
-    public void thatStudentRoleIsAddedWhenAutomaticEnabledAndStatusCodeIsApproved() {
-        SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
-            .withOodiStudent(MOODLE_USER_ID, false, true, APPROVED_ENROLLMENT_STATUS_CODE)
-            .withOodiTeacher(MOODLE_USER_ID)
-            .withMoodleEnrollments(moodleUserEnrollments(
-                teacherRole(),
-                moodiRole()))
-            .expectUserRequestsToESBAndMoodle()
-            .expectAssignRolesToMoodleCourse(
-                true,
-                studentEnrollment()
-            )
-            .getSynchronizationItem();
-
-        synchronizingProcessor.doProcess(item);
-    }
-
     /* Add moodi role */
 
     @Test
-    public void thatMoodiRoleIsAddedForStudent() {
+    public void addMoodiRoleIfStudent() {
         SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
             .withOodiStudent(MOODLE_USER_ID, true)
             .withMoodleEnrollments(moodleUserEnrollments(
@@ -284,7 +239,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
     }
 
     @Test
-    public void thatMoodiRoleIsAddedForTeacher() {
+    public void addMoodiRoleIfTeacher() {
         SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
             .withOodiTeacher(MOODLE_USER_ID)
             .withMoodleEnrollments(moodleUserEnrollments(
@@ -302,7 +257,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
     /* No action */
 
     @Test
-    public void thatNoActionIsTakenIfStudentAlreadyHasCorrectRoles() {
+    public void testNoActionIfAlreadyStudentInMoodle() {
         SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
             .withOodiStudent(MOODLE_USER_ID, true)
             .withMoodleEnrollments(moodleUserEnrollments(
@@ -315,24 +270,11 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
     }
 
     @Test
-    public void thatNoActionIsTakenIfTeacherAlreadyHasCorrectRoles() {
+    public void testNoActionIfAlreadyTeacherInMoodle() {
         SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
             .withOodiTeacher(MOODLE_USER_ID)
             .withMoodleEnrollments(moodleUserEnrollments(
                 teacherRole(),
-                moodiRole()))
-            .expectUserRequestsToESBAndMoodle()
-            .getSynchronizationItem();
-
-        synchronizingProcessor.doProcess(item);
-    }
-
-    @Test
-    public void thatNoActionIsTakenIfStudentAlreadyHasCorrectRolesWhenAutomaticEnabledAndStatusCodeIsApproved() {
-        SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
-            .withOodiStudent(MOODLE_USER_ID, true, true, APPROVED_ENROLLMENT_STATUS_CODE)
-            .withMoodleEnrollments(moodleUserEnrollments(
-                studentRole(),
                 moodiRole()))
             .expectUserRequestsToESBAndMoodle()
             .getSynchronizationItem();
@@ -372,18 +314,9 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
         }
 
         public CourseSynchronizationRequestChain withOodiStudent(long moodleUserId, boolean approved) {
-            return withOodiStudent(moodleUserId, approved, false, APPROVED_ENROLLMENT_STATUS_CODE);
-        }
-
-        public CourseSynchronizationRequestChain withOodiStudent(long moodleUserId,
-                                                                 boolean approved,
-                                                                 boolean automaticEnabled,
-                                                                 int enrollmentStatusCode) {
             OodiStudent oodiStudent = new OodiStudent();
             oodiStudent.studentNumber = STUDENT_NUMBER;
             oodiStudent.approved = approved;
-            oodiStudent.automaticEnabled = automaticEnabled;
-            oodiStudent.enrollmentStatusCode = enrollmentStatusCode;
 
             this.OodiCourseUsers.students.add(oodiStudent);
             oodiStudentMap.put(moodleUserId, oodiStudent);

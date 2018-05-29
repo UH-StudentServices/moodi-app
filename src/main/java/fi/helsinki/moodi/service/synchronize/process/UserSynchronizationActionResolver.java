@@ -17,7 +17,6 @@
 
 package fi.helsinki.moodi.service.synchronize.process;
 
-import fi.helsinki.moodi.integration.oodi.OodiStudentApprovalStatusResolver;
 import fi.helsinki.moodi.service.util.MapperService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,19 +30,16 @@ import static com.google.common.collect.Lists.newArrayList;
 public class UserSynchronizationActionResolver {
 
     private final MapperService mapperService;
-    private final OodiStudentApprovalStatusResolver oodiStudentApprovalStatusResolver;
 
     @Autowired
-    public UserSynchronizationActionResolver(MapperService mapperService,
-                                             OodiStudentApprovalStatusResolver oodiStudentApprovalStatusResolver) {
+    public UserSynchronizationActionResolver(MapperService mapperService) {
         this.mapperService = mapperService;
-        this.oodiStudentApprovalStatusResolver = oodiStudentApprovalStatusResolver;
     }
 
     private List<Long> getCurrentOodiRoles(UserSynchronizationItem item) {
         List<Long> currentOodiRoles = newArrayList();
 
-        if(item.getOodiStudent() != null && oodiStudentApprovalStatusResolver.isApproved(item.getOodiStudent())) {
+        if(item.getOodiStudent() != null && item.getOodiStudent().approved) {
             currentOodiRoles.add(mapperService.getStudentRoleId());
         }
 
