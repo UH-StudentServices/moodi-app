@@ -14,5 +14,5 @@ integration:
   moodle:
     baseUrl: https://moodi-2-moodle.student.helsinki.fi/moodlecurrent
     url: https://moodi-2-moodle.student.helsinki.fi/moodlecurrent/webservice/rest/server.php
-  oodi.url: https://esbmt1.it.helsinki.fi/doo-oodi/v1/productiondb
+  oodi.url: https://esbmt1.it.helsinki.fi/secure/doo-oodi/v1/productiondb
   esb.url: https://esbmt1.it.helsinki.fi
