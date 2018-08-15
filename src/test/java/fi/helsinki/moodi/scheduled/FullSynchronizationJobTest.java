@@ -23,7 +23,6 @@ import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.service.synchronize.enrich.EnrichmentStatus;
-import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationAction;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem.UserSynchronizationItemStatus;
 import fi.helsinki.moodi.test.util.DateUtil;
@@ -267,9 +266,9 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
     }
 
     @Test
-    public void thatIfUsernameIsNotFoundFromESBSynchronizationIsNotCompleted() {
+    public void thatIfUsernameIsNotFoundFromIAMSynchronizationIsNotCompleted() {
         ExpectationsForUserThatCannotBeMappedToMoodleUser expectations = () -> {
-            expectFindStudentRequestToEsbAndRespondWithEmptyResult(STUDENT_NUMBER);
+            expectFindStudentRequestToIAMAndRespondWithEmptyResult(STUDENT_NUMBER);
         };
 
         testSynchronizationForUserThatCanNotBeMappedToMoodleUser(expectations, UserSynchronizationItemStatus.USERNAME_NOT_FOUND);
@@ -278,7 +277,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
     @Test
     public void thatIfUserIsNotFoundFromMoodleSynchronizationIsNotCompleted() {
         ExpectationsForUserThatCannotBeMappedToMoodleUser expectations = () -> {
-            expectFindStudentRequestToEsb(STUDENT_NUMBER, STUDENT_USERNAME);
+            expectFindStudentRequestToIAM(STUDENT_NUMBER, STUDENT_USERNAME);
             expectGetUserRequestToMoodleUserNotFound(STUDENT_USERNAME + USERNAME_SUFFIX);
         };
 

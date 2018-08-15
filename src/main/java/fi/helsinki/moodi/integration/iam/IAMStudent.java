@@ -15,11 +15,11 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.integration.esb;
+package fi.helsinki.moodi.integration.iam;
 
 import java.io.Serializable;
 
-public class EsbStudent implements Serializable {
+public class IAMStudent implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

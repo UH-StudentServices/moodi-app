@@ -17,12 +17,11 @@
 
 package fi.helsinki.moodi.service.synchronize.process;
 
-import fi.helsinki.moodi.integration.esb.EsbService;
+import fi.helsinki.moodi.integration.iam.IAMService;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.integration.moodle.MoodleFullCourse;
 import fi.helsinki.moodi.integration.moodle.MoodleRole;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
-import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUsers;
 import fi.helsinki.moodi.integration.oodi.OodiStudent;
 import fi.helsinki.moodi.integration.oodi.OodiTeacher;
@@ -105,7 +104,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
         SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
             .withOodiStudent(MOODLE_USER_ID, true)
             .withEmptyMoodleEnrollments()
-            .expectUserRequestsToESBAndMoodle()
+            .expectUserRequestsToIAMAndMoodle()
             .expectAddEnrollmentsToMoodleCourse(
                 studentEnrollment(),
                 moodiEnrollment()
@@ -120,7 +119,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
         SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
             .withOodiTeacher(MOODLE_USER_ID)
             .withEmptyMoodleEnrollments()
-            .expectUserRequestsToESBAndMoodle()
+            .expectUserRequestsToIAMAndMoodle()
             .expectAddEnrollmentsToMoodleCourse(
                 teacherEnrollment(),
                 moodiEnrollment()
@@ -135,7 +134,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
         SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
             .withOodiStudent(MOODLE_USER_ID, false)
             .withEmptyMoodleEnrollments()
-            .expectUserRequestsToESBAndMoodle()
+            .expectUserRequestsToIAMAndMoodle()
             .expectAddEnrollmentsToMoodleCourse(
                 moodiEnrollment()
             )
@@ -153,7 +152,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             .withMoodleEnrollments(moodleUserEnrollments(
                 studentRole(),
                 moodiRole()))
-            .expectUserRequestsToESBAndMoodle()
+            .expectUserRequestsToIAMAndMoodle()
             .expectAssignRolesToMoodleCourse(
                 false,
                 studentEnrollment()
@@ -172,7 +171,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
                 studentRole(),
                 teacherRole(),
                 moodiRole()))
-            .expectUserRequestsToESBAndMoodle()
+            .expectUserRequestsToIAMAndMoodle()
             .expectAssignRolesToMoodleCourse(
                 false,
                 studentEnrollment()
@@ -192,7 +191,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             .withMoodleEnrollments(moodleUserEnrollments(
                 teacherRole(),
                 moodiRole()))
-            .expectUserRequestsToESBAndMoodle()
+            .expectUserRequestsToIAMAndMoodle()
             .expectAssignRolesToMoodleCourse(
                 true,
                 studentEnrollment()
@@ -210,7 +209,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             .withMoodleEnrollments(moodleUserEnrollments(
                 studentRole(),
                 moodiRole()))
-            .expectUserRequestsToESBAndMoodle()
+            .expectUserRequestsToIAMAndMoodle()
             .expectAssignRolesToMoodleCourse(
                 true,
                 teacherEnrollment()
@@ -228,7 +227,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             .withOodiStudent(MOODLE_USER_ID, true)
             .withMoodleEnrollments(moodleUserEnrollments(
                 studentRole()))
-            .expectUserRequestsToESBAndMoodle()
+            .expectUserRequestsToIAMAndMoodle()
             .expectAssignRolesToMoodleCourse(
                 true,
                 moodiEnrollment()
@@ -244,7 +243,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             .withOodiTeacher(MOODLE_USER_ID)
             .withMoodleEnrollments(moodleUserEnrollments(
                 teacherRole()))
-            .expectUserRequestsToESBAndMoodle()
+            .expectUserRequestsToIAMAndMoodle()
             .expectAssignRolesToMoodleCourse(
                 true,
                 moodiEnrollment()
@@ -263,7 +262,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             .withMoodleEnrollments(moodleUserEnrollments(
                 studentRole(),
                 moodiRole()))
-            .expectUserRequestsToESBAndMoodle()
+            .expectUserRequestsToIAMAndMoodle()
             .getSynchronizationItem();
 
         synchronizingProcessor.doProcess(item);
@@ -276,7 +275,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             .withMoodleEnrollments(moodleUserEnrollments(
                 teacherRole(),
                 moodiRole()))
-            .expectUserRequestsToESBAndMoodle()
+            .expectUserRequestsToIAMAndMoodle()
             .getSynchronizationItem();
 
         synchronizingProcessor.doProcess(item);
@@ -343,12 +342,12 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             return this.withMoodleEnrollments(newArrayList());
         }
 
-        public CourseSynchronizationRequestChain expectUserRequestsToESBAndMoodle() {
-            oodiStudentMap.forEach((moodleUserId, oodiStudent) -> expectFindStudentRequestToEsb(oodiStudent.studentNumber, STUDENT_USERNAME));
-            oodiTeacherMap.forEach((moodleUserId, oodiTeacher) -> expectFindEmployeeRequestToEsb(EsbService.TEACHER_ID_PREFIX + oodiTeacher.teacherId, TEACHER_USERNAME));
+        public CourseSynchronizationRequestChain expectUserRequestsToIAMAndMoodle() {
+            oodiStudentMap.forEach((moodleUserId, oodiStudent) -> expectFindStudentRequestToIAM(oodiStudent.studentNumber, STUDENT_USERNAME));
+            oodiTeacherMap.forEach((moodleUserId, oodiTeacher) -> expectFindEmployeeRequestToIAM(IAMService.TEACHER_ID_PREFIX + oodiTeacher.teacherId, TEACHER_USERNAME));
 
-            oodiStudentMap.forEach((moodleUserId, oodiStudent) -> expectGetUserRequestToMoodle(STUDENT_USERNAME + EsbService.DOMAIN_SUFFIX, moodleUserId));
-            oodiTeacherMap.forEach((moodleUserId, oodiTeacher) -> expectGetUserRequestToMoodle(TEACHER_USERNAME + EsbService.DOMAIN_SUFFIX, moodleUserId));
+            oodiStudentMap.forEach((moodleUserId, oodiStudent) -> expectGetUserRequestToMoodle(STUDENT_USERNAME + IAMService.DOMAIN_SUFFIX, moodleUserId));
+            oodiTeacherMap.forEach((moodleUserId, oodiTeacher) -> expectGetUserRequestToMoodle(TEACHER_USERNAME + IAMService.DOMAIN_SUFFIX, moodleUserId));
 
             return this;
         }

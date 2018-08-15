@@ -27,7 +27,6 @@ import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRunService;
 import fi.helsinki.moodi.service.synchronize.process.ProcessingStatus;
-import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationAction.UserSynchronizationActionStatus;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem.UserSynchronizationItemStatus;
 import fi.helsinki.moodi.service.util.MapperService;
@@ -180,12 +179,12 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
     }
 
     protected void expectFindStudentRequestToMoodle(String studentNumber, String username, int moodleId) {
-        expectFindStudentRequestToEsb(studentNumber, username);
+        expectFindStudentRequestToIAM(studentNumber, username);
         expectGetUserRequestToMoodle(username + USERNAME_SUFFIX, moodleId);
     }
 
     protected void expectFindTeacherRequestToMoodle(String teacherId, String username, int moodleId) {
-        expectFindEmployeeRequestToEsb(teacherId, username);
+        expectFindEmployeeRequestToIAM(teacherId, username);
         expectGetUserRequestToMoodle(username + USERNAME_SUFFIX, moodleId);
     }
 

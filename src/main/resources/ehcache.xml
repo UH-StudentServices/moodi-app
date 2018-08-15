@@ -21,8 +21,8 @@
             memoryStoreEvictionPolicy="LRU">
     </defaultCache>
 
-    <cache name="esb-client.student-username-by-student-number"></cache>
-    <cache name="esb-client.teacher-username-by-teacher-id"></cache>
+    <cache name="iam-client.student-username-by-student-number"></cache>
+    <cache name="iam-client.teacher-username-by-teacher-id"></cache>
     <cache name="moodle-client.moodle-user-by-username"></cache>
 
 </ehcache>

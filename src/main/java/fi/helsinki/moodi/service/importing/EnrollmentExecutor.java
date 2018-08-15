@@ -18,7 +18,7 @@
 package fi.helsinki.moodi.service.importing;
 
 import com.google.common.base.Stopwatch;
-import fi.helsinki.moodi.integration.esb.EsbService;
+import fi.helsinki.moodi.integration.iam.IAMService;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
@@ -52,7 +52,7 @@ public class EnrollmentExecutor {
     private static final Logger LOGGER = getLogger(EnrollmentExecutor.class);
 
     private final MoodleService moodleService;
-    private final EsbService esbService;
+    private final IAMService iamService;
     private final MapperService mapperService;
     private final CourseService courseService;
     private final LoggingService loggingService;
@@ -61,13 +61,13 @@ public class EnrollmentExecutor {
     @Autowired
     public EnrollmentExecutor(
         MoodleService moodleService,
-        EsbService esbService,
+        IAMService iamService,
         MapperService mapperService,
         CourseService courseService,
         LoggingService loggingService,
         BatchProcessor batchProcessor) {
         this.moodleService = moodleService;
-        this.esbService = esbService;
+        this.iamService = iamService;
         this.mapperService = mapperService;
         this.courseService = courseService;
         this.loggingService = loggingService;
@@ -127,8 +127,8 @@ public class EnrollmentExecutor {
 
     private Enrollment enrichEnrollmentWithUsername(final Enrollment enrollment) {
         enrollment.usernameList = Enrollment.ROLE_TEACHER.equals(enrollment.role) ?
-            esbService.getTeacherUsernameList(enrollment.teacherId.get()) :
-            esbService.getStudentUsernameList(enrollment.studentNumber.get());
+            iamService.getTeacherUsernameList(enrollment.teacherId.get()) :
+            iamService.getStudentUsernameList(enrollment.studentNumber.get());
 
         return enrollment;
     }
@@ -176,7 +176,7 @@ public class EnrollmentExecutor {
             final List<EnrollmentWarning> enrollmentWarnings) {
 
         return filterEnrollmentsAndCreateWarnings(
-                enrollments, enrollmentWarnings, this::isUsernamePresent, EnrollmentWarning::userNotFoundFromEsb);
+                enrollments, enrollmentWarnings, this::isUsernamePresent, EnrollmentWarning::userNotFoundFromIAM);
     }
 
     private List<Enrollment> filterOutEnrollmentsWithoutMoodleIds(
