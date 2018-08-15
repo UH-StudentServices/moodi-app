@@ -15,7 +15,7 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.integration.esb;
+package fi.helsinki.moodi.integration.iam;
 
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
@@ -33,49 +33,49 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-public class EsbClientGetStudentUsernameTest extends AbstractMoodiIntegrationTest {
+public class IAMClientGetStudentUsernameTest extends AbstractMoodiIntegrationTest {
 
     @Autowired
-    private EsbClient esbClient;
+    private IAMClient iamClient;
 
     @Test
     public void deserializeResponseWithOneAccount() {
-        esbMockServer.expect(
+        iamMockServer.expect(
             requestTo("https://esbmt2.it.helsinki.fi/iam/findStudent/007"))
             .andExpect(method(HttpMethod.GET))
-            .andRespond(withSuccess(Fixtures.asString("/esb/student-username-007.json"), MediaType.APPLICATION_JSON));
+            .andRespond(withSuccess(Fixtures.asString("/iam/student-username-007.json"), MediaType.APPLICATION_JSON));
 
-        assertEquals(Arrays.asList("aunesluo"), esbClient.getStudentUsernameList("007"));
+        assertEquals(Arrays.asList("aunesluo"), iamClient.getStudentUsernameList("007"));
     }
 
     @Test
     public void deserializeResponseWithSeveralAccounts() {
-        esbMockServer.expect(
+        iamMockServer.expect(
                 requestTo("https://esbmt2.it.helsinki.fi/iam/findStudent/008"))
                 .andExpect(method(HttpMethod.GET))
-                .andRespond(withSuccess(Fixtures.asString("/esb/student-username-008.json"), MediaType.APPLICATION_JSON));
+                .andRespond(withSuccess(Fixtures.asString("/iam/student-username-008.json"), MediaType.APPLICATION_JSON));
 
-        assertEquals(Arrays.asList("auneslu1","aunesluo"), esbClient.getStudentUsernameList("008"));
+        assertEquals(Arrays.asList("auneslu1","aunesluo"), iamClient.getStudentUsernameList("008"));
     }
 
     @Test
     public void thatEmptyResponseIsHandled() {
-        esbMockServer.expect(
+        iamMockServer.expect(
             requestTo("https://esbmt2.it.helsinki.fi/iam/findStudent/009"))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess("", MediaType.APPLICATION_JSON));
 
-        assertNotNull(esbClient.getStudentUsernameList("009"));
+        assertNotNull(iamClient.getStudentUsernameList("009"));
     }
 
     @Test
     public void thatEmptyArrayIsHandled() {
-        esbMockServer.expect(
+        iamMockServer.expect(
                 requestTo("https://esbmt2.it.helsinki.fi/iam/findStudent/0010"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
 
-        assertNotNull(esbClient.getStudentUsernameList("0010"));
+        assertNotNull(iamClient.getStudentUsernameList("0010"));
     }
 
 }

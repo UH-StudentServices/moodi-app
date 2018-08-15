@@ -19,13 +19,14 @@ package fi.helsinki.moodi.config;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fi.helsinki.moodi.integration.esb.EsbClient;
+import fi.helsinki.moodi.integration.iam.IAMClient;
+import fi.helsinki.moodi.integration.iam.IAMMockClient;
+import fi.helsinki.moodi.integration.iam.IAMRestClient;
 import fi.helsinki.moodi.integration.http.LoggingInterceptor;
 import fi.helsinki.moodi.integration.http.RequestTimingInterceptor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
@@ -34,26 +35,29 @@ import java.util.Collections;
 import static com.google.common.collect.Lists.newArrayList;
 
 @Configuration
-public class EsbConfig {
+public class IAMConfig {
 
-    @Autowired
-    private Environment environment;
+    @Value("${integration.iam.url:''}")
+    private String baseUrl;
+
+    @Value("${integration.iam.client.mock:false}")
+    private boolean mockClientImplementation;
 
     @Bean
-    public EsbClient esbClient() {
-        return new EsbClient(baseUrl(), esbRestTemplate());
+    public IAMClient iamClient() {
+        if (mockClientImplementation) {
+            return new IAMMockClient();
+        } else {
+            return new IAMRestClient(baseUrl, iamRestTemplate());
+        }
     }
 
     @Bean
-    public RestTemplate esbRestTemplate() {
+    public RestTemplate iamRestTemplate() {
         final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(objectMapper());
         RestTemplate restTemplate = new RestTemplate(Collections.singletonList(converter));
         restTemplate.setInterceptors(newArrayList(new LoggingInterceptor(), new RequestTimingInterceptor()));
         return restTemplate;
-    }
-
-    private String baseUrl() {
-        return environment.getRequiredProperty("integration.esb.url");
     }
 
     private ObjectMapper objectMapper() {

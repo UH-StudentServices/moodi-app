@@ -18,7 +18,7 @@
 package fi.helsinki.moodi.service.synchronize.process;
 
 import fi.helsinki.moodi.exception.ProcessingException;
-import fi.helsinki.moodi.integration.esb.EsbService;
+import fi.helsinki.moodi.integration.iam.IAMService;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
 import fi.helsinki.moodi.integration.moodle.MoodleUser;
@@ -62,7 +62,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SynchronizingProcessor.class);
 
-    private final EsbService esbService;
+    private final IAMService iamService;
     private final MapperService mapperService;
     private final MoodleService moodleService;
     private final CourseService courseService;
@@ -72,7 +72,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
     private final BatchProcessor<UserSynchronizationAction> batchProcessor;
 
     @Autowired
-    public SynchronizingProcessor(EsbService esbService,
+    public SynchronizingProcessor(IAMService iamService,
                                   MapperService mapperService,
                                   MoodleService moodleService,
                                   CourseService courseService,
@@ -81,7 +81,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
                                   UserSynchronizationActionResolver synchronizationActionResolver,
                                   BatchProcessor batchProcessor) {
         super(Action.SYNCHRONIZE);
-        this.esbService = esbService;
+        this.iamService = iamService;
         this.mapperService = mapperService;
         this.moodleService = moodleService;
         this.courseService = courseService;
@@ -281,11 +281,11 @@ public class SynchronizingProcessor extends AbstractProcessor {
     }
 
     private List<String> getUsernameList(OodiStudent student) {
-        return esbService.getStudentUsernameList(student.studentNumber);
+        return iamService.getStudentUsernameList(student.studentNumber);
     }
 
     private List<String> getUsernameList(OodiTeacher teacher) {
-        return esbService.getTeacherUsernameList(teacher.teacherId);
+        return iamService.getTeacherUsernameList(teacher.teacherId);
     }
 
     private Optional<MoodleUser> getMoodleUser(final List<String> usernameList) {

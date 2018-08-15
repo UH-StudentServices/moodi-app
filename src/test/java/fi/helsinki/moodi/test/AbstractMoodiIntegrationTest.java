@@ -82,7 +82,7 @@ public abstract class AbstractMoodiIntegrationTest {
     protected RestTemplate moodleReadOnlyRestTemplate;
 
     @Autowired
-    protected RestTemplate esbRestTemplate;
+    protected RestTemplate iamRestTemplate;
 
     @Autowired
     private Flyway flyway;
@@ -98,7 +98,7 @@ public abstract class AbstractMoodiIntegrationTest {
     protected MockRestServiceServer oodiMockServer;
     protected MockRestServiceServer moodleMockServer;
     protected MockRestServiceServer moodleReadOnlyMockServer;
-    protected MockRestServiceServer esbMockServer;
+    protected MockRestServiceServer iamMockServer;
 
     protected String getMoodleBaseUrl() {
         return environment.getProperty("integration.moodle.baseUrl");
@@ -148,7 +148,7 @@ public abstract class AbstractMoodiIntegrationTest {
         oodiMockServer = MockRestServiceServer.createServer(oodiRestTemplate);
         moodleMockServer = MockRestServiceServer.createServer(moodleRestTemplate);
         moodleReadOnlyMockServer = MockRestServiceServer.createServer(moodleReadOnlyRestTemplate);
-        esbMockServer = MockRestServiceServer.createServer(esbRestTemplate);
+        iamMockServer = MockRestServiceServer.createServer(iamRestTemplate);
     }
 
     public static String toJson(Object object) throws IOException {
@@ -238,25 +238,25 @@ public abstract class AbstractMoodiIntegrationTest {
                 .content(toJson(importCourseRequest)));
     }
 
-    protected final void expectFindStudentRequestToEsb(final String studentNumber, final String username) {
+    protected final void expectFindStudentRequestToIAM(final String studentNumber, final String username) {
         final String response = "[{\"username\":\"" + username + "\",\"studentNumber\":\"" + studentNumber + "\"}]";
-        expectFindStudentRequestToEsbWithResponse(studentNumber, response);
+        expectFindStudentRequestToIAMWithResponse(studentNumber, response);
     }
 
-    protected final void expectFindStudentRequestToEsbAndRespondWithEmptyResult(final String studentNumber) {
+    protected final void expectFindStudentRequestToIAMAndRespondWithEmptyResult(final String studentNumber) {
         final String response = "[]";
-        expectFindStudentRequestToEsbWithResponse(studentNumber, response);
+        expectFindStudentRequestToIAMWithResponse(studentNumber, response);
     }
 
-    protected final void expectFindEmployeeRequestToEsb(final String teacherId, final String username) {
+    protected final void expectFindEmployeeRequestToIAM(final String teacherId, final String username) {
         final String response = "[{\"username\":\"" + username + "\",\"personnelNumber\":\"" + teacherId + "\"}]";
-        esbMockServer.expect(requestTo("https://esbmt2.it.helsinki.fi/iam/findEmployee/" + teacherId))
+        iamMockServer.expect(requestTo("https://esbmt2.it.helsinki.fi/iam/findEmployee/" + teacherId))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
     }
 
-    private final void expectFindStudentRequestToEsbWithResponse(final String studentNumber, final String response) {
-        esbMockServer.expect(requestTo("https://esbmt2.it.helsinki.fi/iam/findStudent/" + studentNumber))
+    private final void expectFindStudentRequestToIAMWithResponse(final String studentNumber, final String response) {
+        iamMockServer.expect(requestTo("https://esbmt2.it.helsinki.fi/iam/findStudent/" + studentNumber))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
     }
@@ -338,6 +338,6 @@ public abstract class AbstractMoodiIntegrationTest {
         oodiMockServer.verify();
         moodleMockServer.verify();
         moodleReadOnlyMockServer.verify();
-        esbMockServer.verify();
+        iamMockServer.verify();
     }
 }
