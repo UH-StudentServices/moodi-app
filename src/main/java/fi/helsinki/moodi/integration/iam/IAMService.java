@@ -15,35 +15,31 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.integration.esb;
+package fi.helsinki.moodi.integration.iam;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Service
-public class EsbService {
-
-    private static final Logger LOGGER = getLogger(EsbService.class);
-
-    private final EsbClient esbClient;
+public class IAMService {
+    private final IAMClient iamClient;
 
     public static final String TEACHER_ID_PREFIX = "9";
     public static final String DOMAIN_SUFFIX = "@helsinki.fi";
 
     @Autowired
-    public EsbService(EsbClient esbClient) {
-        this.esbClient = esbClient;
+    public IAMService(IAMClient iamClient) {
+        this.iamClient = iamClient;
     }
 
     public List<String> getStudentUsernameList(final String studentNumber) {
-        List<String> usernameList = esbClient.getStudentUsernameList(studentNumber);
+        List<String> usernameList = iamClient.getStudentUsernameList(studentNumber);
 
         return usernameList.stream()
                 .map(this::appendDomain)
@@ -52,7 +48,7 @@ public class EsbService {
 
     public List<String> getTeacherUsernameList(final String teacherId) {
         final String normalizedTeacherId = TEACHER_ID_PREFIX + teacherId;
-        List<String> usernameList = esbClient.getTeacherUsernameList(normalizedTeacherId);
+        List<String> usernameList = iamClient.getTeacherUsernameList(normalizedTeacherId);
 
         return usernameList.stream()
                 .map(this::appendDomain)

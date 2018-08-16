@@ -18,7 +18,7 @@
 package fi.helsinki.moodi.web;
 
 import fi.helsinki.moodi.config.DevMode;
-import fi.helsinki.moodi.integration.esb.EsbService;
+import fi.helsinki.moodi.integration.iam.IAMService;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
 import fi.helsinki.moodi.integration.oodi.OodiService;
@@ -55,21 +55,21 @@ public class DevModeController {
 
     private final Environment environment;
     private final OodiService oodiService;
-    private final EsbService esbService;
+    private final IAMService iamService;
     private final MoodleService moodleService;
     private final SynchronizationService synchronizationService;
 
     @Autowired
     public DevModeController(
-            OodiService oodiService,
-            Environment environment,
-            EsbService esbService,
-            MoodleService moodleService,
-            SynchronizationService synchronizationService) {
+        OodiService oodiService,
+        Environment environment,
+        IAMService iamService,
+        MoodleService moodleService,
+        SynchronizationService synchronizationService) {
 
         this.oodiService = oodiService;
         this.environment = environment;
-        this.esbService = esbService;
+        this.iamService = iamService;
         this.moodleService = moodleService;
         this.synchronizationService = synchronizationService;
 
@@ -142,11 +142,11 @@ public class DevModeController {
         final OodiCourseUnitRealisation realisation = getOodiCourse(realisationId);
 
         final List<MoodleUser> students = realisation.students.stream()
-                .map(s -> new MoodleUser("student", s.firstNames, s.lastName, esbService.getStudentUsernameList(s.studentNumber).get(0), s.studentNumber))
+                .map(s -> new MoodleUser("student", s.firstNames, s.lastName, iamService.getStudentUsernameList(s.studentNumber).get(0), s.studentNumber))
                 .collect(Collectors.toList());
 
         final List<MoodleUser> teachers = realisation.teachers.stream()
-                .map(s -> new MoodleUser("teacher", s.firstNames, s.lastName, esbService.getTeacherUsernameList(s.teacherId).get(0), null))
+                .map(s -> new MoodleUser("teacher", s.firstNames, s.lastName, iamService.getTeacherUsernameList(s.teacherId).get(0), null))
                 .collect(Collectors.toList());
 
         final List<MoodleUser> users = new ArrayList<>();

@@ -10,6 +10,13 @@ spring:
   flyway:
     locations: classpath:db/migration/common,classpath:db/migration/psql
 
+integration:
+  moodle:
+    baseUrl: https://moodi-2-moodle.student.helsinki.fi/moodlecurrent
+    url: https://moodi-2-moodle.student.helsinki.fi/moodlecurrent/webservice/rest/server.php
+  oodi.url: https://esbmt2.it.helsinki.fi/secure/doo-oodi/dev/testdb
+  iam.mock: true
+
 dev.mode.enabled: true
 
 synchronize.FULL.enabled: false

@@ -11,13 +11,6 @@ management:
     health:
       enabled: true
 
-integration:
-  moodle:
-    baseUrl: https://moodi-2-moodle.student.helsinki.fi/moodlecurrent
-    url: https://moodi-2-moodle.student.helsinki.fi/moodlecurrent/webservice/rest/server.php
-  oodi.url: https://esbmt2.it.helsinki.fi/secure/doo-oodi/dev/testdb
-  esb.url: https://esbmt2.it.helsinki.fi
-
 httpClient:
   readTimeout: 15000
   connectTimeout: 3000

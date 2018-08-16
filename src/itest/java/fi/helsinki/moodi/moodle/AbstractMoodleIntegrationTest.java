@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
 
-import static fi.helsinki.moodi.integration.esb.EsbService.DOMAIN_SUFFIX;
-import static fi.helsinki.moodi.integration.esb.EsbService.TEACHER_ID_PREFIX;
+import static fi.helsinki.moodi.integration.iam.IAMService.DOMAIN_SUFFIX;
+import static fi.helsinki.moodi.integration.iam.IAMService.TEACHER_ID_PREFIX;
 import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
 import static java.lang.Math.abs;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -62,14 +62,14 @@ public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegra
     @Override
     public final void setUpMockServers() {
         oodiMockServer = MockRestServiceServer.createServer(oodiRestTemplate);
-        esbMockServer = MockRestServiceServer.createServer(esbRestTemplate);
+        iamMockServer = MockRestServiceServer.createServer(iamRestTemplate);
     }
 
     @After
     @Override
     public final void verify() {
         oodiMockServer.verify();
-        esbMockServer.verify();
+        iamMockServer.verify();
     }
 
     protected long getOodiCourseId() {
@@ -151,11 +151,11 @@ public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegra
                 MediaType.APPLICATION_JSON));
 
         for(StudentUser studentUser : students) {
-            expectFindStudentRequestToEsb(studentUser.studentNumber, studentUser.username);
+            expectFindStudentRequestToIAM(studentUser.studentNumber, studentUser.username);
         }
 
         for(TeacherUser teacherUser : teachers) {
-            expectFindEmployeeRequestToEsb(TEACHER_ID_PREFIX + teacherUser.teacherId, teacherUser.username);
+            expectFindEmployeeRequestToIAM(TEACHER_ID_PREFIX + teacherUser.teacherId, teacherUser.username);
         }
 
     }

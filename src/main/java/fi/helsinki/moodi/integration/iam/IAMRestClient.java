@@ -15,7 +15,7 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.integration.esb;
+package fi.helsinki.moodi.integration.iam;
 
 import fi.helsinki.moodi.exception.IntegrationConnectionException;
 import org.slf4j.Logger;
@@ -31,27 +31,27 @@ import java.util.stream.Collectors;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class EsbClient {
-    private static final Logger LOGGER = getLogger(EsbClient.class);
+public class IAMRestClient implements IAMClient {
+    private static final Logger LOGGER = getLogger(IAMRestClient.class);
 
     private final String baseUrl;
     private final RestTemplate restTemplate;
 
-    public EsbClient(String baseUrl, RestTemplate restTemplate) {
+    public IAMRestClient(String baseUrl, RestTemplate restTemplate) {
         this.baseUrl = baseUrl;
         this.restTemplate = restTemplate;
     }
 
-    @Cacheable(value="esb-client.student-username-by-student-number", unless="#result == null")
+    @Cacheable(value="iam-client.student-username-by-student-number", unless="#result == null")
     public List<String> getStudentUsernameList(final String studentNumber) {
         LOGGER.debug("Get student username by student number {}", studentNumber);
 
         try {
-            List<EsbStudent> result = restTemplate.exchange(
+            List<IAMStudent> result = restTemplate.exchange(
                 String.format("%s/iam/findStudent/%s", baseUrl, studentNumber),
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<List<EsbStudent>>() {})
+                new ParameterizedTypeReference<List<IAMStudent>>() {})
                 .getBody();
 
             if (result != null){
@@ -63,20 +63,20 @@ public class EsbClient {
                 return newArrayList();
             }
         } catch (ResourceAccessException e) {
-            throw new IntegrationConnectionException("ESB connection failure", e);
+            throw new IntegrationConnectionException("IAM connection failure", e);
         }
     }
 
-    @Cacheable(value="esb-client.teacher-username-by-teacher-id", unless="#result == null")
+    @Cacheable(value="iam-client.teacher-username-by-teacher-id", unless="#result == null")
     public List<String> getTeacherUsernameList(final String teacherId) {
         LOGGER.debug("Get teacher username by teacher id {}", teacherId);
 
         try {
-            List<EsbEmployee> result = restTemplate.exchange(
+            List<IAMEmployee> result = restTemplate.exchange(
                 String.format("%s/iam/findEmployee/%s", baseUrl, teacherId),
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<List<EsbEmployee>>() {})
+                new ParameterizedTypeReference<List<IAMEmployee>>() {})
                 .getBody();
 
             if (result != null) {
@@ -88,7 +88,7 @@ public class EsbClient {
                 return newArrayList();
             }
         } catch (ResourceAccessException e) {
-            throw new IntegrationConnectionException("ESB connection failure", e);
+            throw new IntegrationConnectionException("IAM connection failure", e);
         }
     }
 }
