@@ -19,41 +19,66 @@ package fi.helsinki.moodi.config;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fi.helsinki.moodi.integration.esb.EsbClient;
 import fi.helsinki.moodi.integration.http.LoggingInterceptor;
 import fi.helsinki.moodi.integration.http.RequestTimingInterceptor;
-import org.springframework.beans.factory.annotation.Autowired;
+import fi.helsinki.moodi.integration.iam.IAMClient;
+import fi.helsinki.moodi.integration.iam.IAMMockClient;
+import fi.helsinki.moodi.integration.iam.IAMRestClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 
 @Configuration
-public class EsbConfig {
+@PropertySource(value = {
+    "file:/opt/moodi/config/iammockusers.properties"
+}, ignoreResourceNotFound = true)
+public class IAMConfig {
 
-    @Autowired
-    private Environment environment;
+    @Value("${integration.iam.url:#{null}}")
+    private String baseUrl;
+
+    @Value("${integration.iam.mock:false}")
+    private boolean mockClientImplementation;
+
+    @Value("${integration.iam.users:#{null}}")
+    private String mockUsers;
 
     @Bean
-    public EsbClient esbClient() {
-        return new EsbClient(baseUrl(), esbRestTemplate());
+    public IAMClient iamClient() {
+        if (mockClientImplementation) {
+            return new IAMMockClient(getMockUsers());
+        } else {
+            return new IAMRestClient(baseUrl, iamRestTemplate());
+        }
+    }
+
+    private Map<String, String> getMockUsers() {
+        if (mockUsers != null) {
+            return newArrayList(mockUsers.split(","))
+                .stream()
+                .map(u -> u.split(":"))
+                .collect(Collectors.toMap(u -> u[0], u -> u[1]));
+        }
+
+        return new HashMap<>();
     }
 
     @Bean
-    public RestTemplate esbRestTemplate() {
+    public RestTemplate iamRestTemplate() {
         final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(objectMapper());
         RestTemplate restTemplate = new RestTemplate(Collections.singletonList(converter));
         restTemplate.setInterceptors(newArrayList(new LoggingInterceptor(), new RequestTimingInterceptor()));
         return restTemplate;
-    }
-
-    private String baseUrl() {
-        return environment.getRequiredProperty("integration.esb.url");
     }
 
     private ObjectMapper objectMapper() {

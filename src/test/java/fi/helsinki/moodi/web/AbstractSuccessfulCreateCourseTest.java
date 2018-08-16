@@ -92,9 +92,9 @@ public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIn
             COURSE_REALISATION_ID,
             withSuccess(Fixtures.asString("/oodi/course-realisation.json"), MediaType.APPLICATION_JSON));
 
-        expectFindStudentRequestToEsb("010342729", "niina");
-        expectFindStudentRequestToEsb("011119854", "jukka");
-        expectFindStudentRequestToEsb("011524656", "make");
-        expectFindEmployeeRequestToEsb("9110588", "hraopettaja");
+        expectFindStudentRequestToIAM("010342729", "niina");
+        expectFindStudentRequestToIAM("011119854", "jukka");
+        expectFindStudentRequestToIAM("011524656", "make");
+        expectFindEmployeeRequestToIAM("9110588", "hraopettaja");
     }
 }

@@ -19,7 +19,7 @@ package fi.helsinki.moodi.service.importing;
 
 public class EnrollmentWarning {
 
-    public static final String CODE_USER_NOT_FOUND_FROM_ESB = "user-not-found-from-esb";
+    public static final String CODE_USER_NOT_FOUND_FROM_IAM = "user-not-found-from-iam";
     public static final String CODE_USER_NOT_FOUND_FROM_MOODLE = "user-not-found-from-moodle";
     public static final String CODE_ENROLLMENT_FAILED = "enrollment-failed";
     public static final String CODE_USER_NOT_APPROVED = "user-not-approved";
@@ -35,8 +35,8 @@ public class EnrollmentWarning {
         this.enrollment = enrollment;
     }
 
-    public static EnrollmentWarning userNotFoundFromEsb(final Enrollment enrollment) {
-        return new EnrollmentWarning(CODE_USER_NOT_FOUND_FROM_ESB, enrollment);
+    public static EnrollmentWarning userNotFoundFromIAM(final Enrollment enrollment) {
+        return new EnrollmentWarning(CODE_USER_NOT_FOUND_FROM_IAM, enrollment);
     }
 
     public static EnrollmentWarning userNotFoundFromMoodle(final Enrollment enrollment) {

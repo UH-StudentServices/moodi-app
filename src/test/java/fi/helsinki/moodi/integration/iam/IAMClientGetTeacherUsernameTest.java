@@ -15,7 +15,7 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.integration.esb;
+package fi.helsinki.moodi.integration.iam;
 
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
@@ -33,30 +33,30 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-public class EsbClientGetTeacherUsernameTest extends AbstractMoodiIntegrationTest {
+public class IAMClientGetTeacherUsernameTest extends AbstractMoodiIntegrationTest {
 
     @Autowired
-    private EsbClient esbClient;
+    private IAMRestClient iamClient;
 
     @Test
     public void deserializeResponse() {
-        esbMockServer.expect(
+        iamMockServer.expect(
             requestTo("https://esbmt2.it.helsinki.fi/iam/findEmployee/19691981"))
             .andExpect(method(HttpMethod.GET))
-            .andRespond(withSuccess(Fixtures.asString("/esb/employee-username-19691981.json"),
+            .andRespond(withSuccess(Fixtures.asString("/iam/employee-username-19691981.json"),
                 MediaType.APPLICATION_JSON));
 
-        assertEquals(Arrays.asList("employee-username"), esbClient.getTeacherUsernameList("19691981"));
+        assertEquals(Arrays.asList("employee-username"), iamClient.getTeacherUsernameList("19691981"));
     }
 
     @Test
     public void thatEmptyTeacherResponseIsHandled() {
-        esbMockServer.expect(
+        iamMockServer.expect(
             requestTo("https://esbmt2.it.helsinki.fi/iam/findEmployee/007"))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess("", MediaType.APPLICATION_JSON));
 
-        assertNotNull(esbClient.getTeacherUsernameList("007"));
+        assertNotNull(iamClient.getTeacherUsernameList("007"));
     }
 
 }

@@ -17,7 +17,7 @@ integration:
     url: https://moodi-2-moodle.student.helsinki.fi/moodlecurrent/webservice/rest/server.php
     wstoken: xxxx1234
   oodi.url: https://esbmt2.it.helsinki.fi/doo-oodi/dev/testdb
-  esb.url: https://esbmt2.it.helsinki.fi
+  iam.url: https://esbmt2.it.helsinki.fi
 
 synchronize.FULL.enabled: true
 synchronize.INCREMENTAL.enabled: false
