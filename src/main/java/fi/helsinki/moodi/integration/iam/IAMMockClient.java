@@ -34,6 +34,7 @@ public class IAMMockClient implements IAMClient {
         String username = mockUsers.get(key);
 
         if (username != null) {
+            LOGGER.info("Username {} found for {}", username, key);
             return singletonList(username);
         } else {
             LOGGER.info("Username not found for {}", key);
