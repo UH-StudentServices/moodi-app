@@ -59,8 +59,8 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
 
         expectCreateCourseRequestToMoodle(COURSE_REALISATION_ID, MOODLE_COURSE_ID);
 
-        expectFindStudentRequestToEsb(STUDENT_NUMBER_1, ESB_USERNAME_1);
-        expectFindEmployeeRequestToEsb(TEACHER_ID, TEACHER_ESB_USERNAME);
+        expectFindStudentRequestToIAM(STUDENT_NUMBER_1, ESB_USERNAME_1);
+        expectFindEmployeeRequestToIAM(TEACHER_ID, TEACHER_ESB_USERNAME);
 
         expectGetUserRequestToMoodle(MOODLE_USERNAME_1, MOODLE_USER_ID_1);
         expectGetUserRequestToMoodle(TEACHER_MOODLE_USERNAME, TEACHER_MOODLE_USER_ID);
