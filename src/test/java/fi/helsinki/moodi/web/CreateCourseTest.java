@@ -17,6 +17,9 @@
 
 package fi.helsinki.moodi.web;
 
+import com.google.common.collect.Lists;
+import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
+import fi.helsinki.moodi.test.fixtures.Fixtures;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 
@@ -39,13 +42,6 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
     }
 
     @Test
-    public void successfulCreateCourseInvokesCorrectIntegrationServices() throws Exception {
-        setUpMockServerResponses();
-
-        makeCreateCourseRequest(COURSE_REALISATION_ID).andReturn();
-    }
-
-    @Test
     public void thatImportFailsIfOodiReturnsNullForData() throws Exception {
         testEmptyOodiResponse(NULL_DATA_RESPONSE);
     }
@@ -53,6 +49,29 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
     @Test
     public void thatImportFailsIfOodiReturnsEmptyString() throws Exception {
         testEmptyOodiResponse(EMPTY_OK_RESPONSE);
+    }
+
+    @Test
+    public void thatAutomaticEnabledCourseEnrollmentsAreMadeCorrectly() throws Exception {
+        expectGetCourseUnitRealisationRequestToOodi(
+            COURSE_REALISATION_ID,
+            withSuccess(Fixtures.asString("/oodi/course-realisation-automatic-enabled.json"), MediaType.APPLICATION_JSON));
+
+        expectCreateCourseRequestToMoodle(COURSE_REALISATION_ID, MOODLE_COURSE_ID);
+
+        expectFindStudentRequestToEsb(STUDENT_NUMBER_1, ESB_USERNAME_1);
+        expectFindEmployeeRequestToEsb(TEACHER_ID, TEACHER_ESB_USERNAME);
+
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_1, MOODLE_USER_ID_1);
+        expectGetUserRequestToMoodle(TEACHER_MOODLE_USERNAME, TEACHER_MOODLE_USER_ID);
+
+        expectEnrollmentsWithAddedMoodiRoles(Lists.newArrayList(
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_1, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getTeacherRoleId(), TEACHER_MOODLE_USER_ID, MOODLE_COURSE_ID)
+            ));
+
+        makeCreateCourseRequest(COURSE_REALISATION_ID)
+            .andExpect(status().isOk());
     }
 
     private void testEmptyOodiResponse(String response) throws Exception{
