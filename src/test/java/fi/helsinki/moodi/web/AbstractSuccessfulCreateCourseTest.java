@@ -102,10 +102,10 @@ public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIn
         expectGetCourseUnitRealisationRequestToOodi(
             COURSE_REALISATION_ID,
             withSuccess(Fixtures.asString("/oodi/course-realisation.json"), MediaType.APPLICATION_JSON));
-        
+
         expectFindStudentRequestToIAM(STUDENT_NUMBER_1, ESB_USERNAME_1);
         expectFindStudentRequestToIAM(STUDENT_NUMBER_2, ESB_USERNAME_2);
         expectFindStudentRequestToIAM(STUDENT_NUMBER_3, ESB_USERNAME_3);
-        expectFindStudentRequestToIAM(TEACHER_ID, TEACHER_ESB_USERNAME);
+        expectFindEmployeeRequestToIAM(TEACHER_ID, TEACHER_ESB_USERNAME);
     }
 }

@@ -148,7 +148,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
         SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
             .withOodiStudent(MOODLE_USER_ID, false, true, APPROVED_ENROLLMENT_STATUS_CODE)
             .withEmptyMoodleEnrollments()
-            .expectUserRequestsToESBAndMoodle()
+            .expectUserRequestsToIAMAndMoodle()
             .expectAddEnrollmentsToMoodleCourse(
                 studentEnrollment(),
                 moodiEnrollment()
@@ -163,7 +163,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
         SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
             .withOodiStudent(MOODLE_USER_ID, false, true, NON_APPROVED_ENROLLMENT_STATUS_CODE)
             .withEmptyMoodleEnrollments()
-            .expectUserRequestsToESBAndMoodle()
+            .expectUserRequestsToIAMAndMoodle()
             .expectAddEnrollmentsToMoodleCourse(
                 moodiEnrollment()
             )
@@ -255,7 +255,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             .withMoodleEnrollments(moodleUserEnrollments(
                 teacherRole(),
                 moodiRole()))
-            .expectUserRequestsToESBAndMoodle()
+            .expectUserRequestsToIAMAndMoodle()
             .expectAssignRolesToMoodleCourse(
                 true,
                 studentEnrollment()
@@ -334,7 +334,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             .withMoodleEnrollments(moodleUserEnrollments(
                 studentRole(),
                 moodiRole()))
-            .expectUserRequestsToESBAndMoodle()
+            .expectUserRequestsToIAMAndMoodle()
             .getSynchronizationItem();
 
         synchronizingProcessor.doProcess(item);
