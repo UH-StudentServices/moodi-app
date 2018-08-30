@@ -18,6 +18,8 @@
 package fi.helsinki.moodi.service.log;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import fi.helsinki.moodi.integration.oodi.OodiStudent;
+import fi.helsinki.moodi.integration.oodi.OodiTeacher;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
@@ -147,9 +149,8 @@ public class SynchronizationSummaryLog {
         public final UserSynchronizationItemStatus status;
         public final List<SyncronizationItemActionLogEntry> actions;
         public final Long moodleUserId;
-        public final String studentNumber;
-        public Boolean studentApproved;
-        public final String teacherId;
+        public final OodiStudent oodiStudent;
+        public final OodiTeacher oodiTeacher;
 
         public String moodleUsername;
         public List<Long> moodleRoleIds;
@@ -158,9 +159,8 @@ public class SynchronizationSummaryLog {
             this.status = item.getStatus();
             this.actions = item.getActions().stream().map(SyncronizationItemActionLogEntry::new).collect(Collectors.toList());
             this.moodleUserId = item.getMoodleUserId();
-            this.studentNumber = item.getOodiStudent() != null ? item.getOodiStudent().studentNumber : null;
-            this.studentApproved = item.getOodiStudent() != null ? item.getOodiStudent().approved : null;
-            this.teacherId = item.getOodiTeacher() != null ? item.getOodiTeacher().teacherId : null;
+            this.oodiStudent = item.getOodiStudent();
+            this.oodiTeacher = item.getOodiTeacher();
 
             if(item.getMoodleUserEnrollments() != null) {
                 this.moodleUsername = item.getMoodleUserEnrollments().username;
