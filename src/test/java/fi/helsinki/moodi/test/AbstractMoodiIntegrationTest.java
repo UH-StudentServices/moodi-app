@@ -67,6 +67,9 @@ public abstract class AbstractMoodiIntegrationTest {
     protected static final String NULL_OK_RESPONSE = "null";
     protected static final String NULL_DATA_RESPONSE = "{\"data\": null}";
 
+    protected static final int APPROVED_ENROLLMENT_STATUS_CODE = 3;
+    protected static final int NON_APPROVED_ENROLLMENT_STATUS_CODE = 10;
+
     private static final ObjectMapper testObjectMapper = new ObjectMapper();
 
     @Autowired
