@@ -130,14 +130,11 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
     }
 
     @Test
-    public void thatUserIsEnrolledWithOnlyMoodiRoleIfNotApproved() {
+    public void thatUserIsNotEnrolledWithOnlyMoodiRoleIfNotApproved() {
         SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
             .withOodiStudent(MOODLE_USER_ID, false)
             .withEmptyMoodleEnrollments()
             .expectUserRequestsToIAMAndMoodle()
-            .expectAddEnrollmentsToMoodleCourse(
-                moodiEnrollment()
-            )
             .getSynchronizationItem();
 
         synchronizingProcessor.doProcess(item);
@@ -159,14 +156,11 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
     }
 
     @Test
-    public void thatUserIsEnrolledWithOnlyMoodiRoleWhenAutomaticEnabledAndStatusCodeIsNotApproved() {
+    public void thatUserIsNotEnrolledWithOnlyMoodiRoleWhenAutomaticEnabledAndStatusCodeIsNotApproved() {
         SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
             .withOodiStudent(MOODLE_USER_ID, false, true, NON_APPROVED_ENROLLMENT_STATUS_CODE)
             .withEmptyMoodleEnrollments()
             .expectUserRequestsToIAMAndMoodle()
-            .expectAddEnrollmentsToMoodleCourse(
-                moodiEnrollment()
-            )
             .getSynchronizationItem();
 
         synchronizingProcessor.doProcess(item);
