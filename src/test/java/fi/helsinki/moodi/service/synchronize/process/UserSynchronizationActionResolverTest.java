@@ -57,12 +57,12 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
     }
 
     @Test
-    public void thatAddEnrollmentActionForMoodiRoleIsResolvedForUnApprovedStudent() {
+    public void thatNoAddEnrollmentActionForMoodiRoleIsResolvedForUnApprovedStudent() {
         UserSynchronizationItem item = getStudentUserSynchronizationItem(false);
 
         userSynchronizationActionResolver.enrichWithActions(item);
 
-        assertActions(item, ImmutableMap.of(ADD_ENROLLMENT, newArrayList(11L)));
+        assertActions(item, ImmutableMap.of());
     }
 
     @Test
