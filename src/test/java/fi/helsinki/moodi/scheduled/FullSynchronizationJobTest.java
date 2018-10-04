@@ -99,7 +99,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
     }
 
     @Test
-    public void thatUnApprovedStudentIsEnrolledToMoodleOnlyWithMoodiDefaultRole() {
+    public void thatUnApprovedStudentIsNotEnrolledToMoodle() {
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, false);
 
@@ -109,8 +109,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
         expectEnrollmentRequestToMoodle(
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
+            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID));
 
         job.execute();
     }

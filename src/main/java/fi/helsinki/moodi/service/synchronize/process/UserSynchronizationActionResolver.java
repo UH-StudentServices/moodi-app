@@ -54,13 +54,15 @@ public class UserSynchronizationActionResolver {
         return currentOodiRoles;
     }
 
-    private List<Long> addDefaultRole(List<Long> roles) {
-        roles.add(mapperService.getMoodiRoleId());
+    private List<Long> addDefaultRoleIfNotEmpty(List<Long> roles) {
+        if (roles.size() > 0) {
+            roles.add(mapperService.getMoodiRoleId());
+        }
         return roles;
     }
 
     private boolean roleCanBeRemoved(Long role) {
-        return role == mapperService.getStudentRoleId();
+       return role == mapperService.getStudentRoleId();
     }
 
     private List<Long> getCurrentMoodleRoles(UserSynchronizationItem item) {
@@ -109,7 +111,7 @@ public class UserSynchronizationActionResolver {
     }
 
     public UserSynchronizationItem enrichWithActions(final UserSynchronizationItem item) {
-        List<Long> currentRolesInOodiWithDefaultRole = addDefaultRole(getCurrentOodiRoles(item));
+        List<Long> currentRolesInOodiWithDefaultRole = addDefaultRoleIfNotEmpty(getCurrentOodiRoles(item));
         Long moodleUserId = item.getMoodleUserId();
 
         if (item.getMoodleUserEnrollments() != null) {
