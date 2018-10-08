@@ -87,7 +87,8 @@ public class SynchronizationSummaryLog {
         return items.stream().collect(Collectors.groupingBy(item -> item.status, Collectors.counting()));
     }
 
-    private static Map<UserSynchronizationItemStatus, List<UserSyncronizationItemLogEntry>> getEnrollmentResults(List<UserSyncronizationItemLogEntry> items) {
+    private static Map<UserSynchronizationItemStatus, List<UserSyncronizationItemLogEntry>> getEnrollmentResults(
+        List<UserSyncronizationItemLogEntry> items) {
         return items.stream().collect(Collectors.groupingBy(item -> item.status));
     }
 
@@ -162,7 +163,7 @@ public class SynchronizationSummaryLog {
             this.oodiStudent = item.getOodiStudent();
             this.oodiTeacher = item.getOodiTeacher();
 
-            if(item.getMoodleUserEnrollments() != null) {
+            if (item.getMoodleUserEnrollments() != null) {
                 this.moodleUsername = item.getMoodleUserEnrollments().username;
                 this.moodleRoleIds = item.getMoodleUserEnrollments().roles
                     .stream()

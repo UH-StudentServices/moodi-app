@@ -43,7 +43,7 @@ public class LockedSynchronizationItemMessageBuilder {
     }
 
     public SimpleMailMessage buildMessage(List<SynchronizationItem> lockedItems) {
-        if(from != null && to != null && subject != null) {
+        if (from != null && to != null && subject != null) {
             SimpleMailMessage mailMessage = new SimpleMailMessage();
 
             mailMessage.setFrom(from);

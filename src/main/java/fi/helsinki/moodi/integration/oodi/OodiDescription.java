@@ -17,7 +17,6 @@
 
 package fi.helsinki.moodi.integration.oodi;
 
-
 import com.google.common.collect.Lists;
 
 import java.util.List;

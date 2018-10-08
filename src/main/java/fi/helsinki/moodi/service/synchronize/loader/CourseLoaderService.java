@@ -45,7 +45,7 @@ public class CourseLoaderService {
     }
 
     /**
-     * Load courses by synchronization type
+     * Load courses by synchronization type.
      */
     public List<Course> load(final SynchronizationType type) {
         return courseLoadersByType.get(type).load();

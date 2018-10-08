@@ -127,7 +127,7 @@ public class MoodleClient {
         }
     }
 
-    @Cacheable(value="moodle-client.moodle-user-by-username", unless="#result == null")
+    @Cacheable(value = "moodle-client.moodle-user-by-username", unless = "#result == null")
     public MoodleUser getUser(final List<String> username) {
         final MultiValueMap<String, String> params = createParametersForFunction("core_user_get_users_by_field");
         params.set("field", "username");
@@ -216,8 +216,6 @@ public class MoodleClient {
         }
     }
 
-
-
     private <T> T handleException(final String message, final Exception e) {
         if (e instanceof MoodiException) {
             throw (MoodiException) e;
@@ -271,6 +269,7 @@ public class MoodleClient {
                 return null;
             case RETURN_BODY:
                 return (T) body;
+            default:
         }
 
         try {
@@ -296,7 +295,7 @@ public class MoodleClient {
             RETURN_BODY,
             RETURN_NULL,
             ERROR
-        };
+        }
 
         Action evaluate(String responseBody);
     }

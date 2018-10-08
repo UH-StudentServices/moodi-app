@@ -18,7 +18,7 @@
 package fi.helsinki.moodi.service.synchronize.loader;
 
 import fi.helsinki.moodi.service.course.Course;
-import fi.helsinki.moodi.service.syncLock.SyncLockService;
+import fi.helsinki.moodi.service.synclock.SyncLockService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

@@ -18,12 +18,10 @@
 package fi.helsinki.moodi.service.importing;
 
 import fi.helsinki.moodi.Constants;
-import fi.helsinki.moodi.exception.MissingOrganisationException;
 import fi.helsinki.moodi.integration.moodle.MoodleCourse;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
 import fi.helsinki.moodi.integration.oodi.OodiLocalizedValue;
 import fi.helsinki.moodi.service.util.MapperService;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

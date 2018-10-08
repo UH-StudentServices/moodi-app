@@ -43,11 +43,11 @@ public class UserSynchronizationActionResolver {
     private List<Long> getCurrentOodiRoles(UserSynchronizationItem item) {
         List<Long> currentOodiRoles = newArrayList();
 
-        if(item.getOodiStudent() != null && oodiStudentApprovalStatusResolver.isApproved(item.getOodiStudent())) {
+        if (item.getOodiStudent() != null && oodiStudentApprovalStatusResolver.isApproved(item.getOodiStudent())) {
             currentOodiRoles.add(mapperService.getStudentRoleId());
         }
 
-        if(item.getOodiTeacher() != null) {
+        if (item.getOodiTeacher() != null) {
             currentOodiRoles.add(mapperService.getTeacherRoleId());
         }
 
@@ -60,25 +60,25 @@ public class UserSynchronizationActionResolver {
     }
 
     private boolean roleCanBeRemoved(Long role) {
-       return role == mapperService.getStudentRoleId();
+        return role == mapperService.getStudentRoleId();
     }
 
     private List<Long> getCurrentMoodleRoles(UserSynchronizationItem item) {
-        if(item.getMoodleUserEnrollments() != null) {
+        if (item.getMoodleUserEnrollments() != null) {
             return item.getMoodleUserEnrollments().roles.stream()
-                .map(role-> role.roleId)
+                .map(role -> role.roleId)
                 .collect(Collectors.toList());
         }
 
         return null;
     }
 
-
     private List<UserSynchronizationAction> createEnrollmentActions(Long moodleUserId, List<Long> currentRolesInOodi) {
         return addAction(moodleUserId, currentRolesInOodi, UserSynchronizationActionType.ADD_ENROLLMENT, newArrayList());
     }
 
-    private List<UserSynchronizationAction> createRoleChangeActions(Long moodleUserId, List<Long> currentRolesInOodi, List<Long> currentRolesInMoodle) {
+    private List<UserSynchronizationAction> createRoleChangeActions(Long moodleUserId, List<Long> currentRolesInOodi,
+                                                                    List<Long> currentRolesInMoodle) {
         List<Long> rolesToAdd = difference(currentRolesInOodi, currentRolesInMoodle);
         List<Long> rolesToRemove = difference(currentRolesInMoodle, currentRolesInOodi).stream()
             .filter(this::roleCanBeRemoved)
@@ -96,21 +96,22 @@ public class UserSynchronizationActionResolver {
         return list1.stream().filter(item -> !list2.contains(item)).collect(Collectors.toList());
     }
 
-    private List<UserSynchronizationAction> addAction(Long moodleUserId, List<Long> roles, UserSynchronizationActionType type, List<UserSynchronizationAction> actions) {
-        if(roles.size() > 0) {
+    private List<UserSynchronizationAction> addAction(Long moodleUserId, List<Long> roles, UserSynchronizationActionType type,
+                                                      List<UserSynchronizationAction> actions) {
+        if (roles.size() > 0) {
             actions.add(new UserSynchronizationAction(type, roles, moodleUserId));
         }
         return actions;
     }
 
     public UserSynchronizationItem enrichWithActions(final UserSynchronizationItem item) {
-       List<Long> currentRolesInOodiWithDefaultRole = addDefaultRole(getCurrentOodiRoles(item));
-       Long moodleUserId = item.getMoodleUserId();
+        List<Long> currentRolesInOodiWithDefaultRole = addDefaultRole(getCurrentOodiRoles(item));
+        Long moodleUserId = item.getMoodleUserId();
 
-       if(item.getMoodleUserEnrollments() != null) {
-           return item.withActions(createRoleChangeActions(moodleUserId, currentRolesInOodiWithDefaultRole, getCurrentMoodleRoles(item)));
-       } else {
-           return item.withActions(createEnrollmentActions(moodleUserId, currentRolesInOodiWithDefaultRole));
-       }
+        if (item.getMoodleUserEnrollments() != null) {
+            return item.withActions(createRoleChangeActions(moodleUserId, currentRolesInOodiWithDefaultRole, getCurrentMoodleRoles(item)));
+        } else {
+            return item.withActions(createEnrollmentActions(moodleUserId, currentRolesInOodiWithDefaultRole));
+        }
     }
 }

@@ -53,7 +53,7 @@ public class LockedSynchronizationItemNotifier implements SynchronizationItemNot
             .filter(i -> i.getProcessingStatus().equals(ProcessingStatus.LOCKED))
             .collect(Collectors.toList());
 
-        if(lockedItems.size() > 0) {
+        if (lockedItems.size() > 0) {
             formatAndSendNotification(lockedItems);
         }
     }

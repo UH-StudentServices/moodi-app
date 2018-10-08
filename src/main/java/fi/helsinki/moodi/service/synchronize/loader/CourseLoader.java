@@ -31,12 +31,12 @@ import java.util.List;
 public interface CourseLoader {
 
     /**
-     * Get list of courses to synchronize
+     * Get list of courses to synchronize.
      */
     List<Course> load();
 
     /**
-     * Get type
+     * Get type.
      */
     SynchronizationType getType();
 }

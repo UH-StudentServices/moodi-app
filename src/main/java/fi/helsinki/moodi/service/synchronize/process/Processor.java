@@ -32,7 +32,8 @@ public interface Processor {
     SynchronizationItem process(SynchronizationItem item);
 
     /**
-     * @return What action this processor can perform
+     * Returns action.
+     * @return What action this processor can perform.
      */
     Action getAction();
 }

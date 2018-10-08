@@ -50,7 +50,6 @@ public class SynchronizationService {
     private final LoggingService loggingService;
     private final List<SynchronizationItemNotifier> notifiers;
 
-
     @Autowired
     public SynchronizationService(
             EnricherService enricherService,
@@ -70,7 +69,7 @@ public class SynchronizationService {
 
     public SynchronizationSummary synchronize(final SynchronizationType type) {
 
-        if(synchronizationJobRunService.isSynchronizationInProgress()) {
+        if (synchronizationJobRunService.isSynchronizationInProgress()) {
             throw new SynchronizationInProgressException(type);
         }
 
