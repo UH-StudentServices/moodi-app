@@ -169,22 +169,14 @@ public abstract class AbstractMoodiIntegrationTest {
         expectEnrollmentRequestToMoodleWithResponse(response, coreFunctionName, this::enrollUsersPartsBuilder, enrollments);
     }
 
-    private void expectEnrollmentRequestToMoodleWithResponse(String response, String coreFunctionName,
-                                                             BiFunction<MoodleEnrollment, Integer, Stream<String>> partsBuilder,
-                                                             MoodleEnrollment... enrollments) {
-        String partsSring = IntStream
-            .range(0, enrollments.length)
-            .mapToObj(index -> index)
-            .flatMap(index -> partsBuilder.apply(enrollments[index], index))
-            .collect(Collectors.joining("&"));
+    protected final void expectUnEnrollmentRequestToMoodle(final MoodleEnrollment... enrollments) {
+        expectUnEnrollmentRequestToMoodleWithResponse(EMPTY_OK_RESPONSE, enrollments);
+    }
 
-        final String payload = String.format("wstoken=xxxx1234&wsfunction=%s&moodlewsrestformat=json&%s", coreFunctionName, partsSring);
+    protected final void expectUnEnrollmentRequestToMoodleWithResponse(String response, final MoodleEnrollment... enrollments) {
+        final String coreFunctionName = "enrol_manual_unenrol_users";
+        expectEnrollmentRequestToMoodleWithResponse(response, coreFunctionName, this::unEnrollUsersPartsBuilder, enrollments);
 
-        moodleMockServer.expect(requestTo(getMoodleRestUrl()))
-            .andExpect(method(HttpMethod.POST))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
-            .andExpect(content().string(payload))
-            .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
     }
 
     protected final void expectAssignRolesToMoodle(boolean isAssign, MoodleEnrollment... enrollments) {
@@ -206,6 +198,14 @@ public abstract class AbstractMoodiIntegrationTest {
             createEnrollmentRequestPart(property, "userid", String.valueOf(enrollment.moodleUserId), index));
     }
 
+    private Stream<String> unEnrollUsersPartsBuilder(MoodleEnrollment enrollment, int index) {
+        final String property = "enrolments";
+
+        return Stream.of(
+            createEnrollmentRequestPart(property, "courseid", String.valueOf(enrollment.moodleCourseId), index),
+            createEnrollmentRequestPart(property, "userid", String.valueOf(enrollment.moodleUserId), index));
+    }
+
     private Stream<String> updateRolesPartsBuilder(MoodleEnrollment enrollment, int index, String property) {
         return Stream.of(
             createEnrollmentRequestPart(property, "userid", String.valueOf(enrollment.moodleUserId), index),
@@ -220,6 +220,24 @@ public abstract class AbstractMoodiIntegrationTest {
 
     private Stream<String> unAssignRolesPartsBuilder(MoodleEnrollment enrollment, int index) {
         return updateRolesPartsBuilder(enrollment, index, "unassignments");
+    }
+
+    private void expectEnrollmentRequestToMoodleWithResponse(String response, String coreFunctionName,
+                                                 BiFunction<MoodleEnrollment, Integer, Stream<String>> partsBuilder,
+                                                 MoodleEnrollment... enrollments) {
+        String partsSring = IntStream
+            .range(0, enrollments.length)
+            .mapToObj(index -> index)
+            .flatMap(index -> partsBuilder.apply(enrollments[index], index))
+            .collect(Collectors.joining("&"));
+
+        final String payload = String.format("wstoken=xxxx1234&wsfunction=%s&moodlewsrestformat=json&%s", coreFunctionName, partsSring);
+
+        moodleMockServer.expect(requestTo(getMoodleRestUrl()))
+            .andExpect(method(HttpMethod.POST))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
+            .andExpect(content().string(payload))
+            .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
     }
 
     private String createEnrollmentRequestPart(String property, String childProperty, String value, int index) {
