@@ -57,7 +57,7 @@ public class UserSynchronizationActionResolver {
     }
 
     private Set<Long> addDefaultRoleIfNotEmpty(Set<Long> roles) {
-        if(roles.size()>0) {
+        if (roles.size() > 0) {
             roles.add(mapperService.getMoodiRoleId());
         }
         return roles;
@@ -68,21 +68,21 @@ public class UserSynchronizationActionResolver {
     }
 
     private Set<Long> getCurrentMoodleRoles(UserSynchronizationItem item) {
-        if(item.getMoodleUserEnrollments() != null) {
+        if (item.getMoodleUserEnrollments() != null) {
             return item.getMoodleUserEnrollments().roles.stream()
-                .map(role-> role.roleId)
+                .map(role -> role.roleId)
                 .collect(Collectors.toSet());
         }
 
         return null;
     }
 
-
     private List<UserSynchronizationAction> createEnrollmentActions(Long moodleUserId, Set<Long> currentRolesInOodi) {
         return addAction(moodleUserId, currentRolesInOodi, UserSynchronizationActionType.ADD_ENROLLMENT, newArrayList());
     }
 
-    private List<UserSynchronizationAction> createRoleChangeAndUnEnrollActions(Long moodleUserId, Set<Long> currentRolesInOodi, Set<Long> currentRolesInMoodle) {
+    private List<UserSynchronizationAction> createRoleChangeAndUnEnrollActions(Long moodleUserId, Set<Long> currentRolesInOodi,
+                                                                               Set<Long> currentRolesInMoodle) {
         Set<Long> rolesToAdd = difference(currentRolesInOodi, currentRolesInMoodle);
         Set<Long> rolesToRemove = difference(currentRolesInMoodle, currentRolesInOodi).stream()
             .filter(this::roleCanBeRemoved)
@@ -94,7 +94,7 @@ public class UserSynchronizationActionResolver {
 
         boolean unEnroll = rolesToAdd.size() == 0 && currentRolesInMoodle.size() - rolesToRemove.size() == 1;
 
-        if(unEnroll) {
+        if (unEnroll) {
             addAction(moodleUserId, Sets.newHashSet(mapperService.getMoodiRoleId()), UserSynchronizationActionType.REMOVE_ENROLLMENT, actions);
         } else {
             addAction(moodleUserId, rolesToRemove, UserSynchronizationActionType.REMOVE_ROLES, actions);
@@ -107,21 +107,22 @@ public class UserSynchronizationActionResolver {
         return list1.stream().filter(item -> !list2.contains(item)).collect(Collectors.toSet());
     }
 
-    private List<UserSynchronizationAction> addAction(Long moodleUserId, Set<Long> roles, UserSynchronizationActionType type, List<UserSynchronizationAction> actions) {
-        if(type == UserSynchronizationActionType.REMOVE_ENROLLMENT || roles.size() > 0) {
+    private List<UserSynchronizationAction> addAction(Long moodleUserId, Set<Long> roles, UserSynchronizationActionType type,
+                                                      List<UserSynchronizationAction> actions) {
+        if (type == UserSynchronizationActionType.REMOVE_ENROLLMENT || roles.size() > 0) {
             actions.add(new UserSynchronizationAction(type, roles, moodleUserId));
         }
         return actions;
     }
 
     public UserSynchronizationItem enrichWithActions(final UserSynchronizationItem item) {
-       Set<Long> currentRolesInOodiWithDefaultRole = addDefaultRoleIfNotEmpty(getCurrentOodiRoles(item));
-       Long moodleUserId = item.getMoodleUserId();
+        Set<Long> currentRolesInOodiWithDefaultRole = addDefaultRoleIfNotEmpty(getCurrentOodiRoles(item));
+        Long moodleUserId = item.getMoodleUserId();
 
-       if(item.getMoodleUserEnrollments() != null) {
-           return item.withActions(createRoleChangeAndUnEnrollActions(moodleUserId, currentRolesInOodiWithDefaultRole, getCurrentMoodleRoles(item)));
-       } else {
-           return item.withActions(createEnrollmentActions(moodleUserId, currentRolesInOodiWithDefaultRole));
-       }
+        if (item.getMoodleUserEnrollments() != null) {
+            return item.withActions(createRoleChangeAndUnEnrollActions(moodleUserId, currentRolesInOodiWithDefaultRole, getCurrentMoodleRoles(item)));
+        } else {
+            return item.withActions(createEnrollmentActions(moodleUserId, currentRolesInOodiWithDefaultRole));
+        }
     }
 }

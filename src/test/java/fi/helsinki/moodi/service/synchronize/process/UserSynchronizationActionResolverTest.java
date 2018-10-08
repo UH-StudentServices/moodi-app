@@ -28,7 +28,6 @@ import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -136,7 +135,6 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
         assertActions(item, ImmutableMap.of(ADD_ROLES, newArrayList(11L)));
     }
 
-
     @Test
     public void thatStudentRoleIsRemoved() {
         UserSynchronizationItem item = getStudentUserSynchronizationItem(false);
@@ -224,5 +222,4 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
         moodleUser.id = MOODLE_USER_ID;
         return moodleUser;
     }
-
 }

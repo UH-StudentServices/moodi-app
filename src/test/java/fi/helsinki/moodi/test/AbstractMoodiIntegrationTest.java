@@ -169,6 +169,24 @@ public abstract class AbstractMoodiIntegrationTest {
         expectEnrollmentRequestToMoodleWithResponse(response, coreFunctionName, this::enrollUsersPartsBuilder, enrollments);
     }
 
+    private void expectEnrollmentRequestToMoodleWithResponse(String response, String coreFunctionName,
+                                                             BiFunction<MoodleEnrollment, Integer, Stream<String>> partsBuilder,
+                                                             MoodleEnrollment... enrollments) {
+        String partsSring = IntStream
+            .range(0, enrollments.length)
+            .mapToObj(index -> index)
+            .flatMap(index -> partsBuilder.apply(enrollments[index], index))
+            .collect(Collectors.joining("&"));
+
+        final String payload = String.format("wstoken=xxxx1234&wsfunction=%s&moodlewsrestformat=json&%s", coreFunctionName, partsSring);
+
+        moodleMockServer.expect(requestTo(getMoodleRestUrl()))
+            .andExpect(method(HttpMethod.POST))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
+            .andExpect(content().string(payload))
+            .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
+    }
+    
     protected final void expectUnEnrollmentRequestToMoodle(final MoodleEnrollment... enrollments) {
         expectUnEnrollmentRequestToMoodleWithResponse(EMPTY_OK_RESPONSE, enrollments);
     }
@@ -220,24 +238,6 @@ public abstract class AbstractMoodiIntegrationTest {
 
     private Stream<String> unAssignRolesPartsBuilder(MoodleEnrollment enrollment, int index) {
         return updateRolesPartsBuilder(enrollment, index, "unassignments");
-    }
-
-    private void expectEnrollmentRequestToMoodleWithResponse(String response, String coreFunctionName,
-                                                 BiFunction<MoodleEnrollment, Integer, Stream<String>> partsBuilder,
-                                                 MoodleEnrollment... enrollments) {
-        String partsSring = IntStream
-            .range(0, enrollments.length)
-            .mapToObj(index -> index)
-            .flatMap(index -> partsBuilder.apply(enrollments[index], index))
-            .collect(Collectors.joining("&"));
-
-        final String payload = String.format("wstoken=xxxx1234&wsfunction=%s&moodlewsrestformat=json&%s", coreFunctionName, partsSring);
-
-        moodleMockServer.expect(requestTo(getMoodleRestUrl()))
-            .andExpect(method(HttpMethod.POST))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
-            .andExpect(content().string(payload))
-            .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
     }
 
     private String createEnrollmentRequestPart(String property, String childProperty, String value, int index) {
