@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SkippingProcessor extends AbstractProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SkippingProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(SkippingProcessor.class);
 
     public SkippingProcessor() {
         super(Action.SKIP);
@@ -41,6 +41,6 @@ public class SkippingProcessor extends AbstractProcessor {
 
     @Override
     protected Logger getLogger() {
-        return LOGGER;
+        return logger;
     }
 }

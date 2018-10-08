@@ -28,13 +28,13 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public class IAMMockClient implements IAMClient {
 
-    private static final Logger LOGGER = getLogger(IAMMockClient.class);
+    private static final Logger logger = getLogger(IAMMockClient.class);
 
     private final Map<String, String> mockUsers;
 
     public IAMMockClient(Map<String, String> mockUsers) {
         this.mockUsers = mockUsers;
-        LOGGER.info("--- Using mock IAM client! ---");
+        logger.info("--- Using mock IAM client! ---");
     }
 
     @Override
@@ -51,10 +51,10 @@ public class IAMMockClient implements IAMClient {
         String username = mockUsers.get(key);
 
         if (username != null) {
-            LOGGER.info("Username {} found for {}", username, key);
+            logger.info("Username {} found for {}", username, key);
             return singletonList(username);
         } else {
-            LOGGER.info("Username not found for {}", key);
+            logger.info("Username not found for {}", key);
             return new ArrayList<>();
         }
     }

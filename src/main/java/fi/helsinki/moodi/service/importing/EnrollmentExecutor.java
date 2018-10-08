@@ -49,7 +49,7 @@ public class EnrollmentExecutor {
 
     private static final int ENROLLMENT_BATCH_MAX_SIZE = 300;
 
-    private static final Logger LOGGER = getLogger(EnrollmentExecutor.class);
+    private static final Logger logger = getLogger(EnrollmentExecutor.class);
 
     private final MoodleService moodleService;
     private final IAMService iamService;
@@ -83,7 +83,7 @@ public class EnrollmentExecutor {
                                    final long moodleCourseId) {
         try {
 
-            LOGGER.info("Enrollment executor started for realisationId {} ", course.realisationId);
+            logger.info("Enrollment executor started for realisationId {} ", course.realisationId);
 
             final Stopwatch stopwatch = Stopwatch.createStarted();
 
@@ -104,11 +104,11 @@ public class EnrollmentExecutor {
 
             loggingService.logCourseImportEnrollments(course, enrollmentsWithMoodleIds, enrollmentWarnings);
 
-            LOGGER.info("Enrollment executor for realisationId {} finished in {}", course.realisationId, stopwatch.stop().toString());
+            logger.info("Enrollment executor for realisationId {} finished in {}", course.realisationId, stopwatch.stop().toString());
 
         } catch (Exception e) {
             courseService.completeCourseImport(course.realisationId, false);
-            LOGGER.error("Enrollment execution failed for course " + course.realisationId);
+            logger.error("Enrollment execution failed for course " + course.realisationId);
             e.printStackTrace();
         }
     }
@@ -224,12 +224,12 @@ public class EnrollmentExecutor {
         final long teacherCount = countEnrollmentsByRole(enrollmentsWithMoodleIds, Enrollment.ROLE_TEACHER);
         final long studentCount = countEnrollmentsByRole(enrollmentsWithMoodleIds, Enrollment.ROLE_STUDENT);
 
-        LOGGER.info("About to enroll {} teacher(s) and {} students", teacherCount, studentCount);
+        logger.info("About to enroll {} teacher(s) and {} students", teacherCount, studentCount);
 
         if (enrollToCourse(courseId, enrollmentsWithMoodleIds)) {
-            LOGGER.info("Successfully enrolled {} teacher(s) and {} student(s)", teacherCount, studentCount);
+            logger.info("Successfully enrolled {} teacher(s) and {} student(s)", teacherCount, studentCount);
         } else {
-            LOGGER.warn("Failed to enroll {} teacher(s) and {} student(s)", teacherCount, studentCount);
+            logger.warn("Failed to enroll {} teacher(s) and {} student(s)", teacherCount, studentCount);
             enrollmentsWithMoodleIds
                     .stream()
                     .map(EnrollmentWarning::enrollFailed)
@@ -249,7 +249,7 @@ public class EnrollmentExecutor {
             moodleService.addEnrollments(moodleEnrollments);
             return true;
         } catch (Exception e) {
-            LOGGER.error("An error occurred while enrolling", e);
+            logger.error("An error occurred while enrolling", e);
             return false;
         }
     }

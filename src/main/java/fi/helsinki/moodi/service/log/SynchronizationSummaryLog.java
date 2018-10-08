@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 @JsonIgnoreProperties("fullSummary")
 public class SynchronizationSummaryLog {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SynchronizationSummaryLog.class);
+    private static final Logger logger = LoggerFactory.getLogger(SynchronizationSummaryLog.class);
 
     private final SynchronizationSummary fullSummary;
 
@@ -79,7 +79,7 @@ public class SynchronizationSummaryLog {
                 item.getMessage()
             );
         } catch (Exception e) {
-            LOGGER.error("Could not create log entry for synchronizationItem", e);
+            logger.error("Could not create log entry for synchronizationItem", e);
             return null;
         }
     }

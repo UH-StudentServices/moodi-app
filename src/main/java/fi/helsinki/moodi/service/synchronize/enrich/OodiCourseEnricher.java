@@ -35,7 +35,7 @@ import static fi.helsinki.moodi.util.DateFormat.OODI_UTC_DATE_FORMAT;
 @Component
 public class OodiCourseEnricher extends AbstractEnricher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OodiCourseEnricher.class);
+    private static final Logger logger = LoggerFactory.getLogger(OodiCourseEnricher.class);
 
     private final OodiService oodiService;
 
@@ -69,7 +69,7 @@ public class OodiCourseEnricher extends AbstractEnricher {
 
     @Override
     protected Logger getLogger() {
-        return LOGGER;
+        return logger;
     }
 
     private boolean isCourseEnded(OodiCourseUsers oodiCourse) {
