@@ -45,7 +45,6 @@ public class OodiClientGetCourseUnitRealisationTest extends AbstractMoodiIntegra
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(Fixtures.asString("/oodi/course-realisation.json"), MediaType.APPLICATION_JSON));
 
-
         final Optional<OodiCourseUnitRealisation> cur = oodiClient.getCourseUnitRealisation(102374742);
         assertOodiCourseUnitRealisation(cur);
     }

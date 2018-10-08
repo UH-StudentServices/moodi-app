@@ -32,7 +32,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIntegrationTest {
 
     protected static final long COURSE_REALISATION_ID = 102374742L;
-    protected final static long MOODLE_COURSE_ID = 988888L;
+    protected static final  long MOODLE_COURSE_ID = 988888L;
     protected static final long MOODLE_USER_ID_1 = 1L;
     protected static final long MOODLE_USER_ID_2 = 2L;
     protected static final long MOODLE_USER_ID_3 = 3L;
@@ -52,7 +52,6 @@ public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIn
     protected static final String ESB_USERNAME_2 = "jukka";
     protected static final String ESB_USERNAME_3 = "make";
     protected static final String TEACHER_ESB_USERNAME = "hraopettaja";
-
 
     protected void setUpMockServerResponses() {
 

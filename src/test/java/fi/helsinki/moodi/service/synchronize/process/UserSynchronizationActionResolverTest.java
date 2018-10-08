@@ -144,7 +144,6 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
         assertActions(item, ImmutableMap.of(REMOVE_ROLES, newArrayList(5L)));
     }
 
-
     @Test
     public void thatTeacherRoleIsNeverRemoved() {
         UserSynchronizationItem item = getStudentUserSynchronizationItem(true);
@@ -172,7 +171,7 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
 
         assertEquals(expectedActions.size(), actions.size());
 
-        for(UserSynchronizationActionType actionType : expectedActions) {
+        for (UserSynchronizationActionType actionType : expectedActions) {
             UserSynchronizationAction action = findActionByType(actionType, actions);
             List<Long> roles = action.getRoles();
             List<Long> expectedRoles = expectedActionsForRoles.get(actionType);
@@ -207,12 +206,10 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
         return new OodiTeacher();
     }
 
-
     private MoodleUser getMoodleUser() {
         MoodleUser moodleUser = new MoodleUser();
         moodleUser.id = MOODLE_USER_ID;
         return moodleUser;
     }
-
 
 }

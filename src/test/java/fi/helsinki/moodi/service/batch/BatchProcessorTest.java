@@ -17,7 +17,6 @@
 
 package fi.helsinki.moodi.service.batch;
 
-
 import org.junit.Test;
 
 import java.util.List;
@@ -53,7 +52,7 @@ public class BatchProcessorTest {
     private List<BatchItem> createBatchItems(final int numItems) {
         List<BatchItem> batchItems = newArrayList();
 
-        for(int i = 0; i < numItems; i++) {
+        for (int i = 0; i < numItems; i++) {
             batchItems.add(new BatchItem(false));
         }
 

@@ -19,7 +19,7 @@ package fi.helsinki.moodi.scheduled;
 
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
-import fi.helsinki.moodi.service.syncLock.SyncLockService;
+import fi.helsinki.moodi.service.synclock.SyncLockService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
