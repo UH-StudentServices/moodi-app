@@ -71,7 +71,7 @@ public abstract class AbstractMoodiIntegrationTest {
     protected static final int APPROVED_ENROLLMENT_STATUS_CODE = 3;
     protected static final int NON_APPROVED_ENROLLMENT_STATUS_CODE = 10;
 
-    private static final ObjectMapper TEST_OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper testObjectMapper = new ObjectMapper();
 
     @Autowired
     private WebApplicationContext context;
@@ -157,7 +157,7 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     public static String toJson(Object object) throws IOException {
-        return TEST_OBJECT_MAPPER.writeValueAsString(object);
+        return testObjectMapper.writeValueAsString(object);
     }
 
     protected final void expectEnrollmentRequestToMoodle(final MoodleEnrollment... enrollments) {
@@ -186,7 +186,7 @@ public abstract class AbstractMoodiIntegrationTest {
             .andExpect(content().string(payload))
             .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
     }
-    
+
     protected final void expectUnEnrollmentRequestToMoodle(final MoodleEnrollment... enrollments) {
         expectUnEnrollmentRequestToMoodleWithResponse(EMPTY_OK_RESPONSE, enrollments);
     }

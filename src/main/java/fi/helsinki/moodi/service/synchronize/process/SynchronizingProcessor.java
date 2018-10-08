@@ -60,7 +60,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
     private static final String THRESHOLD_EXCEEDED_MESSAGE = "Action %s for %s items exceeds threshold";
     private static final String PREVENT_ACTION_ON_ALL_MESSAGE = "Action %s is not permitted for all items";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SynchronizingProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(SynchronizingProcessor.class);
 
     private final IAMService iamService;
     private final MapperService mapperService;
@@ -166,7 +166,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
                 .collect(Collectors.toList());
 
         } catch (Exception e) {
-            LOGGER.error(String.format("Error when executing action %s", e));
+            logger.error(String.format("Error when executing action %s", e));
             return actions.stream()
                 .map(UserSynchronizationAction::withErrorStatus)
                 .collect(Collectors.toList());
@@ -299,7 +299,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
     @Override
     protected Logger getLogger() {
-        return LOGGER;
+        return logger;
     }
 
 }

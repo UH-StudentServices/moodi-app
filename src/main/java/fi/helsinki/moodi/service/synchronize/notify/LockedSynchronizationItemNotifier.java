@@ -33,7 +33,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Component
 public class LockedSynchronizationItemNotifier implements SynchronizationItemNotifier {
 
-    private static final Logger LOGGER = getLogger(LockedSynchronizationItemNotifier.class);
+    private static final Logger logger = getLogger(LockedSynchronizationItemNotifier.class);
 
     private final MailSender mailSender;
     private final LockedSynchronizationItemMessageBuilder lockedSynchronizationItemMessageBuilder;
@@ -63,10 +63,10 @@ public class LockedSynchronizationItemNotifier implements SynchronizationItemNot
             SimpleMailMessage mailMessage = lockedSynchronizationItemMessageBuilder.buildMessage(lockedItems);
             mailSender.send(mailMessage);
 
-            LOGGER.info("Sent mail notification for locked items:");
-            LOGGER.info(mailMessage.toString());
+            logger.info("Sent mail notification for locked items:");
+            logger.info(mailMessage.toString());
         } catch (Exception e) {
-            LOGGER.error("Error when sending locked notification email", e);
+            logger.error("Error when sending locked notification email", e);
         }
     }
 }

@@ -32,7 +32,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class IAMRestClient implements IAMClient {
-    private static final Logger LOGGER = getLogger(IAMRestClient.class);
+    private static final Logger logger = getLogger(IAMRestClient.class);
 
     private final String baseUrl;
     private final RestTemplate restTemplate;
@@ -44,7 +44,7 @@ public class IAMRestClient implements IAMClient {
 
     @Cacheable(value = "iam-client.student-username-by-student-number", unless = "#result == null")
     public List<String> getStudentUsernameList(final String studentNumber) {
-        LOGGER.debug("Get student username by student number {}", studentNumber);
+        logger.debug("Get student username by student number {}", studentNumber);
 
         try {
             List<IAMStudent> result = restTemplate.exchange(
@@ -69,7 +69,7 @@ public class IAMRestClient implements IAMClient {
 
     @Cacheable(value = "iam-client.teacher-username-by-teacher-id", unless = "#result == null")
     public List<String> getTeacherUsernameList(final String teacherId) {
-        LOGGER.debug("Get teacher username by teacher id {}", teacherId);
+        logger.debug("Get teacher username by teacher id {}", teacherId);
 
         try {
             List<IAMEmployee> result = restTemplate.exchange(

@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class LockStatusEnricher extends AbstractEnricher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LockStatusEnricher.class);
+    private static final Logger logger = LoggerFactory.getLogger(LockStatusEnricher.class);
 
     private final SyncLockService syncLockService;
 
@@ -53,6 +53,6 @@ public class LockStatusEnricher extends AbstractEnricher {
 
     @Override
     protected Logger getLogger() {
-        return LOGGER;
+        return logger;
     }
 }

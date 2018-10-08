@@ -48,7 +48,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegrationTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMoodiIntegrationTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractMoodiIntegrationTest.class);
 
     protected static final long REALISATION_ID = 12345;
     protected static final int MOODLE_COURSE_ID = 54321;
@@ -147,7 +147,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
     }
 
     protected SynchronizationSummary testTresholdCheckFailed(String expectedMessage) {
-        LOGGER.info("Testing synchronizationSummary with " +
+        logger.info("Testing synchronizationSummary with " +
                 "properties syncTresholds.REMOVE_ROLES.preventAll: {}, syncTresholds.REMOVE_ROLES.limit: {}",
             environment.getProperty("syncTresholds.REMOVE_ROLES.preventAll"),
             environment.getProperty("syncTresholds.REMOVE_ROLES.limit"));

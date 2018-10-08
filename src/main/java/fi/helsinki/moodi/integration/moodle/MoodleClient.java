@@ -41,7 +41,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public class MoodleClient {
 
-    private static final Logger LOGGER = getLogger(MoodleClient.class);
+    private static final Logger logger = getLogger(MoodleClient.class);
 
     private final String baseUrl;
     private final RestTemplate restTemplate;
@@ -269,12 +269,12 @@ public class MoodleClient {
             final boolean readOnly)
             throws IOException {
 
-        LOGGER.info("Invoke url: {} with params: {}", baseUrl, paramsToString(params));
+        logger.info("Invoke url: {} with params: {}", baseUrl, paramsToString(params));
 
         final String body = getRestTemplate(readOnly)
             .postForObject(baseUrl, new HttpEntity<>(params, createHeaders()), String.class);
 
-        LOGGER.debug("Got response body:\n{}", body);
+        logger.debug("Got response body:\n{}", body);
 
         switch (responseBodyEvaluator.evaluate(body)) {
             case CONTINUE:
@@ -298,7 +298,7 @@ public class MoodleClient {
     }
 
     private MoodleClientException createMoodleClientException(final String body) throws IOException {
-        LOGGER.error("Got unexpected response body " + body);
+        logger.error("Got unexpected response body " + body);
         final Map<String, String> map = objectMapper.readValue(body, Map.class);
         return new MoodleClientException(map.get("message"), map.get("exception"), map.get("errorcode"));
     }

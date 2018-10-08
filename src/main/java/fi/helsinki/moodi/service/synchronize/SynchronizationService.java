@@ -41,7 +41,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Service
 public class SynchronizationService {
 
-    private static final Logger LOGGER = getLogger(SynchronizationService.class);
+    private static final Logger logger = getLogger(SynchronizationService.class);
 
     private final EnricherService enricherService;
     private final ProcessorService processorService;
@@ -76,7 +76,7 @@ public class SynchronizationService {
         final Stopwatch stopwatch = Stopwatch.createStarted();
         final long jobId  = begin(type);
 
-        LOGGER.info("Synchronization of type {} started with jobId {}", type, jobId);
+        logger.info("Synchronization of type {} started with jobId {}", type, jobId);
 
         final List<Course> courses = loadCourses(type);
         final List<SynchronizationItem> items = makeItems(courses, type);
@@ -85,7 +85,7 @@ public class SynchronizationService {
 
         final SynchronizationSummary summary = complete(type, jobId, stopwatch, processedItems);
 
-        LOGGER.info("Synchronization with jobId {} completed in {}", jobId, stopwatch.toString());
+        logger.info("Synchronization with jobId {} completed in {}", jobId, stopwatch.toString());
 
         applyNotifiers(processedItems);
 

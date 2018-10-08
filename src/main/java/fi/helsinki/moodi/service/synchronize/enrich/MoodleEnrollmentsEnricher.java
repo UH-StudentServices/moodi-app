@@ -32,7 +32,7 @@ import java.util.Optional;
 @Component
 public class MoodleEnrollmentsEnricher extends AbstractEnricher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MoodleEnrollmentsEnricher.class);
+    private static final Logger logger = LoggerFactory.getLogger(MoodleEnrollmentsEnricher.class);
 
     private final MoodleService moodleService;
 
@@ -51,6 +51,6 @@ public class MoodleEnrollmentsEnricher extends AbstractEnricher {
 
     @Override
     protected Logger getLogger() {
-        return LOGGER;
+        return logger;
     }
 }
