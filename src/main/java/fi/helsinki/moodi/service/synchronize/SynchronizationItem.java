@@ -50,7 +50,8 @@ public final class SynchronizationItem {
     private final boolean removed;
 
     public SynchronizationItem(Course course, SynchronizationType synchronizationType) {
-        this(course, synchronizationType, false, "Started", empty(), empty(), empty(), newArrayList(), EnrichmentStatus.IN_PROGESS, ProcessingStatus.IN_PROGRESS, false, false);
+        this(course, synchronizationType, false, "Started", empty(), empty(), empty(), newArrayList(), EnrichmentStatus.IN_PROGESS,
+            ProcessingStatus.IN_PROGRESS, false, false);
     }
 
     private SynchronizationItem(
@@ -98,37 +99,57 @@ public final class SynchronizationItem {
     }
 
     public SynchronizationItem setOodiCourse(final Optional<OodiCourseUsers> newOodiCourse) {
-        return new SynchronizationItem(course, synchronizationType, success, message, newOodiCourse, moodleCourse, moodleEnrollments, userSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
+        return new SynchronizationItem(course, synchronizationType, success, message, newOodiCourse, moodleCourse, moodleEnrollments,
+            userSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
     }
 
     public SynchronizationItem setMoodleCourse(final Optional<MoodleFullCourse> newMoodleCourse) {
-        return new SynchronizationItem(course, synchronizationType, success, message, oodiCourse, newMoodleCourse, moodleEnrollments, userSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
+        return new SynchronizationItem(course, synchronizationType, success, message, oodiCourse, newMoodleCourse, moodleEnrollments,
+            userSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
     }
 
     public SynchronizationItem setMoodleEnrollments(final Optional<List<MoodleUserEnrollments>> newMoodleEnrollments) {
-        return new SynchronizationItem(course, synchronizationType, success, message, oodiCourse, moodleCourse, newMoodleEnrollments, userSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
+        return new SynchronizationItem(course, synchronizationType, success, message, oodiCourse, moodleCourse, newMoodleEnrollments,
+            userSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
     }
 
     public SynchronizationItem setUserSynchronizationItems(final List<UserSynchronizationItem> newUserSynchronizationItems) {
-        return new SynchronizationItem(course, synchronizationType, success, message, oodiCourse, moodleCourse, moodleEnrollments, newUserSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
+        return new SynchronizationItem(course, synchronizationType, success, message, oodiCourse, moodleCourse, moodleEnrollments,
+            newUserSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
     }
 
     public SynchronizationItem setUnlock(final boolean newUnlock) {
-        return new SynchronizationItem(course, synchronizationType, success, message, oodiCourse, moodleCourse, moodleEnrollments, userSynchronizationItems, enrichmentStatus, processingStatus, newUnlock, removed);
+        return new SynchronizationItem(course, synchronizationType, success, message, oodiCourse, moodleCourse, moodleEnrollments,
+            userSynchronizationItems, enrichmentStatus, processingStatus, newUnlock, removed);
     }
 
     public SynchronizationItem completeEnrichmentPhase(final EnrichmentStatus newEnrichmentStatus, final String newMessage) {
         final boolean newSuccess = newEnrichmentStatus == EnrichmentStatus.SUCCESS;
-        return new SynchronizationItem(course, synchronizationType, newSuccess, newMessage, oodiCourse, moodleCourse, moodleEnrollments, userSynchronizationItems, newEnrichmentStatus, processingStatus, unlock, removed);
+        return new SynchronizationItem(course, synchronizationType, newSuccess, newMessage, oodiCourse, moodleCourse, moodleEnrollments,
+            userSynchronizationItems, newEnrichmentStatus, processingStatus, unlock, removed);
     }
 
     public SynchronizationItem completeProcessingPhase(final ProcessingStatus newProcessingStatus, final String newMessage) {
         return completeProcessingPhase(newProcessingStatus, newMessage, false);
     }
 
-    public SynchronizationItem completeProcessingPhase(final ProcessingStatus newProcessingStatus, final String newMessage, final boolean newRemoved) {
+    public SynchronizationItem completeProcessingPhase(final ProcessingStatus newProcessingStatus, final String newMessage,
+                                                       final boolean newRemoved) {
         final boolean newSuccess = newProcessingStatus == ProcessingStatus.SUCCESS;
-        return new SynchronizationItem(course, synchronizationType, newSuccess, newMessage, oodiCourse, moodleCourse, moodleEnrollments, userSynchronizationItems, enrichmentStatus, newProcessingStatus, unlock, newRemoved);
+        return new SynchronizationItem(course, synchronizationType, newSuccess, newMessage, oodiCourse, moodleCourse, moodleEnrollments,
+            userSynchronizationItems, enrichmentStatus, newProcessingStatus, unlock, newRemoved);
+    }
+
+    public SynchronizationItem completeProcessingPhase() {
+
+        final boolean newSuccess = userSynchronizationItems.stream().allMatch(UserSynchronizationItem::isSuccess);
+
+        final String newMessage = (newSuccess) ? SUCCESS_MESSAGE : ENROLLMENT_FAILURES_MESSAGE;
+
+        final ProcessingStatus newProcessingStatus =
+            (newSuccess) ? ProcessingStatus.SUCCESS : ProcessingStatus.ENROLLMENT_FAILURES;
+
+        return completeProcessingPhase(newProcessingStatus, newMessage);
     }
 
     public Course getCourse() {
@@ -163,15 +184,4 @@ public final class SynchronizationItem {
         return userSynchronizationItems;
     }
 
-    public SynchronizationItem completeProcessingPhase() {
-
-        final boolean newSuccess = userSynchronizationItems.stream().allMatch(UserSynchronizationItem::isSuccess);
-
-        final String newMessage = (newSuccess) ? SUCCESS_MESSAGE : ENROLLMENT_FAILURES_MESSAGE;
-
-        final ProcessingStatus newProcessingStatus =
-                (newSuccess) ? ProcessingStatus.SUCCESS : ProcessingStatus.ENROLLMENT_FAILURES;
-
-        return completeProcessingPhase(newProcessingStatus, newMessage);
-    }
 }

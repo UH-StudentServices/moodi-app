@@ -37,7 +37,8 @@ public class OodiStudentApprovalStatusResolver {
     }
 
     public boolean isApproved(OodiStudent oodiStudent) {
-        if(!oodiStudent.automaticEnabled) {
+
+        if (!oodiStudent.automaticEnabled) {
             return oodiStudent.approved;
         }
 

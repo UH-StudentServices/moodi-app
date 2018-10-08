@@ -26,10 +26,12 @@ plugins {
     id "org.springframework.boot" version "2.0.0.RELEASE"
     id "net.researchgate.release" version "2.6.0"
     id "java"
+    id 'checkstyle'
 }
 
 apply plugin: "io.spring.dependency-management"
 apply from: "gradle-build/required-properties.gradle"
+apply plugin: 'checkstyle'
 
 bootJar {
     mainClassName = "fi.helsinki.moodi.Application"
@@ -42,6 +44,16 @@ springBoot {
 
 task wrapper(type: Wrapper) {
     gradleVersion = '4.6'
+}
+
+checkstyle {
+  configDir = rootProject.file('gradle-build/checkstyle')
+  toolVersion = '8.8'
+}
+
+task checkstyle {
+  dependsOn checkstyleMain
+  dependsOn checkstyleTest
 }
 
 repositories {

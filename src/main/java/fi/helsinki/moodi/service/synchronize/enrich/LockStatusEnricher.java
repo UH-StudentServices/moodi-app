@@ -17,7 +17,7 @@
 
 package fi.helsinki.moodi.service.synchronize.enrich;
 
-import fi.helsinki.moodi.service.syncLock.SyncLockService;
+import fi.helsinki.moodi.service.synclock.SyncLockService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import org.slf4j.Logger;
@@ -42,9 +42,9 @@ public class LockStatusEnricher extends AbstractEnricher {
     protected SynchronizationItem doEnrich(SynchronizationItem item) {
         final boolean isLocked = syncLockService.isLocked(item.getCourse());
 
-        if(SynchronizationType.UNLOCK.equals(item.getSynchronizationType())) {
+        if (SynchronizationType.UNLOCK.equals(item.getSynchronizationType())) {
             return item.setUnlock(true);
-        } else if(isLocked) {
+        } else if (isLocked) {
             return item.completeEnrichmentPhase(EnrichmentStatus.LOCKED, "Item locked. Will not synchronize.");
         } else {
             return item;

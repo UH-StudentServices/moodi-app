@@ -42,6 +42,7 @@ public final class SynchronizationSummary {
     public SynchronizationStatus getStatus() {
         return (getItemCount() == getSuccessfulItemsCount()) ? COMPLETED_SUCCESS : COMPLETED_FAILURE;
     }
+
     public SynchronizationType getType() {
         return type;
     }

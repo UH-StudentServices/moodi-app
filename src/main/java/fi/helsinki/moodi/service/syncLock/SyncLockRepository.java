@@ -15,7 +15,7 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.service.syncLock;
+package fi.helsinki.moodi.service.synclock;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SyncLockRepository extends JpaRepository<SyncLock, Long> {
+
     Optional<SyncLock> findByCourseIdAndActiveTrue(Long courseId);
+
     List<SyncLock> findAllByActiveTrue();
 }

@@ -33,7 +33,6 @@ public class WebConfig implements WebMvcConfigurer {
     @Autowired
     private AccessLoggingInterceptor accessLoggingInterceptor;
 
-
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
         registry.addInterceptor(accessLoggingInterceptor).addPathPatterns("/api/**");

@@ -15,7 +15,7 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.service.syncLock;
+package fi.helsinki.moodi.service.synclock;
 
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.time.TimeService;
@@ -70,6 +70,5 @@ public class SyncLockService {
             .map(l -> l.course)
             .collect(Collectors.toList());
     }
-
 
 }

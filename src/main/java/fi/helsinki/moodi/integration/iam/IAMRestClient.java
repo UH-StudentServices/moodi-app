@@ -42,7 +42,7 @@ public class IAMRestClient implements IAMClient {
         this.restTemplate = restTemplate;
     }
 
-    @Cacheable(value="iam-client.student-username-by-student-number", unless="#result == null")
+    @Cacheable(value = "iam-client.student-username-by-student-number", unless = "#result == null")
     public List<String> getStudentUsernameList(final String studentNumber) {
         LOGGER.debug("Get student username by student number {}", studentNumber);
 
@@ -54,7 +54,7 @@ public class IAMRestClient implements IAMClient {
                 new ParameterizedTypeReference<List<IAMStudent>>() {})
                 .getBody();
 
-            if (result != null){
+            if (result != null) {
                 return result
                     .stream()
                     .map(s -> s.username)
@@ -67,7 +67,7 @@ public class IAMRestClient implements IAMClient {
         }
     }
 
-    @Cacheable(value="iam-client.teacher-username-by-teacher-id", unless="#result == null")
+    @Cacheable(value = "iam-client.teacher-username-by-teacher-id", unless = "#result == null")
     public List<String> getTeacherUsernameList(final String teacherId) {
         LOGGER.debug("Get teacher username by teacher id {}", teacherId);
 

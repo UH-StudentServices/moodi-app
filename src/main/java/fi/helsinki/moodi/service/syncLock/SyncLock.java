@@ -15,7 +15,7 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.service.syncLock;
+package fi.helsinki.moodi.service.synclock;
 
 import fi.helsinki.moodi.service.course.Course;
 
@@ -25,7 +25,7 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="sync_lock")
+@Table(name = "sync_lock")
 public class SyncLock {
 
     @Id
@@ -37,7 +37,7 @@ public class SyncLock {
     public String reason;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name="course_id")
+    @JoinColumn(name = "course_id")
     public Course course;
 
     public boolean active = true;
