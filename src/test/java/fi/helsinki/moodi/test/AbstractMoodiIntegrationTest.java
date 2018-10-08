@@ -174,6 +174,15 @@ public abstract class AbstractMoodiIntegrationTest {
         expectEnrollmentRequestToMoodleWithResponse(response, coreFunctionName, this::enrollUsersPartsBuilder, enrollments);
     }
 
+    protected final void expectUnEnrollmentRequestToMoodle(final MoodleEnrollment... enrollments) {
+        expectUnEnrollmentRequestToMoodleWithResponse(EMPTY_RESPONSE, enrollments);
+    }
+
+    protected final void expectUnEnrollmentRequestToMoodleWithResponse(String response, final MoodleEnrollment... enrollments) {
+        final String coreFunctionName = "enrol_manual_unenrol_users";
+        expectEnrollmentRequestToMoodleWithResponse(response, coreFunctionName, this::unEnrollUsersPartsBuilder, enrollments);
+    }
+
     private void expectEnrollmentRequestToMoodleWithResponse(String response, String coreFunctionName,
                                                              BiFunction<MoodleEnrollment, Integer, Stream<String>> partsBuilder,
                                                              MoodleEnrollment... enrollments) {
@@ -208,6 +217,14 @@ public abstract class AbstractMoodiIntegrationTest {
         return Stream.of(
             createEnrollmentRequestPart(property, "courseid", String.valueOf(enrollment.moodleCourseId), index),
             createEnrollmentRequestPart(property, "roleid", String.valueOf(enrollment.moodleRoleId), index),
+            createEnrollmentRequestPart(property, "userid", String.valueOf(enrollment.moodleUserId), index));
+    }
+
+    private Stream<String> unEnrollUsersPartsBuilder(MoodleEnrollment enrollment, int index) {
+        final String property = "enrolments";
+
+        return Stream.of(
+            createEnrollmentRequestPart(property, "courseid", String.valueOf(enrollment.moodleCourseId), index),
             createEnrollmentRequestPart(property, "userid", String.valueOf(enrollment.moodleUserId), index));
     }
 
