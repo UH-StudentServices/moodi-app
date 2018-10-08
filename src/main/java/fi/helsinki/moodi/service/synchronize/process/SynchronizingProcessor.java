@@ -177,6 +177,8 @@ public class SynchronizingProcessor extends AbstractProcessor {
         switch (actionType) {
             case ADD_ENROLLMENT:
                 return moodleService::addEnrollments;
+            case REMOVE_ENROLLMENT:
+                return moodleService::removeEnrollments;
             case ADD_ROLES:
                 return moodleService::addRoles;
             case REMOVE_ROLES:
@@ -196,6 +198,8 @@ public class SynchronizingProcessor extends AbstractProcessor {
         if (!parentItem.isUnlock()) {
             checkThresholdLimitsForRole(itemsByAction, mapperService.getStudentRoleId(), studentCount, parentItem);
             checkThresholdLimitsForRole(itemsByAction, mapperService.getTeacherRoleId(), teacherCount, parentItem);
+            // check against all students being unenrolled
+            checkThresholdLimitsForRole(itemsByAction, mapperService.getMoodiRoleId(), studentCount, parentItem);
         }
     }
 

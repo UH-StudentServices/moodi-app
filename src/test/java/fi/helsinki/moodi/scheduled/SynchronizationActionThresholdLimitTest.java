@@ -17,17 +17,38 @@
 
 package fi.helsinki.moodi.scheduled;
 
+import fi.helsinki.moodi.service.course.Course;
+import fi.helsinki.moodi.service.synclock.SyncLockService;
+import fi.helsinki.moodi.service.synchronize.notify.LockedSynchronizationItemMessageBuilder;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailSender;
 import org.springframework.test.context.TestPropertySource;
 
-@TestPropertySource(properties = {"syncTresholds.REMOVE_ROLES.preventAll = 1",
-                                  "syncTresholds.REMOVE_ROLES.limit = 1"})
+import static org.junit.Assert.assertFalse;
+
+@TestPropertySource(properties = {
+    "syncTresholds.REMOVE_ENROLLMENT.preventAll = 1",
+    "syncTresholds.REMOVE_ENROLLMENT.limit = 1"
+})
 public class SynchronizationActionThresholdLimitTest extends AbstractSynchronizationJobTest {
 
-    private static final String EXPECTED_THRESHOLD_EXCEEDED_FOR_REMOVE_ROLE_MESSAGE = "Action REMOVE_ROLES for 1 items exceeds threshold";
+    private static final String EXPECTED_THRESHOLD_CROSSED_REMOVE_ENROLLMENT_MESSAGE = "Action REMOVE_ENROLLMENT for 1 items exceeds threshold";
+
+    @Autowired
+    private SyncLockService syncLockService;
+
+    @Autowired
+    private MailSender mailSender;
+
+    @Autowired
+    private LockedSynchronizationItemMessageBuilder lockedSynchronizationItemMessageBuilder;
 
     @Test
-    public void thatRemovingRolesActionIsLimitedByThreshold() {
-        testThatThresholdCheckLocksCourse(EXPECTED_THRESHOLD_EXCEEDED_FOR_REMOVE_ROLE_MESSAGE);
+    public void thatRemoveEnrollmentActionIsLimitedByThreshold() {
+        Course course = findCourse();
+        assertFalse(syncLockService.isLocked(course));
+
+        testThatThresholdCheckLocksCourse(EXPECTED_THRESHOLD_CROSSED_REMOVE_ENROLLMENT_MESSAGE);
     }
 }
