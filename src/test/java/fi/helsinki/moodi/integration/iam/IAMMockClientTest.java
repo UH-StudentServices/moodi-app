@@ -35,16 +35,16 @@ public class IAMMockClientTest {
 
     private static final Map<String, String> USERS = ImmutableMap.of(STUDENT_NUMBER, STUDENT_USERNAME, TEACHER_ID, TEACHER_USERNAME);
 
-    private static final IAMClient IAM_CLIENT = new IAMMockClient(USERS);
+    private static final IAMClient iamClient = new IAMMockClient(USERS);
 
     @Test
     public void thatStudentUsernameIsFound() {
-        assertUsernameResult(STUDENT_USERNAME, IAM_CLIENT.getStudentUsernameList(STUDENT_NUMBER));
+        assertUsernameResult(STUDENT_USERNAME, iamClient.getStudentUsernameList(STUDENT_NUMBER));
     }
 
     @Test
     public void thatTeacherUsernameIsFound() {
-        assertUsernameResult(TEACHER_USERNAME, IAM_CLIENT.getTeacherUsernameList(TEACHER_ID));
+        assertUsernameResult(TEACHER_USERNAME, iamClient.getTeacherUsernameList(TEACHER_ID));
     }
 
     private void assertUsernameResult(String expectedUsername, List<String> result) {
@@ -54,6 +54,6 @@ public class IAMMockClientTest {
 
     @Test
     public void thatEmptyListIsReturnedIfUsernameIsNotFound() {
-        assertEquals(0, IAM_CLIENT.getStudentUsernameList("1").size());
+        assertEquals(0, iamClient.getStudentUsernameList("1").size());
     }
 }
