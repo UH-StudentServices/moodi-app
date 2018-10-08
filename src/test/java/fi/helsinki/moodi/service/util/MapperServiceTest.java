@@ -17,12 +17,9 @@
 
 package fi.helsinki.moodi.service.util;
 
-import com.google.common.collect.Lists;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 

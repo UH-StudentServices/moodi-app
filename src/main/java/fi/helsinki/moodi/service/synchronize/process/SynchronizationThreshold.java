@@ -55,17 +55,17 @@ public class SynchronizationThreshold {
     }
 
     public boolean isLimitedByThreshold(UserSynchronizationActionType actionType, Long itemCount) {
-       Long limit = limits.get(actionType).getLimit();
+        Long limit = limits.get(actionType).getLimit();
 
-       return limit != null && limit <= itemCount;
+        return limit != null && limit <= itemCount;
     }
 
     public boolean isActionPreventedToAllItems(UserSynchronizationActionType actionType, Long itemCount) {
-       Long preventAll = limits.get(actionType).getPreventAll();
+        Long preventAll = limits.get(actionType).getPreventAll();
 
-       return preventAll != null &&
-           preventAll > 0 &&
-           preventAll <= itemCount;
+        return preventAll != null &&
+            preventAll > 0 &&
+            preventAll <= itemCount;
     }
 
     private static class SyncLimit {

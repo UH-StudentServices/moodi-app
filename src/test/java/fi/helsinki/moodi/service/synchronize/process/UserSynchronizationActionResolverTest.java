@@ -28,7 +28,6 @@ import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -136,7 +135,6 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
         assertActions(item, ImmutableMap.of(ADD_ROLES, newArrayList(11L)));
     }
 
-
     @Test
     public void thatStudentRoleIsRemoved() {
         UserSynchronizationItem item = getStudentUserSynchronizationItem(false);
@@ -156,7 +154,6 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
 
         assertActions(item, ImmutableMap.of(REMOVE_ENROLLMENT, newArrayList(11L)));
     }
-
 
     @Test
     public void thatTeacherRoleIsNeverRemoved() {
@@ -185,7 +182,7 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
 
         assertEquals(expectedActions.size(), actions.size());
 
-        for(UserSynchronizationActionType actionType : expectedActions) {
+        for (UserSynchronizationActionType actionType : expectedActions) {
             UserSynchronizationAction action = findActionByType(actionType, actions);
             Set<Long> roles = action.getRoles();
             List<Long> expectedRoles = expectedActionsForRoles.get(actionType);
@@ -220,12 +217,9 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
         return new OodiTeacher();
     }
 
-
     private MoodleUser getMoodleUser() {
         MoodleUser moodleUser = new MoodleUser();
         moodleUser.id = MOODLE_USER_ID;
         return moodleUser;
     }
-
-
 }

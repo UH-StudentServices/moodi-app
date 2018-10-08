@@ -74,7 +74,7 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
             .andExpect(status().isOk());
     }
 
-    private void testEmptyOodiResponse(String response) throws Exception{
+    private void testEmptyOodiResponse(String response) throws Exception {
         expectGetCourseUnitRealisationRequestToOodi(
             COURSE_REALISATION_ID,
             withSuccess(response, MediaType.APPLICATION_JSON));

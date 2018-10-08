@@ -30,7 +30,7 @@ public class GetCourseAndEnrollmentStatusTest extends AbstractSuccessfulCreateCo
 
     @Before
     public void setUp() {
-       setUpMockServerResponsesWithWarnings();
+        setUpMockServerResponsesWithWarnings();
     }
 
     @Test
@@ -38,7 +38,7 @@ public class GetCourseAndEnrollmentStatusTest extends AbstractSuccessfulCreateCo
         makeCreateCourseRequest(COURSE_REALISATION_ID);
 
         mockMvc.perform(
-            get("/api/v1/courses/"+ COURSE_REALISATION_ID)
+            get("/api/v1/courses/" + COURSE_REALISATION_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("client-id", "testclient")
                 .header("client-token", "xxx123"))
@@ -46,6 +46,5 @@ public class GetCourseAndEnrollmentStatusTest extends AbstractSuccessfulCreateCo
             .andExpect(jsonPath("$.url").value(getMoodleBaseUrl() + "/course/view.php?id=988888"))
             .andExpect(jsonPath("$.importStatus").value(COMPLETED.toString()));
     }
-
 
 }

@@ -55,9 +55,9 @@ public class UserSynchronizationItem {
     }
 
     public static UserSynchronizationItem combine(UserSynchronizationItem firstItem, UserSynchronizationItem secondItem) {
-        if(firstItem.getOodiStudent() == null) {
+        if (firstItem.getOodiStudent() == null) {
             firstItem.setOodiStudent(secondItem.getOodiStudent());
-        } else if(firstItem.getOodiTeacher() == null) {
+        } else if (firstItem.getOodiTeacher() == null) {
             firstItem.setOodiTeacher(secondItem.getOodiTeacher());
         }
         return firstItem;
@@ -95,6 +95,7 @@ public class UserSynchronizationItem {
     public boolean isCompleted() {
         return !UserSynchronizationItemStatus.IN_PROGRESS.equals(status);
     }
+
     public boolean isSuccess() {
         return UserSynchronizationItemStatus.SUCCESS.equals(status);
     }

@@ -28,7 +28,7 @@ import fi.helsinki.moodi.integration.oodi.OodiStudent;
 import fi.helsinki.moodi.integration.oodi.OodiTeacher;
 import fi.helsinki.moodi.service.batch.BatchProcessor;
 import fi.helsinki.moodi.service.course.CourseService;
-import fi.helsinki.moodi.service.syncLock.SyncLockService;
+import fi.helsinki.moodi.service.synclock.SyncLockService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.util.MapperService;
 import org.slf4j.Logger;
@@ -60,7 +60,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
     private static final String THRESHOLD_EXCEEDED_MESSAGE = "Action %s for %s items exceeds threshold";
     private static final String PREVENT_ACTION_ON_ALL_MESSAGE = "Action %s is not permitted for all items";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SynchronizingProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(SynchronizingProcessor.class);
 
     private final IAMService iamService;
     private final MapperService mapperService;
@@ -124,7 +124,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
         checkThresholdLimits(userSynchronizationActionMap, parentItem);
 
-        for(UserSynchronizationActionType actionType : UserSynchronizationActionType.values()) {
+        for (UserSynchronizationActionType actionType : UserSynchronizationActionType.values()) {
             batchProcessActions(parentItem, actionType, userSynchronizationActionMap.getOrDefault(actionType, newArrayList()));
         }
 
@@ -134,7 +134,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
     }
 
     private UserSynchronizationItem completeItem(UserSynchronizationItem item) {
-        if(item.isCompleted()) {
+        if (item.isCompleted()) {
             return item;
         } else {
             final boolean isSuccess = item.getActions().stream().allMatch(UserSynchronizationAction::isSuccess);
@@ -142,7 +142,8 @@ public class SynchronizingProcessor extends AbstractProcessor {
         }
     }
 
-    private void batchProcessActions(SynchronizationItem parentItem, UserSynchronizationActionType actionType, List<UserSynchronizationAction> actions) {
+    private void batchProcessActions(SynchronizationItem parentItem, UserSynchronizationActionType actionType,
+                                     List<UserSynchronizationAction> actions) {
         batchProcessor
             .process(
                 actions,
@@ -152,7 +153,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
     private List<UserSynchronizationAction> processActions(SynchronizationItem parentItem,
                                                          UserSynchronizationActionType actionType,
-                                                         List<UserSynchronizationAction> actions){
+                                                         List<UserSynchronizationAction> actions) {
 
         List<MoodleEnrollment> moodleEnrollments = actions.stream()
             .flatMap(action -> actionsToMoodleEnrollents(parentItem, action))
@@ -165,7 +166,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
                 .collect(Collectors.toList());
 
         } catch (Exception e) {
-            LOGGER.error(String.format("Error when executing action %s", e));
+            logger.error(String.format("Error when executing action %s", e));
             return actions.stream()
                 .map(UserSynchronizationAction::withErrorStatus)
                 .collect(Collectors.toList());
@@ -210,9 +211,9 @@ public class SynchronizingProcessor extends AbstractProcessor {
                 .filter(item -> item.getRoles().contains(roleId))
                 .count();
 
-            if(synchronizationThreshold.isLimitedByThreshold(action, actionCountForRole)) {
+            if (synchronizationThreshold.isLimitedByThreshold(action, actionCountForRole)) {
                 lockItem(parentItem, String.format(THRESHOLD_EXCEEDED_MESSAGE, action, actionCountForRole));
-            } else if(actionCountForRole == userCountForRole && synchronizationThreshold.isActionPreventedToAllItems(action, actionCountForRole)) {
+            } else if (actionCountForRole == userCountForRole && synchronizationThreshold.isActionPreventedToAllItems(action, actionCountForRole)) {
                 lockItem(parentItem, String.format(PREVENT_ACTION_ON_ALL_MESSAGE, action));
             }
         });
@@ -268,7 +269,8 @@ public class SynchronizingProcessor extends AbstractProcessor {
             completedItems.stream()).collect(Collectors.toList());
     }
 
-    private Function<UserSynchronizationItem, UserSynchronizationItem> enrichWithMoodleUserEnrollments(final Map<Long, MoodleUserEnrollments> moodleEnrollmentsByUserId) {
+    private Function<UserSynchronizationItem, UserSynchronizationItem> enrichWithMoodleUserEnrollments(final Map<Long,
+        MoodleUserEnrollments> moodleEnrollmentsByUserId) {
         return userSynchronizationItem ->
             userSynchronizationItem.withMoodleUserEnrollments(moodleEnrollmentsByUserId
                 .getOrDefault(userSynchronizationItem.getMoodleUserId(), null));
@@ -277,7 +279,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
     private UserSynchronizationItem enrichWithMoodleUser(UserSynchronizationItem item) {
         List<String> usernames = item.getOodiStudent() != null ? getUsernameList(item.getOodiStudent()) : getUsernameList(item.getOodiTeacher());
 
-        if(usernames.isEmpty()) {
+        if (usernames.isEmpty()) {
             return item.withStatus(USERNAME_NOT_FOUND);
         }
         return getMoodleUser(usernames).map(item::withMoodleUser).orElseGet(() -> item.withStatus(MOODLE_USER_NOT_FOUND));
@@ -297,7 +299,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
     @Override
     protected Logger getLogger() {
-        return LOGGER;
+        return logger;
     }
 
 }

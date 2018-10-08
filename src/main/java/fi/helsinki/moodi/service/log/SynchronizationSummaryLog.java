@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 @JsonIgnoreProperties("fullSummary")
 public class SynchronizationSummaryLog {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SynchronizationSummaryLog.class);
+    private static final Logger logger = LoggerFactory.getLogger(SynchronizationSummaryLog.class);
 
     private final SynchronizationSummary fullSummary;
 
@@ -79,7 +79,7 @@ public class SynchronizationSummaryLog {
                 item.getMessage()
             );
         } catch (Exception e) {
-            LOGGER.error("Could not create log entry for synchronizationItem", e);
+            logger.error("Could not create log entry for synchronizationItem", e);
             return null;
         }
     }
@@ -88,7 +88,8 @@ public class SynchronizationSummaryLog {
         return items.stream().collect(Collectors.groupingBy(item -> item.status, Collectors.counting()));
     }
 
-    private static Map<UserSynchronizationItemStatus, List<UserSyncronizationItemLogEntry>> getEnrollmentResults(List<UserSyncronizationItemLogEntry> items) {
+    private static Map<UserSynchronizationItemStatus, List<UserSyncronizationItemLogEntry>> getEnrollmentResults(
+        List<UserSyncronizationItemLogEntry> items) {
         return items.stream().collect(Collectors.groupingBy(item -> item.status));
     }
 
@@ -163,7 +164,7 @@ public class SynchronizationSummaryLog {
             this.oodiStudent = item.getOodiStudent();
             this.oodiTeacher = item.getOodiTeacher();
 
-            if(item.getMoodleUserEnrollments() != null) {
+            if (item.getMoodleUserEnrollments() != null) {
                 this.moodleUsername = item.getMoodleUserEnrollments().username;
                 this.moodleRoleIds = item.getMoodleUserEnrollments().roles
                     .stream()

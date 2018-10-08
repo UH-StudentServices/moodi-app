@@ -29,10 +29,10 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Component
 public class BatchProcessor<T> {
 
-    private static final Logger LOGGER = getLogger(BatchProcessor.class);
+    private static final Logger logger = getLogger(BatchProcessor.class);
 
-    public interface ProcessBatch<T>{
-         List<T> apply(List<T> currentItems);
+    public interface ProcessBatch<T> {
+        List<T> apply(List<T> currentItems);
     }
 
     public List<T> process(final List<T> items,
@@ -47,15 +47,14 @@ public class BatchProcessor<T> {
                             final List<T> processedItems,
                             final int batchSize) {
 
-
         List<T> itemsToProcess = items
             .stream()
             .filter(item -> !processedItems.contains(item))
             .limit(batchSize)
             .collect(Collectors.toList());
 
-        if(itemsToProcess.size() > 0) {
-            LOGGER.info("Processing batch of {} items", itemsToProcess.size());
+        if (itemsToProcess.size() > 0) {
+            logger.info("Processing batch of {} items", itemsToProcess.size());
             results.addAll(processBatch.apply(itemsToProcess));
             processedItems.addAll(itemsToProcess);
             return process(items, processBatch, results, processedItems, batchSize);

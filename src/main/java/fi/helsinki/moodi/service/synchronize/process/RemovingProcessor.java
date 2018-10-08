@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class RemovingProcessor extends AbstractProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RemovingProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(RemovingProcessor.class);
 
     private final CourseService courseService;
 
@@ -48,6 +48,6 @@ public class RemovingProcessor extends AbstractProcessor {
 
     @Override
     protected Logger getLogger() {
-        return LOGGER;
+        return logger;
     }
 }

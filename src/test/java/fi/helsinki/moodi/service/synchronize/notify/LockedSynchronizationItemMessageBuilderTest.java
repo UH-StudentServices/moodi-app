@@ -17,7 +17,6 @@
 
 package fi.helsinki.moodi.service.synchronize.notify;
 
-
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;

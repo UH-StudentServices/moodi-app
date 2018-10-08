@@ -53,7 +53,7 @@ public class AccessLoggingInterceptor extends HandlerInterceptorAdapter {
     private String getRequestIp(final HttpServletRequest request) {
         String requestIp = request.getHeader("X-FORWARDED-FOR");
 
-        if(requestIp == null) {
+        if (requestIp == null) {
             requestIp = request.getRequestURI();
         }
 
@@ -65,11 +65,11 @@ public class AccessLoggingInterceptor extends HandlerInterceptorAdapter {
 
         clientId = getClientIdFromHeaders(request);
 
-        if(clientId == null) {
+        if (clientId == null) {
             clientId = getClientIdFromParameters(request);
         }
 
-        if(clientId == null) {
+        if (clientId == null) {
             clientId = getClientIdFromCookie(request);
         }
 
@@ -87,7 +87,7 @@ public class AccessLoggingInterceptor extends HandlerInterceptorAdapter {
     private String getClientIdFromCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
 
-        if(cookies == null) {
+        if (cookies == null) {
             return null;
         }
 

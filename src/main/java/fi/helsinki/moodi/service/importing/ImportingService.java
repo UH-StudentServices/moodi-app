@@ -29,19 +29,15 @@ import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.dto.CourseDto;
 import fi.helsinki.moodi.service.log.LoggingService;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 import static fi.helsinki.moodi.exception.NotFoundException.notFoundException;
-import static org.slf4j.LoggerFactory.getLogger;
 
 @Service
 public class ImportingService {
-
-    private static final Logger LOGGER = getLogger(ImportingService.class);
 
     private final MoodleService moodleService;
     private final CourseService courseService;

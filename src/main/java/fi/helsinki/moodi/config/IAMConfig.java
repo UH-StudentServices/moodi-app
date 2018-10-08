@@ -39,9 +39,8 @@ import java.util.stream.Collectors;
 import static com.google.common.collect.Lists.newArrayList;
 
 @Configuration
-@PropertySource(value = {
-    "file:/opt/moodi/config/iammockusers.properties"
-}, ignoreResourceNotFound = true)
+@PropertySource(value = {"file:/opt/moodi/config/iammockusers.properties"}, ignoreResourceNotFound = true
+)
 public class IAMConfig {
 
     @Value("${integration.iam.url:#{null}}")

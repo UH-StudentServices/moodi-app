@@ -19,7 +19,6 @@ package fi.helsinki.moodi.service.synchronize.process;
 
 import com.google.common.collect.Lists;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +29,6 @@ import java.util.function.Function;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Orchestrates processors.
@@ -40,8 +38,6 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 @Service
 public class ProcessorService {
-
-    private static final Logger LOGGER = getLogger(ProcessorService.class);
 
     private final Map<Action, Processor> processorsByAction;
     private final ProcessExecutor processExecutor;

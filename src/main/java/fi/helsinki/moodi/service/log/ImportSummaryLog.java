@@ -75,7 +75,6 @@ public class ImportSummaryLog {
             .collect(Collectors.groupingBy(e -> e.message));
     }
 
-
     private EnrollmentSummary createSummary() {
         final long studentCount = successfulEnrollments.stream()
             .filter(e -> ROLE_STUDENT.equals(e.role)).count();
@@ -118,7 +117,7 @@ public class ImportSummaryLog {
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static abstract class EnrollmentEntry {
+    public abstract static class EnrollmentEntry {
         public String message;
     }
 

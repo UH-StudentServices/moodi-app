@@ -50,7 +50,8 @@ public final class Enrollment implements Serializable {
         return new Enrollment(ROLE_TEACHER, Optional.of(teacherId), Optional.empty(), null, Optional.empty(), true);
     }
 
-    private Enrollment(String role, Optional<String> teacherId, Optional<String> studentNumber, List<String> usernameList, Optional<Long> moodleId, boolean approved) {
+    private Enrollment(String role, Optional<String> teacherId, Optional<String> studentNumber, List<String> usernameList,
+                       Optional<Long> moodleId, boolean approved) {
         this.role = role;
         this.teacherId = teacherId;
         this.studentNumber = studentNumber;

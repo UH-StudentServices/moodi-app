@@ -20,8 +20,6 @@ package fi.helsinki.moodi.integration.oodi;
 import fi.helsinki.moodi.exception.IntegrationConnectionException;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestOperations;
 
