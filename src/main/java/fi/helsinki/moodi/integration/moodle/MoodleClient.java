@@ -143,7 +143,7 @@ public class MoodleClient {
         }
     }
 
-    @Cacheable(value = "moodle-client.moodle-user-by-username", unless="#result == null")
+    @Cacheable(value = "moodle-client.moodle-user-by-username", unless = "#result == null")
     public MoodleUser getUser(final List<String> username) {
         final MultiValueMap<String, String> params = createParametersForFunction("core_user_get_users_by_field");
         params.set("field", "username");
