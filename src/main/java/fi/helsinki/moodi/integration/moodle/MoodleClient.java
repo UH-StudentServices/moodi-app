@@ -127,7 +127,23 @@ public class MoodleClient {
         }
     }
 
-    @Cacheable(value = "moodle-client.moodle-user-by-username", unless = "#result == null")
+    public void removeEnrollments(final List<MoodleEnrollment> moodleEnrollments) {
+        final MultiValueMap<String, String> params = createParametersForFunction("enrol_manual_unenrol_users");
+
+        for (int i = 0; i < moodleEnrollments.size(); i++) {
+            final MoodleEnrollment moodleEnrollment = moodleEnrollments.get(i);
+            params.set("enrolments[" + i + "][courseid]", String.valueOf(moodleEnrollment.moodleCourseId));
+            params.set("enrolments[" + i + "][userid]", String.valueOf(moodleEnrollment.moodleUserId));
+        }
+
+        try {
+            execute(params, new TypeReference<Void>() {}, EMPTY_OK_RESPONSE_EVALUATION, false);
+        } catch (Exception e) {
+            handleException("Error executing method: removeEnrollments", e);
+        }
+    }
+
+    @Cacheable(value = "moodle-client.moodle-user-by-username", unless="#result == null")
     public MoodleUser getUser(final List<String> username) {
         final MultiValueMap<String, String> params = createParametersForFunction("core_user_get_users_by_field");
         params.set("field", "username");
