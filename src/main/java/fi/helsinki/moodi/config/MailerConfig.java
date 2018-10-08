@@ -30,5 +30,4 @@ public class MailerConfig {
         return new JavaMailSenderImpl();
     }
 
-
 }

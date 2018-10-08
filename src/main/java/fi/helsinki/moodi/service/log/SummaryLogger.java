@@ -28,7 +28,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
 public class SummaryLogger {
-    private static final Logger LOGGER = getLogger("SUMMARY_LOGGER");
+    private static final Logger logger = getLogger("SUMMARY_LOGGER");
     private final ObjectMapper objectMapper;
 
     @Autowired
@@ -41,8 +41,8 @@ public class SummaryLogger {
             final String jsonData = objectMapper
                 .writerWithDefaultPrettyPrinter()
                 .writeValueAsString(data);
-            LOGGER.info(title);
-            LOGGER.info(jsonData);
+            logger.info(title);
+            logger.info(jsonData);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Could not write summary", e);
         }

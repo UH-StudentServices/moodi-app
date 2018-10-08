@@ -47,21 +47,21 @@ public class SynchronizationController {
             .map(j -> j.status)
             .orElse(SynchronizationStatus.COMPLETED_SUCCESS);
 
-        if(status != SynchronizationStatus.COMPLETED_FAILURE) {
+        if (status != SynchronizationStatus.COMPLETED_FAILURE) {
             return response(Result.success(true));
         } else {
             return response(Result.error(true, "Error", "Last synchronization failed"));
         }
     }
 
-    @RequestMapping(value="/full", method = RequestMethod.POST)
+    @RequestMapping(value = "/full", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<Result<String, Boolean>> synchronizeCourses() {
         synchronizationExecutor.synchronize(SynchronizationType.FULL);
         return response(Result.success("Full synchronization job started"));
     }
 
-    @RequestMapping(value="/unlock", method = RequestMethod.POST)
+    @RequestMapping(value = "/unlock", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<Result<String, Boolean>> synchronizeAndUnlockLockedCourses() {
         synchronizationExecutor.synchronize(SynchronizationType.UNLOCK);

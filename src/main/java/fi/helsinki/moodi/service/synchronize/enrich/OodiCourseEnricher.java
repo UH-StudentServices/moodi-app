@@ -35,7 +35,7 @@ import static fi.helsinki.moodi.util.DateFormat.OODI_UTC_DATE_FORMAT;
 @Component
 public class OodiCourseEnricher extends AbstractEnricher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OodiCourseEnricher.class);
+    private static final Logger logger = LoggerFactory.getLogger(OodiCourseEnricher.class);
 
     private final OodiService oodiService;
 
@@ -50,15 +50,15 @@ public class OodiCourseEnricher extends AbstractEnricher {
         final Course course = item.getCourse();
         final Optional<OodiCourseUsers> oodiCourse = oodiService.getOodiCourseUsers(course.realisationId);
 
-        if(!oodiCourse.isPresent()) {
+        if (!oodiCourse.isPresent()) {
             return item.completeEnrichmentPhase(
                 EnrichmentStatus.ERROR,
                 String.format("Course not found from Oodi with id %s", course.realisationId));
-        } else if(oodiCourse.map(c -> c.removed).orElse(false)) {
+        } else if (oodiCourse.map(c -> c.removed).orElse(false)) {
             return item.completeEnrichmentPhase(
                 EnrichmentStatus.OODI_COURSE_REMOVED,
                 String.format("Course with id %s removed from Oodi", course.realisationId));
-        } else if(oodiCourse.map(this::isCourseEnded).orElse(false)) {
+        } else if (oodiCourse.map(this::isCourseEnded).orElse(false)) {
             return item.completeEnrichmentPhase(
                 EnrichmentStatus.OODI_COURSE_ENDED,
                 String.format("Course with realisation id %s has ended", course.realisationId));
@@ -69,7 +69,7 @@ public class OodiCourseEnricher extends AbstractEnricher {
 
     @Override
     protected Logger getLogger() {
-        return LOGGER;
+        return logger;
     }
 
     private boolean isCourseEnded(OodiCourseUsers oodiCourse) {

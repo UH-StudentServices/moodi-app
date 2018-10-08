@@ -48,7 +48,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegrationTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMoodiIntegrationTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractMoodiIntegrationTest.class);
 
     protected static final long REALISATION_ID = 12345;
     protected static final int MOODLE_COURSE_ID = 54321;
@@ -108,6 +108,17 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
                 MediaType.APPLICATION_JSON));
     }
 
+    protected void setupOodiCourseUnitRealisationResponse(String responseJson) {
+        expectGetCourseUsersRequestToOodi(
+            REALISATION_ID,
+            withSuccess(Fixtures.asString(
+                responseJson,
+                new ImmutableMap.Builder()
+                    .put("endDate", getFutureDateString())
+                    .build()),
+                MediaType.APPLICATION_JSON));
+    }
+
     protected void testSynchronizationSummary(SynchronizationType synchronizationType, String moodleResponse, boolean expectErrors) {
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, true);
@@ -122,7 +133,8 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
             new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID));
 
-        expectAssignRolesToMoodleWithResponse(moodleResponse, true, new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
+        expectAssignRolesToMoodleWithResponse(moodleResponse, true, new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID,
+            MOODLE_COURSE_ID));
 
         SynchronizationSummary summary = synchronizationService.synchronize(synchronizationType);
 
@@ -135,7 +147,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
     }
 
     protected SynchronizationSummary testTresholdCheckFailed(String expectedMessage) {
-        LOGGER.info("Testing synchronizationSummary with " +
+        logger.info("Testing synchronizationSummary with " +
                 "properties syncTresholds.REMOVE_ROLES.preventAll: {}, syncTresholds.REMOVE_ROLES.limit: {}",
             environment.getProperty("syncTresholds.REMOVE_ROLES.preventAll"),
             environment.getProperty("syncTresholds.REMOVE_ROLES.limit"));
@@ -157,17 +169,6 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
         assertEquals(expectedMessage, item.getMessage());
 
         return summary;
-    }
-
-    protected void setupOodiCourseUnitRealisationResponse(String responseJson) {
-        expectGetCourseUsersRequestToOodi(
-            REALISATION_ID,
-            withSuccess(Fixtures.asString(
-                    responseJson,
-                    new ImmutableMap.Builder()
-                        .put("endDate", getFutureDateString())
-                        .build()),
-                MediaType.APPLICATION_JSON));
     }
 
     protected String getEnrollmentsResponse(int moodleUserId, long moodleRoleId, long moodiRoleId) {
@@ -192,7 +193,6 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
         expectFindEmployeeRequestToIAM(teacherId, username);
         expectGetUserRequestToMoodle(username + USERNAME_SUFFIX, moodleId);
     }
-
 
     protected Course findCourse() {
         return courseService.findByRealisationId(REALISATION_ID).get();

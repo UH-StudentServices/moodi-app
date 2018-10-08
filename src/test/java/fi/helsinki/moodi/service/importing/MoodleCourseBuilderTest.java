@@ -33,24 +33,24 @@ import static org.junit.Assert.assertEquals;
 
 public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
 
-    private final String REALISATION_NAME_FI = "Course realisation name (fi)";
-    private final String REALISATION_NAME_SV = "Course realisation name (sv)";
-    private final String REALISATION_NAME_EN = "Course realisation name (en)";
-    private final int REALISATION_ID = 1;
+    private static final String REALISATION_NAME_FI = "Course realisation name (fi)";
+    private static final String REALISATION_NAME_SV = "Course realisation name (sv)";
+    private static final String REALISATION_NAME_EN = "Course realisation name (en)";
+    private static final int REALISATION_ID = 1;
 
-    private final String DESCRIPTION_1_FI = "Course description 1 (fi)";
-    private final String DESCRIPTION_2_FI = "Course description 2 (fi)";
-    private final String DESCRIPTION_3_FI = "Course description 3 (fi)";
-    private final String DESCRIPTION_1_SV = "Course description 1 (sv)";
-    private final String DESCRIPTION_2_SV = "Course description 2 (sv)";
-    private final String DESCRIPTION_3_SV = "Course description 3 (sv)";
-    private final String DESCRIPTION_1_EN = "Course description 1 (en)";
-    private final String DESCRIPTION_2_EN = "Course description 2 (en)";
-    private final String DESCRIPTION_3_EN = "Course description 3 (en)";
-    private final Integer DESCRIPTION_1_ID = 10;
-    private final Integer DESCRIPTION_2_ID = 20;
-    private final Integer DESCRIPTION_3_ID = 30;
-    private final String MOODLE_CATEGORY_ID = "73";
+    private static final String DESCRIPTION_1_FI = "Course description 1 (fi)";
+    private static final String DESCRIPTION_2_FI = "Course description 2 (fi)";
+    private static final String DESCRIPTION_3_FI = "Course description 3 (fi)";
+    private static final String DESCRIPTION_1_SV = "Course description 1 (sv)";
+    private static final String DESCRIPTION_2_SV = "Course description 2 (sv)";
+    private static final String DESCRIPTION_3_SV = "Course description 3 (sv)";
+    private static final String DESCRIPTION_1_EN = "Course description 1 (en)";
+    private static final String DESCRIPTION_2_EN = "Course description 2 (en)";
+    private static final String DESCRIPTION_3_EN = "Course description 3 (en)";
+    private static final Integer DESCRIPTION_1_ID = 10;
+    private static final Integer DESCRIPTION_2_ID = 20;
+    private static final Integer DESCRIPTION_3_ID = 30;
+    private static final String MOODLE_CATEGORY_ID = "73";
 
     @Autowired
     private MoodleCourseBuilder moodleCourseBuilder;

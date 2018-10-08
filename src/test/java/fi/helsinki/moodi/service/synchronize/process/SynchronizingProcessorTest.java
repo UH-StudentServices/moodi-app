@@ -40,7 +40,6 @@ import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-
 @TestPropertySource(properties = {
     "syncTresholds.REMOVE_ENROLLMENT.preventAll = 0"
 })
@@ -60,7 +59,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
 
         moodleUserEnrollments.roles = newArrayList();
 
-        for(MoodleRole role : roles) {
+        for (MoodleRole role : roles) {
             moodleUserEnrollments.roles.add(role);
         }
 
@@ -70,11 +69,11 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
     }
 
     private MoodleRole teacherRole() {
-       return createMoodleRole(getTeacherRoleId());
+        return createMoodleRole(getTeacherRoleId());
     }
 
     private MoodleRole studentRole() {
-       return createMoodleRole(getStudentRoleId());
+        return createMoodleRole(getStudentRoleId());
     }
 
     private MoodleRole moodiRole() {
@@ -327,7 +326,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
         private static final long REALISATION_ID = 12345L;
 
         private SynchronizationItem synchronizationItem;
-        private OodiCourseUsers OodiCourseUsers;
+        private OodiCourseUsers oodiCourseUsers;
 
         private Map<Long, OodiStudent> oodiStudentMap = new HashMap<>();
         private Map<Long, OodiTeacher> oodiTeacherMap = new HashMap<>();
@@ -342,9 +341,10 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             oodiCourseUsers.teachers = newArrayList();
 
             SynchronizationItem synchronizationItemWithOodiCourse = synchronizationItem.setOodiCourse(Optional.of(oodiCourseUsers));
-            SynchronizationItem synchronizationItemWithMoodleCourse = synchronizationItemWithOodiCourse.setMoodleCourse(Optional.of(createMoodleCourse(moodleCourseId)));
+            SynchronizationItem synchronizationItemWithMoodleCourse = synchronizationItemWithOodiCourse
+                .setMoodleCourse(Optional.of(createMoodleCourse(moodleCourseId)));
 
-            this.OodiCourseUsers = oodiCourseUsers;
+            this.oodiCourseUsers = oodiCourseUsers;
             this.synchronizationItem = synchronizationItemWithMoodleCourse;
 
         }
@@ -363,7 +363,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             oodiStudent.automaticEnabled = automaticEnabled;
             oodiStudent.enrollmentStatusCode = enrollmentStatusCode;
 
-            this.OodiCourseUsers.students.add(oodiStudent);
+            this.oodiCourseUsers.students.add(oodiStudent);
             oodiStudentMap.put(moodleUserId, oodiStudent);
 
             return this;
@@ -373,7 +373,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             OodiTeacher oodiTeacher = new OodiTeacher();
             oodiTeacher.teacherId = TEACHER_ID;
 
-            this.OodiCourseUsers.teachers.add(oodiTeacher);
+            this.oodiCourseUsers.teachers.add(oodiTeacher);
             oodiTeacherMap.put(moodleUserId, oodiTeacher);
 
             return this;
@@ -389,11 +389,14 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
         }
 
         public CourseSynchronizationRequestChain expectUserRequestsToIAMAndMoodle() {
-            oodiStudentMap.forEach((moodleUserId, oodiStudent) -> expectFindStudentRequestToIAM(oodiStudent.studentNumber, STUDENT_USERNAME));
-            oodiTeacherMap.forEach((moodleUserId, oodiTeacher) -> expectFindEmployeeRequestToIAM(IAMService.TEACHER_ID_PREFIX + oodiTeacher.teacherId, TEACHER_USERNAME));
-
-            oodiStudentMap.forEach((moodleUserId, oodiStudent) -> expectGetUserRequestToMoodle(STUDENT_USERNAME + IAMService.DOMAIN_SUFFIX, moodleUserId));
-            oodiTeacherMap.forEach((moodleUserId, oodiTeacher) -> expectGetUserRequestToMoodle(TEACHER_USERNAME + IAMService.DOMAIN_SUFFIX, moodleUserId));
+            oodiStudentMap.forEach((moodleUserId, oodiStudent) -> expectFindStudentRequestToIAM(oodiStudent.studentNumber,
+                STUDENT_USERNAME));
+            oodiTeacherMap.forEach((moodleUserId, oodiTeacher) -> expectFindEmployeeRequestToIAM(
+                IAMService.TEACHER_ID_PREFIX + oodiTeacher.teacherId, TEACHER_USERNAME));
+            oodiStudentMap.forEach((moodleUserId, oodiStudent) -> expectGetUserRequestToMoodle(
+                STUDENT_USERNAME + IAMService.DOMAIN_SUFFIX, moodleUserId));
+            oodiTeacherMap.forEach((moodleUserId, oodiTeacher) -> expectGetUserRequestToMoodle(
+                TEACHER_USERNAME + IAMService.DOMAIN_SUFFIX, moodleUserId));
 
             return this;
         }

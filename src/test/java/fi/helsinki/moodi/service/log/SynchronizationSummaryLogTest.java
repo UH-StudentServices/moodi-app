@@ -15,7 +15,6 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 package fi.helsinki.moodi.service.log;
 
 import com.google.common.base.Stopwatch;
@@ -85,24 +84,25 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
         SynchronizationSummaryLog synchronizationSummaryLog = new SynchronizationSummaryLog(summary);
 
         SynchronizationSymmaryLogRoot logRoot = synchronizationSummaryLog.getSyncronizationSummary();
-        SynchronizationItemLogEntry synchronizationItemLogEntry = logRoot.courses.get(0);
-
-        UserEnrollmentsLogEntry userEnrollmentsLogEntry = synchronizationItemLogEntry.userEnrollments;
-        Map<UserSynchronizationItemStatus, Long> synchronizationItemLogEntrySummary = userEnrollmentsLogEntry.summary;
-        Map<UserSynchronizationItemStatus, List<UserSyncronizationItemLogEntry>> synchronizationItemLogEntryResults = userEnrollmentsLogEntry.results;
 
         assertEquals(synchronizationType, logRoot.type);
         assertEquals(0, logRoot.successfulItemsCount);
         assertEquals(1, logRoot.failedItemsCount);
+
+        SynchronizationItemLogEntry synchronizationItemLogEntry = logRoot.courses.get(0);
         assertEquals(COURSE_REALISATION_ID, synchronizationItemLogEntry.realisationId);
         assertEquals(COURSE_MOODLE_ID, synchronizationItemLogEntry.moodleId);
         assertEquals(EnrichmentStatus.SUCCESS, synchronizationItemLogEntry.enrichmentStatus);
         assertEquals(ProcessingStatus.ENROLLMENT_FAILURES, synchronizationItemLogEntry.processingStatus);
         assertEquals(SynchronizationItem.ENROLLMENT_FAILURES_MESSAGE, synchronizationItemLogEntry.message);
 
+        UserEnrollmentsLogEntry userEnrollmentsLogEntry = synchronizationItemLogEntry.userEnrollments;
+        Map<UserSynchronizationItemStatus, Long> synchronizationItemLogEntrySummary = userEnrollmentsLogEntry.summary;
+
         assertEquals(1, synchronizationItemLogEntrySummary.get(UserSynchronizationItemStatus.SUCCESS).intValue());
         assertEquals(1, synchronizationItemLogEntrySummary.get(UserSynchronizationItemStatus.ERROR).intValue());
 
+        Map<UserSynchronizationItemStatus, List<UserSyncronizationItemLogEntry>> synchronizationItemLogEntryResults = userEnrollmentsLogEntry.results;
         List<UserSyncronizationItemLogEntry> successfullUserEntries = synchronizationItemLogEntryResults.get(UserSynchronizationItemStatus.SUCCESS);
         List<UserSyncronizationItemLogEntry> failedUserEntries = synchronizationItemLogEntryResults.get(UserSynchronizationItemStatus.ERROR);
 
@@ -110,7 +110,6 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
         assertEquals(1, failedUserEntries.size());
 
         UserSyncronizationItemLogEntry successfulEntry = successfullUserEntries.get(0);
-        UserSyncronizationItemLogEntry failedEntry = failedUserEntries.get(0);
 
         assertTrue(successfulEntry.status.equals(UserSynchronizationItemStatus.SUCCESS));
         assertTrue(successfulEntry.moodleUserId.equals(STUDENT_MOODLE_USER_ID));
@@ -127,6 +126,7 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
         assertEquals(STUDENT_MOODLE_USERNAME, successfulEntry.moodleUsername);
         assertEquals(singletonList(STUDENT_ROLE_ID), successfulEntry.moodleRoleIds);
 
+        UserSyncronizationItemLogEntry failedEntry = failedUserEntries.get(0);
         assertTrue(failedEntry.status.equals(UserSynchronizationItemStatus.ERROR));
         assertTrue(failedEntry.moodleUserId.equals(TEACHER_MOODLE_USER_ID));
         assertNull(failedEntry.oodiStudent);
@@ -155,7 +155,6 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
 
     }
 
-
     private SynchronizationItem getSynchronizationItem(SynchronizationType synchronizationType) {
         Course course = new Course();
         course.moodleId = COURSE_MOODLE_ID;
@@ -165,20 +164,19 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
     }
 
     private UserSynchronizationItem getSuccessfulStudentUserSynchronizationItem() {
-        UserSynchronizationItem item = new UserSynchronizationItem(getOodiStudent());
-
         MoodleUserEnrollments moodleUserEnrollments = new MoodleUserEnrollments();
         MoodleRole moodleRole = new MoodleRole();
         moodleRole.roleId = STUDENT_ROLE_ID;
         moodleUserEnrollments.username = STUDENT_MOODLE_USERNAME;
         moodleUserEnrollments.roles = singletonList(moodleRole);
+        UserSynchronizationItem item = new UserSynchronizationItem(getOodiStudent());
 
         return enrichUserSynchronizationItem(
             item,
             UserSynchronizationItemStatus.SUCCESS,
             STUDENT_MOODLE_USER_ID,
-            newArrayList(new UserSynchronizationAction(UserSynchronizationActionType.REMOVE_ROLES, Sets.newHashSet(STUDENT_ROLE_ID), STUDENT_MOODLE_USER_ID)
-                .withSuccessStatus()),
+            newArrayList(new UserSynchronizationAction(UserSynchronizationActionType.REMOVE_ROLES, Sets.newHashSet(STUDENT_ROLE_ID),
+                STUDENT_MOODLE_USER_ID).withSuccessStatus()),
             moodleUserEnrollments);
     }
 
@@ -192,7 +190,9 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
             item,
             UserSynchronizationItemStatus.ERROR,
             TEACHER_MOODLE_USER_ID,
-            newArrayList(new UserSynchronizationAction(UserSynchronizationActionType.ADD_ROLES, Sets.newHashSet(TEACHER_ROLE_ID), TEACHER_MOODLE_USER_ID)
+            newArrayList(new UserSynchronizationAction(UserSynchronizationActionType.ADD_ROLES, Sets.newHashSet(TEACHER_ROLE_ID),
+                TEACHER_MOODLE_USER_ID)
+
                 .withErrorStatus()),
             moodleUserEnrollments);
     }

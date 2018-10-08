@@ -1,3 +1,20 @@
+/*
+ * This file is part of Moodi application.
+ *
+ * Moodi application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Moodi application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package fi.helsinki.moodi.integration.iam;
 
 import org.slf4j.Logger;
@@ -11,13 +28,13 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public class IAMMockClient implements IAMClient {
 
-    private static final Logger LOGGER = getLogger(IAMMockClient.class);
+    private static final Logger logger = getLogger(IAMMockClient.class);
 
     private final Map<String, String> mockUsers;
 
     public IAMMockClient(Map<String, String> mockUsers) {
         this.mockUsers = mockUsers;
-        LOGGER.info("--- Using mock IAM client! ---");
+        logger.info("--- Using mock IAM client! ---");
     }
 
     @Override
@@ -34,10 +51,10 @@ public class IAMMockClient implements IAMClient {
         String username = mockUsers.get(key);
 
         if (username != null) {
-            LOGGER.info("Username {} found for {}", username, key);
+            logger.info("Username {} found for {}", username, key);
             return singletonList(username);
         } else {
-            LOGGER.info("Username not found for {}", key);
+            logger.info("Username not found for {}", key);
             return new ArrayList<>();
         }
     }

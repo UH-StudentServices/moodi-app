@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @Service
 public class EnricherService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnricherService.class);
+    private static final Logger logger = LoggerFactory.getLogger(EnricherService.class);
 
     private final EnrichExecutor enrichExecutor;
 

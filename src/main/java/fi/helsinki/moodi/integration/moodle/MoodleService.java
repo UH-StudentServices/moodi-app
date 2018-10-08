@@ -17,7 +17,6 @@
 
 package fi.helsinki.moodi.integration.moodle;
 
-import fi.helsinki.moodi.service.util.MapperService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,12 +27,10 @@ import java.util.Optional;
 public class MoodleService {
 
     private final MoodleClient moodleClient;
-    private final MapperService mapperService;
 
     @Autowired
-    public MoodleService(MoodleClient moodleClient, MapperService mapperService) {
+    public MoodleService(MoodleClient moodleClient) {
         this.moodleClient = moodleClient;
-        this.mapperService = mapperService;
     }
 
     public long createCourse(final MoodleCourse course) {
@@ -46,7 +43,7 @@ public class MoodleService {
         } else {
             return Optional.empty();
         }
-    };
+    }
 
     public long createUser(final String username, final String firstName, final String lastName,
                            final String email, final String password, final String idNumber) {

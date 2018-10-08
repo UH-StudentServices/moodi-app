@@ -61,7 +61,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
     @Test
     public void thatOverYearOldCourseIsRemoved() {
         String endDateInPast = DateUtil.getOverYearAgoPastDateString();
-        setupOodiCourseUnitRealisationResponse(endDateInPast, true, false , APPROVED_ENROLLMENT_STATUS_CODE);
+        setupOodiCourseUnitRealisationResponse(endDateInPast, true, false, APPROVED_ENROLLMENT_STATUS_CODE);
 
         Course course = findCourse();
 

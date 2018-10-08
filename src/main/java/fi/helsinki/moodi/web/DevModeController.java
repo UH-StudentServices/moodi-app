@@ -142,7 +142,8 @@ public class DevModeController {
         final OodiCourseUnitRealisation realisation = getOodiCourse(realisationId);
 
         final List<MoodleUser> students = realisation.students.stream()
-                .map(s -> new MoodleUser("student", s.firstNames, s.lastName, iamService.getStudentUsernameList(s.studentNumber).get(0), s.studentNumber))
+                .map(s -> new MoodleUser("student", s.firstNames, s.lastName,
+                    iamService.getStudentUsernameList(s.studentNumber).get(0), s.studentNumber))
                 .collect(Collectors.toList());
 
         final List<MoodleUser> teachers = realisation.teachers.stream()

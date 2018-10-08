@@ -42,7 +42,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Component
 public class IncrementalSynchronizationCourseLoader implements CourseLoader {
 
-    private static final Logger LOGGER = getLogger(IncrementalSynchronizationCourseLoader.class);
+    private static final Logger logger = getLogger(IncrementalSynchronizationCourseLoader.class);
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final CourseService courseService;
@@ -70,7 +70,7 @@ public class IncrementalSynchronizationCourseLoader implements CourseLoader {
         final LocalDateTime afterDate =
                 lastRun.map(s -> s.completed).orElse(timeService.getCurrentUTCDateTime().minusDays(1));
 
-        LOGGER.debug("Last successful synchronization run at {}", FORMATTER.format(afterDate));
+        logger.debug("Last successful synchronization run at {}", FORMATTER.format(afterDate));
 
         final List<Long> realisationIds = oodiService.getCourseChanges(afterDate)
                 .stream()

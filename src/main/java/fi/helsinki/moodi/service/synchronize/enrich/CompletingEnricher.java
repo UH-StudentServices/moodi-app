@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CompletingEnricher extends AbstractEnricher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompletingEnricher.class);
+    private static final Logger logger = LoggerFactory.getLogger(CompletingEnricher.class);
 
     protected CompletingEnricher() {
         super(4);
@@ -38,6 +38,6 @@ public class CompletingEnricher extends AbstractEnricher {
 
     @Override
     protected Logger getLogger() {
-        return LOGGER;
+        return logger;
     }
 }

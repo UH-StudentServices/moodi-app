@@ -41,7 +41,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public class MoodleClient {
 
-    private static final Logger LOGGER = getLogger(MoodleClient.class);
+    private static final Logger logger = getLogger(MoodleClient.class);
 
     private final String baseUrl;
     private final RestTemplate restTemplate;
@@ -127,7 +127,6 @@ public class MoodleClient {
         }
     }
 
-
     public void removeEnrollments(final List<MoodleEnrollment> moodleEnrollments) {
         final MultiValueMap<String, String> params = createParametersForFunction("enrol_manual_unenrol_users");
 
@@ -144,7 +143,7 @@ public class MoodleClient {
         }
     }
 
-    @Cacheable(value="moodle-client.moodle-user-by-username", unless="#result == null")
+    @Cacheable(value = "moodle-client.moodle-user-by-username", unless = "#result == null")
     public MoodleUser getUser(final List<String> username) {
         final MultiValueMap<String, String> params = createParametersForFunction("core_user_get_users_by_field");
         params.set("field", "username");
@@ -233,8 +232,6 @@ public class MoodleClient {
         }
     }
 
-
-
     private <T> T handleException(final String message, final Exception e) {
         if (e instanceof MoodiException) {
             throw (MoodiException) e;
@@ -272,12 +269,12 @@ public class MoodleClient {
             final boolean readOnly)
             throws IOException {
 
-        LOGGER.info("Invoke url: {} with params: {}", baseUrl, paramsToString(params));
+        logger.info("Invoke url: {} with params: {}", baseUrl, paramsToString(params));
 
         final String body = getRestTemplate(readOnly)
             .postForObject(baseUrl, new HttpEntity<>(params, createHeaders()), String.class);
 
-        LOGGER.debug("Got response body:\n{}", body);
+        logger.debug("Got response body:\n{}", body);
 
         switch (responseBodyEvaluator.evaluate(body)) {
             case CONTINUE:
@@ -288,6 +285,7 @@ public class MoodleClient {
                 return null;
             case RETURN_BODY:
                 return (T) body;
+            default:
         }
 
         try {
@@ -300,7 +298,7 @@ public class MoodleClient {
     }
 
     private MoodleClientException createMoodleClientException(final String body) throws IOException {
-        LOGGER.error("Got unexpected response body " + body);
+        logger.error("Got unexpected response body " + body);
         final Map<String, String> map = objectMapper.readValue(body, Map.class);
         return new MoodleClientException(map.get("message"), map.get("exception"), map.get("errorcode"));
     }
@@ -313,7 +311,7 @@ public class MoodleClient {
             RETURN_BODY,
             RETURN_NULL,
             ERROR
-        };
+        }
 
         Action evaluate(String responseBody);
     }

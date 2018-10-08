@@ -40,5 +40,4 @@ public enum OodiLocale {
         return localeString;
     }
 
-
 }

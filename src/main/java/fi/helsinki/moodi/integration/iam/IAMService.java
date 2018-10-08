@@ -17,14 +17,11 @@
 
 package fi.helsinki.moodi.integration.iam;
 
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static org.slf4j.LoggerFactory.getLogger;
 
 @Service
 public class IAMService {
