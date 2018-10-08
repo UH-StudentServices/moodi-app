@@ -44,7 +44,6 @@ public class OodiClientGetCourseChangesTest extends AbstractMoodiIntegrationTest
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess(Fixtures.asString("/oodi/course-changes.json"), MediaType.APPLICATION_JSON));
 
-
         final List<OodiCourseChange> changes = oodiClient.getCourseChanges(LocalDateTime.of(2015, 1, 20, 0, 0, 0));
         assertEquals(1, changes.size());
     }

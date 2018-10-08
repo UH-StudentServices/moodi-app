@@ -62,7 +62,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 public abstract class AbstractMoodiIntegrationTest {
     private static final String EMPTY_LIST_RESPONSE = "[]";
     private static final String EXPECTED_COURSE_ID = MoodleCourseBuilder.MOODLE_COURSE_ID_PREFIX + 102374742;
-    protected static final String ERROR_RESPONSE = "{\"exception\":\"webservice_access_exception\",\"errorcode\":\"accessexception\",\"message\":\"P\\u00e4\\u00e4syn hallinnan poikkeus\"}";
+    protected static final String ERROR_RESPONSE =
+        "{\"exception\":\"webservice_access_exception\",\"errorcode\":\"accessexception\",\"message\":\"P\\u00e4\\u00e4syn hallinnan poikkeus\"}";
     protected static final String EMPTY_OK_RESPONSE = "";
     protected static final String NULL_OK_RESPONSE = "null";
     protected static final String NULL_DATA_RESPONSE = "{\"data\": null}";
@@ -70,7 +71,7 @@ public abstract class AbstractMoodiIntegrationTest {
     protected static final int APPROVED_ENROLLMENT_STATUS_CODE = 3;
     protected static final int NON_APPROVED_ENROLLMENT_STATUS_CODE = 10;
 
-    private static final ObjectMapper testObjectMapper = new ObjectMapper();
+    private static final ObjectMapper TEST_OBJECT_MAPPER = new ObjectMapper();
 
     @Autowired
     private WebApplicationContext context;
@@ -106,6 +107,7 @@ public abstract class AbstractMoodiIntegrationTest {
     protected String getMoodleBaseUrl() {
         return environment.getProperty("integration.moodle.baseUrl");
     }
+
     protected String getOodiUrl() {
         return environment.getProperty("integration.oodi.url");
     }
@@ -155,7 +157,7 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     public static String toJson(Object object) throws IOException {
-        return testObjectMapper.writeValueAsString(object);
+        return TEST_OBJECT_MAPPER.writeValueAsString(object);
     }
 
     protected final void expectEnrollmentRequestToMoodle(final MoodleEnrollment... enrollments) {
@@ -167,13 +169,32 @@ public abstract class AbstractMoodiIntegrationTest {
         expectEnrollmentRequestToMoodleWithResponse(response, coreFunctionName, this::enrollUsersPartsBuilder, enrollments);
     }
 
+    private void expectEnrollmentRequestToMoodleWithResponse(String response, String coreFunctionName,
+                                                             BiFunction<MoodleEnrollment, Integer, Stream<String>> partsBuilder,
+                                                             MoodleEnrollment... enrollments) {
+        String partsSring = IntStream
+            .range(0, enrollments.length)
+            .mapToObj(index -> index)
+            .flatMap(index -> partsBuilder.apply(enrollments[index], index))
+            .collect(Collectors.joining("&"));
+
+        final String payload = String.format("wstoken=xxxx1234&wsfunction=%s&moodlewsrestformat=json&%s", coreFunctionName, partsSring);
+
+        moodleMockServer.expect(requestTo(getMoodleRestUrl()))
+            .andExpect(method(HttpMethod.POST))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
+            .andExpect(content().string(payload))
+            .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
+    }
+
     protected final void expectAssignRolesToMoodle(boolean isAssign, MoodleEnrollment... enrollments) {
         expectAssignRolesToMoodleWithResponse(EMPTY_OK_RESPONSE, isAssign, enrollments);
     }
 
     protected final void expectAssignRolesToMoodleWithResponse(String response, boolean isAssign, MoodleEnrollment... enrollments) {
         final String coreFunctionName = isAssign ? "core_role_assign_roles" : "core_role_unassign_roles";
-        expectEnrollmentRequestToMoodleWithResponse(response, coreFunctionName, isAssign ? this::assignRolesPartsBuilder : this::unAssignRolesPartsBuilder, enrollments);
+        expectEnrollmentRequestToMoodleWithResponse(response, coreFunctionName, isAssign ? this::assignRolesPartsBuilder :
+            this::unAssignRolesPartsBuilder, enrollments);
     }
 
     private Stream<String> enrollUsersPartsBuilder(MoodleEnrollment enrollment, int index) {
@@ -198,31 +219,7 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     private Stream<String> unAssignRolesPartsBuilder(MoodleEnrollment enrollment, int index) {
-       return updateRolesPartsBuilder(enrollment, index, "unassignments");
-    }
-
-    private void expectEnrollmentRequestToMoodleWithResponse(String response, String coreFunctionName,
-                                                 BiFunction<MoodleEnrollment, Integer, Stream<String>> partsBuilder,
-                                                 MoodleEnrollment... enrollments) {
-        String partsSring = IntStream
-            .range(0, enrollments.length)
-            .mapToObj(index -> index)
-            .flatMap(index -> partsBuilder.apply(enrollments[index], index))
-            .collect(Collectors.joining("&"));
-
-        final String payload = String.format("wstoken=xxxx1234&wsfunction=%s&moodlewsrestformat=json&%s", coreFunctionName, partsSring);
-
-        moodleMockServer.expect(requestTo(getMoodleRestUrl()))
-            .andExpect(method(HttpMethod.POST))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
-            .andExpect(content().string(payload))
-            .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
-    }
-
-    private void expectEnrollmentRequestToMoodle(String coreFunctionName,
-                                                 BiFunction<MoodleEnrollment, Integer, Stream<String>> partsBuilder,
-                                                 MoodleEnrollment... enrollments) {
-        expectEnrollmentRequestToMoodleWithResponse(EMPTY_OK_RESPONSE, coreFunctionName, partsBuilder, enrollments);
+        return updateRolesPartsBuilder(enrollment, index, "unassignments");
     }
 
     private String createEnrollmentRequestPart(String property, String childProperty, String value, int index) {
@@ -278,7 +275,8 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     private void expectGetUserRequestToMoodleWithResponse(String username, String response) {
-        String payload = "wstoken=xxxx1234&wsfunction=core_user_get_users_by_field&moodlewsrestformat=json&field=username&values%5B0%5D=" + urlEncode(username);
+        String payload = "wstoken=xxxx1234&wsfunction=core_user_get_users_by_field&moodlewsrestformat=json&field=username&values%5B0%5D="
+            + urlEncode(username);
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
@@ -306,11 +304,11 @@ public abstract class AbstractMoodiIntegrationTest {
             .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andExpect(content().string(
                 "wstoken=xxxx1234&wsfunction=core_course_create_courses&moodlewsrestformat=json&courses%5B0%5D%5Bidnumber%5D=" +
-                    EXPECTED_COURSE_ID +
-                    "&courses%5B0%5D%5Bfullname%5D=Lapsuus+ja+yhteiskunta&courses%5B0%5D%5Bshortname%5D=Lapsuus++" +
-                    realisationId +
-                    "&courses%5B0%5D%5Bcategoryid%5D=73&courses%5B0%5D%5Bsummary%5D=Description+1+%28fi%29+Description+2+%28fi%29&courses%5B0%5D%5Bvisible%5D=0" +
-                    "&courses%5B0%5D%5Bcourseformatoptions%5D%5B0%5D%5Bname%5D=numsections&courses%5B0%5D%5Bcourseformatoptions%5D%5B0%5D%5Bvalue%5D=7"))
+                EXPECTED_COURSE_ID +
+                "&courses%5B0%5D%5Bfullname%5D=Lapsuus+ja+yhteiskunta&courses%5B0%5D%5Bshortname%5D=Lapsuus++" + realisationId +
+                "&courses%5B0%5D%5Bcategoryid%5D=73" +
+                "&courses%5B0%5D%5Bsummary%5D=Description+1+%28fi%29+Description+2+%28fi%29&courses%5B0%5D%5Bvisible%5D=0" +
+                "&courses%5B0%5D%5Bcourseformatoptions%5D%5B0%5D%5Bname%5D=numsections&courses%5B0%5D%5Bcourseformatoptions%5D%5B0%5D%5Bvalue%5D=7"))
             .andRespond(withSuccess("[{\"id\":\"" + moodleCourseIdToReturn + "\", \"shortname\":\"shortie\"}]", MediaType.APPLICATION_JSON));
     }
 

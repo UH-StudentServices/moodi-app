@@ -108,6 +108,17 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
                 MediaType.APPLICATION_JSON));
     }
 
+    protected void setupOodiCourseUnitRealisationResponse(String responseJson) {
+        expectGetCourseUsersRequestToOodi(
+            REALISATION_ID,
+            withSuccess(Fixtures.asString(
+                responseJson,
+                new ImmutableMap.Builder()
+                    .put("endDate", getFutureDateString())
+                    .build()),
+                MediaType.APPLICATION_JSON));
+    }
+
     protected void testSynchronizationSummary(SynchronizationType synchronizationType, String moodleResponse, boolean expectErrors) {
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, true);
@@ -122,7 +133,8 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
             new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID));
 
-        expectAssignRolesToMoodleWithResponse(moodleResponse, true, new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
+        expectAssignRolesToMoodleWithResponse(moodleResponse, true, new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID,
+            MOODLE_COURSE_ID));
 
         SynchronizationSummary summary = synchronizationService.synchronize(synchronizationType);
 
@@ -159,17 +171,6 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
         return summary;
     }
 
-    protected void setupOodiCourseUnitRealisationResponse(String responseJson) {
-        expectGetCourseUsersRequestToOodi(
-            REALISATION_ID,
-            withSuccess(Fixtures.asString(
-                    responseJson,
-                    new ImmutableMap.Builder()
-                        .put("endDate", getFutureDateString())
-                        .build()),
-                MediaType.APPLICATION_JSON));
-    }
-
     protected String getEnrollmentsResponse(int moodleUserId, long moodleRoleId, long moodiRoleId) {
         return String.format(
             "[{ \"id\" : \"%s\" , \"roles\" : [{\"roleid\" : %s}, {\"roleid\" : %s}]}]",
@@ -192,7 +193,6 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
         expectFindEmployeeRequestToIAM(teacherId, username);
         expectGetUserRequestToMoodle(username + USERNAME_SUFFIX, moodleId);
     }
-
 
     protected Course findCourse() {
         return courseService.findByRealisationId(REALISATION_ID).get();

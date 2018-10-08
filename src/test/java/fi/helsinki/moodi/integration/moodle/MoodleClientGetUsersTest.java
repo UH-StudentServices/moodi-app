@@ -40,7 +40,8 @@ public class MoodleClientGetUsersTest extends AbstractMoodiIntegrationTest {
     public void deserializeRespose() {
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
                 .andExpect(method(HttpMethod.POST))
-                .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_user_get_users_by_field&moodlewsrestformat=json&field=username&values%5B0%5D=integraatio"))
+                .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_user_get_users_by_field&moodlewsrestformat=json" +
+                    "&field=username&values%5B0%5D=integraatio"))
                 .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
                 .andRespond(withSuccess(Fixtures.asString("/moodle/get-users-one-username.json"), MediaType.APPLICATION_JSON));
 
@@ -54,7 +55,8 @@ public class MoodleClientGetUsersTest extends AbstractMoodiIntegrationTest {
     public void getWithTheSecondUsername() {
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
                 .andExpect(method(HttpMethod.POST))
-                .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_user_get_users_by_field&moodlewsrestformat=json&field=username&values%5B0%5D=first&values%5B1%5D=second"))
+                .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_user_get_users_by_field&moodlewsrestformat=json" +
+                    "&field=username&values%5B0%5D=first&values%5B1%5D=second"))
                 .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
                 .andRespond(withSuccess(Fixtures.asString("/moodle/get-users-second-username.json"), MediaType.APPLICATION_JSON));
 

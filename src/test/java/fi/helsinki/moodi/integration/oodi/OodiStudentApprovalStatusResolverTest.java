@@ -15,7 +15,6 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 package fi.helsinki.moodi.integration.oodi;
 
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
