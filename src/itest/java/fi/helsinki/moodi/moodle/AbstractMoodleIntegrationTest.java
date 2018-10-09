@@ -1,3 +1,20 @@
+/*
+ * This file is part of Moodi application.
+ *
+ * Moodi application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Moodi application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package fi.helsinki.moodi.moodle;
 
 import com.google.common.collect.ImmutableMap;
@@ -51,7 +68,6 @@ public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegra
     protected final StudentUser studentUserNotInMoodle = new StudentUser(STUDENT_NOT_IN_MOODLE_USERNAME, "012345678", true);
     protected final TeacherUser teacherUser = new TeacherUser(TEACHER_USERNAME, "011631484");
     protected final StudentUser teacherInStudentRole = new StudentUser(TEACHER_USERNAME, "011911609", true);
-
 
     @Before
     public void emptyCourses() {
@@ -123,20 +139,16 @@ public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegra
         }
     }
 
-    protected void expectCourseRealisationWithUsers(long courseId, List<StudentUser> students, List<TeacherUser> teachers) {
-        expectCourseRealisationWithUsers(this::expectGetCourseUnitRealisationRequestToOodi, courseId, students, teachers);
-    }
-
     protected void expectCourseUsersWithUsers(long courseId, List<StudentUser> students, List<TeacherUser> teachers) {
         expectCourseRealisationWithUsers(this::expectGetCourseUsersRequestToOodi, courseId, students, teachers);
     }
 
-    private void expectCourseRealisationWithUsers(
-        BiConsumer<Long, ResponseCreator> expectationFn,
-        long courseId,
-        List<StudentUser> students,
-        List<TeacherUser> teachers) {
+    protected void expectCourseRealisationWithUsers(long courseId, List<StudentUser> students, List<TeacherUser> teachers) {
+        expectCourseRealisationWithUsers(this::expectGetCourseUnitRealisationRequestToOodi, courseId, students, teachers);
+    }
 
+    private void expectCourseRealisationWithUsers(BiConsumer<Long, ResponseCreator> expectationFn, long courseId, List<StudentUser> students,
+        List<TeacherUser> teachers) {
         expectationFn.accept(
             courseId,
             withSuccess(Fixtures.asString(
@@ -150,16 +162,12 @@ public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegra
                     .build()),
                 MediaType.APPLICATION_JSON));
 
-        for(StudentUser studentUser : students) {
+        for (StudentUser studentUser : students) {
             expectFindStudentRequestToIAM(studentUser.studentNumber, studentUser.username);
         }
 
-        for(TeacherUser teacherUser : teachers) {
+        for (TeacherUser teacherUser : teachers) {
             expectFindEmployeeRequestToIAM(TEACHER_ID_PREFIX + teacherUser.teacherId, teacherUser.username);
         }
-
     }
-
-
-
 }

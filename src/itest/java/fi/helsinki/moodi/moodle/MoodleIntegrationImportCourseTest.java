@@ -44,11 +44,12 @@ public class MoodleIntegrationImportCourseTest extends AbstractMoodleIntegration
         assertEquals(2, moodleUserEnrollmentsList.size());
 
         MoodleUserEnrollments studentEnrollment = findEnrollmentsByUsername(moodleUserEnrollmentsList, STUDENT_USERNAME);
-        MoodleUserEnrollments teacherEnrollment = findEnrollmentsByUsername(moodleUserEnrollmentsList, TEACHER_USERNAME);
 
         assertEquals(2, studentEnrollment.roles.size());
         assertTrue(studentEnrollment.hasRole(mapperService.getMoodiRoleId()));
         assertTrue(studentEnrollment.hasRole(mapperService.getStudentRoleId()));
+
+        MoodleUserEnrollments teacherEnrollment = findEnrollmentsByUsername(moodleUserEnrollmentsList, TEACHER_USERNAME);
 
         assertEquals(2, teacherEnrollment.roles.size());
         assertTrue(teacherEnrollment.hasRole(mapperService.getMoodiRoleId()));
