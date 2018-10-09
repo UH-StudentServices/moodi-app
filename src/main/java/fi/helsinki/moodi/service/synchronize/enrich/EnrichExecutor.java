@@ -34,7 +34,7 @@ public class EnrichExecutor {
     @Autowired
     public EnrichExecutor(List<Enricher> enrichers) {
         this.enrichers = enrichers;
-        enrichers.sort((a,b) -> Integer.compare(a.getOrder(), b.getOrder()));
+        enrichers.sort((a, b) -> Integer.compare(a.getOrder(), b.getOrder()));
     }
 
     @Async("taskExecutor")

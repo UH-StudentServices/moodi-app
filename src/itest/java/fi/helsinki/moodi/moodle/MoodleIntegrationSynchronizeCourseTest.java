@@ -71,6 +71,7 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
         This role is never removed, even if other roles are removed. Note that only student role can be removed by Moodi
         if student is returned from Oodi with approved set to false.
      */
+
     private void assertMoodiRoleEnrollment(String username, List<MoodleUserEnrollments> moodleUserEnrollmentsList) {
         assertUserEnrollments(
             username,
