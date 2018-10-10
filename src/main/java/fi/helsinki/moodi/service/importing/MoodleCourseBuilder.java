@@ -49,7 +49,8 @@ public class MoodleCourseBuilder {
         String realisationName = getTranslation(oodiCourseUnitRealisation.realisationName, preferredLanguage);
         String shortName = getShortName(realisationName, oodiCourseUnitRealisation.realisationId);
         String moodleCategory = mapperService.getDefaultCategory();
-        String description =  getDescription(oodiCourseUnitRealisation, preferredLanguage);
+        String description = getDescription(oodiCourseUnitRealisation, preferredLanguage);
+        String courseLanguage = getFirstSupportedMoodleLanguageOrDefault(oodiCourseUnitRealisation);
 
         return new MoodleCourse(
             MOODLE_COURSE_ID_PREFIX + String.valueOf(oodiCourseUnitRealisation.realisationId),
@@ -58,7 +59,8 @@ public class MoodleCourseBuilder {
             moodleCategory,
             description,
             false,
-            DEFAULT_NUMBER_OF_SECTIONS
+            DEFAULT_NUMBER_OF_SECTIONS,
+            courseLanguage
         );
     }
 
@@ -83,6 +85,16 @@ public class MoodleCourseBuilder {
             .findFirst()
             .map(l -> l.langCode)
             .orElse(Constants.LANG_DEFAULT);
+    }
+
+    private String getFirstSupportedMoodleLanguageOrDefault(OodiCourseUnitRealisation oodiCourseUnitRealisation) {
+        return oodiCourseUnitRealisation.languages.isEmpty() ?
+                Constants.LANG_FI :
+                oodiCourseUnitRealisation.languages.stream()
+                .filter(l -> Constants.SUPPORTED_MOODLE_LANGS.contains(l.langCode))
+                .findFirst()
+                .map(l -> l.langCode)
+                .orElse(Constants.LANG_EN);
     }
 
     private Optional<String> getTranslationByLanguage(List<OodiLocalizedValue> oodiLocalizedValues, String language) {
