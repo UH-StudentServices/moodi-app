@@ -19,6 +19,8 @@ package fi.helsinki.moodi.integration.moodle;
 
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -35,18 +37,31 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 public class MoodleClientCreateCourseTest extends AbstractMoodiIntegrationTest {
     private final String WS_USER_ORIG_LANG = "en";
     private final Long WS_USER_MOODLE_ID = 3L;
-    private final String COURSE_LANG = "fi";
+    private final String LANG_FI = "fi";
+    private final String LANG_EN = "en";
     private final String WS_USER_NAME = "wsuser";
+    private String configuredWsUsername;
 
     @Autowired
     private MoodleClient moodleClient;
 
-    private final MoodleCourse course =
-            new MoodleCourse("12345", "Fullname", "Shortname", "1", "summary", false, 7, COURSE_LANG);
+
+    @Before
+    public void before() {
+        configuredWsUsername = moodleClient.wsUsername;
+    }
+
+    @After
+    public void after() {
+        moodleClient.wsUsername = configuredWsUsername;
+    }
 
 
     @Test
     public void creatingCourseWithShortnameThatIsAlreadyTaken() {
+
+        MoodleCourse course = getCourseWithLang(LANG_FI);
+
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_course_create_courses&moodlewsrestformat=json" +
@@ -69,17 +84,29 @@ public class MoodleClientCreateCourseTest extends AbstractMoodiIntegrationTest {
 
     @Test
     public void creatingCourseTemporarilySetsWsUserLangToCourseLang() {
-        String configuredWsUsername = moodleClient.wsUsername;
         moodleClient.wsUsername = WS_USER_NAME;
-        try {
 
-            expectGetUserRequestToMoodle(WS_USER_NAME, WS_USER_MOODLE_ID.toString(), WS_USER_ORIG_LANG);
-            expectUpdateUserLangRequestToMoodle(WS_USER_MOODLE_ID, COURSE_LANG);
-            expectCreateCourseRequestToMoodle();
-            expectUpdateUserLangRequestToMoodle(WS_USER_MOODLE_ID, WS_USER_ORIG_LANG);
-            moodleClient.createCourse(course);
-        } finally {
-            moodleClient.wsUsername = configuredWsUsername;
-        }
+        expectGetUserRequestToMoodle(WS_USER_NAME, WS_USER_MOODLE_ID.toString(), WS_USER_ORIG_LANG);
+        expectUpdateUserLangRequestToMoodle(WS_USER_MOODLE_ID, LANG_FI);
+        expectCreateCourseRequestToMoodle();
+        expectUpdateUserLangRequestToMoodle(WS_USER_MOODLE_ID, WS_USER_ORIG_LANG);
+
+        moodleClient.createCourse(getCourseWithLang(LANG_FI));
     }
+
+    @Test
+    public void creatingCourseDoesNotSetWsUserLangIfCourseLangSameAsUserLang() {
+        moodleClient.wsUsername = WS_USER_NAME;
+
+        expectGetUserRequestToMoodle(WS_USER_NAME, WS_USER_MOODLE_ID.toString(), WS_USER_ORIG_LANG);
+        expectCreateCourseRequestToMoodle();
+
+        moodleClient.createCourse(getCourseWithLang(WS_USER_ORIG_LANG));
+    }
+
+
+    private MoodleCourse getCourseWithLang(String lang) {
+        return new MoodleCourse("12345", "Fullname", "Shortname", "1", "summary", false, 7, lang);
+    }
+
 }

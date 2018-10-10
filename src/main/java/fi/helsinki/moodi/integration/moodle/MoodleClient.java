@@ -48,7 +48,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class MoodleClient {
 
     private static final Logger logger = getLogger(MoodleClient.class);
-    private Long cachedWsUserId = null;
 
     private final String baseUrl;
     private final RestTemplate restTemplate;
@@ -113,10 +112,9 @@ public class MoodleClient {
         params.set("courses[0][courseformatoptions][0][name]", "numsections");
         params.set("courses[0][courseformatoptions][0][value]", String.valueOf(course.numberOfSections));
 
-        String origLang = null;
+        LanguageSwitch langSwitch = null;
         try {
-            origLang = getWsUserLang();
-            setWsUserLang(course.langCode);
+            langSwitch = switchWsUserLang(course.langCode);
 
             return execute(params, new TypeReference<List<MoodleCourseData>>() {}, DEFAULT_EVALUATION, false)
                 .stream()
@@ -126,40 +124,26 @@ public class MoodleClient {
         } catch (Exception e) {
             return handleException("Error executing method: importCourse", e);
         } finally {
-            setWsUserLang(origLang);
+            revertWsUserLang(langSwitch);
         }
     }
 
-    private String getWsUserLang() {
-        MoodleUser wsUser = getWsUser();
-        return wsUser == null ? null : wsUser.lang;
+    private LanguageSwitch switchWsUserLang(String newLang) {
+        if (wsUsername != null && newLang != null) {
+            MoodleUser wsUser = getUser(Arrays.asList(wsUsername));
+            if (wsUser != null && wsUser.id != null && !newLang.equals(wsUser.lang)) {
+                setUserLang(wsUser.id, newLang);
+                return new LanguageSwitch(wsUser.id, wsUser.lang, newLang);
+            }
+        }
+        return null;
     }
 
-    private void setWsUserLang(String langCode) {
-        Long wsUserId = getWsUserId();
-        if (wsUsername != null && wsUserId != null && langCode != null) {
-            setUserLang(wsUserId, langCode);
+    private void revertWsUserLang(LanguageSwitch idAndLang) {
+        if (idAndLang != null) {
+            setUserLang(idAndLang.id, idAndLang.origLang);
         }
     }
-
-    private MoodleUser getWsUser() {
-        MoodleUser ret = null;
-        if (wsUsername != null) {
-            ret = getUser(Arrays.asList(wsUsername));
-            cachedWsUserId = ret.id;
-        }
-        return ret;
-    }
-
-    private Long getWsUserId() {
-        if (cachedWsUserId == null) {
-            MoodleUser wsUser = getWsUser();
-            cachedWsUserId = wsUser == null ? null : wsUser.id;
-        }
-
-        return cachedWsUserId;
-    }
-
 
     public void addEnrollments(final List<MoodleEnrollment> moodleEnrollments) {
         final MultiValueMap<String, String> params = createParametersForFunction("enrol_manual_enrol_users");
@@ -394,5 +378,17 @@ public class MoodleClient {
         }
 
         return sb.toString();
+    }
+
+    private class LanguageSwitch {
+        public Long id;
+        public String origLang;
+        public String newLang;
+
+        public LanguageSwitch(Long id, String origLang, String newLang) {
+            this.id = id;
+            this.origLang = origLang;
+            this.newLang = newLang;
+        }
     }
 }
