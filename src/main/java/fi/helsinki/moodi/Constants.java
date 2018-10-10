@@ -17,12 +17,16 @@
 
 package fi.helsinki.moodi;
 
+import java.util.Arrays;
+import java.util.List;
+
 public final class Constants {
 
     public static final String LANG_FI = "fi";
     public static final String LANG_SV = "sv";
     public static final String LANG_EN = "en";
     public static final String LANG_DEFAULT = LANG_FI;
+    public static final List<String> SUPPORTED_MOODLE_LANGS = Arrays.asList(LANG_FI, LANG_EN, LANG_SV);
 
     private Constants() {}
 }

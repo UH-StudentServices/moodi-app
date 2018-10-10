@@ -97,6 +97,36 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         assertEquals(String.join(" ", DESCRIPTION_1_EN, DESCRIPTION_2_EN, DESCRIPTION_3_EN), moodleCourse.summary);
     }
 
+    @Test
+    public void testGetFirstSupportedMoodleLanguageOrDefaultWithOnlySupportedLangs() {
+        testGetFirstSupportedMoodleLanguageOrDefault(LANG_FI, LANG_FI, LANG_EN, LANG_SV);
+    }
+
+    @Test
+    public void testGetFirstSupportedMoodleLanguageOrDefaultWithSomeUnsupportedLangs() {
+        testGetFirstSupportedMoodleLanguageOrDefault(LANG_FI, "ru", "es", LANG_FI, LANG_SV);
+    }
+
+    @Test
+    public void testGetFirstSupportedMoodleLanguageOrDefaultWithOnlyUnsupportedLangs() {
+        testGetFirstSupportedMoodleLanguageOrDefault(LANG_EN, "ru", "es");
+    }
+
+    @Test
+    public void testGetFirstSupportedMoodleLanguageOrDefaultWithoutCourseLangs() {
+        testGetFirstSupportedMoodleLanguageOrDefault(LANG_FI);
+    }
+
+
+    private void testGetFirstSupportedMoodleLanguageOrDefault(String expectedLang, String... courseLangs) {
+        OodiCourseUnitRealisation oodiCourseUnitRealisation = getOodiCourseUnitRealisation(courseLangs);
+
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation);
+
+        assertEquals(expectedLang, moodleCourse.langCode);
+    }
+
+
     private OodiCourseUnitRealisation getOodiCourseUnitRealisation(String... langcodes) {
         List<OodiLanguage> languages = Arrays.asList(langcodes).stream()
             .map(this::getOodiLanguage)

@@ -24,6 +24,7 @@ import fi.helsinki.moodi.service.importing.ImportCourseRequest;
 import fi.helsinki.moodi.service.importing.MoodleCourseBuilder;
 import fi.helsinki.moodi.service.util.MapperService;
 import org.flywaydb.core.Flyway;
+import org.hamcrest.core.StringStartsWith;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -50,7 +51,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -283,18 +287,18 @@ public abstract class AbstractMoodiIntegrationTest {
         expectGetUserRequestToMoodleWithResponse(username, EMPTY_LIST_RESPONSE);
     }
 
-    protected final void expectGetUserRequestToMoodle(final String username, final long userMoodleId) {
-        expectGetUserRequestToMoodle(username, String.valueOf(userMoodleId));
+    protected final void expectGetUserRequestToMoodle(final String expectedUsername, final long returnUserMoodleId) {
+        expectGetUserRequestToMoodle(expectedUsername, String.valueOf(returnUserMoodleId), "en");
     }
 
-    protected final void expectGetUserRequestToMoodle(final String username, final String userMoodleId) {
-        final String response = String.format("[{\"id\":\"%s\", \"username\":\"%s\", \"email\":\"\", \"fullname\":\"\"}]", userMoodleId, username);
-        expectGetUserRequestToMoodleWithResponse(username, response);
+    protected final void expectGetUserRequestToMoodle(final String expectedUsername, final String returnUserMoodleId, String returnLangCode) {
+        final String response = String.format("[{\"id\":\"%s\", \"username\":\"%s\", \"email\":\"\", \"fullname\":\"\", \"lang\": \"%s\"}]", returnUserMoodleId, expectedUsername, returnLangCode);
+        expectGetUserRequestToMoodleWithResponse(expectedUsername, response);
     }
 
-    private void expectGetUserRequestToMoodleWithResponse(String username, String response) {
+    private void expectGetUserRequestToMoodleWithResponse(String expectedUsername, String response) {
         String payload = "wstoken=xxxx1234&wsfunction=core_user_get_users_by_field&moodlewsrestformat=json&field=username&values%5B0%5D="
-            + urlEncode(username);
+            + urlEncode(expectedUsername);
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
@@ -330,6 +334,23 @@ public abstract class AbstractMoodiIntegrationTest {
             .andRespond(withSuccess("[{\"id\":\"" + moodleCourseIdToReturn + "\", \"shortname\":\"shortie\"}]", MediaType.APPLICATION_JSON));
     }
 
+    protected final void expectCreateCourseRequestToMoodle() {
+        moodleMockServer.expect(requestTo(getMoodleRestUrl()))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
+                .andExpect(content().string(StringStartsWith.startsWith("wstoken=xxxx1234&wsfunction=core_course_create_courses&moodlewsrestformat=json&courses%5B0%5D%5Bidnumber%5D=")))
+                .andRespond(withSuccess("[{\"id\":\"1\", \"shortname\":\"shortie\"}]", MediaType.APPLICATION_JSON));
+    }
+
+    protected final void expectUpdateUserLangRequestToMoodle(final Long userId, final String langCode) {
+        moodleMockServer.expect(requestTo(getMoodleRestUrl()))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
+                .andExpect(content().string(
+                        "wstoken=xxxx1234&wsfunction=core_user_update_users&moodlewsrestformat=json" + addUrlParam("users[0][id]", userId.toString()) + addUrlParam("users[0][lang]", langCode)))
+                .andRespond(withSuccess("null", MediaType.APPLICATION_JSON));
+    }
+
     protected final void expectGetEnrollmentsRequestToMoodle(final int courseId) {
         expectGetEnrollmentsRequestToMoodle(courseId, "[]");
     }
@@ -342,6 +363,10 @@ public abstract class AbstractMoodiIntegrationTest {
             .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andExpect(content().string(payload))
             .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
+    }
+
+    private String addUrlParam(String name, String value) {
+        return "&" + urlEncode(name) + "=" + urlEncode(value);
     }
 
     private String urlEncode(final String string) {

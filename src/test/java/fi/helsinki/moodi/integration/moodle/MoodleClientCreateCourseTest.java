@@ -26,13 +26,24 @@ import org.springframework.http.MediaType;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 public class MoodleClientCreateCourseTest extends AbstractMoodiIntegrationTest {
+    private final String WS_USER_ORIG_LANG = "en";
+    private final Long WS_USER_MOODLE_ID = 3L;
+    private final String COURSE_LANG = "fi";
+    private final String WS_USER_NAME = "wsuser";
 
     @Autowired
     private MoodleClient moodleClient;
+
+    private final MoodleCourse course =
+            new MoodleCourse("12345", "Fullname", "Shortname", "1", "summary", false, 7, COURSE_LANG);
+
 
     @Test
     public void creatingCourseWithShortnameThatIsAlreadyTaken() {
@@ -46,9 +57,6 @@ public class MoodleClientCreateCourseTest extends AbstractMoodiIntegrationTest {
                 .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
                 .andRespond(withSuccess(Fixtures.asString("/moodle/create-course-shortname-already-in-use.json"), MediaType.APPLICATION_JSON));
 
-        final MoodleCourse course =
-                new MoodleCourse("12345", "Fullname", "Shortname", "1", "summary", false, 7);
-
         try {
             moodleClient.createCourse(course);
             fail("We want an exception!");
@@ -56,6 +64,22 @@ public class MoodleClientCreateCourseTest extends AbstractMoodiIntegrationTest {
             assertEquals("Short name is already used for another course (ICT Driv 103127921)", e.getMessage());
             assertEquals("moodle_exception", e.getMoodleException());
             assertEquals("shortnametaken", e.getErrorCode());
+        }
+    }
+
+    @Test
+    public void creatingCourseTemporarilySetsWsUserLangToCourseLang() {
+        String configuredWsUsername = moodleClient.wsUsername;
+        moodleClient.wsUsername = WS_USER_NAME;
+        try {
+
+            expectGetUserRequestToMoodle(WS_USER_NAME, WS_USER_MOODLE_ID.toString(), WS_USER_ORIG_LANG);
+            expectUpdateUserLangRequestToMoodle(WS_USER_MOODLE_ID, COURSE_LANG);
+            expectCreateCourseRequestToMoodle();
+            expectUpdateUserLangRequestToMoodle(WS_USER_MOODLE_ID, WS_USER_ORIG_LANG);
+            moodleClient.createCourse(course);
+        } finally {
+            moodleClient.wsUsername = configuredWsUsername;
         }
     }
 }
