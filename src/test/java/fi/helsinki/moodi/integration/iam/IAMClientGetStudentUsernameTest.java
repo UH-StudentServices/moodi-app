@@ -54,7 +54,7 @@ public class IAMClientGetStudentUsernameTest extends AbstractMoodiIntegrationTes
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(Fixtures.asString("/iam/student-username-008.json"), MediaType.APPLICATION_JSON));
 
-        assertEquals(Arrays.asList("auneslu1","aunesluo"), iamClient.getStudentUsernameList("008"));
+        assertEquals(Arrays.asList("auneslu1", "aunesluo"), iamClient.getStudentUsernameList("008"));
     }
 
     @Test

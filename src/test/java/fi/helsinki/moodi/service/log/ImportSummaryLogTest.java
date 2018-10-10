@@ -52,9 +52,9 @@ public class ImportSummaryLogTest extends AbstractSummaryLogTest {
         assertEquals(0, importSummaryLog.enrolledTeachers.size());
         assertEquals(0, importSummaryLog.failedStudents.size());
         assertEquals(1, importSummaryLog.failedTeachers.size());
-        assertEquals(STUDENT_NUMBER, ((StudentEnrollmentEntry)importSummaryLog.enrolledStudents
+        assertEquals(STUDENT_NUMBER, ((StudentEnrollmentEntry) importSummaryLog.enrolledStudents
             .get(0)).studentNumber);
-        assertEquals(TEACHER_ID, ((TeacherEnrollmentEntry)importSummaryLog.failedTeachers
+        assertEquals(TEACHER_ID, ((TeacherEnrollmentEntry) importSummaryLog.failedTeachers
             .get(CODE_ENROLLMENT_FAILED.toString()).get(0)).teacherId);
 
     }
