@@ -54,7 +54,12 @@ public class MoodleConfig {
             wstoken(),
             objectMapper,
             moodleRestTemplate(),
-            moodleReadOnlyRestTemplate());
+            moodleReadOnlyRestTemplate(),
+            moodleWsUsername());
+    }
+
+    private String moodleWsUsername() {
+        return environment.getProperty("integration.moodle.wsUsername");
     }
 
     private RestTemplate createRestTemplate(HttpRequestRetryHandler httpRequestRetryHandler) {
