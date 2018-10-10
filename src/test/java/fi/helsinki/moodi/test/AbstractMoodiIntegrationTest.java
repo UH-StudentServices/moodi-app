@@ -292,7 +292,8 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     protected final void expectGetUserRequestToMoodle(final String expectedUsername, final String returnUserMoodleId, String returnLangCode) {
-        final String response = String.format("[{\"id\":\"%s\", \"username\":\"%s\", \"email\":\"\", \"fullname\":\"\", \"lang\": \"%s\"}]", returnUserMoodleId, expectedUsername, returnLangCode);
+        final String response = String.format("[{\"id\":\"%s\", \"username\":\"%s\", \"email\":\"\", \"fullname\":\"\", \"lang\": \"%s\"}]",
+                returnUserMoodleId, expectedUsername, returnLangCode);
         expectGetUserRequestToMoodleWithResponse(expectedUsername, response);
     }
 
@@ -338,7 +339,8 @@ public abstract class AbstractMoodiIntegrationTest {
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
-                .andExpect(content().string(StringStartsWith.startsWith("wstoken=xxxx1234&wsfunction=core_course_create_courses&moodlewsrestformat=json&courses%5B0%5D%5Bidnumber%5D=")))
+                .andExpect(content().string(StringStartsWith
+                        .startsWith("wstoken=xxxx1234&wsfunction=core_course_create_courses&moodlewsrestformat=json&courses%5B0%5D%5Bidnumber%5D=")))
                 .andRespond(withSuccess("[{\"id\":\"1\", \"shortname\":\"shortie\"}]", MediaType.APPLICATION_JSON));
     }
 
@@ -347,7 +349,8 @@ public abstract class AbstractMoodiIntegrationTest {
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
                 .andExpect(content().string(
-                        "wstoken=xxxx1234&wsfunction=core_user_update_users&moodlewsrestformat=json" + addUrlParam("users[0][id]", userId.toString()) + addUrlParam("users[0][lang]", langCode)))
+                        "wstoken=xxxx1234&wsfunction=core_user_update_users&moodlewsrestformat=json" +
+                                addUrlParam("users[0][id]", userId.toString()) + addUrlParam("users[0][lang]", langCode)))
                 .andRespond(withSuccess("null", MediaType.APPLICATION_JSON));
     }
 
