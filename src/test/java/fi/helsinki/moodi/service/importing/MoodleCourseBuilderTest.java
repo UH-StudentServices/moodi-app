@@ -117,7 +117,6 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         testGetFirstSupportedMoodleLanguageOrDefault(LANG_FI);
     }
 
-
     private void testGetFirstSupportedMoodleLanguageOrDefault(String expectedLang, String... courseLangs) {
         OodiCourseUnitRealisation oodiCourseUnitRealisation = getOodiCourseUnitRealisation(courseLangs);
 
@@ -125,7 +124,6 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
 
         assertEquals(expectedLang, moodleCourse.langCode);
     }
-
 
     private OodiCourseUnitRealisation getOodiCourseUnitRealisation(String... langcodes) {
         List<OodiLanguage> languages = Arrays.asList(langcodes).stream()

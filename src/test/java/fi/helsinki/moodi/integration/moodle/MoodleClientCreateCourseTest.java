@@ -35,16 +35,15 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 public class MoodleClientCreateCourseTest extends AbstractMoodiIntegrationTest {
-    private final String WS_USER_ORIG_LANG = "en";
-    private final Long WS_USER_MOODLE_ID = 3L;
-    private final String LANG_FI = "fi";
-    private final String LANG_EN = "en";
-    private final String WS_USER_NAME = "wsuser";
+    private static final String WS_USER_ORIG_LANG = "en";
+    private static final Long WS_USER_MOODLE_ID = 3L;
+    private static final String LANG_FI = "fi";
+    private static final String LANG_EN = "en";
+    private static final String WS_USER_NAME = "wsuser";
     private String configuredWsUsername;
 
     @Autowired
     private MoodleClient moodleClient;
-
 
     @Before
     public void before() {
@@ -55,7 +54,6 @@ public class MoodleClientCreateCourseTest extends AbstractMoodiIntegrationTest {
     public void after() {
         moodleClient.wsUsername = configuredWsUsername;
     }
-
 
     @Test
     public void creatingCourseWithShortnameThatIsAlreadyTaken() {
@@ -103,7 +101,6 @@ public class MoodleClientCreateCourseTest extends AbstractMoodiIntegrationTest {
 
         moodleClient.createCourse(getCourseWithLang(WS_USER_ORIG_LANG));
     }
-
 
     private MoodleCourse getCourseWithLang(String lang) {
         return new MoodleCourse("12345", "Fullname", "Shortname", "1", "summary", false, 7, lang);
