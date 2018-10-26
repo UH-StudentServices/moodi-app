@@ -40,7 +40,7 @@ public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
     private static final long REALISATION_ID = 12345L;
 
     private static final String COURSE_NOT_FOUND_ERROR_MESSAGE = String.format("Course not found from Oodi with id %s", REALISATION_ID);
-    private static final String EXCEPTION_MESSAGE = "Received exception with status 500 from from oodi: Something went wrong";
+    private static final String EXCEPTION_MESSAGE = "Received exception with status 500 from from Oodi: Something went wrong";
 
     @Autowired
     private OodiCourseEnricher oodiCourseEnricher;
