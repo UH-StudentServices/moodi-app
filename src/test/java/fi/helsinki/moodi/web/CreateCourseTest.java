@@ -43,12 +43,12 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
 
     @Test
     public void thatImportFailsIfOodiReturnsNullForData() throws Exception {
-        testEmptyOodiResponse(NULL_DATA_RESPONSE);
+        testEmptyOodiResponse(OODI_NULL_DATA_RESPONSE);
     }
 
     @Test
     public void thatImportFailsIfOodiReturnsEmptyString() throws Exception {
-        testEmptyOodiResponse(EMPTY_OK_RESPONSE);
+        testEmptyOodiResponse(EMPTY_RESPONSE);
     }
 
     @Test

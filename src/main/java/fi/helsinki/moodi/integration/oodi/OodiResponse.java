@@ -21,4 +21,8 @@ public class OodiResponse<T> {
 
     public T data;
 
+    public OodiResponseException exception;
+
+    public int status;
+
 }

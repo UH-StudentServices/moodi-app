@@ -79,14 +79,25 @@ public class OodiClient {
     private <T> Optional<T> getOodiData(
             final String url,
             final ParameterizedTypeReference<OodiResponse<T>> typeReference) {
-
         try {
             return Optional.ofNullable(
                     restOperations
                         .exchange(url, HttpMethod.GET, null, typeReference).getBody())
-                .map(body -> body.data);
+                .map(this::resolveOodiResponse);
         } catch (ResourceAccessException e) {
             throw new IntegrationConnectionException("Oodi connection failure", e);
+        }
+    }
+
+    private <T> T resolveOodiResponse(OodiResponse<T> oodiResponse) {
+        if (oodiResponse.status == 200) {
+            return oodiResponse.data;
+        } else if(oodiResponse.exception != null) {
+            throw new RuntimeException(
+                String.format("Received exception with status %s from from oodi: %s", oodiResponse.status, oodiResponse.exception.message));
+        } else {
+            throw new RuntimeException(
+                String.format("Received unexpected status %s from Oodi", oodiResponse.status));
         }
     }
 }

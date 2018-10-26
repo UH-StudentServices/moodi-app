@@ -196,17 +196,17 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
     @Test
     public void thatSynchronizationSummaryContainsErrorStatusesAndMessagesWhenMoodleResponseWithError() {
-        testSynchronizationSummary(SynchronizationType.FULL, ERROR_RESPONSE, true);
+        testSynchronizationSummary(SynchronizationType.FULL, MOODLE_ERROR_RESPONSE, true);
     }
 
     @Test
     public void thatSynchronizationSummaryContainsOkStatusesAndMessagesWhenMoodleResponseWithEmptyString() {
-        testSynchronizationSummary(SynchronizationType.FULL, EMPTY_OK_RESPONSE, false);
+        testSynchronizationSummary(SynchronizationType.FULL, EMPTY_RESPONSE, false);
     }
 
     @Test
     public void thatSynchronizationSummaryContainsOkStatusesAndMessagesWhenMoodleResponseWithNull() {
-        testSynchronizationSummary(SynchronizationType.FULL, NULL_OK_RESPONSE, false);
+        testSynchronizationSummary(SynchronizationType.FULL, MOODLE_NULL_OK_RESPONSE, false);
     }
 
     @Test
