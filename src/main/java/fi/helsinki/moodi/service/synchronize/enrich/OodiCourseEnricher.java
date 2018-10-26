@@ -17,7 +17,7 @@
 
 package fi.helsinki.moodi.service.synchronize.enrich;
 
-import fi.helsinki.moodi.integration.oodi.OodiCourseUsers;
+import fi.helsinki.moodi.integration.oodi.BaseOodiCourseUnitRealisation;
 import fi.helsinki.moodi.integration.oodi.OodiService;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
@@ -48,7 +48,7 @@ public class OodiCourseEnricher extends AbstractEnricher {
     @Override
     protected SynchronizationItem doEnrich(final SynchronizationItem item) {
         final Course course = item.getCourse();
-        final Optional<OodiCourseUsers> oodiCourse = oodiService.getOodiCourseUsers(course.realisationId);
+        final Optional<BaseOodiCourseUnitRealisation> oodiCourse = oodiService.getOodiCourseUsers(course.realisationId);
 
         if (!oodiCourse.isPresent()) {
             return item.completeEnrichmentPhase(
@@ -72,7 +72,11 @@ public class OodiCourseEnricher extends AbstractEnricher {
         return logger;
     }
 
-    private boolean isCourseEnded(OodiCourseUsers oodiCourse) {
+    private boolean isCourseEnded(BaseOodiCourseUnitRealisation oodiCourse) {
+        if(oodiCourse.endDate == null) {
+            return false;
+        }
+
         LocalDateTime endDatePlusOneYear = LocalDateTime.parse(oodiCourse.endDate, DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT)).plusYears(1);
         LocalDateTime nowDate = LocalDateTime.now();
         return endDatePlusOneYear.isBefore(nowDate);

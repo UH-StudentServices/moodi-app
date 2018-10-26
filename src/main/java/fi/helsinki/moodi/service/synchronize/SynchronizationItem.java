@@ -19,7 +19,7 @@ package fi.helsinki.moodi.service.synchronize;
 
 import fi.helsinki.moodi.integration.moodle.MoodleFullCourse;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
-import fi.helsinki.moodi.integration.oodi.OodiCourseUsers;
+import fi.helsinki.moodi.integration.oodi.BaseOodiCourseUnitRealisation;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.enrich.EnrichmentStatus;
 import fi.helsinki.moodi.service.synchronize.process.ProcessingStatus;
@@ -42,7 +42,7 @@ public final class SynchronizationItem {
 
     private final String enrichmentMessage;
     private final String processingMessage;
-    private final Optional<OodiCourseUsers> oodiCourse;
+    private final Optional<BaseOodiCourseUnitRealisation> oodiCourse;
     private final Optional<MoodleFullCourse> moodleCourse;
     private final Optional<List<MoodleUserEnrollments>> moodleEnrollments;
     private final List<UserSynchronizationItem> userSynchronizationItems;
@@ -62,7 +62,7 @@ public final class SynchronizationItem {
         boolean success,
         String enrichmentMessage,
         String processingMessage,
-        Optional<OodiCourseUsers> oodiCourse,
+        Optional<BaseOodiCourseUnitRealisation> oodiCourse,
         Optional<MoodleFullCourse> moodleCourse,
         Optional<List<MoodleUserEnrollments>> moodleEnrollments,
         List<UserSynchronizationItem> userSynchronizationItems,
@@ -90,7 +90,7 @@ public final class SynchronizationItem {
         return synchronizationType;
     }
 
-    public Optional<OodiCourseUsers> getOodiCourse() {
+    public Optional<BaseOodiCourseUnitRealisation> getOodiCourse() {
         return oodiCourse;
     }
 
@@ -102,7 +102,7 @@ public final class SynchronizationItem {
         return moodleEnrollments;
     }
 
-    public SynchronizationItem setOodiCourse(final Optional<OodiCourseUsers> newOodiCourse) {
+    public SynchronizationItem setOodiCourse(final Optional<BaseOodiCourseUnitRealisation> newOodiCourse) {
         return new SynchronizationItem(course, synchronizationType, success, enrichmentMessage,
             processingMessage, newOodiCourse, moodleCourse, moodleEnrollments,
             userSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);

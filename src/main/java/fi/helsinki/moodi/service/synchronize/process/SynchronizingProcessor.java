@@ -23,7 +23,7 @@ import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
 import fi.helsinki.moodi.integration.moodle.MoodleUser;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
-import fi.helsinki.moodi.integration.oodi.OodiCourseUsers;
+import fi.helsinki.moodi.integration.oodi.BaseOodiCourseUnitRealisation;
 import fi.helsinki.moodi.integration.oodi.OodiStudent;
 import fi.helsinki.moodi.integration.oodi.OodiTeacher;
 import fi.helsinki.moodi.service.batch.BatchProcessor;
@@ -191,7 +191,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
     private void checkThresholdLimits(Map<UserSynchronizationActionType, List<UserSynchronizationAction>> itemsByAction,
                                       SynchronizationItem parentItem) {
 
-        final OodiCourseUsers oodiCourse = parentItem.getOodiCourse().get();
+        final BaseOodiCourseUnitRealisation oodiCourse = parentItem.getOodiCourse().get();
         final long studentCount = oodiCourse.students.size();
         final long teacherCount = oodiCourse.teachers.size();
 
@@ -240,7 +240,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
     private List<UserSynchronizationItem> createUserSyncronizationItems(final SynchronizationItem item,
                                                                         final Map<Long, MoodleUserEnrollments> moodleEnrollmentsByUserId) {
 
-        final OodiCourseUsers oodiCourse = item.getOodiCourse().get();
+        final BaseOodiCourseUnitRealisation oodiCourse = item.getOodiCourse().get();
 
         Stream<UserSynchronizationItem> studentItemStream = oodiCourse.students
             .stream()

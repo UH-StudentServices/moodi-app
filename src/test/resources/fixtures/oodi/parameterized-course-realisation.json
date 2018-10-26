@@ -1,6 +1,7 @@
 {
   "status": 200,
   "data": {
+    "course_id": 1234,
     "students": [
       {
         "enrollment_status_code": 3,
@@ -11,7 +12,6 @@
       }
     ],
     "realisationtypecode": 5,
-    "realisationid": 102374742,
     "teachers": [
       {
         "teacher_id": "{{ teacherid }}",

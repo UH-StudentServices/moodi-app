@@ -22,7 +22,7 @@ import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.integration.moodle.MoodleFullCourse;
 import fi.helsinki.moodi.integration.moodle.MoodleRole;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
-import fi.helsinki.moodi.integration.oodi.OodiCourseUsers;
+import fi.helsinki.moodi.integration.oodi.BaseOodiCourseUnitRealisation;
 import fi.helsinki.moodi.integration.oodi.OodiStudent;
 import fi.helsinki.moodi.integration.oodi.OodiTeacher;
 import fi.helsinki.moodi.service.course.CourseService;
@@ -326,7 +326,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
         private static final long REALISATION_ID = 12345L;
 
         private SynchronizationItem synchronizationItem;
-        private OodiCourseUsers oodiCourseUsers;
+        private BaseOodiCourseUnitRealisation oodiCourseUsers;
 
         private Map<Long, OodiStudent> oodiStudentMap = new HashMap<>();
         private Map<Long, OodiTeacher> oodiTeacherMap = new HashMap<>();
@@ -336,7 +336,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
                 courseService.findByRealisationId(REALISATION_ID).get(),
                 SynchronizationType.FULL);
 
-            OodiCourseUsers oodiCourseUsers = new OodiCourseUsers();
+            BaseOodiCourseUnitRealisation oodiCourseUsers = new BaseOodiCourseUnitRealisation();
             oodiCourseUsers.students = newArrayList();
             oodiCourseUsers.teachers = newArrayList();
 

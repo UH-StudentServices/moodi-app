@@ -18,7 +18,7 @@
 package fi.helsinki.moodi.service.synchronize.enrich;
 
 import com.google.common.collect.ImmutableMap;
-import fi.helsinki.moodi.integration.oodi.OodiCourseUsers;
+import fi.helsinki.moodi.integration.oodi.BaseOodiCourseUnitRealisation;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
@@ -88,7 +88,7 @@ public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
 
         SynchronizationItem enrichedItem = oodiCourseEnricher.doEnrich(synchronizationItem);
 
-        Optional<OodiCourseUsers> oodiCourseUsers = enrichedItem.getOodiCourse();
+        Optional<BaseOodiCourseUnitRealisation> oodiCourseUsers = enrichedItem.getOodiCourse();
 
         assertTrue(oodiCourseUsers.isPresent());
         assertEquals(enrichedItem.getEnrichmentStatus(), EnrichmentStatus.IN_PROGESS);
@@ -109,6 +109,11 @@ public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
         testErrorResponse(OODI_ERROR_RESPONSE, EXCEPTION_MESSAGE);
     }
 
+    @Test
+    public void thatSynchronizationItemIsSetToErrorStatusWhenOodiResponseDataContainsEmptyArraysForStudentsAndTeachers() {
+        testErrorResponse(OODI_EMPTY_RESPONSE, COURSE_NOT_FOUND_ERROR_MESSAGE);
+    }
+
     private void testErrorResponse(String response, String expectedMessage) {
         setUpMockResponse(response);
 
@@ -116,7 +121,7 @@ public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
 
         SynchronizationItem enrichedItem = oodiCourseEnricher.enrich(synchronizationItem);
 
-        Optional<OodiCourseUsers> oodiCourseUsers = enrichedItem.getOodiCourse();
+        Optional<BaseOodiCourseUnitRealisation> oodiCourseUsers = enrichedItem.getOodiCourse();
 
         assertFalse(oodiCourseUsers.isPresent());
         assertEquals(EnrichmentStatus.ERROR, enrichedItem.getEnrichmentStatus());
