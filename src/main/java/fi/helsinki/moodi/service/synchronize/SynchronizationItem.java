@@ -103,33 +103,39 @@ public final class SynchronizationItem {
     }
 
     public SynchronizationItem setOodiCourse(final Optional<OodiCourseUsers> newOodiCourse) {
-        return new SynchronizationItem(course, synchronizationType, success, enrichmentMessage, processingMessage, newOodiCourse, moodleCourse, moodleEnrollments,
+        return new SynchronizationItem(course, synchronizationType, success, enrichmentMessage,
+            processingMessage, newOodiCourse, moodleCourse, moodleEnrollments,
             userSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
     }
 
     public SynchronizationItem setMoodleCourse(final Optional<MoodleFullCourse> newMoodleCourse) {
-        return new SynchronizationItem(course, synchronizationType, success, enrichmentMessage, processingMessage, oodiCourse, newMoodleCourse, moodleEnrollments,
+        return new SynchronizationItem(course, synchronizationType, success, enrichmentMessage,
+            processingMessage, oodiCourse, newMoodleCourse, moodleEnrollments,
             userSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
     }
 
     public SynchronizationItem setMoodleEnrollments(final Optional<List<MoodleUserEnrollments>> newMoodleEnrollments) {
-        return new SynchronizationItem(course, synchronizationType, success, enrichmentMessage, processingMessage, oodiCourse, moodleCourse, newMoodleEnrollments,
+        return new SynchronizationItem(course, synchronizationType, success, enrichmentMessage,
+            processingMessage, oodiCourse, moodleCourse, newMoodleEnrollments,
             userSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
     }
 
     public SynchronizationItem setUserSynchronizationItems(final List<UserSynchronizationItem> newUserSynchronizationItems) {
-        return new SynchronizationItem(course, synchronizationType, success, enrichmentMessage, processingMessage, oodiCourse, moodleCourse, moodleEnrollments,
+        return new SynchronizationItem(course, synchronizationType, success, enrichmentMessage,
+            processingMessage, oodiCourse, moodleCourse, moodleEnrollments,
             newUserSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
     }
 
     public SynchronizationItem setUnlock(final boolean newUnlock) {
-        return new SynchronizationItem(course, synchronizationType, success, enrichmentMessage, processingMessage, oodiCourse, moodleCourse, moodleEnrollments,
+        return new SynchronizationItem(course, synchronizationType, success, enrichmentMessage,
+            processingMessage, oodiCourse, moodleCourse, moodleEnrollments,
             userSynchronizationItems, enrichmentStatus, processingStatus, newUnlock, removed);
     }
 
     public SynchronizationItem completeEnrichmentPhase(final EnrichmentStatus newEnrichmentStatus, final String newMessage) {
         final boolean newSuccess = newEnrichmentStatus == EnrichmentStatus.SUCCESS;
-        return new SynchronizationItem(course, synchronizationType, newSuccess, newMessage, processingMessage, oodiCourse, moodleCourse, moodleEnrollments,
+        return new SynchronizationItem(course, synchronizationType, newSuccess, newMessage,
+            processingMessage, oodiCourse, moodleCourse, moodleEnrollments,
             userSynchronizationItems, newEnrichmentStatus, processingStatus, unlock, removed);
     }
 
@@ -140,7 +146,8 @@ public final class SynchronizationItem {
     public SynchronizationItem completeProcessingPhase(final ProcessingStatus newProcessingStatus, final String newMessage,
                                                        final boolean newRemoved) {
         final boolean newSuccess = newProcessingStatus == ProcessingStatus.SUCCESS;
-        return new SynchronizationItem(course, synchronizationType, newSuccess, enrichmentMessage, newMessage, oodiCourse, moodleCourse, moodleEnrollments,
+        return new SynchronizationItem(course, synchronizationType, newSuccess, enrichmentMessage,
+            newMessage, oodiCourse, moodleCourse, moodleEnrollments,
             userSynchronizationItems, enrichmentStatus, newProcessingStatus, unlock, newRemoved);
     }
 
