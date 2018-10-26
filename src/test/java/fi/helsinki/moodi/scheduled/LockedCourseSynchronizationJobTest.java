@@ -61,7 +61,7 @@ public class LockedCourseSynchronizationJobTest extends AbstractSynchronizationJ
     public void testUnlockingSynchronizationJob() {
         Course course = getTestCourse();
         assertTrue(syncLockService.isLocked(course));
-        testSynchronizationSummary(SynchronizationType.UNLOCK, EMPTY_OK_RESPONSE, false);
+        testSynchronizationSummary(SynchronizationType.UNLOCK, EMPTY_RESPONSE, false);
         assertFalse(syncLockService.isLocked(course));
     }
 

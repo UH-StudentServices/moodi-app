@@ -166,7 +166,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
 
         assertEquals(ProcessingStatus.LOCKED, item.getProcessingStatus());
 
-        assertEquals(expectedMessage, item.getMessage());
+        assertEquals(expectedMessage, item.getProcessingMessage());
 
         return summary;
     }

@@ -76,7 +76,8 @@ public class SynchronizationSummaryLog {
                 new UserEnrollmentsLogEntry(
                     getEnrollmentDetailsSummary(userSyncronizationItemLogEntries),
                     getEnrollmentResults(userSyncronizationItemLogEntries)),
-                item.getMessage()
+                item.getEnrichmentMessage(),
+                item.getProcessingMessage()
             );
         } catch (Exception e) {
             logger.error("Could not create log entry for synchronizationItem", e);
@@ -119,20 +120,23 @@ public class SynchronizationSummaryLog {
         public final EnrichmentStatus enrichmentStatus;
         public final ProcessingStatus processingStatus;
         public final UserEnrollmentsLogEntry userEnrollments;
-        public final String message;
+        public final String enrichmentMessage;
+        public final String processingMessage;
 
         public SynchronizationItemLogEntry(long realisationId,
                                            long moodleId,
                                            EnrichmentStatus enrichmentStatus,
                                            ProcessingStatus processingStatus,
                                            UserEnrollmentsLogEntry userEnrollments,
-                                           String message) {
+                                           String enrichmentMessage,
+                                           String processingMessage) {
             this.realisationId = realisationId;
             this.moodleId = moodleId;
             this.enrichmentStatus = enrichmentStatus;
             this.processingStatus = processingStatus;
             this.userEnrollments = userEnrollments;
-            this.message = message;
+            this.enrichmentMessage = enrichmentMessage;
+            this.processingMessage = processingMessage;
         }
     }
 

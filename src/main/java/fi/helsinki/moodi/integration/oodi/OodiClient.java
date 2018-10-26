@@ -52,10 +52,11 @@ public class OodiClient {
                 courseRealisationId,
                 INCLUDE_DELETED_QUERY_PARAMETER,
                 INCLUDE_APPROVED_STATUS_QUERY_PARAMETER),
-            new ParameterizedTypeReference<OodiResponse<OodiCourseUnitRealisation>>() {});
+            new ParameterizedTypeReference<OodiResponse<OodiCourseUnitRealisation>>() {})
+            .filter(this::isValid);
     }
 
-    public Optional<OodiCourseUsers> getCourseUsers(final long courseRealisationId) {
+    public Optional<BaseOodiCourseUnitRealisation> getCourseUsers(final long courseRealisationId) {
         return getOodiData(
             String.format(
                 "%s/courseunitrealisations/%s/users?%s&%s",
@@ -63,8 +64,8 @@ public class OodiClient {
                 courseRealisationId,
                 INCLUDE_DELETED_QUERY_PARAMETER,
                 INCLUDE_APPROVED_STATUS_QUERY_PARAMETER),
-            new ParameterizedTypeReference<OodiResponse<OodiCourseUsers>>() {
-            });
+            new ParameterizedTypeReference<OodiResponse<BaseOodiCourseUnitRealisation>>() {})
+            .filter(this::isValid);
     }
 
     public List<OodiCourseChange> getCourseChanges(final LocalDateTime afterDate) {
@@ -76,17 +77,32 @@ public class OodiClient {
             ).orElse(new ArrayList<>());
     }
 
+    private boolean isValid(BaseOodiCourseUnitRealisation oodiCourseUnitRealisation) {
+        return oodiCourseUnitRealisation.realisationId != null;
+    }
+
     private <T> Optional<T> getOodiData(
             final String url,
             final ParameterizedTypeReference<OodiResponse<T>> typeReference) {
-
         try {
             return Optional.ofNullable(
                     restOperations
                         .exchange(url, HttpMethod.GET, null, typeReference).getBody())
-                .map(body -> body.data);
+                .map(this::resolveOodiResponse);
         } catch (ResourceAccessException e) {
             throw new IntegrationConnectionException("Oodi connection failure", e);
+        }
+    }
+
+    private <T> T resolveOodiResponse(OodiResponse<T> oodiResponse) {
+        if (oodiResponse.status == 200) {
+            return oodiResponse.data;
+        } else if (oodiResponse.exception != null) {
+            throw new RuntimeException(
+                String.format("Received exception with status %s from from Oodi: %s", oodiResponse.status, oodiResponse.exception.message));
+        } else {
+            throw new RuntimeException(
+                String.format("Received unexpected status %s from Oodi", oodiResponse.status));
         }
     }
 }

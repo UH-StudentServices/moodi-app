@@ -18,7 +18,7 @@
 package fi.helsinki.moodi.service.synchronize.enrich;
 
 import com.google.common.collect.ImmutableMap;
-import fi.helsinki.moodi.integration.oodi.OodiCourseUsers;
+import fi.helsinki.moodi.integration.oodi.BaseOodiCourseUnitRealisation;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
@@ -38,6 +38,9 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
 
     private static final long REALISATION_ID = 12345L;
+
+    private static final String COURSE_NOT_FOUND_ERROR_MESSAGE = String.format("Course not found from Oodi with id %s", REALISATION_ID);
+    private static final String EXCEPTION_MESSAGE = "Received exception with status 500 from from Oodi: Something went wrong";
 
     @Autowired
     private OodiCourseEnricher oodiCourseEnricher;
@@ -85,7 +88,7 @@ public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
 
         SynchronizationItem enrichedItem = oodiCourseEnricher.doEnrich(synchronizationItem);
 
-        Optional<OodiCourseUsers> oodiCourseUsers = enrichedItem.getOodiCourse();
+        Optional<BaseOodiCourseUnitRealisation> oodiCourseUsers = enrichedItem.getOodiCourse();
 
         assertTrue(oodiCourseUsers.isPresent());
         assertEquals(enrichedItem.getEnrichmentStatus(), EnrichmentStatus.IN_PROGESS);
@@ -93,25 +96,36 @@ public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
 
     @Test
     public void thatSynchronizationItemIsSetToErrorStatusWhenOodiResponseIsEmpty() {
-        testEmptyResponse(EMPTY_OK_RESPONSE);
+        testErrorResponse(EMPTY_RESPONSE, COURSE_NOT_FOUND_ERROR_MESSAGE);
     }
 
     @Test
     public void thatSynchronizationItemIsSetToErrorStatusWhenOodiResponseDataIsNull() {
-        testEmptyResponse(NULL_DATA_RESPONSE);
+        testErrorResponse(OODI_NULL_DATA_RESPONSE, COURSE_NOT_FOUND_ERROR_MESSAGE);
     }
 
-    private void testEmptyResponse(String response) {
+    @Test
+    public void thatSynchronizationItemIsSetToErrorStatusWhenOodiRespondsWithError() {
+        testErrorResponse(OODI_ERROR_RESPONSE, EXCEPTION_MESSAGE);
+    }
+
+    @Test
+    public void thatSynchronizationItemIsSetToErrorStatusWhenOodiResponseDataContainsEmptyArraysForStudentsAndTeachers() {
+        testErrorResponse(OODI_EMPTY_RESPONSE, COURSE_NOT_FOUND_ERROR_MESSAGE);
+    }
+
+    private void testErrorResponse(String response, String expectedMessage) {
         setUpMockResponse(response);
 
         SynchronizationItem synchronizationItem = createSynchronizationItem(REALISATION_ID);
 
-        SynchronizationItem enrichedItem = oodiCourseEnricher.doEnrich(synchronizationItem);
+        SynchronizationItem enrichedItem = oodiCourseEnricher.enrich(synchronizationItem);
 
-        Optional<OodiCourseUsers> oodiCourseUsers = enrichedItem.getOodiCourse();
+        Optional<BaseOodiCourseUnitRealisation> oodiCourseUsers = enrichedItem.getOodiCourse();
 
         assertFalse(oodiCourseUsers.isPresent());
-        assertEquals(enrichedItem.getEnrichmentStatus(), EnrichmentStatus.ERROR);
+        assertEquals(EnrichmentStatus.ERROR, enrichedItem.getEnrichmentStatus());
+        assertEquals(expectedMessage, enrichedItem.getEnrichmentMessage());
     }
 
     @Test

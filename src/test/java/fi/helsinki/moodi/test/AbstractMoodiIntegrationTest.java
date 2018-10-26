@@ -64,13 +64,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
     classes = { Application.class, TestConfig.class })
 @ActiveProfiles("test")
 public abstract class AbstractMoodiIntegrationTest {
-    private static final String EMPTY_LIST_RESPONSE = "[]";
-    private static final String EXPECTED_COURSE_ID = MoodleCourseBuilder.MOODLE_COURSE_ID_PREFIX + 102374742;
-    protected static final String ERROR_RESPONSE =
+    private static final String MOODLE_EMPTY_LIST_RESPONSE = "[]";
+    protected static final String MOODLE_ERROR_RESPONSE =
         "{\"exception\":\"webservice_access_exception\",\"errorcode\":\"accessexception\",\"message\":\"P\\u00e4\\u00e4syn hallinnan poikkeus\"}";
-    protected static final String EMPTY_OK_RESPONSE = "";
-    protected static final String NULL_OK_RESPONSE = "null";
-    protected static final String NULL_DATA_RESPONSE = "{\"data\": null}";
+    protected static final String MOODLE_NULL_OK_RESPONSE = "null";
+
+    protected static final String OODI_ERROR_RESPONSE = "{\"exception\": {\"message\": \"Something went wrong\"}, \"status\": 500}";
+    protected static final String OODI_NULL_DATA_RESPONSE = "{\"data\": null, \"status\": 200}";
+    protected static final String OODI_EMPTY_RESPONSE = "{\"data\": { \"students\": [], \"teachers\": [] }, \"status\": 200}";
+
+    protected static final String EMPTY_RESPONSE = "";
+
+    private static final String EXPECTED_COURSE_ID = MoodleCourseBuilder.MOODLE_COURSE_ID_PREFIX + 102374742;
 
     protected static final int APPROVED_ENROLLMENT_STATUS_CODE = 3;
     protected static final int NON_APPROVED_ENROLLMENT_STATUS_CODE = 10;
@@ -165,7 +170,7 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     protected final void expectEnrollmentRequestToMoodle(final MoodleEnrollment... enrollments) {
-        expectEnrollmentRequestToMoodleWithResponse(EMPTY_OK_RESPONSE, enrollments);
+        expectEnrollmentRequestToMoodleWithResponse(EMPTY_RESPONSE, enrollments);
     }
 
     protected final void expectEnrollmentRequestToMoodleWithResponse(String response, final MoodleEnrollment... enrollments) {
@@ -192,7 +197,7 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     protected final void expectUnEnrollmentRequestToMoodle(final MoodleEnrollment... enrollments) {
-        expectUnEnrollmentRequestToMoodleWithResponse(EMPTY_OK_RESPONSE, enrollments);
+        expectUnEnrollmentRequestToMoodleWithResponse(EMPTY_RESPONSE, enrollments);
     }
 
     protected final void expectUnEnrollmentRequestToMoodleWithResponse(String response, final MoodleEnrollment... enrollments) {
@@ -202,7 +207,7 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     protected final void expectAssignRolesToMoodle(boolean isAssign, MoodleEnrollment... enrollments) {
-        expectAssignRolesToMoodleWithResponse(EMPTY_OK_RESPONSE, isAssign, enrollments);
+        expectAssignRolesToMoodleWithResponse(EMPTY_RESPONSE, isAssign, enrollments);
     }
 
     protected final void expectAssignRolesToMoodleWithResponse(String response, boolean isAssign, MoodleEnrollment... enrollments) {
@@ -284,7 +289,7 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     protected final void expectGetUserRequestToMoodleUserNotFound(final String username) {
-        expectGetUserRequestToMoodleWithResponse(username, EMPTY_LIST_RESPONSE);
+        expectGetUserRequestToMoodleWithResponse(username, MOODLE_EMPTY_LIST_RESPONSE);
     }
 
     protected final void expectGetUserRequestToMoodle(final String expectedUsername, final long returnUserMoodleId) {
