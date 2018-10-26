@@ -94,7 +94,7 @@ public class OodiClient {
             return oodiResponse.data;
         } else if (oodiResponse.exception != null) {
             throw new RuntimeException(
-                String.format("Received exception with status %s from from oodi: %s", oodiResponse.status, oodiResponse.exception.message));
+                String.format("Received exception with status %s from from Oodi: %s", oodiResponse.status, oodiResponse.exception.message));
         } else {
             throw new RuntimeException(
                 String.format("Received unexpected status %s from Oodi", oodiResponse.status));
