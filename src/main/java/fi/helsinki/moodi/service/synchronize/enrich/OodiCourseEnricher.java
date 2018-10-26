@@ -73,7 +73,7 @@ public class OodiCourseEnricher extends AbstractEnricher {
     }
 
     private boolean isCourseEnded(BaseOodiCourseUnitRealisation oodiCourse) {
-        if(oodiCourse.endDate == null) {
+        if (oodiCourse.endDate == null) {
             return false;
         }
 
