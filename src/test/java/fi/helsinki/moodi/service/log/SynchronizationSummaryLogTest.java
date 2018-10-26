@@ -62,6 +62,8 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
 
     private static final int ENROLLMENT_STATUS_CODE = 2;
 
+    private static final String ENRICHMENT_SUCCESSFUL_MESSAGE = "Enrichment successful";
+
     @Test
     public void thatSynchronizationSummaryLogIsCreated() {
 
@@ -74,7 +76,7 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
             getFailedTeacherUserStudentUserSynchronizationItem()));
 
         SynchronizationItem completedItem = itemWithUserItems
-            .completeEnrichmentPhase(EnrichmentStatus.SUCCESS, null)
+            .completeEnrichmentPhase(EnrichmentStatus.SUCCESS, ENRICHMENT_SUCCESSFUL_MESSAGE)
             .completeProcessingPhase();
 
         List<SynchronizationItem> synchronizationItems = newArrayList(completedItem);
@@ -94,7 +96,8 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
         assertEquals(COURSE_MOODLE_ID, synchronizationItemLogEntry.moodleId);
         assertEquals(EnrichmentStatus.SUCCESS, synchronizationItemLogEntry.enrichmentStatus);
         assertEquals(ProcessingStatus.ENROLLMENT_FAILURES, synchronizationItemLogEntry.processingStatus);
-        assertEquals(SynchronizationItem.ENROLLMENT_FAILURES_MESSAGE, synchronizationItemLogEntry.message);
+        assertEquals(ENRICHMENT_SUCCESSFUL_MESSAGE, synchronizationItemLogEntry.enrichmentMessage);
+        assertEquals(SynchronizationItem.ENROLLMENT_FAILURES_MESSAGE, synchronizationItemLogEntry.processingMessage);
 
         UserEnrollmentsLogEntry userEnrollmentsLogEntry = synchronizationItemLogEntry.userEnrollments;
         Map<UserSynchronizationItemStatus, Long> synchronizationItemLogEntrySummary = userEnrollmentsLogEntry.summary;

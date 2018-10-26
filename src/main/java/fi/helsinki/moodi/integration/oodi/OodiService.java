@@ -36,7 +36,7 @@ public class OodiService {
         return oodiClient.getCourseUnitRealisation(realisationId);
     }
 
-    public Optional<OodiCourseUsers> getOodiCourseUsers(final long realisationId) {
+    public Optional<BaseOodiCourseUnitRealisation> getOodiCourseUsers(final long realisationId) {
         return oodiClient.getCourseUsers(realisationId);
     }
 }

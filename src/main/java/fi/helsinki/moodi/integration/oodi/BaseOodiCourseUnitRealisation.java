@@ -17,12 +17,29 @@
 
 package fi.helsinki.moodi.integration.oodi;
 
-public class OodiResponse<T> {
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-    public T data;
+import java.io.Serializable;
+import java.util.List;
 
-    public OodiResponseException exception;
+import static com.google.common.collect.Lists.newArrayList;
 
-    public int status;
+public class BaseOodiCourseUnitRealisation implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
+    @JsonProperty("course_id")
+    public Integer realisationId;
+
+    @JsonProperty("end_date")
+    public String endDate;
+
+    @JsonProperty("deleted")
+    public boolean removed;
+
+    @JsonProperty("students")
+    public List<OodiStudent> students = newArrayList();
+
+    @JsonProperty("teachers")
+    public List<OodiTeacher> teachers = newArrayList();
 }

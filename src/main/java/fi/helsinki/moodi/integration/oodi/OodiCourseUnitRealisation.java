@@ -20,37 +20,21 @@ package fi.helsinki.moodi.integration.oodi;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-public class OodiCourseUnitRealisation {
-
-    private static final long serialVersionUID = 1L;
+public class OodiCourseUnitRealisation extends BaseOodiCourseUnitRealisation {
 
     @JsonProperty("languages")
     public List<OodiLanguage> languages = newArrayList();
-
-    @JsonProperty("students")
-    public List<OodiStudent> students = newArrayList();
 
     @JsonProperty("descriptions")
     public List<OodiDescription> descriptions = newArrayList();
 
     @JsonProperty("realisation_name")
     public List<OodiLocalizedValue> realisationName = newArrayList();
-
-    @JsonProperty("end_date")
-    public String endDate;
-
-    @JsonProperty("teachers")
-    public List<OodiTeacher> teachers = newArrayList();
-
-    @JsonProperty("course_id")
-    public Integer realisationId;
-
-    @JsonProperty("deleted")
-    public boolean removed;
 
     @Override
     public String toString() {
