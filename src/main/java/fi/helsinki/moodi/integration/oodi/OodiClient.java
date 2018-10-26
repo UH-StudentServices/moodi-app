@@ -52,10 +52,11 @@ public class OodiClient {
                 courseRealisationId,
                 INCLUDE_DELETED_QUERY_PARAMETER,
                 INCLUDE_APPROVED_STATUS_QUERY_PARAMETER),
-            new ParameterizedTypeReference<OodiResponse<OodiCourseUnitRealisation>>() {});
+            new ParameterizedTypeReference<OodiResponse<OodiCourseUnitRealisation>>() {})
+            .filter(this::isValid);
     }
 
-    public Optional<OodiCourseUsers> getCourseUsers(final long courseRealisationId) {
+    public Optional<BaseOodiCourseUnitRealisation> getCourseUsers(final long courseRealisationId) {
         return getOodiData(
             String.format(
                 "%s/courseunitrealisations/%s/users?%s&%s",
@@ -63,8 +64,8 @@ public class OodiClient {
                 courseRealisationId,
                 INCLUDE_DELETED_QUERY_PARAMETER,
                 INCLUDE_APPROVED_STATUS_QUERY_PARAMETER),
-            new ParameterizedTypeReference<OodiResponse<OodiCourseUsers>>() {
-            });
+            new ParameterizedTypeReference<OodiResponse<BaseOodiCourseUnitRealisation>>() {})
+            .filter(this::isValid);
     }
 
     public List<OodiCourseChange> getCourseChanges(final LocalDateTime afterDate) {
@@ -74,6 +75,10 @@ public class OodiClient {
             String.format("%s/courseunitrealisations/changes/ids/%s", baseUrl, formattedStartDate),
             new ParameterizedTypeReference<OodiResponse<List<OodiCourseChange>>>() {}
             ).orElse(new ArrayList<>());
+    }
+
+    private boolean isValid(BaseOodiCourseUnitRealisation oodiCourseUnitRealisation) {
+        return oodiCourseUnitRealisation.realisationId != null;
     }
 
     private <T> Optional<T> getOodiData(

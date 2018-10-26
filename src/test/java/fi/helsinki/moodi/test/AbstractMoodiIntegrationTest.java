@@ -71,6 +71,7 @@ public abstract class AbstractMoodiIntegrationTest {
 
     protected static final String OODI_ERROR_RESPONSE = "{\"exception\": {\"message\": \"Something went wrong\"}, \"status\": 500}";
     protected static final String OODI_NULL_DATA_RESPONSE = "{\"data\": null, \"status\": 200}";
+    protected static final String OODI_EMPTY_RESPONSE = "{\"data\": { \"students\": [], \"teachers\": [] }, \"status\": 200}";
 
     protected static final String EMPTY_RESPONSE = "";
 

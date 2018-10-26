@@ -33,7 +33,7 @@ public class CompletingEnricher extends AbstractEnricher {
 
     @Override
     protected SynchronizationItem doEnrich(SynchronizationItem item) {
-        return item.completeEnrichmentPhase(EnrichmentStatus.SUCCESS, "Enrichment successfull");
+        return item.completeEnrichmentPhase(EnrichmentStatus.SUCCESS, "Enrichment successful");
     }
 
     @Override
