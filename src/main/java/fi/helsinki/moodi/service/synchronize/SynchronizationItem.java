@@ -39,7 +39,9 @@ public final class SynchronizationItem {
     private final Course course;
     private final SynchronizationType synchronizationType;
     private final boolean success;
-    private final String message;
+
+    private final String enrichmentMessage;
+    private final String processingMessage;
     private final Optional<OodiCourseUsers> oodiCourse;
     private final Optional<MoodleFullCourse> moodleCourse;
     private final Optional<List<MoodleUserEnrollments>> moodleEnrollments;
@@ -50,7 +52,7 @@ public final class SynchronizationItem {
     private final boolean removed;
 
     public SynchronizationItem(Course course, SynchronizationType synchronizationType) {
-        this(course, synchronizationType, false, "Started", empty(), empty(), empty(), newArrayList(), EnrichmentStatus.IN_PROGESS,
+        this(course, synchronizationType, false, null, null, empty(), empty(), empty(), newArrayList(), EnrichmentStatus.IN_PROGESS,
             ProcessingStatus.IN_PROGRESS, false, false);
     }
 
@@ -58,7 +60,8 @@ public final class SynchronizationItem {
         Course course,
         SynchronizationType synchronizationType,
         boolean success,
-        String message,
+        String enrichmentMessage,
+        String processingMessage,
         Optional<OodiCourseUsers> oodiCourse,
         Optional<MoodleFullCourse> moodleCourse,
         Optional<List<MoodleUserEnrollments>> moodleEnrollments,
@@ -71,7 +74,8 @@ public final class SynchronizationItem {
         this.course = course;
         this.synchronizationType = synchronizationType;
         this.success = success;
-        this.message = message;
+        this.enrichmentMessage = enrichmentMessage;
+        this.processingMessage = processingMessage;
         this.oodiCourse = oodiCourse;
         this.moodleCourse = moodleCourse;
         this.moodleEnrollments = moodleEnrollments;
@@ -99,33 +103,33 @@ public final class SynchronizationItem {
     }
 
     public SynchronizationItem setOodiCourse(final Optional<OodiCourseUsers> newOodiCourse) {
-        return new SynchronizationItem(course, synchronizationType, success, message, newOodiCourse, moodleCourse, moodleEnrollments,
+        return new SynchronizationItem(course, synchronizationType, success, enrichmentMessage, processingMessage, newOodiCourse, moodleCourse, moodleEnrollments,
             userSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
     }
 
     public SynchronizationItem setMoodleCourse(final Optional<MoodleFullCourse> newMoodleCourse) {
-        return new SynchronizationItem(course, synchronizationType, success, message, oodiCourse, newMoodleCourse, moodleEnrollments,
+        return new SynchronizationItem(course, synchronizationType, success, enrichmentMessage, processingMessage, oodiCourse, newMoodleCourse, moodleEnrollments,
             userSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
     }
 
     public SynchronizationItem setMoodleEnrollments(final Optional<List<MoodleUserEnrollments>> newMoodleEnrollments) {
-        return new SynchronizationItem(course, synchronizationType, success, message, oodiCourse, moodleCourse, newMoodleEnrollments,
+        return new SynchronizationItem(course, synchronizationType, success, enrichmentMessage, processingMessage, oodiCourse, moodleCourse, newMoodleEnrollments,
             userSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
     }
 
     public SynchronizationItem setUserSynchronizationItems(final List<UserSynchronizationItem> newUserSynchronizationItems) {
-        return new SynchronizationItem(course, synchronizationType, success, message, oodiCourse, moodleCourse, moodleEnrollments,
+        return new SynchronizationItem(course, synchronizationType, success, enrichmentMessage, processingMessage, oodiCourse, moodleCourse, moodleEnrollments,
             newUserSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
     }
 
     public SynchronizationItem setUnlock(final boolean newUnlock) {
-        return new SynchronizationItem(course, synchronizationType, success, message, oodiCourse, moodleCourse, moodleEnrollments,
+        return new SynchronizationItem(course, synchronizationType, success, enrichmentMessage, processingMessage, oodiCourse, moodleCourse, moodleEnrollments,
             userSynchronizationItems, enrichmentStatus, processingStatus, newUnlock, removed);
     }
 
     public SynchronizationItem completeEnrichmentPhase(final EnrichmentStatus newEnrichmentStatus, final String newMessage) {
         final boolean newSuccess = newEnrichmentStatus == EnrichmentStatus.SUCCESS;
-        return new SynchronizationItem(course, synchronizationType, newSuccess, newMessage, oodiCourse, moodleCourse, moodleEnrollments,
+        return new SynchronizationItem(course, synchronizationType, newSuccess, newMessage, processingMessage, oodiCourse, moodleCourse, moodleEnrollments,
             userSynchronizationItems, newEnrichmentStatus, processingStatus, unlock, removed);
     }
 
@@ -136,7 +140,7 @@ public final class SynchronizationItem {
     public SynchronizationItem completeProcessingPhase(final ProcessingStatus newProcessingStatus, final String newMessage,
                                                        final boolean newRemoved) {
         final boolean newSuccess = newProcessingStatus == ProcessingStatus.SUCCESS;
-        return new SynchronizationItem(course, synchronizationType, newSuccess, newMessage, oodiCourse, moodleCourse, moodleEnrollments,
+        return new SynchronizationItem(course, synchronizationType, newSuccess, enrichmentMessage, newMessage, oodiCourse, moodleCourse, moodleEnrollments,
             userSynchronizationItems, enrichmentStatus, newProcessingStatus, unlock, newRemoved);
     }
 
@@ -160,8 +164,12 @@ public final class SynchronizationItem {
         return success;
     }
 
-    public String getMessage() {
-        return message;
+    public String getEnrichmentMessage() {
+        return enrichmentMessage;
+    }
+
+    public String getProcessingMessage() {
+        return processingMessage;
     }
 
     public EnrichmentStatus getEnrichmentStatus() {
