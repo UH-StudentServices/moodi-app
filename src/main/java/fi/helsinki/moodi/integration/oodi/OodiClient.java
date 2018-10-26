@@ -92,7 +92,7 @@ public class OodiClient {
     private <T> T resolveOodiResponse(OodiResponse<T> oodiResponse) {
         if (oodiResponse.status == 200) {
             return oodiResponse.data;
-        } else if(oodiResponse.exception != null) {
+        } else if (oodiResponse.exception != null) {
             throw new RuntimeException(
                 String.format("Received exception with status %s from from oodi: %s", oodiResponse.status, oodiResponse.exception.message));
         } else {
