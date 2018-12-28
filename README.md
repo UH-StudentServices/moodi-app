@@ -22,16 +22,6 @@ Requirements
 The following programs must be installed:
 - JDK 8
 
-Add the following empty properties to ~/.gradle/gradle.properties:
-
-```
-opintoni_artifactory_base_url=
-opintoni_artifactory_username=
-opintoni_artifactory_password=
-```
-
-These properties need to be defined but are only used by CI builds run by Jenkins.
-
 Running locally
 ---------------
 ### 1. Prerequisites
