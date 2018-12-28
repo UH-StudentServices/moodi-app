@@ -19,23 +19,25 @@
 // Check for required properties
 //
 
-["base_url", "username", "password"].collect { "opintoni_artifactory_$it" }.each {
-    if (!project.hasProperty(it)) {
-        def msg = """
-          |Missing project property: $it
-          |
-          |Configure Artifactory connection in file: \$USER_HOME/.gradle/gradle.properties
-          |
-          |opintoni_artifactory_base_url=<base url>
-          |opintoni_artifactory_username=<username>
-          |opintoni_artifactory_password=<password>
-          |
-          |Or provide with command line args like:
-          |
-          |-Popintoni_artifactory_base_url=<base url> \\
-          |  -Popintoni_artifactory_username=<username> \\
-          |  -Popintoni_artifactory_password=<password>
-        """.stripMargin()
-        throw new GradleException(msg)
+tasks.withType(PublishToMavenRepository) { task ->
+    task.doFirst {
+        ['base_url', 'username', 'password'].collect { "opintoni_artifactory_$it" }.each {
+            if (!project.hasProperty(it)) {
+                def msg = """
+         |Missing project property: $it
+         |
+         |Configure Artifactory connection in file: \$USER_HOME/.gradle/gradle.properties
+         |
+         |opintoni_artifactory_base_url=<base url>
+         |opintoni_artifactory_username=<username>
+         |opintoni_artifactory_password=<password>
+         |
+         |Or provide with command line args like:
+         |
+         |-Popintoni_artifactory_base_url=<base url> -Popintoni_artifactory_username=<username> -Popintoni_artifactory_password=<password>
+       """.stripMargin()
+                throw new GradleException(msg)
+            }
+        }
     }
 }
