@@ -56,22 +56,19 @@ task checkstyle {
   dependsOn checkstyleTest
 }
 
-repositories {
-    mavenLocal()
-
-    maven {
-        if (gradle.startParameter.taskNames.size() > 0 && gradle.startParameter.taskNames.get(0).contains("publish")) {
-            credentials {
-                username opintoni_artifactory_username
-                password opintoni_artifactory_password
-            }
+if(hasProperty("opintoni_artifactory_base_url")) {
+    repositories {
+        maven {
+            url "${opintoni_artifactory_base_url}/remote-repos/"
         }
-
-        url "${opintoni_artifactory_base_url}/repo"
+        mavenLocal()
+        jcenter()
     }
-
-    jcenter()
-    maven { url "http://repo.spring.io/milestone" }
+} else {
+    repositories {
+        mavenLocal()
+        jcenter()
+    }
 }
 
 dependencies {
