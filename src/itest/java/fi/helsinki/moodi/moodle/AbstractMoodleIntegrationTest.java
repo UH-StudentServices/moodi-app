@@ -37,8 +37,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
 
-import static fi.helsinki.moodi.integration.iam.IAMService.DOMAIN_SUFFIX;
-import static fi.helsinki.moodi.integration.iam.IAMService.TEACHER_ID_PREFIX;
+import static fi.helsinki.moodi.service.iam.IAMService.DOMAIN_SUFFIX;
+import static fi.helsinki.moodi.service.iam.IAMService.TEACHER_ID_PREFIX;
 import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
 import static java.lang.Math.abs;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;

@@ -18,7 +18,7 @@
 package fi.helsinki.moodi.web;
 
 import fi.helsinki.moodi.config.DevMode;
-import fi.helsinki.moodi.integration.iam.IAMService;
+import fi.helsinki.moodi.service.iam.IAMService;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
 import fi.helsinki.moodi.integration.oodi.OodiService;
