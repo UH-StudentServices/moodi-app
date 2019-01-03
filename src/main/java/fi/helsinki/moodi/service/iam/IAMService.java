@@ -15,8 +15,9 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.integration.iam;
+package fi.helsinki.moodi.service.iam;
 
+import fi.helsinki.moodi.integration.iam.IAMClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,12 +45,19 @@ public class IAMService {
     }
 
     public List<String> getTeacherUsernameList(final String teacherId) {
-        final String normalizedTeacherId = TEACHER_ID_PREFIX + teacherId;
-        List<String> usernameList = iamClient.getTeacherUsernameList(normalizedTeacherId);
+        List<String> usernameList = iamClient.getTeacherUsernameList(getPrefixedTeacherId(teacherId));
 
         return usernameList.stream()
                 .map(this::appendDomain)
                 .collect(Collectors.toList());
+    }
+
+    private String getPrefixedTeacherId(final String teacherId) {
+        if (teacherId.startsWith(TEACHER_ID_PREFIX)) {
+            return teacherId;
+        }
+
+        return TEACHER_ID_PREFIX + teacherId;
     }
 
     private String appendDomain(final String username) {

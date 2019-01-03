@@ -386,7 +386,7 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     @After
-    public void verify() {
+    public void verifyMockServers() {
         oodiMockServer.verify();
         moodleMockServer.verify();
         moodleReadOnlyMockServer.verify();

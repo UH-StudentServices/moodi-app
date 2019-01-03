@@ -18,7 +18,7 @@
 package fi.helsinki.moodi.service.importing;
 
 import com.google.common.base.Stopwatch;
-import fi.helsinki.moodi.integration.iam.IAMService;
+import fi.helsinki.moodi.service.iam.IAMService;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
 import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
