@@ -27,6 +27,7 @@ plugins {
     id "net.researchgate.release" version "2.6.0"
     id "java"
     id 'checkstyle'
+    id 'org.sonarqube' version '2.6.2'
 }
 
 apply plugin: "io.spring.dependency-management"
@@ -54,6 +55,13 @@ checkstyle {
 task checkstyle {
   dependsOn checkstyleMain
   dependsOn checkstyleTest
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "moodi-app"
+        property "sonar.projectName", "moodi-app"
+    }
 }
 
 if(hasProperty("opintoni_artifactory_base_url")) {
