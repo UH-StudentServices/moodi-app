@@ -110,7 +110,7 @@ dependencies {
 }
 
 apply from: "gradle-build/test.gradle"
-apply from: "gradle-build/itest.gradle"
 apply from: "gradle-build/publishing.gradle"
 apply from: "gradle-build/deploy.gradle"
 apply from: "gradle-build/release.gradle"
+apply from: "gradle-build/itest.gradle"
