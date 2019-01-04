@@ -83,7 +83,7 @@ public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegra
 
     @After
     @Override
-    public final void verify() {
+    public final void verifyMockServers() {
         oodiMockServer.verify();
         iamMockServer.verify();
     }
