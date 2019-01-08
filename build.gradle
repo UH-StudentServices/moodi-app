@@ -48,20 +48,8 @@ task wrapper(type: Wrapper) {
 }
 
 checkstyle {
-  configDir = rootProject.file('gradle-build/checkstyle')
-  toolVersion = '8.8'
-}
-
-task checkstyle {
-  dependsOn checkstyleMain
-  dependsOn checkstyleTest
-}
-
-sonarqube {
-    properties {
-        property "sonar.projectKey", "moodi-app"
-        property "sonar.projectName", "moodi-app"
-    }
+    configDir = rootProject.file('gradle-build/checkstyle')
+    toolVersion = '8.8'
 }
 
 if(hasProperty("opintoni_artifactory_base_url")) {
@@ -110,7 +98,20 @@ dependencies {
 }
 
 apply from: "gradle-build/test.gradle"
+apply from: "gradle-build/itest.gradle"
 apply from: "gradle-build/publishing.gradle"
 apply from: "gradle-build/deploy.gradle"
 apply from: "gradle-build/release.gradle"
-apply from: "gradle-build/itest.gradle"
+
+task checkstyle {
+    dependsOn checkstyleMain
+    dependsOn checkstyleTest
+    dependsOn checkstyleItest
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "moodi-app"
+        property "sonar.projectName", "moodi-app"
+    }
+}
