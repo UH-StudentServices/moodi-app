@@ -19,8 +19,6 @@ package fi.helsinki.moodi.integration.moodle;
 
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -28,38 +26,16 @@ import org.springframework.http.MediaType;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 public class MoodleClientCreateCourseTest extends AbstractMoodiIntegrationTest {
-    private static final String WS_USER_ORIG_LANG = "en";
-    private static final Long WS_USER_MOODLE_ID = 3L;
-    private static final String LANG_FI = "fi";
-    private static final String LANG_EN = "en";
-    private static final String WS_USER_NAME = "wsuser";
-    private String configuredWsUsername;
 
     @Autowired
     private MoodleClient moodleClient;
 
-    @Before
-    public void before() {
-        configuredWsUsername = moodleClient.wsUsername;
-    }
-
-    @After
-    public void after() {
-        moodleClient.wsUsername = configuredWsUsername;
-    }
-
     @Test
     public void creatingCourseWithShortnameThatIsAlreadyTaken() {
-
-        MoodleCourse course = getCourseWithLang(LANG_FI);
-
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_course_create_courses&moodlewsrestformat=json" +
@@ -70,6 +46,9 @@ public class MoodleClientCreateCourseTest extends AbstractMoodiIntegrationTest {
                 .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
                 .andRespond(withSuccess(Fixtures.asString("/moodle/create-course-shortname-already-in-use.json"), MediaType.APPLICATION_JSON));
 
+        final MoodleCourse course =
+                new MoodleCourse("12345", "Fullname", "Shortname", "1", "summary", false, 7);
+
         try {
             moodleClient.createCourse(course);
             fail("We want an exception!");
@@ -79,31 +58,4 @@ public class MoodleClientCreateCourseTest extends AbstractMoodiIntegrationTest {
             assertEquals("shortnametaken", e.getErrorCode());
         }
     }
-
-    @Test
-    public void creatingCourseTemporarilySetsWsUserLangToCourseLang() {
-        moodleClient.wsUsername = WS_USER_NAME;
-
-        expectGetUserRequestToMoodle(WS_USER_NAME, WS_USER_MOODLE_ID.toString(), WS_USER_ORIG_LANG);
-        expectUpdateUserLangRequestToMoodle(WS_USER_MOODLE_ID, LANG_FI);
-        expectCreateCourseRequestToMoodle();
-        expectUpdateUserLangRequestToMoodle(WS_USER_MOODLE_ID, WS_USER_ORIG_LANG);
-
-        moodleClient.createCourse(getCourseWithLang(LANG_FI));
-    }
-
-    @Test
-    public void creatingCourseDoesNotSetWsUserLangIfCourseLangSameAsUserLang() {
-        moodleClient.wsUsername = WS_USER_NAME;
-
-        expectGetUserRequestToMoodle(WS_USER_NAME, WS_USER_MOODLE_ID.toString(), WS_USER_ORIG_LANG);
-        expectCreateCourseRequestToMoodle();
-
-        moodleClient.createCourse(getCourseWithLang(WS_USER_ORIG_LANG));
-    }
-
-    private MoodleCourse getCourseWithLang(String lang) {
-        return new MoodleCourse("12345", "Fullname", "Shortname", "1", "summary", false, 7, lang);
-    }
-
 }

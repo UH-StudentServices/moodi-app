@@ -14,7 +14,5 @@ integration:
   moodle:
     baseUrl: https://moodle.helsinki.fi
     url: https://moodle.helsinki.fi/webservice/rest/server.php
-    # If wsUsername is set, the system will temporarily set the user language to that of the course created in Moodle
-    wsUsername: moodi-webservice
   oodi.url: https://esbmt1.it.helsinki.fi/secure/doo-oodi/v1/productiondb
   iam.url: https://esbmt1.it.helsinki.fi
