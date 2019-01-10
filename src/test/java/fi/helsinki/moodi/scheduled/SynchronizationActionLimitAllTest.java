@@ -30,13 +30,11 @@ import org.springframework.test.context.TestPropertySource;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@TestPropertySource(properties = {
-    "syncTresholds.REMOVE_ENROLLMENT.preventAll = 1",
-    "syncTresholds.REMOVE_ENROLLMENT.limit = 10"
-})
+@TestPropertySource(properties = {"syncTresholds.REMOVE_ROLES.preventAll = 1",
+                                  "syncTresholds.REMOVE_ROLES.limit = 10"})
 public class SynchronizationActionLimitAllTest extends AbstractSynchronizationJobTest {
 
-    private static final String EXPECTED_REMOVE_ENROLLMENT_FROM_ALL_NOT_PERMITTED_MESSAGE = "Action REMOVE_ENROLLMENT is not permitted for all items";
+    private static final String EXPECTED_REMOVE_ROLE_FROM_ALL_NOT_PERMITTED_MESSAGE = "Action REMOVE_ROLES is not permitted for all items";
 
     @Autowired
     private SyncLockService syncLockService;
@@ -48,11 +46,11 @@ public class SynchronizationActionLimitAllTest extends AbstractSynchronizationJo
     private LockedSynchronizationItemMessageBuilder lockedSynchronizationItemMessageBuilder;
 
     @Test
-    public void thatRemoveEnrollmentActionIsLimitedBypreventAllThreshold() {
+    public void thatRemovingRolesActionIsLimitedByThreshold() {
         Course course = findCourse();
         assertFalse(syncLockService.isLocked(course));
 
-        SynchronizationSummary summary = testTresholdCheckFailed(EXPECTED_REMOVE_ENROLLMENT_FROM_ALL_NOT_PERMITTED_MESSAGE);
+        SynchronizationSummary summary = testTresholdCheckFailed(EXPECTED_REMOVE_ROLE_FROM_ALL_NOT_PERMITTED_MESSAGE);
         Mockito.verify(mailSender).send(lockedSynchronizationItemMessageBuilder.buildMessage(summary.getItems()));
 
         assertTrue(syncLockService.isLocked(course));

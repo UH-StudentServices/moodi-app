@@ -30,13 +30,11 @@ import org.springframework.test.context.TestPropertySource;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@TestPropertySource(properties = {
-    "syncTresholds.REMOVE_ENROLLMENT.preventAll = 1",
-    "syncTresholds.REMOVE_ENROLLMENT.limit = 1"
-})
+@TestPropertySource(properties = {"syncTresholds.REMOVE_ROLES.preventAll = 1",
+                                  "syncTresholds.REMOVE_ROLES.limit = 1"})
 public class SynchronizationActionThresholdLimitTest extends AbstractSynchronizationJobTest {
 
-    private static final String EXPECTED_THRESHOLD_CROSSED_REMOVE_ENROLLMENT_MESSAGE = "Action REMOVE_ENROLLMENT for 1 items exceeds threshold";
+    private static final String EXPECTED_THRESHOLD_CROSSED_REMOVE_ROLE_MESSAGE = "Action REMOVE_ROLES for 1 items exceeds threshold";
 
     @Autowired
     private SyncLockService syncLockService;
@@ -48,11 +46,11 @@ public class SynchronizationActionThresholdLimitTest extends AbstractSynchroniza
     private LockedSynchronizationItemMessageBuilder lockedSynchronizationItemMessageBuilder;
 
     @Test
-    public void thatRemoveEnrollmentActionIsLimitedByThreshold() {
+    public void thatRemovingRolesActionIsLimitedByThreshold() {
         Course course = findCourse();
         assertFalse(syncLockService.isLocked(course));
 
-        SynchronizationSummary summary = testTresholdCheckFailed(EXPECTED_THRESHOLD_CROSSED_REMOVE_ENROLLMENT_MESSAGE);
+        SynchronizationSummary summary = testTresholdCheckFailed(EXPECTED_THRESHOLD_CROSSED_REMOVE_ROLE_MESSAGE);
         Mockito.verify(mailSender).send(lockedSynchronizationItemMessageBuilder.buildMessage(summary.getItems()));
 
         assertTrue(syncLockService.isLocked(course));

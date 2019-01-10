@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @JsonIgnoreProperties("fullSummary")
@@ -181,7 +180,7 @@ public class SynchronizationSummaryLog {
     public static class SyncronizationItemActionLogEntry {
         public final UserSynchronizationActionStatus status;
         public final UserSynchronizationActionType actionType;
-        public final Set<Long> roles;
+        public final List<Long> roles;
 
         public SyncronizationItemActionLogEntry(UserSynchronizationAction action) {
             this.status = action.getStatus();

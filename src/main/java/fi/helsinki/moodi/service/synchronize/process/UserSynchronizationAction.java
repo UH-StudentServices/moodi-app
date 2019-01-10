@@ -17,7 +17,7 @@
 
 package fi.helsinki.moodi.service.synchronize.process;
 
-import java.util.Set;
+import java.util.List;
 
 public class UserSynchronizationAction {
 
@@ -27,12 +27,12 @@ public class UserSynchronizationAction {
     }
 
     private final UserSynchronizationActionType actionType;
-    private final Set<Long> roles;
+    private final List<Long> roles;
     private final Long moodleUserId;
 
     private UserSynchronizationActionStatus status;
 
-    public UserSynchronizationAction(UserSynchronizationActionType actionType, Set<Long> roles, Long moodleUserId) {
+    public UserSynchronizationAction(UserSynchronizationActionType actionType, List<Long> roles, Long moodleUserId) {
         this.actionType = actionType;
         this.roles = roles;
         this.moodleUserId = moodleUserId;
@@ -42,7 +42,7 @@ public class UserSynchronizationAction {
         return actionType;
     }
 
-    public Set<Long> getRoles() {
+    public List<Long> getRoles() {
         return roles;
     }
 
