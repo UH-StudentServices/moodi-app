@@ -231,7 +231,7 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
     }
 
     @Test
-    public void testSyncRemovesStudentEnrolmentIfNotApproved() {
+    public void testSyncRemovesStudentRoleIfNotApproved() {
         long oodiCourseId = getOodiCourseId();
 
         expectCourseRealisationWithUsers(oodiCourseId, singletonList(studentUser), singletonList(teacherUser));
@@ -248,8 +248,9 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
 
         moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
 
-        assertEquals(1, moodleUserEnrollmentsList.size());
+        assertEquals(2, moodleUserEnrollmentsList.size());
 
+        assertMoodiRoleEnrollment(STUDENT_USERNAME, moodleUserEnrollmentsList);
         assertTeacherEnrollment(TEACHER_USERNAME, moodleUserEnrollmentsList);
     }
 
