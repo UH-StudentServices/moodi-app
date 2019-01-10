@@ -33,16 +33,10 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
-import static fi.helsinki.moodi.integration.moodle.MoodleClient.ResponseBodyEvaluator.Action.CONTINUE;
-import static fi.helsinki.moodi.integration.moodle.MoodleClient.ResponseBodyEvaluator.Action.ERROR;
-import static fi.helsinki.moodi.integration.moodle.MoodleClient.ResponseBodyEvaluator.Action.RETURN_NULL;
+import static fi.helsinki.moodi.integration.moodle.MoodleClient.ResponseBodyEvaluator.Action.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class MoodleClient {
@@ -54,20 +48,17 @@ public class MoodleClient {
     private final RestTemplate readOnlyRestTemplate;
     private final ObjectMapper objectMapper;
     private final String wstoken;
-    protected String wsUsername; // protected non-final to facilitate testing
 
     public MoodleClient(String baseUrl,
                         String wstoken,
                         ObjectMapper objectMapper,
                         RestTemplate restTemplate,
-                        RestTemplate readOnlyRestTemplate,
-                        String wsUsername) {
+                        RestTemplate readOnlyRestTemplate) {
         this.baseUrl = baseUrl;
         this.wstoken = wstoken;
         this.objectMapper = objectMapper;
         this.restTemplate = restTemplate;
         this.readOnlyRestTemplate = readOnlyRestTemplate;
-        this.wsUsername = wsUsername;
     }
 
     public List<MoodleFullCourse> getCourses(List<Long> ids) {
@@ -96,11 +87,7 @@ public class MoodleClient {
         }
     }
 
-    // https://jira.it.helsinki.fi/browse/MOODI-84
-    // We temporarily change the language of the WS user to that of the course to be created in order to
-    // have the Announcements section name show up in the required language.
-    // This method is synchronized, because can't have two threads doing that at the same time.
-    public synchronized long createCourse(final MoodleCourse course) {
+    public long createCourse(final MoodleCourse course) {
         final MultiValueMap<String, String> params = createParametersForFunction("core_course_create_courses");
 
         params.set("courses[0][idnumber]", course.idnumber);
@@ -112,10 +99,7 @@ public class MoodleClient {
         params.set("courses[0][courseformatoptions][0][name]", "numsections");
         params.set("courses[0][courseformatoptions][0][value]", String.valueOf(course.numberOfSections));
 
-        LanguageSwitch langSwitch = null;
         try {
-            langSwitch = switchWsUserLang(course.langCode);
-
             return execute(params, new TypeReference<List<MoodleCourseData>>() {}, DEFAULT_EVALUATION, false)
                 .stream()
                 .findFirst()
@@ -123,25 +107,6 @@ public class MoodleClient {
                 .orElse(null);
         } catch (Exception e) {
             return handleException("Error executing method: importCourse", e);
-        } finally {
-            revertWsUserLang(langSwitch);
-        }
-    }
-
-    private LanguageSwitch switchWsUserLang(String newLang) {
-        if (wsUsername != null && newLang != null) {
-            MoodleUser wsUser = getUser(Arrays.asList(wsUsername));
-            if (wsUser != null && wsUser.id != null && !newLang.equals(wsUser.lang)) {
-                setUserLang(wsUser.id, newLang);
-                return new LanguageSwitch(wsUser.id, wsUser.lang, newLang);
-            }
-        }
-        return null;
-    }
-
-    private void revertWsUserLang(LanguageSwitch idAndLang) {
-        if (idAndLang != null) {
-            setUserLang(idAndLang.id, idAndLang.origLang);
         }
     }
 
@@ -218,23 +183,7 @@ public class MoodleClient {
         try {
             return execute(params, new TypeReference<List<MoodleUserEnrollments>>() {}, DEFAULT_EVALUATION, true);
         } catch (Exception e) {
-            return handleException("Error executing method: getEnrolledUsers", e);
-        }
-    }
-
-    public void setUserLang(final long userId, final String langCode) {
-        logger.info("Setting language of user '{}' to '{}'", userId, langCode);
-
-        final MultiValueMap<String, String> params = createParametersForFunction("core_user_update_users");
-
-        params.set("users[0][id]", String.valueOf(userId));
-        params.set("users[0][lang]", langCode);
-
-        try {
-            execute(params, new TypeReference<List<Map<String, String>>>() {},
-                    DEFAULT_EVALUATION, false);
-        } catch (Throwable e) {
-            handleException("Error executing method: setUserLang", new Exception(e));
+            return handleException("Error executing method: getUsers", e);
         }
     }
 
@@ -362,17 +311,5 @@ public class MoodleClient {
         }
 
         return sb.toString();
-    }
-
-    private class LanguageSwitch {
-        public Long id;
-        public String origLang;
-        public String newLang;
-
-        public LanguageSwitch(Long id, String origLang, String newLang) {
-            this.id = id;
-            this.origLang = origLang;
-            this.newLang = newLang;
-        }
     }
 }

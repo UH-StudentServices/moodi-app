@@ -30,9 +30,6 @@ public final class MoodleUser implements Serializable {
     @JsonProperty("id")
     public Long id;
 
-    @JsonProperty("lang")
-    public String lang;
-
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
