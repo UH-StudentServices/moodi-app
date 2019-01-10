@@ -45,8 +45,6 @@ dev.mode.enabled: false
 syncTresholds:
   REMOVE_ROLES:
     preventAll: 5
-  REMOVE_ENROLLMENT:
-    preventAll: 5
 
 mailNotification:
   from: moodi-app
