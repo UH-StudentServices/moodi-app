@@ -60,13 +60,16 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
         expectCreateCourseRequestToMoodle(COURSE_REALISATION_ID, MOODLE_COURSE_ID);
 
         expectFindStudentRequestToIAM(STUDENT_NUMBER_1, ESB_USERNAME_1);
+        expectFindStudentRequestToIAM(STUDENT_NUMBER_2, ESB_USERNAME_2);
         expectFindEmployeeRequestToIAM(TEACHER_ID, TEACHER_ESB_USERNAME);
 
         expectGetUserRequestToMoodle(MOODLE_USERNAME_1, MOODLE_USER_ID_1);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_2, MOODLE_USER_ID_2);
         expectGetUserRequestToMoodle(TEACHER_MOODLE_USERNAME, TEACHER_MOODLE_USER_ID);
 
         expectEnrollmentsWithAddedMoodiRoles(Lists.newArrayList(
             new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_1, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_2, MOODLE_COURSE_ID),
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_MOODLE_USER_ID, MOODLE_COURSE_ID)
             ));
 
