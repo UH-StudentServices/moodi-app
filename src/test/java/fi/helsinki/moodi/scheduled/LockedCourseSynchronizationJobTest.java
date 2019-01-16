@@ -17,6 +17,7 @@
 
 package fi.helsinki.moodi.scheduled;
 
+import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.synclock.SyncLockService;
@@ -28,9 +29,13 @@ import fi.helsinki.moodi.service.synchronize.process.ProcessingStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.Assert.*;
 
+@TestPropertySource(properties = {
+    "syncTresholds.REMOVE_ROLES.preventAll = 1",
+    "syncTresholds.REMOVE_ROLES.limit = 10"})
 public class LockedCourseSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
     private static final String LOCK_MESSAGE = "Locked";
@@ -48,7 +53,7 @@ public class LockedCourseSynchronizationJobTest extends AbstractSynchronizationJ
     }
 
     @Test
-    public void testSynchronizationRunForLockedCourse() {
+    public void thatSynchronizationSkipsLockedCourse() {
         SynchronizationSummary summary = synchronizationService.synchronize(SynchronizationType.FULL);
 
         SynchronizationItem item = summary.getItems().get(0);
@@ -58,10 +63,35 @@ public class LockedCourseSynchronizationJobTest extends AbstractSynchronizationJ
     }
 
     @Test
-    public void testUnlockingSynchronizationJob() {
+    public void thatLockedCourseIsUnlockedWhenUnlockSynchronizationIsTriggeredAndThresholdsAreNotExceeded() {
         Course course = getTestCourse();
         assertTrue(syncLockService.isLocked(course));
         testSynchronizationSummary(SynchronizationType.UNLOCK, EMPTY_RESPONSE, false);
+        assertFalse(syncLockService.isLocked(course));
+    }
+
+    @Test
+    public void thatLockedCourseIsUnlockedWhenUnlockSynchronizationIsTriggeredAndThresholdsAreExceeded() {
+        expectEnrollmentRequestToMoodleWithResponse(EMPTY_RESPONSE,
+            new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID));
+
+        expectAssignRolesToMoodleWithResponse(
+            EMPTY_RESPONSE,
+            false,
+            new MoodleEnrollment(getStudentRoleId(),
+                STUDENT_USER_MOODLE_ID,
+                MOODLE_COURSE_ID)
+        );
+
+        Course course = getTestCourse();
+        assertTrue(syncLockService.isLocked(course));
+
+        testSynchronizationSummaryWhenRemovingRoles(
+            SynchronizationType.UNLOCK,
+            ProcessingStatus.SUCCESS,
+            SynchronizationItem.SUCCESS_MESSAGE);
+
         assertFalse(syncLockService.isLocked(course));
     }
 
