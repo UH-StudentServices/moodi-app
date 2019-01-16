@@ -26,22 +26,26 @@ import fi.helsinki.moodi.service.synchronize.SynchronizationService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRunService;
+import fi.helsinki.moodi.service.synchronize.notify.LockedSynchronizationItemMessageBuilder;
 import fi.helsinki.moodi.service.synchronize.process.ProcessingStatus;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem.UserSynchronizationItemStatus;
 import fi.helsinki.moodi.service.util.MapperService;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.mail.MailSender;
 
 import java.util.List;
 
 import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -75,6 +79,15 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
 
     @Autowired
     protected SynchronizationJobRunService synchronizationJobRunService;
+
+    @Autowired
+    private fi.helsinki.moodi.service.synclock.SyncLockService syncLockService;
+
+    @Autowired
+    private MailSender mailSender;
+
+    @Autowired
+    private LockedSynchronizationItemMessageBuilder lockedSynchronizationItemMessageBuilder;
 
     protected void setUpMockServerResponses(String endDate, boolean approved) {
         setupMoodleGetCourseResponse();
@@ -146,11 +159,10 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
         assertTrue(userSynchronizationItems.stream().allMatch(userItem -> expectedStatus.equals(userItem.getStatus())));
     }
 
-    protected SynchronizationSummary testTresholdCheckFailed(String expectedMessage) {
-        logger.info("Testing synchronizationSummary with " +
-                "properties syncTresholds.REMOVE_ROLES.preventAll: {}, syncTresholds.REMOVE_ROLES.limit: {}",
-            environment.getProperty("syncTresholds.REMOVE_ROLES.preventAll"),
-            environment.getProperty("syncTresholds.REMOVE_ROLES.limit"));
+    protected SynchronizationSummary testSynchronizationSummaryWhenRemovingRoles(
+        SynchronizationType synchronizationType,
+        ProcessingStatus expectedProcessingStatus,
+        String expectedMessage) {
 
         setUpMockServerResponses(getFutureDateString(), false);
 
@@ -160,15 +172,30 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
 
         expectFindUsersRequestsToMoodle();
 
-        SynchronizationSummary summary = synchronizationService.synchronize(SynchronizationType.FULL);
+        SynchronizationSummary summary = synchronizationService.synchronize(synchronizationType);
 
         SynchronizationItem item = summary.getItems().get(0);
 
-        assertEquals(ProcessingStatus.LOCKED, item.getProcessingStatus());
+        assertEquals(expectedProcessingStatus, item.getProcessingStatus());
 
         assertEquals(expectedMessage, item.getProcessingMessage());
 
         return summary;
+    }
+
+    protected void testThatThresholdCheckLocksCourse(String expectedMessage) {
+        Mockito.reset(mailSender);
+
+        Course course = findCourse();
+        assertFalse(syncLockService.isLocked(course));
+
+        SynchronizationSummary summary = testSynchronizationSummaryWhenRemovingRoles(
+            SynchronizationType.FULL,
+            ProcessingStatus.LOCKED,
+            expectedMessage);
+        Mockito.verify(mailSender).send(lockedSynchronizationItemMessageBuilder.buildMessage(summary.getItems()));
+
+        assertTrue(syncLockService.isLocked(course));
     }
 
     protected String getEnrollmentsResponse(int moodleUserId, long moodleRoleId, long moodiRoleId) {

@@ -193,9 +193,10 @@ public class SynchronizingProcessor extends AbstractProcessor {
         final long studentCount = oodiCourse.students.size();
         final long teacherCount = oodiCourse.teachers.size();
 
-        checkThresholdLimitsForRole(itemsByAction, mapperService.getStudentRoleId(), studentCount, parentItem);
-        checkThresholdLimitsForRole(itemsByAction, mapperService.getTeacherRoleId(), teacherCount, parentItem);
-
+        if (!parentItem.isUnlock()) {
+            checkThresholdLimitsForRole(itemsByAction, mapperService.getStudentRoleId(), studentCount, parentItem);
+            checkThresholdLimitsForRole(itemsByAction, mapperService.getTeacherRoleId(), teacherCount, parentItem);
+        }
     }
 
     private void checkThresholdLimitsForRole(Map<UserSynchronizationActionType, List<UserSynchronizationAction>> actionsMap,
