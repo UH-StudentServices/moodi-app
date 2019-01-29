@@ -82,9 +82,9 @@ public class UserSynchronizationActionResolver {
         return addAction(moodleUserId, currentRolesInOodi, UserSynchronizationActionType.ADD_ENROLLMENT, newArrayList());
     }
 
-    private List<UserSynchronizationAction> createRoleChangeAndUnEnrollActions(Long moodleUserId,
-                                                                               Set<Long> currentRolesInOodi,
-                                                                               Set<Long> currentRolesInMoodle) {
+    private List<UserSynchronizationAction> createRoleChangeAndSuspendActions(Long moodleUserId,
+                                                                              Set<Long> currentRolesInOodi,
+                                                                              Set<Long> currentRolesInMoodle) {
         Set<Long> rolesToAdd = difference(currentRolesInOodi, currentRolesInMoodle);
         Set<Long> rolesToRemove = difference(currentRolesInMoodle, currentRolesInOodi).stream()
             .filter(this::roleCanBeRemoved)
@@ -94,13 +94,14 @@ public class UserSynchronizationActionResolver {
 
         addAction(moodleUserId, rolesToAdd, UserSynchronizationActionType.ADD_ROLES, actions);
 
-        boolean unEnroll = rolesToAdd.size() == 0 && currentRolesInMoodle.size() - rolesToRemove.size() == 1;
+        boolean suspendStudent = (rolesToRemove.contains(mapperService.getStudentRoleId()) &&
+                !currentRolesInMoodle.contains(mapperService.getTeacherRoleId()));
 
-        if (unEnroll) {
-            addAction(moodleUserId, Sets.newHashSet(mapperService.getMoodiRoleId()), UserSynchronizationActionType.REMOVE_ENROLLMENT, actions);
-        } else {
-            addAction(moodleUserId, rolesToRemove, UserSynchronizationActionType.REMOVE_ROLES, actions);
+        if (suspendStudent) {
+            addAction(moodleUserId, Sets.newHashSet(mapperService.getMoodiRoleId()), UserSynchronizationActionType.SUSPEND_ENROLLMENT, actions);
         }
+
+        addAction(moodleUserId, rolesToRemove, UserSynchronizationActionType.REMOVE_ROLES, actions);
 
         return actions;
     }
@@ -113,7 +114,7 @@ public class UserSynchronizationActionResolver {
                                                       Set<Long> roles,
                                                       UserSynchronizationActionType type,
                                                       List<UserSynchronizationAction> actions) {
-        if (type == UserSynchronizationActionType.REMOVE_ENROLLMENT || roles.size() > 0) {
+        if (type == UserSynchronizationActionType.SUSPEND_ENROLLMENT || roles.size() > 0) {
             actions.add(new UserSynchronizationAction(type, roles, moodleUserId));
         }
         return actions;
@@ -124,7 +125,7 @@ public class UserSynchronizationActionResolver {
         Long moodleUserId = item.getMoodleUserId();
 
         if (item.getMoodleUserEnrollments() != null) {
-            return item.withActions(createRoleChangeAndUnEnrollActions(moodleUserId, currentRolesInOodiWithDefaultRole, getCurrentMoodleRoles(item)));
+            return item.withActions(createRoleChangeAndSuspendActions(moodleUserId, currentRolesInOodiWithDefaultRole, getCurrentMoodleRoles(item)));
         } else {
             return item.withActions(createEnrollmentActions(moodleUserId, currentRolesInOodiWithDefaultRole));
         }

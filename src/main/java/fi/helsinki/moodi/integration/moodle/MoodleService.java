@@ -74,7 +74,7 @@ public class MoodleService {
         moodleClient.addEnrollments(moodleEnrollments);
     }
 
-    public void removeEnrollments(final List<MoodleEnrollment> moodleEnrollments) {
-        moodleClient.removeEnrollments(moodleEnrollments);
+    public void suspendEnrollments(final List<MoodleEnrollment> moodleEnrollments) {
+        moodleClient.suspendEnrollments(moodleEnrollments);
     }
 }

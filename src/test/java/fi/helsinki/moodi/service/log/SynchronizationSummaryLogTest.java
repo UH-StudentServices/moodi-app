@@ -191,12 +191,14 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
         moodleUserEnrollments.username = TEACHER_MOODLE_USERNAME;
 
         return enrichUserSynchronizationItem(
-            item,
-            UserSynchronizationItemStatus.ERROR,
-            TEACHER_MOODLE_USER_ID,
-            newArrayList(new UserSynchronizationAction(UserSynchronizationActionType.ADD_ROLES, Sets.newHashSet(TEACHER_ROLE_ID), TEACHER_MOODLE_USER_ID)
-                .withErrorStatus()),
-            moodleUserEnrollments);
+                item,
+                UserSynchronizationItemStatus.ERROR,
+                TEACHER_MOODLE_USER_ID,
+                newArrayList(new UserSynchronizationAction(UserSynchronizationActionType.ADD_ROLES,
+                        Sets.newHashSet(TEACHER_ROLE_ID),
+                        TEACHER_MOODLE_USER_ID)
+                        .withErrorStatus()),
+                moodleUserEnrollments);
     }
 
     private UserSynchronizationItem enrichUserSynchronizationItem(UserSynchronizationItem item,

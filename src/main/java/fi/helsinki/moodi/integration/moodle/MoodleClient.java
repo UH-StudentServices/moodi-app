@@ -127,19 +127,21 @@ public class MoodleClient {
         }
     }
 
-    public void removeEnrollments(final List<MoodleEnrollment> moodleEnrollments) {
-        final MultiValueMap<String, String> params = createParametersForFunction("enrol_manual_unenrol_users");
+    public void suspendEnrollments(final List<MoodleEnrollment> moodleEnrollments) {
+        final MultiValueMap<String, String> params = createParametersForFunction("enrol_manual_enrol_users");
 
         for (int i = 0; i < moodleEnrollments.size(); i++) {
             final MoodleEnrollment moodleEnrollment = moodleEnrollments.get(i);
             params.set("enrolments[" + i + "][courseid]", String.valueOf(moodleEnrollment.moodleCourseId));
+            params.set("enrolments[" + i + "][roleid]", String.valueOf(moodleEnrollment.moodleRoleId));
             params.set("enrolments[" + i + "][userid]", String.valueOf(moodleEnrollment.moodleUserId));
+            params.set("enrolments[" + i + "][suspend]", "1");
         }
 
         try {
             execute(params, new TypeReference<Void>() {}, EMPTY_OK_RESPONSE_EVALUATION, false);
         } catch (Exception e) {
-            handleException("Error executing method: removeEnrollments", e);
+            handleException("Error executing method: suspendEnrollments", e);
         }
     }
 

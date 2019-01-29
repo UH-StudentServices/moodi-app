@@ -28,7 +28,6 @@ import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +37,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static fi.helsinki.moodi.service.synchronize.process.UserSynchronizationActionType.ADD_ENROLLMENT;
 import static fi.helsinki.moodi.service.synchronize.process.UserSynchronizationActionType.ADD_ROLES;
 import static fi.helsinki.moodi.service.synchronize.process.UserSynchronizationActionType.REMOVE_ROLES;
-import static fi.helsinki.moodi.service.synchronize.process.UserSynchronizationActionType.REMOVE_ENROLLMENT;
+import static fi.helsinki.moodi.service.synchronize.process.UserSynchronizationActionType.SUSPEND_ENROLLMENT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -97,13 +96,13 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
     }
 
     @Test
-    public void thatRemoveEnrollmentActionIsResolvedIfAlreadyInDefaultRoleAndNotApproved() {
+    public void thatSuspendEnrollmentActionIsResolvedIfAlreadyInDefaultRoleAndNotApproved() {
         UserSynchronizationItem item = getStudentUserSynchronizationItem(false);
         item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(11L)));
 
         userSynchronizationActionResolver.enrichWithActions(item);
 
-        assertActions(item, ImmutableMap.of(REMOVE_ENROLLMENT, newArrayList(11L)));
+        assertActions(item, ImmutableMap.of(SUSPEND_ENROLLMENT, newArrayList(11L)));
     }
 
     @Test
@@ -147,13 +146,15 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
     }
 
     @Test
-    public void thatStudentIsUnenrolled() {
+    public void thatStudentIsSuspendedAndStudentRoleIsRemoved() {
         UserSynchronizationItem item = getStudentUserSynchronizationItem(false);
         item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(5L, 11L)));
 
         userSynchronizationActionResolver.enrichWithActions(item);
 
-        assertActions(item, ImmutableMap.of(REMOVE_ENROLLMENT, newArrayList(11L)));
+        assertActions(item, ImmutableMap.of(
+                SUSPEND_ENROLLMENT, newArrayList(11L),
+                REMOVE_ROLES, newArrayList(5L)));
     }
 
     @Test

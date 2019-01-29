@@ -40,9 +40,8 @@ import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-
 @TestPropertySource(properties = {
-    "syncTresholds.REMOVE_ENROLLMENT.preventAll = 0"
+    "syncTresholds.SUSPEND_ENROLLMENT.preventAll = 0"
 })
 public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
 
@@ -186,17 +185,17 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
     }
 
     @Test
-    public void thatStudentIsUnEnrolledIfStatusCodeIsNotApproved() {
+    public void thatStudentIsSuspendedIfStatusCodeIsNotApproved() {
         SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
             .withOodiStudent(MOODLE_USER_ID, true, true, NON_APPROVED_ENROLLMENT_STATUS_CODE)
             .withMoodleEnrollments(moodleUserEnrollments(
                 studentRole(),
                 moodiRole()))
             .expectUserRequestsToIAMAndMoodle()
-            //XXX expect unenrollment
-            .expectUnEnrollmentsToMoodleCourse(
+            .expectSuspendsToMoodleCourse(
                 studentEnrollment()
             )
+            .expectUnAssignRolesToMoodleCourse(studentEnrollment())
             .getSynchronizationItem();
 
         synchronizingProcessor.doProcess(item);
@@ -408,8 +407,8 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             return this;
         }
 
-        public CourseSynchronizationRequestChain expectUnEnrollmentsToMoodleCourse(MoodleEnrollment... enrollments) {
-            expectUnEnrollmentRequestToMoodle(enrollments);
+        public CourseSynchronizationRequestChain expectSuspendsToMoodleCourse(MoodleEnrollment... enrollments) {
+            expectSuspendRequestToMoodle(enrollments);
             return this;
         }
 
