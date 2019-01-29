@@ -45,7 +45,7 @@ dev.mode.enabled: false
 syncTresholds:
   REMOVE_ROLES:
     preventAll: 5
-  REMOVE_ENROLLMENT:
+  SUSPEND_ENROLLMENT:
     preventAll: 5
 
 mailNotification:

@@ -169,18 +169,18 @@ public abstract class AbstractMoodiIntegrationTest {
         expectEnrollmentRequestToMoodleWithResponse(EMPTY_RESPONSE, enrollments);
     }
 
+    protected final void expectSuspendRequestToMoodle(final MoodleEnrollment... enrollments) {
+        expectSuspendRequestToMoodleWithResponse(EMPTY_RESPONSE, enrollments);
+    }
+
+    protected final void expectSuspendRequestToMoodleWithResponse(String response, final MoodleEnrollment... enrollments) {
+        final String coreFunctionName = "enrol_manual_enrol_users";
+        expectEnrollmentRequestToMoodleWithResponse(response, coreFunctionName, this::suspendUsersPartsBuilder, enrollments);
+    }
+
     protected final void expectEnrollmentRequestToMoodleWithResponse(String response, final MoodleEnrollment... enrollments) {
         final String coreFunctionName = "enrol_manual_enrol_users";
         expectEnrollmentRequestToMoodleWithResponse(response, coreFunctionName, this::enrollUsersPartsBuilder, enrollments);
-    }
-
-    protected final void expectUnEnrollmentRequestToMoodle(final MoodleEnrollment... enrollments) {
-        expectUnEnrollmentRequestToMoodleWithResponse(EMPTY_RESPONSE, enrollments);
-    }
-
-    protected final void expectUnEnrollmentRequestToMoodleWithResponse(String response, final MoodleEnrollment... enrollments) {
-        final String coreFunctionName = "enrol_manual_unenrol_users";
-        expectEnrollmentRequestToMoodleWithResponse(response, coreFunctionName, this::unEnrollUsersPartsBuilder, enrollments);
     }
 
     private void expectEnrollmentRequestToMoodleWithResponse(String response, String coreFunctionName,
@@ -220,12 +220,15 @@ public abstract class AbstractMoodiIntegrationTest {
             createEnrollmentRequestPart(property, "userid", String.valueOf(enrollment.moodleUserId), index));
     }
 
-    private Stream<String> unEnrollUsersPartsBuilder(MoodleEnrollment enrollment, int index) {
+    private Stream<String> suspendUsersPartsBuilder(MoodleEnrollment enrollment, int index) {
         final String property = "enrolments";
 
         return Stream.of(
             createEnrollmentRequestPart(property, "courseid", String.valueOf(enrollment.moodleCourseId), index),
-            createEnrollmentRequestPart(property, "userid", String.valueOf(enrollment.moodleUserId), index));
+            createEnrollmentRequestPart(property, "roleid", String.valueOf(getMoodiRoleId()), index),
+            createEnrollmentRequestPart(property, "userid", String.valueOf(enrollment.moodleUserId), index),
+            createEnrollmentRequestPart(property, "suspend", "1", index)
+        );
     }
 
     private Stream<String> updateRolesPartsBuilder(MoodleEnrollment enrollment, int index, String property) {

@@ -105,7 +105,6 @@ public class SynchronizingProcessor extends AbstractProcessor {
             .completeProcessingPhase();
     }
 
-    @Transactional
     private void completeCourseEnrollments(final SynchronizationItem item) {
         courseService.completeCourseImport(item.getCourse().realisationId, true);
     }
@@ -177,8 +176,8 @@ public class SynchronizingProcessor extends AbstractProcessor {
         switch (actionType) {
             case ADD_ENROLLMENT:
                 return moodleService::addEnrollments;
-            case REMOVE_ENROLLMENT:
-                return moodleService::removeEnrollments;
+            case SUSPEND_ENROLLMENT:
+                return moodleService::suspendEnrollments;
             case ADD_ROLES:
                 return moodleService::addRoles;
             case REMOVE_ROLES:
@@ -198,7 +197,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
         if (!parentItem.isUnlock()) {
             checkThresholdLimitsForRole(itemsByAction, mapperService.getStudentRoleId(), studentCount, parentItem);
             checkThresholdLimitsForRole(itemsByAction, mapperService.getTeacherRoleId(), teacherCount, parentItem);
-            // check against all students being unenrolled
+            // check against students being suspended
             checkThresholdLimitsForRole(itemsByAction, mapperService.getMoodiRoleId(), studentCount, parentItem);
         }
     }

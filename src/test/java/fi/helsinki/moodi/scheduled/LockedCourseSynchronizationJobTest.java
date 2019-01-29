@@ -76,6 +76,8 @@ public class LockedCourseSynchronizationJobTest extends AbstractSynchronizationJ
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
             new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID));
 
+        expectSuspendRequestToMoodle(new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
+
         expectAssignRolesToMoodleWithResponse(
             EMPTY_RESPONSE,
             false,

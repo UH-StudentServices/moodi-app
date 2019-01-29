@@ -28,12 +28,12 @@ import org.springframework.test.context.TestPropertySource;
 import static org.junit.Assert.assertFalse;
 
 @TestPropertySource(properties = {
-    "syncTresholds.REMOVE_ENROLLMENT.preventAll = 1",
-    "syncTresholds.REMOVE_ENROLLMENT.limit = 1"
+    "syncTresholds.SUSPEND_ENROLLMENT.preventAll = 1",
+    "syncTresholds.SUSPEND_ENROLLMENT.limit = 1"
 })
 public class SynchronizationActionThresholdLimitTest extends AbstractSynchronizationJobTest {
 
-    private static final String EXPECTED_THRESHOLD_CROSSED_REMOVE_ENROLLMENT_MESSAGE = "Action REMOVE_ENROLLMENT for 1 items exceeds threshold";
+    private static final String EXPECTED_THRESHOLD_CROSSED_SUSPEND_ENROLLMENT_MESSAGE = "Action SUSPEND_ENROLLMENT for 1 items exceeds threshold";
 
     @Autowired
     private SyncLockService syncLockService;
@@ -45,10 +45,10 @@ public class SynchronizationActionThresholdLimitTest extends AbstractSynchroniza
     private LockedSynchronizationItemMessageBuilder lockedSynchronizationItemMessageBuilder;
 
     @Test
-    public void thatRemoveEnrollmentActionIsLimitedByThreshold() {
+    public void thatSuspendEnrollmentActionIsLimitedByThreshold() {
         Course course = findCourse();
         assertFalse(syncLockService.isLocked(course));
 
-        testThatThresholdCheckLocksCourse(EXPECTED_THRESHOLD_CROSSED_REMOVE_ENROLLMENT_MESSAGE);
+        testThatThresholdCheckLocksCourse(EXPECTED_THRESHOLD_CROSSED_SUSPEND_ENROLLMENT_MESSAGE);
     }
 }
