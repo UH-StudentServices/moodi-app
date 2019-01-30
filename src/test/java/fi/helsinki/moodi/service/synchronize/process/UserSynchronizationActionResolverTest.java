@@ -96,13 +96,13 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
     }
 
     @Test
-    public void thatSuspendEnrollmentActionIsResolvedIfAlreadyInDefaultRoleAndNotApproved() {
+    public void thatNoSuspendEnrollmentActionIsResolvedIfAlreadyInDefaultRoleAndNotApproved() {
         UserSynchronizationItem item = getStudentUserSynchronizationItem(false);
         item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(11L)));
 
         userSynchronizationActionResolver.enrichWithActions(item);
 
-        assertActions(item, ImmutableMap.of(SUSPEND_ENROLLMENT, newArrayList(11L)));
+        assertActions(item, ImmutableMap.of());
     }
 
     @Test
