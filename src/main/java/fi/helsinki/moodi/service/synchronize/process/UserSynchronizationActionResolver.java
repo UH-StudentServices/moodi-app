@@ -64,7 +64,7 @@ public class UserSynchronizationActionResolver {
     }
 
     private boolean roleCanBeRemoved(Long role) {
-        //XXX why teacher role cannot be removed??
+        // Teacher role and Sync role (MoodiRole) cannot be removed
         return role == mapperService.getStudentRoleId();
     }
 
