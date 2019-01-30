@@ -114,7 +114,7 @@ public class UserSynchronizationActionResolver {
                                                       Set<Long> roles,
                                                       UserSynchronizationActionType type,
                                                       List<UserSynchronizationAction> actions) {
-        if (type == UserSynchronizationActionType.SUSPEND_ENROLLMENT || roles.size() > 0) {
+        if (type == UserSynchronizationActionType.SUSPEND_ENROLLMENT || !roles.isEmpty()) {
             actions.add(new UserSynchronizationAction(type, roles, moodleUserId));
         }
         return actions;
