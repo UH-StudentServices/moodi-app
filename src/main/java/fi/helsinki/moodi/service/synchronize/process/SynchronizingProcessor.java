@@ -177,6 +177,9 @@ public class SynchronizingProcessor extends AbstractProcessor {
                 return moodleService::addEnrollments;
             case SUSPEND_ENROLLMENT:
                 return moodleService::suspendEnrollments;
+            case REACTIVATE_ENROLLMENT:
+                // Adding the enrollment again in Moodle sets the enrollment suspend flag to 0
+                return moodleService::addEnrollments;
             case ADD_ROLES:
                 return moodleService::addRoles;
             case REMOVE_ROLES:

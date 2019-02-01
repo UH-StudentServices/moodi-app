@@ -94,11 +94,20 @@ public class UserSynchronizationActionResolver {
 
         addAction(moodleUserId, rolesToAdd, UserSynchronizationActionType.ADD_ROLES, actions);
 
-        boolean suspendStudent = (rolesToRemove.contains(mapperService.getStudentRoleId()) &&
-                !currentRolesInMoodle.contains(mapperService.getTeacherRoleId()));
+        boolean suspendStudent = rolesToRemove.contains(mapperService.getStudentRoleId()) &&
+                !currentRolesInMoodle.contains(mapperService.getTeacherRoleId());
 
         if (suspendStudent) {
             addAction(moodleUserId, Sets.newHashSet(mapperService.getMoodiRoleId()), UserSynchronizationActionType.SUSPEND_ENROLLMENT, actions);
+        }
+
+        // We identify a suspended student by him having an enrollment in Moodle with just the sync role.
+        boolean reactivateStudent = rolesToAdd.contains(mapperService.getStudentRoleId()) &&
+                currentRolesInMoodle.contains(mapperService.getMoodiRoleId()) &&
+                currentRolesInMoodle.size() == 1;
+
+        if (reactivateStudent) {
+            addAction(moodleUserId, Sets.newHashSet(mapperService.getStudentRoleId()), UserSynchronizationActionType.REACTIVATE_ENROLLMENT, actions);
         }
 
         addAction(moodleUserId, rolesToRemove, UserSynchronizationActionType.REMOVE_ROLES, actions);
