@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import static com.google.common.collect.Lists.newArrayList;
 import static fi.helsinki.moodi.service.synchronize.process.UserSynchronizationActionType.ADD_ENROLLMENT;
 import static fi.helsinki.moodi.service.synchronize.process.UserSynchronizationActionType.ADD_ROLES;
+import static fi.helsinki.moodi.service.synchronize.process.UserSynchronizationActionType.REACTIVATE_ENROLLMENT;
 import static fi.helsinki.moodi.service.synchronize.process.UserSynchronizationActionType.REMOVE_ROLES;
 import static fi.helsinki.moodi.service.synchronize.process.UserSynchronizationActionType.SUSPEND_ENROLLMENT;
 import static org.junit.Assert.assertEquals;
@@ -83,16 +84,6 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
         userSynchronizationActionResolver.enrichWithActions(item);
 
         assertActions(item, ImmutableMap.of(ADD_ENROLLMENT, newArrayList(3L, 5L, 11L)));
-    }
-
-    @Test
-    public void thatAddStudentRoleActionIsResolvedIfAlreadyInDefaultRole() {
-        UserSynchronizationItem item = getStudentUserSynchronizationItem(true);
-        item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(11L)));
-
-        userSynchronizationActionResolver.enrichWithActions(item);
-
-        assertActions(item, ImmutableMap.of(ADD_ROLES, newArrayList(5L)));
     }
 
     @Test
@@ -155,6 +146,18 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
         assertActions(item, ImmutableMap.of(
                 SUSPEND_ENROLLMENT, newArrayList(11L),
                 REMOVE_ROLES, newArrayList(5L)));
+    }
+
+    @Test
+    public void thatStudentIsReactivatedAndStudentRoleIsAdded() {
+        UserSynchronizationItem item = getStudentUserSynchronizationItem(true);
+        item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(11L)));
+
+        userSynchronizationActionResolver.enrichWithActions(item);
+
+        assertActions(item, ImmutableMap.of(
+                REACTIVATE_ENROLLMENT, newArrayList(5L),
+                ADD_ROLES, newArrayList(5L)));
     }
 
     @Test

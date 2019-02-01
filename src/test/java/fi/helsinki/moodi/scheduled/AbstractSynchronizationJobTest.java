@@ -41,13 +41,16 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mail.MailSender;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegrationTest {
@@ -198,12 +201,15 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
         assertTrue(syncLockService.isLocked(course));
     }
 
-    protected String getEnrollmentsResponse(int moodleUserId, long moodleRoleId, long moodiRoleId) {
-        return String.format(
-            "[{ \"id\" : \"%s\" , \"roles\" : [{\"roleid\" : %s}, {\"roleid\" : %s}]}]",
-            moodleUserId,
-            moodleRoleId,
-            moodiRoleId);
+    protected String getEnrollmentsResponse(int moodleUserId, long... roleIds) {
+        String ret = String.format(
+                "[{ \"id\" : \"%s\" , \"roles\" : [%s]}]",
+                moodleUserId,
+                Arrays.stream(roleIds)
+                        .mapToObj(id -> String.format("{\"roleid\" : %d}", id))
+                        .reduce((a, b) -> a.concat(",").concat(b))
+                        .get());
+        return ret;
     }
 
     protected void expectFindUsersRequestsToMoodle() {

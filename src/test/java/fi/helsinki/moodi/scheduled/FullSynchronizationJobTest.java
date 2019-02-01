@@ -157,6 +157,31 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
     }
 
     @Test
+    public void thatReApprovedStudentIsEnrolledAndRoleAddedInMoodle() {
+        String endDateInFuture = getFutureDateString();
+        // Student approved in Oodi...
+        setUpMockServerResponses(endDateInFuture, true);
+
+        // ...but only has the sync role in Moodle.
+        expectGetEnrollmentsRequestToMoodle(
+                MOODLE_COURSE_ID,
+                getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, mapperService.getMoodiRoleId()));
+
+        expectFindUsersRequestsToMoodle();
+
+        expectEnrollmentRequestToMoodle(
+                new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
+                new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID));
+
+        expectEnrollmentRequestToMoodle(
+                new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
+
+        expectAssignRolesToMoodle(true, new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
+
+        job.execute();
+    }
+
+    @Test
     public void thatMultipleStudentsAndTeachersAreSyncedCorrectly() {
 
         setupMoodleGetCourseResponse();
