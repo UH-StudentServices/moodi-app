@@ -254,6 +254,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
         Map<Boolean, List<UserSynchronizationItem>> userSynchronizationItemsByCompletedStatus = Stream
             .concat(studentItemStream, teacherItemStream)
+            .map(i -> i.withMoodleCourseId(item.getCourse().moodleId))
             .map(this::enrichWithMoodleUser)
             .collect(Collectors.groupingBy(UserSynchronizationItem::isCompleted));
 

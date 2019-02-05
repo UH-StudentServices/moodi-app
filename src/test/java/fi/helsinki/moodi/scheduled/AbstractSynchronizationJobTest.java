@@ -59,6 +59,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
 
     protected static final long REALISATION_ID = 12345;
     protected static final int MOODLE_COURSE_ID = 54321;
+    protected static final int SOME_OTHER_MOODLE_COURSE_ID = 999;
     protected static final int STUDENT_USER_MOODLE_ID = 555;
     protected static final int TEACHER_USER_MOODLE_ID = 3434;
     protected static final String STUDENT_NUMBER = "010342729";
@@ -141,7 +142,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
 
         expectGetEnrollmentsRequestToMoodle(
             MOODLE_COURSE_ID,
-            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId()));
+            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID, mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId()));
 
         expectFindUsersRequestsToMoodle();
 
@@ -171,7 +172,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
 
         expectGetEnrollmentsRequestToMoodle(
             MOODLE_COURSE_ID,
-            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
+            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
 
         expectFindUsersRequestsToMoodle();
 
@@ -201,15 +202,24 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
         assertTrue(syncLockService.isLocked(course));
     }
 
-    protected String getEnrollmentsResponse(int moodleUserId, long... roleIds) {
+    protected String getEnrollmentsResponse(int moodleUserId, int enrolledCourseId, long...roleIds) {
+        long[] enrolledCourseIds = new long[] { enrolledCourseId };
         String ret = String.format(
-                "[{ \"id\" : \"%s\" , \"roles\" : [%s]}]",
-                moodleUserId,
-                Arrays.stream(roleIds)
-                        .mapToObj(id -> String.format("{\"roleid\" : %d}", id))
-                        .reduce((a, b) -> a.concat(",").concat(b))
-                        .get());
+            "[{ \"id\" : \"%s\" , \"roles\" : [%s], \"enrolledcourses\" : [%s]}]",
+            moodleUserId,
+            longArrayJson("roleid", roleIds),
+            longArrayJson("id", enrolledCourseIds));
+
         return ret;
+    }
+
+    private String longArrayJson(String key, long[] ids) {
+        return ids.length > 0 ?
+            Arrays.stream(ids)
+            .mapToObj(id -> String.format("{\"%s\" : %d}", key, id))
+            .reduce((a, b) -> a.concat(",").concat(b))
+            .get() :
+            "";
     }
 
     protected void expectFindUsersRequestsToMoodle() {
