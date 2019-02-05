@@ -19,6 +19,7 @@ package fi.helsinki.moodi.service.synchronize.process;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import fi.helsinki.moodi.integration.moodle.MoodleCourseData;
 import fi.helsinki.moodi.integration.moodle.MoodleRole;
 import fi.helsinki.moodi.integration.moodle.MoodleUser;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
@@ -28,6 +29,7 @@ import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,6 +47,7 @@ import static org.junit.Assert.assertTrue;
 public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrationTest {
 
     private static final Long MOODLE_USER_ID = 1L;
+    private static final Long MOODLE_COURSE_ID = 2L;
 
     @Autowired
     private UserSynchronizationActionResolver userSynchronizationActionResolver;
@@ -87,13 +90,13 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
     }
 
     @Test
-    public void thatNoSuspendEnrollmentActionIsResolvedIfAlreadyInDefaultRoleAndNotApproved() {
+    public void thatSuspendEnrollmentActionIsResolvedIfAlreadyInDefaultRoleAndNotApproved() {
         UserSynchronizationItem item = getStudentUserSynchronizationItem(false);
-        item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(11L)));
+        item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(11L), MOODLE_COURSE_ID));
 
         userSynchronizationActionResolver.enrichWithActions(item);
 
-        assertActions(item, ImmutableMap.of());
+        assertActions(item, ImmutableMap.of(SUSPEND_ENROLLMENT, newArrayList(11L)));
     }
 
     @Test
@@ -139,7 +142,7 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
     @Test
     public void thatStudentIsSuspendedAndStudentRoleIsRemoved() {
         UserSynchronizationItem item = getStudentUserSynchronizationItem(false);
-        item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(5L, 11L)));
+        item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(5L, 11L), MOODLE_COURSE_ID));
 
         userSynchronizationActionResolver.enrichWithActions(item);
 
@@ -170,13 +173,15 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
         assertActions(item, Maps.newHashMap());
     }
 
-    private MoodleUserEnrollments getMoodleUserEnrollments(List<Long> roles) {
+    private MoodleUserEnrollments getMoodleUserEnrollments(List<Long> roleIds, Long...moodleCourseIds) {
         MoodleUserEnrollments moodleUserEnrollments = new MoodleUserEnrollments();
-        moodleUserEnrollments.roles = roles.stream().map(role -> {
+        moodleUserEnrollments.roles = roleIds.stream().map(role -> {
             MoodleRole moodleRole = new MoodleRole();
             moodleRole.roleId = role;
             return moodleRole;
         }).collect(Collectors.toList());
+        moodleUserEnrollments.enrolledCourses = Arrays.stream(moodleCourseIds).map(id -> new MoodleCourseData(id)
+            ).collect(Collectors.toList());
         return moodleUserEnrollments;
     }
 
@@ -203,6 +208,7 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
     private UserSynchronizationItem getStudentUserSynchronizationItem(boolean approved) {
         UserSynchronizationItem item = new UserSynchronizationItem(getOodiStudent(approved));
         item.withMoodleUser(getMoodleUser());
+        item.withMoodleCourseId(MOODLE_COURSE_ID);
         return item;
     }
 

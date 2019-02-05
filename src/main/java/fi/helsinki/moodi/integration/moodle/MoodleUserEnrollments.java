@@ -39,12 +39,19 @@ public final class MoodleUserEnrollments implements Serializable {
     @JsonProperty("roles")
     public List<MoodleRole> roles = newArrayList();
 
+    @JsonProperty("enrolledcourses")
+    public List<MoodleCourseData> enrolledCourses = newArrayList();
+
     public boolean hasRole(long roleId) {
         if (roles == null) {
             return false;
         } else {
             return roles.stream().anyMatch(r -> r.roleId == roleId);
         }
+    }
+
+    public boolean seesCourse(Long courseId) {
+        return enrolledCourses == null ? false : enrolledCourses.stream().anyMatch(e -> e.id == courseId);
     }
 
     @Override

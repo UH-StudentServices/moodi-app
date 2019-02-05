@@ -26,4 +26,10 @@ public final class MoodleCourseData implements Serializable {
     public long id;
     public String shortname;
 
+    public MoodleCourseData() {}
+
+    public MoodleCourseData(long id) {
+        this.id = id;
+    }
+
 }

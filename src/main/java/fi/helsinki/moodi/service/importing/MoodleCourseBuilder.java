@@ -35,6 +35,7 @@ public class MoodleCourseBuilder {
 
     public static final String MOODLE_COURSE_ID_PREFIX = "oodi_";
     public static final int DEFAULT_NUMBER_OF_SECTIONS = 7;
+    private boolean courseVisibility = false;
 
     private final MapperService mapperService;
 
@@ -57,9 +58,13 @@ public class MoodleCourseBuilder {
             shortName,
             moodleCategory,
             description,
-            false,
+            courseVisibility,
             DEFAULT_NUMBER_OF_SECTIONS
         );
+    }
+
+    public void useOnlyInTestsToSetCourseVisibility(boolean courseVisibility) {
+        this.courseVisibility = courseVisibility;
     }
 
     private String getDescription(OodiCourseUnitRealisation oodiCourseUnitRealisation, String language) {

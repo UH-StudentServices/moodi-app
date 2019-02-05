@@ -39,6 +39,7 @@ public class UserSynchronizationItem {
     private UserSynchronizationItemStatus status = UserSynchronizationItemStatus.IN_PROGRESS;
 
     private MoodleUser moodleUser;
+    private Long moodleCourseId;
     private MoodleUserEnrollments moodleUserEnrollments;
 
     private OodiStudent oodiStudent;
@@ -104,6 +105,15 @@ public class UserSynchronizationItem {
         return actions;
     }
 
+    public Long getMoodleCourseId() {
+        return moodleCourseId;
+    }
+
+    public UserSynchronizationItem withMoodleCourseId(Long moodleCourseId) {
+        this.moodleCourseId = moodleCourseId;
+        return this;
+    }
+
     public UserSynchronizationItem withActions(List<UserSynchronizationAction> actions) {
         this.actions = actions;
         return this;
@@ -126,4 +136,9 @@ public class UserSynchronizationItem {
         this.status = status;
         return this;
     }
+
+    public boolean userSeesCourseInMoodle() {
+        return moodleUserEnrollments == null ? false : moodleUserEnrollments.seesCourse(this.moodleCourseId);
+    }
+
 }

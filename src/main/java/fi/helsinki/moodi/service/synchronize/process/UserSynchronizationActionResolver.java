@@ -84,7 +84,8 @@ public class UserSynchronizationActionResolver {
 
     private List<UserSynchronizationAction> createRoleChangeAndSuspendActions(Long moodleUserId,
                                                                               Set<Long> currentRolesInOodi,
-                                                                              Set<Long> currentRolesInMoodle) {
+                                                                              Set<Long> currentRolesInMoodle,
+                                                                              boolean userSeesCourseInMoodle) {
         Set<Long> rolesToAdd = difference(currentRolesInOodi, currentRolesInMoodle);
         Set<Long> rolesToRemove = difference(currentRolesInMoodle, currentRolesInOodi).stream()
             .filter(this::roleCanBeRemoved)
@@ -94,17 +95,20 @@ public class UserSynchronizationActionResolver {
 
         addAction(moodleUserId, rolesToAdd, UserSynchronizationActionType.ADD_ROLES, actions);
 
-        boolean suspendStudent = rolesToRemove.contains(mapperService.getStudentRoleId()) &&
-                !currentRolesInMoodle.contains(mapperService.getTeacherRoleId());
+        // Suspend when student role is removed from Oodi,
+        // or if the user can see the course and only has the sync role in Moodle, but no student role in Oodi
+        boolean suspendStudent =
+                (rolesToRemove.contains(mapperService.getStudentRoleId()) ||
+                        hasOnlySyncRole(currentRolesInMoodle) && !currentRolesInOodi.contains(mapperService.getStudentRoleId())) &&
+                !currentRolesInMoodle.contains(mapperService.getTeacherRoleId()) &&
+                userSeesCourseInMoodle;
 
         if (suspendStudent) {
             addAction(moodleUserId, Sets.newHashSet(mapperService.getMoodiRoleId()), UserSynchronizationActionType.SUSPEND_ENROLLMENT, actions);
         }
 
         // We identify a suspended student by him having an enrollment in Moodle with just the sync role.
-        boolean reactivateStudent = rolesToAdd.contains(mapperService.getStudentRoleId()) &&
-                currentRolesInMoodle.contains(mapperService.getMoodiRoleId()) &&
-                currentRolesInMoodle.size() == 1;
+        boolean reactivateStudent = rolesToAdd.contains(mapperService.getStudentRoleId()) && hasOnlySyncRole(currentRolesInMoodle);
 
         if (reactivateStudent) {
             addAction(moodleUserId, Sets.newHashSet(mapperService.getStudentRoleId()), UserSynchronizationActionType.REACTIVATE_ENROLLMENT, actions);
@@ -113,6 +117,10 @@ public class UserSynchronizationActionResolver {
         addAction(moodleUserId, rolesToRemove, UserSynchronizationActionType.REMOVE_ROLES, actions);
 
         return actions;
+    }
+
+    private boolean hasOnlySyncRole(Set<Long> roles) {
+        return roles.contains(mapperService.getMoodiRoleId()) && roles.size() == 1;
     }
 
     private Set<Long> difference(Set<Long> list1, Set<Long> list2) {
@@ -134,7 +142,11 @@ public class UserSynchronizationActionResolver {
         Long moodleUserId = item.getMoodleUserId();
 
         if (item.getMoodleUserEnrollments() != null) {
-            return item.withActions(createRoleChangeAndSuspendActions(moodleUserId, currentRolesInOodiWithDefaultRole, getCurrentMoodleRoles(item)));
+            return item.withActions(createRoleChangeAndSuspendActions(
+                    moodleUserId,
+                    currentRolesInOodiWithDefaultRole,
+                    getCurrentMoodleRoles(item),
+                    item.userSeesCourseInMoodle()));
         } else {
             return item.withActions(createEnrollmentActions(moodleUserId, currentRolesInOodiWithDefaultRole));
         }
