@@ -21,9 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.io.Serializable;
-
-public class OodiCourseChange implements Serializable {
+public class OodiCourseChange {
 
     private static final long serialVersionUID = 1L;
 

@@ -19,12 +19,11 @@ package fi.helsinki.moodi.integration.oodi;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.io.Serializable;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-public class BaseOodiCourseUnitRealisation implements Serializable {
+public class BaseOodiCourseUnitRealisation {
 
     private static final long serialVersionUID = 1L;
 
