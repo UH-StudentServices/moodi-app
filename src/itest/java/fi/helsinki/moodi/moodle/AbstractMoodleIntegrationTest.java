@@ -23,6 +23,8 @@ import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.service.course.CourseRepository;
 import fi.helsinki.moodi.service.importing.ImportCourseRequest;
 import fi.helsinki.moodi.service.importing.ImportingService;
+import fi.helsinki.moodi.service.importing.MoodleCourseBuilder;
+import fi.helsinki.moodi.service.synchronize.SynchronizationService;
 import fi.helsinki.moodi.service.util.MapperService;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
@@ -37,10 +39,14 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static fi.helsinki.moodi.service.iam.IAMService.DOMAIN_SUFFIX;
 import static fi.helsinki.moodi.service.iam.IAMService.TEACHER_ID_PREFIX;
 import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
 import static java.lang.Math.abs;
+import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegrationTest {
@@ -56,6 +62,12 @@ public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegra
 
     @Autowired
     private CourseRepository courseRepository;
+
+    @Autowired
+    protected SynchronizationService synchronizationService;
+
+    @Autowired
+    protected MoodleCourseBuilder moodleCourseBuilder;
 
     protected static final String STUDENT_USERNAME = "bar_simp";
     protected static final String STUDENT_NOT_IN_MOODLE_USERNAME = "username_of_student_not_in_moodle";
@@ -169,5 +181,55 @@ public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegra
         for (TeacherUser teacherUser : teachers) {
             expectFindEmployeeRequestToIAM(TEACHER_ID_PREFIX + teacherUser.teacherId, teacherUser.username);
         }
+    }
+
+    protected void assertUserEnrollments(String username,
+                                         List<MoodleUserEnrollments> moodleUserEnrollmentsList,
+                                         List<Long> expectedRoleIds) {
+        MoodleUserEnrollments userEnrollments = findEnrollmentsByUsername(moodleUserEnrollmentsList, username);
+
+        assertEquals(expectedRoleIds.size(), userEnrollments.roles.size());
+
+        expectedRoleIds.stream().forEach(roleId -> assertTrue(userEnrollments.hasRole(roleId)));
+    }
+
+    protected void assertStudentEnrollment(String username, List<MoodleUserEnrollments> moodleUserEnrollmentsList) {
+        assertUserEnrollments(
+            username,
+            moodleUserEnrollmentsList,
+            newArrayList(mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
+    }
+
+    protected void assertUserCourseVisibility(boolean expectedVisibility,
+                                              String username,
+                                              Long courseId,
+                                              List<MoodleUserEnrollments> moodleUserEnrollmentsList) {
+        assertEquals(expectedVisibility, findEnrollmentsByUsername(moodleUserEnrollmentsList, username).seesCourse(courseId));
+    }
+
+    protected void assertTeacherEnrollment(String username, List<MoodleUserEnrollments> moodleUserEnrollmentsList) {
+        assertUserEnrollments(
+            username,
+            moodleUserEnrollmentsList,
+            newArrayList(mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId()));
+    }
+
+    protected void assertHybridEnrollment(String username, List<MoodleUserEnrollments> moodleUserEnrollmentsList) {
+        assertUserEnrollments(
+            username,
+            moodleUserEnrollmentsList,
+            newArrayList(mapperService.getStudentRoleId(), mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId()));
+    }
+    /*
+        Every user is that has been enrolled or updated by moodi is tagged with "moodi role".
+        This role is never removed, even if other roles are removed. Note that only student role can be removed by Moodi
+        if student is returned from Oodi with approved set to false.
+     */
+
+    protected void assertMoodiRoleEnrollment(String username, List<MoodleUserEnrollments> moodleUserEnrollmentsList) {
+        assertUserEnrollments(
+            username,
+            moodleUserEnrollmentsList,
+            singletonList(mapperService.getMoodiRoleId()));
     }
 }

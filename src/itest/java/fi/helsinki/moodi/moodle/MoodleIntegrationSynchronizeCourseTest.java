@@ -18,12 +18,8 @@
 package fi.helsinki.moodi.moodle;
 
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
-import fi.helsinki.moodi.service.importing.MoodleCourseBuilder;
-import fi.helsinki.moodi.service.synchronize.SynchronizationService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
-import org.junit.After;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,69 +27,8 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegrationTest {
-
-    @Autowired
-    private SynchronizationService synchronizationService;
-    @Autowired
-    private MoodleCourseBuilder moodleCourseBuilder;
-
-    @After
-    public void reset() {
-        moodleCourseBuilder.useOnlyInTestsToSetCourseVisibility(false); // Back to default
-    }
-
-    private void assertUserEnrollments(String username,
-                                       List<MoodleUserEnrollments> moodleUserEnrollmentsList,
-                                       List<Long> expectedRoleIds) {
-        MoodleUserEnrollments userEnrollments = findEnrollmentsByUsername(moodleUserEnrollmentsList, username);
-
-        assertEquals(expectedRoleIds.size(), userEnrollments.roles.size());
-
-        expectedRoleIds.stream().forEach(roleId -> assertTrue(userEnrollments.hasRole(roleId)));
-    }
-
-    private void assertStudentEnrollment(String username, List<MoodleUserEnrollments> moodleUserEnrollmentsList) {
-        assertUserEnrollments(
-            username,
-            moodleUserEnrollmentsList,
-            newArrayList(mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
-    }
-
-    private void assertUserCourseVisibility(boolean expectedVisibility,
-                                            String username,
-                                            Long courseId,
-                                            List<MoodleUserEnrollments> moodleUserEnrollmentsList) {
-        assertEquals(expectedVisibility, findEnrollmentsByUsername(moodleUserEnrollmentsList, username).seesCourse(courseId));
-    }
-
-    private void assertTeacherEnrollment(String username, List<MoodleUserEnrollments> moodleUserEnrollmentsList) {
-        assertUserEnrollments(
-            username,
-            moodleUserEnrollmentsList,
-            newArrayList(mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId()));
-    }
-
-    private void assertHybridEnrollment(String username, List<MoodleUserEnrollments> moodleUserEnrollmentsList) {
-        assertUserEnrollments(
-            username,
-            moodleUserEnrollmentsList,
-            newArrayList(mapperService.getStudentRoleId(), mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId()));
-    }
-    /*
-        Every user is that has been enrolled or updated by moodi is tagged with "moodi role".
-        This role is never removed, even if other roles are removed. Note that only student role can be removed by Moodi
-        if student is returned from Oodi with approved set to false.
-     */
-
-    private void assertMoodiRoleEnrollment(String username, List<MoodleUserEnrollments> moodleUserEnrollmentsList) {
-        assertUserEnrollments(
-            username,
-            moodleUserEnrollmentsList,
-            singletonList(mapperService.getMoodiRoleId()));
-    }
 
     @Test
     public void testSyncExistingUsers() {
@@ -243,33 +178,6 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
         assertEquals(2, moodleUserEnrollmentsList.size());
 
         assertStudentEnrollment(STUDENT_USERNAME, moodleUserEnrollmentsList);
-        assertTeacherEnrollment(TEACHER_USERNAME, moodleUserEnrollmentsList);
-    }
-
-    @Test
-    public void testSyncRemovesStudentRoleAndSuspendsIfNotApproved() {
-        long oodiCourseId = getOodiCourseId();
-        moodleCourseBuilder.useOnlyInTestsToSetCourseVisibility(true);
-
-        expectCourseRealisationWithUsers(oodiCourseId, singletonList(studentUser), singletonList(teacherUser));
-        expectCourseUsersWithUsers(oodiCourseId, singletonList(studentUser.setApproved(false)), singletonList(teacherUser));
-
-        long moodleCourseId = importCourse(oodiCourseId);
-
-        List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
-
-        assertStudentEnrollment(STUDENT_USERNAME, moodleUserEnrollmentsList);
-        assertUserCourseVisibility(true, STUDENT_USERNAME, moodleCourseId, moodleUserEnrollmentsList);
-        assertTeacherEnrollment(TEACHER_USERNAME, moodleUserEnrollmentsList);
-
-        synchronizationService.synchronize(SynchronizationType.FULL);
-
-        moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
-
-        assertEquals(2, moodleUserEnrollmentsList.size());
-
-        assertMoodiRoleEnrollment(STUDENT_USERNAME, moodleUserEnrollmentsList);
-        assertUserCourseVisibility(false, STUDENT_USERNAME, moodleCourseId, moodleUserEnrollmentsList);
         assertTeacherEnrollment(TEACHER_USERNAME, moodleUserEnrollmentsList);
     }
 
