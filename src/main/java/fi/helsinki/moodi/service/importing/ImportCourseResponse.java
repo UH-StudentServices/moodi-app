@@ -17,9 +17,7 @@
 
 package fi.helsinki.moodi.service.importing;
 
-import java.io.Serializable;
-
-public final class ImportCourseResponse implements Serializable {
+public final class ImportCourseResponse {
 
     private static final long serialVersionUID = 1L;
 

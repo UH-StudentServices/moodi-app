@@ -21,12 +21,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.io.Serializable;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-public final class MoodleUserEnrollments implements Serializable {
+public final class MoodleUserEnrollments {
 
     private static final long serialVersionUID = 1L;
 
