@@ -21,14 +21,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.io.Serializable;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-public final class MoodleUserEnrollments implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public final class MoodleUserEnrollments {
 
     @JsonProperty("id")
     public Long id;
@@ -39,12 +36,19 @@ public final class MoodleUserEnrollments implements Serializable {
     @JsonProperty("roles")
     public List<MoodleRole> roles = newArrayList();
 
+    @JsonProperty("enrolledcourses")
+    public List<MoodleCourseData> enrolledCourses = newArrayList();
+
     public boolean hasRole(long roleId) {
         if (roles == null) {
             return false;
         } else {
             return roles.stream().anyMatch(r -> r.roleId == roleId);
         }
+    }
+
+    public boolean seesCourse(Long courseId) {
+        return enrolledCourses == null ? false : enrolledCourses.stream().anyMatch(e -> e.id == courseId);
     }
 
     @Override

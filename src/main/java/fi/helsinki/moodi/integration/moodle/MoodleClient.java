@@ -49,6 +49,14 @@ public class MoodleClient {
     private final ObjectMapper objectMapper;
     private final String wstoken;
 
+    private static final String ENROLMENTS = "enrolments";
+    private static final String COURSEID = "courseid";
+    private static final String ROLEID = "roleid";
+    private static final String USERID = "userid";
+    private static final String SUSPEND = "suspend";
+    private static final String COURSES = "courses";
+    private static final String USERS = "users";
+
     public MoodleClient(String baseUrl,
                         String wstoken,
                         ObjectMapper objectMapper,
@@ -90,14 +98,14 @@ public class MoodleClient {
     public long createCourse(final MoodleCourse course) {
         final MultiValueMap<String, String> params = createParametersForFunction("core_course_create_courses");
 
-        params.set("courses[0][idnumber]", course.idnumber);
-        params.set("courses[0][fullname]", course.fullName);
-        params.set("courses[0][shortname]", course.shortName);
-        params.set("courses[0][categoryid]", course.categoryId);
-        params.set("courses[0][summary]", course.summary);
-        params.set("courses[0][visible]", booleanToIntString(course.visible));
-        params.set("courses[0][courseformatoptions][0][name]", "numsections");
-        params.set("courses[0][courseformatoptions][0][value]", String.valueOf(course.numberOfSections));
+        params.set(createParamName(COURSES, "idnumber", 0), course.idnumber);
+        params.set(createParamName(COURSES, "fullname", 0), course.fullName);
+        params.set(createParamName(COURSES, "shortname", 0), course.shortName);
+        params.set(createParamName(COURSES, "categoryid", 0), course.categoryId);
+        params.set(createParamName(COURSES, "summary", 0), course.summary);
+        params.set(createParamName(COURSES, "visible", 0), booleanToIntString(course.visible));
+        params.set(createParamName(COURSES, "courseformatoptions", 0) + "[0][name]", "numsections");
+        params.set(createParamName(COURSES, "courseformatoptions", 0) + "[0][value]", String.valueOf(course.numberOfSections));
 
         try {
             return execute(params, new TypeReference<List<MoodleCourseData>>() {}, DEFAULT_EVALUATION, false)
@@ -115,15 +123,33 @@ public class MoodleClient {
 
         for (int i = 0; i < moodleEnrollments.size(); i++) {
             final MoodleEnrollment moodleEnrollment = moodleEnrollments.get(i);
-            params.set("enrolments[" + i + "][courseid]", String.valueOf(moodleEnrollment.moodleCourseId));
-            params.set("enrolments[" + i + "][roleid]", String.valueOf(moodleEnrollment.moodleRoleId));
-            params.set("enrolments[" + i + "][userid]", String.valueOf(moodleEnrollment.moodleUserId));
+            params.set(createParamName(ENROLMENTS, COURSEID, i), String.valueOf(moodleEnrollment.moodleCourseId));
+            params.set(createParamName(ENROLMENTS, ROLEID, i), String.valueOf(moodleEnrollment.moodleRoleId));
+            params.set(createParamName(ENROLMENTS, USERID, i), String.valueOf(moodleEnrollment.moodleUserId));
         }
 
         try {
             execute(params, new TypeReference<Void>() {}, EMPTY_OK_RESPONSE_EVALUATION, false);
         } catch (Exception e) {
             handleException("Error executing method: addEnrollments", e);
+        }
+    }
+
+    public void suspendEnrollments(final List<MoodleEnrollment> moodleEnrollments) {
+        final MultiValueMap<String, String> params = createParametersForFunction("enrol_manual_enrol_users");
+
+        for (int i = 0; i < moodleEnrollments.size(); i++) {
+            final MoodleEnrollment moodleEnrollment = moodleEnrollments.get(i);
+            params.set(createParamName(ENROLMENTS, COURSEID, i), String.valueOf(moodleEnrollment.moodleCourseId));
+            params.set(createParamName(ENROLMENTS, ROLEID, i), String.valueOf(moodleEnrollment.moodleRoleId));
+            params.set(createParamName(ENROLMENTS, USERID, i), String.valueOf(moodleEnrollment.moodleUserId));
+            params.set(createParamName(ENROLMENTS, SUSPEND, i), "1");
+        }
+
+        try {
+            execute(params, new TypeReference<Void>() {}, EMPTY_OK_RESPONSE_EVALUATION, false);
+        } catch (Exception e) {
+            handleException("Error executing method: suspendEnrollments", e);
         }
     }
 
@@ -149,12 +175,12 @@ public class MoodleClient {
 
         final MultiValueMap<String, String> params = createParametersForFunction("core_user_create_users");
 
-        params.set("users[0][username]", username);
-        params.set("users[0][password]", password);
-        params.set("users[0][firstname]", firstName);
-        params.set("users[0][lastname]", lastName);
-        params.set("users[0][email]", email);
-        params.set("users[0][idnumber]", idNumber);
+        params.set(createParamName(USERS, "username", 0), username);
+        params.set(createParamName(USERS, "password", 0), password);
+        params.set(createParamName(USERS, "firstname", 0), firstName);
+        params.set(createParamName(USERS, "lastname", 0), lastName);
+        params.set(createParamName(USERS, "email", 0), email);
+        params.set(createParamName(USERS, "idnumber", 0), idNumber);
 
         try {
             return Long.valueOf(execute(params, new TypeReference<List<Map<String, String>>>() {},
@@ -178,7 +204,7 @@ public class MoodleClient {
 
     public List<MoodleUserEnrollments> getEnrolledUsers(final long courseId) {
         final MultiValueMap<String, String> params = createParametersForFunction("core_enrol_get_enrolled_users");
-        params.set("courseid", String.valueOf(courseId));
+        params.set(COURSEID, String.valueOf(courseId));
 
         try {
             return execute(params, new TypeReference<List<MoodleUserEnrollments>>() {}, DEFAULT_EVALUATION, true);
@@ -203,10 +229,10 @@ public class MoodleClient {
 
         for (int i = 0; i < moodleEnrollments.size(); i++) {
             final MoodleEnrollment moodleEnrollment = moodleEnrollments.get(i);
-            params.set(array + "[" + i + "][userid]", String.valueOf(moodleEnrollment.moodleUserId));
-            params.set(array + "[" + i + "][roleid]", String.valueOf(moodleEnrollment.moodleRoleId));
-            params.set(array + "[" + i + "][instanceid]", String.valueOf(moodleEnrollment.moodleCourseId));
-            params.set(array + "[" + i + "][contextlevel]", "course");
+            params.set(createParamName(array, USERID, i), String.valueOf(moodleEnrollment.moodleUserId));
+            params.set(createParamName(array, ROLEID, i), String.valueOf(moodleEnrollment.moodleRoleId));
+            params.set(createParamName(array, "instanceid", i), String.valueOf(moodleEnrollment.moodleCourseId));
+            params.set(createParamName(array, "contextlevel", i), "course");
         }
 
         try {
@@ -234,6 +260,11 @@ public class MoodleClient {
         params.set("wsfunction", function);
         params.set("moodlewsrestformat", "json");
         return params;
+    }
+
+    private String createParamName(String param1, String param2, int i) {
+        // "enrolments", "courseid", 0 -> "enrolments[0][courseid]"
+        return String.format("%s[%d][%s]", param1, i, param2);
     }
 
     private HttpHeaders createHeaders() {

@@ -12,6 +12,18 @@
         "name": "Moodi synced",
         "shortname": "o-moodi"
       }
+    ],
+    "enrolledcourses": [
+      {
+        "id": 1234,
+        "fullname": "That course",
+        "shortname": "thtcrs"
+      },
+      {
+        "id": 999,
+        "fullname": "Some other course",
+        "shortname": "smtcrs"
+      }
     ]
   },
   {
@@ -26,6 +38,13 @@
         "roleid": 11,
         "name": "Moodi synced",
         "shortname": "o-moodi"
+      }
+    ],
+    "enrolledcourses": [
+      {
+        "id": 999,
+        "fullname": "Some other course",
+        "shortname": "smtcrs"
       }
     ]
   },

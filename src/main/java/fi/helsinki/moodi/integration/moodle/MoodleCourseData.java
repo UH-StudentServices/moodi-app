@@ -17,13 +17,15 @@
 
 package fi.helsinki.moodi.integration.moodle;
 
-import java.io.Serializable;
-
-public final class MoodleCourseData implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public final class MoodleCourseData {
 
     public long id;
     public String shortname;
+
+    public MoodleCourseData() {}
+
+    public MoodleCourseData(long id) {
+        this.id = id;
+    }
 
 }

@@ -27,7 +27,12 @@ import org.springframework.http.MediaType;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 public class MoodleClientGetEnrolledUsersTest extends AbstractMoodiIntegrationTest {
@@ -39,7 +44,7 @@ public class MoodleClientGetEnrolledUsersTest extends AbstractMoodiIntegrationTe
     private MoodleClient moodleClient;
 
     @Test
-    public void deserializeRespose() {
+    public void deserializeResponse() {
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_enrol_get_enrolled_users&moodlewsrestformat=json&courseid=1234"))
@@ -53,6 +58,11 @@ public class MoodleClientGetEnrolledUsersTest extends AbstractMoodiIntegrationTe
         assertEquals(Long.valueOf(5), user.id);
 
         assertEquals(2, user.roles.size());
+
+        assertEquals(2, user.enrolledCourses.size());
+        assertTrue(user.seesCourse(1234L));
+        assertTrue(user.seesCourse(999L));
+        assertFalse(user.seesCourse(888L));
 
         final MoodleRole moodleStudentRole = user.roles.get(0);
         assertEquals(getStudentRoleId(), moodleStudentRole.roleId);

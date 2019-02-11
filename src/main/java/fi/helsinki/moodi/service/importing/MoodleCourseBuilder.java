@@ -24,6 +24,7 @@ import fi.helsinki.moodi.integration.oodi.OodiLocalizedValue;
 import fi.helsinki.moodi.service.util.MapperService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -35,6 +36,9 @@ public class MoodleCourseBuilder {
 
     public static final String MOODLE_COURSE_ID_PREFIX = "oodi_";
     public static final int DEFAULT_NUMBER_OF_SECTIONS = 7;
+
+    @Value("${test.MoodleCourseBuilder.courseVisibility:false}")
+    private boolean courseVisibility = false;
 
     private final MapperService mapperService;
 
@@ -57,7 +61,7 @@ public class MoodleCourseBuilder {
             shortName,
             moodleCategory,
             description,
-            false,
+            courseVisibility,
             DEFAULT_NUMBER_OF_SECTIONS
         );
     }

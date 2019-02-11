@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -105,7 +104,6 @@ public class SynchronizingProcessor extends AbstractProcessor {
             .completeProcessingPhase();
     }
 
-    @Transactional
     private void completeCourseEnrollments(final SynchronizationItem item) {
         courseService.completeCourseImport(item.getCourse().realisationId, true);
     }
@@ -177,6 +175,11 @@ public class SynchronizingProcessor extends AbstractProcessor {
         switch (actionType) {
             case ADD_ENROLLMENT:
                 return moodleService::addEnrollments;
+            case SUSPEND_ENROLLMENT:
+                return moodleService::suspendEnrollments;
+            case REACTIVATE_ENROLLMENT:
+                // Adding the enrollment again in Moodle sets the enrollment suspend flag to 0
+                return moodleService::addEnrollments;
             case ADD_ROLES:
                 return moodleService::addRoles;
             case REMOVE_ROLES:
@@ -196,6 +199,8 @@ public class SynchronizingProcessor extends AbstractProcessor {
         if (!parentItem.isUnlock()) {
             checkThresholdLimitsForRole(itemsByAction, mapperService.getStudentRoleId(), studentCount, parentItem);
             checkThresholdLimitsForRole(itemsByAction, mapperService.getTeacherRoleId(), teacherCount, parentItem);
+            // check against students being suspended
+            checkThresholdLimitsForRole(itemsByAction, mapperService.getMoodiRoleId(), studentCount, parentItem);
         }
     }
 
@@ -249,6 +254,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
         Map<Boolean, List<UserSynchronizationItem>> userSynchronizationItemsByCompletedStatus = Stream
             .concat(studentItemStream, teacherItemStream)
+            .map(i -> i.withMoodleCourseId(item.getCourse().moodleId))
             .map(this::enrichWithMoodleUser)
             .collect(Collectors.groupingBy(UserSynchronizationItem::isCompleted));
 

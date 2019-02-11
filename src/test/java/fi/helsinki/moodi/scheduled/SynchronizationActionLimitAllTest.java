@@ -17,17 +17,31 @@
 
 package fi.helsinki.moodi.scheduled;
 
+import fi.helsinki.moodi.service.course.Course;
+import fi.helsinki.moodi.service.synclock.SyncLockService;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 
-@TestPropertySource(properties = {"syncTresholds.REMOVE_ROLES.preventAll = 1",
-                                  "syncTresholds.REMOVE_ROLES.limit = 10"})
+import static org.junit.Assert.assertFalse;
+
+@TestPropertySource(properties = {
+    "syncTresholds.SUSPEND_ENROLLMENT.preventAll = 1",
+    "syncTresholds.SUSPEND_ENROLLMENT.limit = 10"
+})
 public class SynchronizationActionLimitAllTest extends AbstractSynchronizationJobTest {
 
-    private static final String EXPECTED_REMOVE_ROLE_FROM_ALL_NOT_PERMITTED_MESSAGE = "Action REMOVE_ROLES is not permitted for all items";
+    private static final String EXPECTED_SUSPEND_ENROLLMENT_FROM_ALL_NOT_PERMITTED_MESSAGE =
+            "Action SUSPEND_ENROLLMENT is not permitted for all items";
+
+    @Autowired
+    private SyncLockService syncLockService;
 
     @Test
-    public void thatRemovingRolesActionIsLimitedByThreshold() {
-        testThatThresholdCheckLocksCourse(EXPECTED_REMOVE_ROLE_FROM_ALL_NOT_PERMITTED_MESSAGE);
+    public void thatSuspendEnrollmentActionIsLimitedBypreventAllThreshold() {
+        Course course = findCourse();
+        assertFalse(syncLockService.isLocked(course));
+
+        testThatThresholdCheckLocksCourse(EXPECTED_SUSPEND_ENROLLMENT_FROM_ALL_NOT_PERMITTED_MESSAGE);
     }
 }
