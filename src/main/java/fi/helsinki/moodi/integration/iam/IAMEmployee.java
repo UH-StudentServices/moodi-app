@@ -17,11 +17,7 @@
 
 package fi.helsinki.moodi.integration.iam;
 
-import java.io.Serializable;
-
-public class IAMEmployee implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class IAMEmployee {
 
     public String personnelNumber;
     public String username;

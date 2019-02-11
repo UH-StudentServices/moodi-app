@@ -19,11 +19,7 @@ package fi.helsinki.moodi.integration.moodle;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.io.Serializable;
-
-public final class MoodleFullCourse implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public final class MoodleFullCourse {
 
     @JsonProperty("id")
     public Long id;

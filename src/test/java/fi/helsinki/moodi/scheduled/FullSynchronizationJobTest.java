@@ -99,7 +99,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
     }
 
     @Test
-    public void thatUnApprovedStudentIsEnrolledToMoodleOnlyWithMoodiDefaultRole() {
+    public void thatUnApprovedStudentIsNotEnrolledToMoodle() {
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, false);
 
@@ -109,8 +109,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
         expectEnrollmentRequestToMoodle(
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
+            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID));
 
         job.execute();
     }
@@ -122,7 +121,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
         expectGetEnrollmentsRequestToMoodle(
             MOODLE_COURSE_ID,
-            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId()));
+            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID, mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId()));
 
         expectFindUsersRequestsToMoodle();
 
@@ -136,13 +135,13 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
     }
 
     @Test
-    public void thatUnApprovedStudentHasStudentRoleUnassignedFromMoodle() {
+    public void thatUnApprovedStudentIsSuspendedAndRoleRemovedFromMoodle() {
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, false);
 
         expectGetEnrollmentsRequestToMoodle(
             MOODLE_COURSE_ID,
-            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
+            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
 
         expectFindUsersRequestsToMoodle();
 
@@ -150,8 +149,52 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
             new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID));
 
-        expectAssignRolesToMoodle(false,
+        expectSuspendRequestToMoodle(new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
+
+        expectAssignRolesToMoodle(false, new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
+
+        job.execute();
+    }
+
+    @Test
+    public void thatReApprovedStudentIsEnrolledAndRoleAddedInMoodle() {
+        String endDateInFuture = getFutureDateString();
+        // Student approved in Oodi...
+        setUpMockServerResponses(endDateInFuture, true);
+
+        // ...but only has the sync role in Moodle.
+        expectGetEnrollmentsRequestToMoodle(
+            MOODLE_COURSE_ID,
+            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID, mapperService.getMoodiRoleId()));
+
+        expectFindUsersRequestsToMoodle();
+
+        expectEnrollmentRequestToMoodle(
+            new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID));
+
+        expectEnrollmentRequestToMoodle(
             new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
+
+        expectAssignRolesToMoodle(true, new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
+
+        job.execute();
+    }
+
+    @Test
+    public void thatUserWithSyncRoleIsNotSuspendedIfDoesNotSeeCourse() {
+        String endDateInFuture = getFutureDateString();
+        setUpMockServerResponses(endDateInFuture, false);
+
+        expectGetEnrollmentsRequestToMoodle(
+            MOODLE_COURSE_ID,
+            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, SOME_OTHER_MOODLE_COURSE_ID, mapperService.getMoodiRoleId()));
+
+        expectFindUsersRequestsToMoodle();
+
+        expectEnrollmentRequestToMoodle(
+            new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID));
 
         job.execute();
     }
@@ -165,7 +208,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
         expectGetEnrollmentsRequestToMoodle(
             MOODLE_COURSE_ID,
-            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
+            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
 
         expectFindStudentRequestToMoodle(STUDENT_NUMBER, STUDENT_USERNAME, STUDENT_USER_MOODLE_ID);
         expectFindStudentRequestToMoodle(STUDENT_NUMBER + "1", STUDENT_USERNAME + "1", STUDENT_USER_MOODLE_ID + 1);
@@ -191,8 +234,9 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
             new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID + 3, MOODLE_COURSE_ID),
             new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID + 3, MOODLE_COURSE_ID));
 
-        expectAssignRolesToMoodle(false,
-            new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
+        expectSuspendRequestToMoodle(new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
+
+        expectAssignRolesToMoodle(false, new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
 
         job.execute();
     }
@@ -221,7 +265,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
         expectGetEnrollmentsRequestToMoodle(
             MOODLE_COURSE_ID,
-            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
+            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
 
         expectFindStudentRequestToMoodle(STUDENT_NUMBER, STUDENT_USERNAME, STUDENT_USER_MOODLE_ID);
         expectFindStudentRequestToMoodle(STUDENT_NUMBER + "1", STUDENT_USERNAME + "1", STUDENT_USER_MOODLE_ID + 1);

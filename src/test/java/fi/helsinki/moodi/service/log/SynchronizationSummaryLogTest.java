@@ -18,6 +18,7 @@
 package fi.helsinki.moodi.service.log;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Sets;
 import fi.helsinki.moodi.integration.moodle.MoodleRole;
 import fi.helsinki.moodi.integration.moodle.MoodleUser;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
@@ -177,9 +178,8 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
             item,
             UserSynchronizationItemStatus.SUCCESS,
             STUDENT_MOODLE_USER_ID,
-            newArrayList(new UserSynchronizationAction(
-                UserSynchronizationActionType.REMOVE_ROLES, newArrayList(STUDENT_ROLE_ID),
-                STUDENT_MOODLE_USER_ID)
+            newArrayList(new UserSynchronizationAction(UserSynchronizationActionType.REMOVE_ROLES,
+                    Sets.newHashSet(STUDENT_ROLE_ID), STUDENT_MOODLE_USER_ID)
                 .withSuccessStatus()),
             moodleUserEnrollments);
     }
@@ -191,12 +191,14 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
         moodleUserEnrollments.username = TEACHER_MOODLE_USERNAME;
 
         return enrichUserSynchronizationItem(
-            item,
-            UserSynchronizationItemStatus.ERROR,
-            TEACHER_MOODLE_USER_ID,
-            newArrayList(new UserSynchronizationAction(UserSynchronizationActionType.ADD_ROLES, newArrayList(TEACHER_ROLE_ID), TEACHER_MOODLE_USER_ID)
-                .withErrorStatus()),
-            moodleUserEnrollments);
+                item,
+                UserSynchronizationItemStatus.ERROR,
+                TEACHER_MOODLE_USER_ID,
+                newArrayList(new UserSynchronizationAction(UserSynchronizationActionType.ADD_ROLES,
+                        Sets.newHashSet(TEACHER_ROLE_ID),
+                        TEACHER_MOODLE_USER_ID)
+                        .withErrorStatus()),
+                moodleUserEnrollments);
     }
 
     private UserSynchronizationItem enrichUserSynchronizationItem(UserSynchronizationItem item,

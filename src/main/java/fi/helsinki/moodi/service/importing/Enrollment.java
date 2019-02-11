@@ -20,16 +20,13 @@ package fi.helsinki.moodi.service.importing;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
-public final class Enrollment implements Serializable {
+public final class Enrollment {
 
     public static final String ROLE_TEACHER = "teacher";
     public static final String ROLE_STUDENT = "student";
-
-    private static final long serialVersionUID = 1L;
 
     public String role;
     public Optional<String> teacherId;
