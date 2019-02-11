@@ -21,8 +21,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public final class MoodleCourseEnrollment {
 
-    private static final long serialVersionUID = 1L;
-
     @JsonProperty("id")
     public Long id;
 

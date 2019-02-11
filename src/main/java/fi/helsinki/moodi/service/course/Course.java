@@ -39,8 +39,6 @@ public class Course {
         COMPLETED_FAILED
     }
 
-    private static final long serialVersionUID = 1L;
-
     @Id
     @SequenceGenerator(name = "course_id_seq_generator", sequenceName = "course_id_seq")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "course_id_seq_generator")

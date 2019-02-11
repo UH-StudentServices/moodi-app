@@ -23,8 +23,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class OodiTeacher {
 
-    private static final long serialVersionUID = 1L;
-
     @JsonProperty("first_names")
     public String firstNames;
 

@@ -23,8 +23,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class OodiCourseChange {
 
-    private static final long serialVersionUID = 1L;
-
     @JsonProperty("course_id")
     public long courseUnitRealisationId;
 

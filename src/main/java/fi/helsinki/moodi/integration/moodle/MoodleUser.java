@@ -23,8 +23,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 public final class MoodleUser {
 
-    private static final long serialVersionUID = 1L;
-
     @JsonProperty("id")
     public Long id;
 

@@ -21,8 +21,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public final class MoodleRole {
 
-    private static final long serialVersionUID = 1L;
-
     @JsonProperty("roleid")
     public long roleId;
 

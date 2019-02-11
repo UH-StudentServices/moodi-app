@@ -25,8 +25,6 @@ import static com.google.common.collect.Lists.newArrayList;
 
 public class BaseOodiCourseUnitRealisation {
 
-    private static final long serialVersionUID = 1L;
-
     @JsonProperty("course_id")
     public Integer realisationId;
 

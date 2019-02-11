@@ -19,8 +19,6 @@ package fi.helsinki.moodi.integration.iam;
 
 public class IAMStudent {
 
-    private static final long serialVersionUID = 1L;
-
     public String studentNumber;
     public String username;
 

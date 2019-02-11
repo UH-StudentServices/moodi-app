@@ -36,8 +36,6 @@ import java.time.LocalDateTime;
 @Table(name = "synchronization_job_run")
 public class SynchronizationJobRun {
 
-    private static final long serialVersionUID = 1L;
-
     @Id
     @SequenceGenerator(name = "synchronization_job_run_id_seq_generator", sequenceName = "synchronization_job_run_id_seq")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "synchronization_job_run_id_seq_generator")

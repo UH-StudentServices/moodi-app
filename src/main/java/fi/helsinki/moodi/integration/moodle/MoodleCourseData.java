@@ -19,8 +19,6 @@ package fi.helsinki.moodi.integration.moodle;
 
 public final class MoodleCourseData {
 
-    private static final long serialVersionUID = 1L;
-
     public long id;
     public String shortname;
 
