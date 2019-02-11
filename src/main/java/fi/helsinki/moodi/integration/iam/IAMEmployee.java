@@ -19,8 +19,6 @@ package fi.helsinki.moodi.integration.iam;
 
 public class IAMEmployee {
 
-    private static final long serialVersionUID = 1L;
-
     public String personnelNumber;
     public String username;
 }

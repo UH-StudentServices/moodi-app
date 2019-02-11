@@ -19,8 +19,6 @@ package fi.helsinki.moodi.service.importing;
 
 public final class ImportCourseResponse {
 
-    private static final long serialVersionUID = 1L;
-
     public final long moodleCourseId;
 
     public ImportCourseResponse(long moodleCourseId) {

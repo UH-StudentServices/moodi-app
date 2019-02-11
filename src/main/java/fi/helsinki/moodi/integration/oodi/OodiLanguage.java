@@ -23,8 +23,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class OodiLanguage {
 
-    private static final long serialVersionUID = 1L;
-
     @JsonProperty("langcode")
     public String langCode;
 

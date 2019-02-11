@@ -22,8 +22,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 public final class MoodleEnrollment {
 
-    private static final long serialVersionUID = 1L;
-
     public long moodleRoleId;
     public long moodleUserId;
     public long moodleCourseId;

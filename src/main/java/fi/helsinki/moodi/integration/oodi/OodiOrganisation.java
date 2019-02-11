@@ -23,8 +23,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class OodiOrganisation {
 
-    private static final long serialVersionUID = 1L;
-
     @JsonProperty("percentage")
     public Integer percentage;
 

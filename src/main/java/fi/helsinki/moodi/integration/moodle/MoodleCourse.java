@@ -22,8 +22,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 public final class MoodleCourse {
 
-    private static final long serialVersionUID = 1L;
-
     public final String idnumber;
     public final String fullName;
     public final String shortName;

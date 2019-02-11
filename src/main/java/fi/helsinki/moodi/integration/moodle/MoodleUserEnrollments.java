@@ -27,8 +27,6 @@ import static com.google.common.collect.Lists.newArrayList;
 
 public final class MoodleUserEnrollments {
 
-    private static final long serialVersionUID = 1L;
-
     @JsonProperty("id")
     public Long id;
 

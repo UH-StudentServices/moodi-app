@@ -28,8 +28,6 @@ public final class Enrollment {
     public static final String ROLE_TEACHER = "teacher";
     public static final String ROLE_STUDENT = "student";
 
-    private static final long serialVersionUID = 1L;
-
     public String role;
     public Optional<String> teacherId;
     public Optional<String> studentNumber;
