@@ -31,6 +31,9 @@ public class BaseOodiCourseUnitRealisation {
     @JsonProperty("end_date")
     public String endDate;
 
+    @JsonProperty("start_date")
+    public String startDate;
+
     @JsonProperty("deleted")
     public boolean removed;
 
