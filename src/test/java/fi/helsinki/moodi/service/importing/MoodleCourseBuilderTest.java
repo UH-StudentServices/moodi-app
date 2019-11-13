@@ -18,18 +18,30 @@
 package fi.helsinki.moodi.service.importing;
 
 import fi.helsinki.moodi.integration.moodle.MoodleCourse;
-import fi.helsinki.moodi.integration.oodi.*;
+import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
+import fi.helsinki.moodi.integration.oodi.OodiDescription;
+import fi.helsinki.moodi.integration.oodi.OodiLanguage;
+import fi.helsinki.moodi.integration.oodi.OodiLocale;
+import fi.helsinki.moodi.integration.oodi.OodiLocalizedValue;
+import fi.helsinki.moodi.integration.oodi.OodiOrganisation;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static fi.helsinki.moodi.Constants.*;
+import static fi.helsinki.moodi.Constants.LANG_EN;
+import static fi.helsinki.moodi.Constants.LANG_FI;
+import static fi.helsinki.moodi.Constants.LANG_SV;
+import static fi.helsinki.moodi.util.DateFormat.OODI_UTC_DATE_FORMAT;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
 
@@ -95,6 +107,45 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
 
         assertEquals(REALISATION_NAME_EN, moodleCourse.fullName);
         assertEquals(String.join(" ", DESCRIPTION_1_EN, DESCRIPTION_2_EN, DESCRIPTION_3_EN), moodleCourse.summary);
+    }
+
+    @Test
+    public void thatItUsesOodiDates() {
+        OodiCourseUnitRealisation oodiCourseUnitRealisation = getOodiCourseUnitRealisation(
+            LANG_EN,
+            LANG_SV,
+            LANG_FI);
+        oodiCourseUnitRealisation.startDate = "2019-08-04T21:00:00.000Z";
+        oodiCourseUnitRealisation.endDate = "2019-08-04T21:00:00.000Z";
+
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation);
+
+        assertEquals(parseDateTime(oodiCourseUnitRealisation.startDate), moodleCourse.startTime);
+        assertEquals(parseDateTime(oodiCourseUnitRealisation.endDate).plusMonths(1), moodleCourse.endTime);
+    }
+
+    private LocalDateTime parseDateTime(String s) {
+        return LocalDateTime.parse(s, DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
+    }
+
+    @Test
+    public void thatItUsesDefaultsIfOodiDatesAreMissing() {
+        OodiCourseUnitRealisation oodiCourseUnitRealisation = getOodiCourseUnitRealisation(
+            LANG_EN,
+            LANG_SV,
+            LANG_FI);
+        oodiCourseUnitRealisation.startDate = "";
+        oodiCourseUnitRealisation.endDate = null;
+
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation);
+
+        assertTimesAreClose(moodleCourse.startTime, LocalDateTime.now());
+        assertTimesAreClose(moodleCourse.endTime, LocalDateTime.now().plusYears(1));
+    }
+
+    private void assertTimesAreClose(LocalDateTime first, LocalDateTime later) {
+        assertTrue(String.format("first: %s, later: %s", first, later), first.isBefore(later.plusSeconds(1)));
+        assertTrue(Duration.between(first, later).getSeconds() < 3);
     }
 
     private OodiCourseUnitRealisation getOodiCourseUnitRealisation(String... langcodes) {

@@ -27,9 +27,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static fi.helsinki.moodi.util.DateFormat.OODI_UTC_DATE_FORMAT;
 
 @Component
 public class MoodleCourseBuilder {
@@ -54,6 +58,7 @@ public class MoodleCourseBuilder {
         String shortName = getShortName(realisationName, oodiCourseUnitRealisation.realisationId);
         String moodleCategory = mapperService.getDefaultCategory();
         String description =  getDescription(oodiCourseUnitRealisation, preferredLanguage);
+        LocalDateTime endDatePlusOneMonth = parseDateTime(oodiCourseUnitRealisation.endDate, LocalDateTime.now().plusMonths(11)).plusMonths(1);
 
         return new MoodleCourse(
             MOODLE_COURSE_ID_PREFIX + String.valueOf(oodiCourseUnitRealisation.realisationId),
@@ -62,8 +67,19 @@ public class MoodleCourseBuilder {
             moodleCategory,
             description,
             courseVisibility,
-            DEFAULT_NUMBER_OF_SECTIONS
+            DEFAULT_NUMBER_OF_SECTIONS,
+            parseDateTime(oodiCourseUnitRealisation.startDate, LocalDateTime.now()),
+            endDatePlusOneMonth
         );
+    }
+
+    private LocalDateTime parseDateTime(String s, LocalDateTime defaultValue) {
+        try {
+            return LocalDateTime.parse(s, DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
+        } catch (Exception e) {
+            // Fall through and return defaultValue
+        }
+        return defaultValue;
     }
 
     private String getDescription(OodiCourseUnitRealisation oodiCourseUnitRealisation, String language) {
