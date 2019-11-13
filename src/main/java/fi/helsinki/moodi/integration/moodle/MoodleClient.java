@@ -33,10 +33,17 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
-import static fi.helsinki.moodi.integration.moodle.MoodleClient.ResponseBodyEvaluator.Action.*;
+import static fi.helsinki.moodi.integration.moodle.MoodleClient.ResponseBodyEvaluator.Action.CONTINUE;
+import static fi.helsinki.moodi.integration.moodle.MoodleClient.ResponseBodyEvaluator.Action.ERROR;
+import static fi.helsinki.moodi.integration.moodle.MoodleClient.ResponseBodyEvaluator.Action.RETURN_NULL;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class MoodleClient {
@@ -104,6 +111,8 @@ public class MoodleClient {
         params.set(createParamName(COURSES, "categoryid", 0), course.categoryId);
         params.set(createParamName(COURSES, "summary", 0), course.summary);
         params.set(createParamName(COURSES, "visible", 0), booleanToIntString(course.visible));
+        params.set(createParamName(COURSES, "startdate", 0), localDateTimeToString(course.startTime));
+        params.set(createParamName(COURSES, "enddate", 0), localDateTimeToString(course.endTime));
         params.set(createParamName(COURSES, "courseformatoptions", 0) + "[0][name]", "numsections");
         params.set(createParamName(COURSES, "courseformatoptions", 0) + "[0][value]", String.valueOf(course.numberOfSections));
 
@@ -116,6 +125,10 @@ public class MoodleClient {
         } catch (Exception e) {
             return handleException("Error executing method: importCourse", e);
         }
+    }
+
+    private String localDateTimeToString(LocalDateTime d) {
+        return "" + d.toEpochSecond(ZoneOffset.UTC);
     }
 
     public void addEnrollments(final List<MoodleEnrollment> moodleEnrollments) {

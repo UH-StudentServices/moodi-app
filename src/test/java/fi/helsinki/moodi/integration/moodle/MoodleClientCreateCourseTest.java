@@ -24,6 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
+import java.time.LocalDateTime;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
@@ -41,13 +43,15 @@ public class MoodleClientCreateCourseTest extends AbstractMoodiIntegrationTest {
                 .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_course_create_courses&moodlewsrestformat=json" +
                     "&courses%5B0%5D%5Bidnumber%5D=12345&courses%5B0%5D%5Bfullname%5D=Fullname&courses%5B0%5D%5Bshortname%5D=Shortname" +
                     "&courses%5B0%5D%5Bcategoryid%5D=1&courses%5B0%5D%5Bsummary%5D=summary&courses%5B0%5D%5Bvisible%5D=0" +
-                    "&courses%5B0%5D%5Bcourseformatoptions%5D%5B0%5D%5Bname%5D=numsections&" +
-                    "courses%5B0%5D%5Bcourseformatoptions%5D%5B0%5D%5Bvalue%5D=7"))
+                    "&courses%5B0%5D%5Bstartdate%5D=1564952400&courses%5B0%5D%5Benddate%5D=1572901200" +
+                    "&courses%5B0%5D%5Bcourseformatoptions%5D%5B0%5D%5Bname%5D=numsections" +
+                    "&courses%5B0%5D%5Bcourseformatoptions%5D%5B0%5D%5Bvalue%5D=7"))
                 .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
                 .andRespond(withSuccess(Fixtures.asString("/moodle/create-course-shortname-already-in-use.json"), MediaType.APPLICATION_JSON));
 
         final MoodleCourse course =
-                new MoodleCourse("12345", "Fullname", "Shortname", "1", "summary", false, 7);
+                new MoodleCourse("12345", "Fullname", "Shortname", "1", "summary", false, 7,
+                    LocalDateTime.parse("2019-08-04T21:00:00"), LocalDateTime.parse("2019-11-04T21:00:00"));
 
         try {
             moodleClient.createCourse(course);
