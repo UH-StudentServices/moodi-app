@@ -20,9 +20,9 @@ package fi.helsinki.moodi.moodle;
 import fi.helsinki.moodi.integration.moodle.MoodleFullCourse;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 
-import org.assertj.core.util.Lists;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -59,7 +59,7 @@ public class MoodleIntegrationImportCourseTest extends AbstractMoodleIntegration
         assertTrue(teacherEnrollment.hasRole(mapperService.getMoodiRoleId()));
         assertTrue(teacherEnrollment.hasRole(mapperService.getTeacherRoleId()));
 
-        List<MoodleFullCourse> moodleCourses = moodleClient.getCourses(Lists.newArrayList(moodleCourseId));
+        List<MoodleFullCourse> moodleCourses = moodleClient.getCourses(Arrays.asList(moodleCourseId));
 
         assertThat(moodleCourses.size()).isEqualTo(1);
         MoodleFullCourse mfc = moodleCourses.get(0);
