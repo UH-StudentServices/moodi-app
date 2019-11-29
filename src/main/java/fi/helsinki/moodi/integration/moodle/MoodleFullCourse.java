@@ -23,4 +23,29 @@ public final class MoodleFullCourse {
 
     @JsonProperty("id")
     public Long id;
+
+    @JsonProperty("idnumber")
+    public String idNumber;
+
+    @JsonProperty("shortname")
+    public String shortName;
+
+    @JsonProperty("fullname")
+    public String fullName;
+
+    @JsonProperty("displayname")
+    public String displayName;
+
+    @JsonProperty("summary")
+    public String summary;
+
+    @JsonProperty("startdate")
+    public Long startDate;
+
+    @JsonProperty("enddate")
+    public Long endDate;
+
+    @JsonProperty("lang")
+    public String lang;
+
 }
