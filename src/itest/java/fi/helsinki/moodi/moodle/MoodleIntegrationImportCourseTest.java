@@ -17,15 +17,19 @@
 
 package fi.helsinki.moodi.moodle;
 
+import fi.helsinki.moodi.integration.moodle.MoodleFullCourse;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
+
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MoodleIntegrationImportCourseTest extends AbstractMoodleIntegrationTest {
     @Test
@@ -55,6 +59,18 @@ public class MoodleIntegrationImportCourseTest extends AbstractMoodleIntegration
         assertTrue(teacherEnrollment.hasRole(mapperService.getMoodiRoleId()));
         assertTrue(teacherEnrollment.hasRole(mapperService.getTeacherRoleId()));
 
+        List<MoodleFullCourse> moodleCourses = moodleClient.getCourses(Arrays.asList(moodleCourseId));
+
+        assertThat(moodleCourses.size()).isEqualTo(1);
+        MoodleFullCourse mfc = moodleCourses.get(0);
+
+        assertThat(mfc.fullName).isEqualTo("Lapsuus ja yhteiskunta");
+        assertThat(mfc.displayName).isEqualTo("Lapsuus ja yhteiskunta");
+        assertThat(mfc.endDate).isGreaterThan(mfc.startDate);
+        assertThat(mfc.shortName).contains(Long.valueOf(oodiCourseId).toString());
+        assertThat(mfc.idNumber).isEqualTo("oodi_" + Long.valueOf(oodiCourseId).toString());
+        assertThat(mfc.lang).isEmpty();
+        assertThat(mfc.summary).isEqualTo("Description 1 (fi) Description 2 (fi)");
     }
 
 }
