@@ -30,7 +30,7 @@ public class MapperServiceTest extends AbstractMoodiIntegrationTest {
 
     @Test
     public void getDefaultMoodleCategory() throws Exception {
-        assertEquals("73", mapperService.getDefaultCategory());
+        assertEquals("2", mapperService.getDefaultCategory());
     }
 
     @Test

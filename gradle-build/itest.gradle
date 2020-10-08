@@ -41,8 +41,8 @@ task itest(type: Test) {
         systemProperty 'integration.moodle.wstoken', moodle_ws_token
     }
 
-    if (project.hasProperty('moodle_url')) {
-        systemProperty 'integration.moodle.url', moodle_url
+    if (project.hasProperty('moodle_base_url')) {
+        systemProperty 'integration.moodle.baseUrl', moodle_base_url
     }
 
     testLogging {

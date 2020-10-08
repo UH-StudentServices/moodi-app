@@ -13,6 +13,9 @@ spring:
 integration:
   moodle:
     baseUrl: https://moodle.helsinki.fi
-    url: https://moodle.helsinki.fi/webservice/rest/server.php
   oodi.url: https://esbmt1.it.helsinki.fi/secure/doo-oodi/v1/productiondb
   iam.url: https://esbmt1.it.helsinki.fi
+
+mapper.moodle.defaultCategory: 73
+# Also known as the synced role
+mapper.moodle.role.moodi: 11
