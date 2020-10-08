@@ -118,7 +118,7 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     protected String getMoodleRestUrl() {
-        return environment.getProperty("integration.moodle.url");
+        return environment.getProperty("integration.moodle.baseUrl") + "/webservice/rest/server.php";
     }
 
     protected String getOodiCourseUnitRealisationRequestUrl(final long realisationId) {
@@ -331,7 +331,7 @@ public abstract class AbstractMoodiIntegrationTest {
                 "wstoken=xxxx1234&wsfunction=core_course_create_courses&moodlewsrestformat=json&courses%5B0%5D%5Bidnumber%5D=" +
                 EXPECTED_COURSE_ID +
                 "&courses%5B0%5D%5Bfullname%5D=Lapsuus+ja+yhteiskunta&courses%5B0%5D%5Bshortname%5D=Lapsuus++" + realisationId +
-                "&courses%5B0%5D%5Bcategoryid%5D=73" +
+                "&courses%5B0%5D%5Bcategoryid%5D=2" +
                 "&courses%5B0%5D%5Bsummary%5D=Description+1+%28fi%29+Description+2+%28fi%29&courses%5B0%5D%5Bvisible%5D=0" +
                 "&courses%5B0%5D%5Bstartdate%5D=1564952400&courses%5B0%5D%5Benddate%5D=1575493200" + // Oodi end date plus one month
                 "&courses%5B0%5D%5Bcourseformatoptions%5D%5B0%5D%5Bname%5D=numsections&courses%5B0%5D%5Bcourseformatoptions%5D%5B0%5D%5Bvalue%5D=7"))

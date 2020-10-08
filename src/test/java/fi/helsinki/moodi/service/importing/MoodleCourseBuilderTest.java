@@ -62,7 +62,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
     private static final Integer DESCRIPTION_1_ID = 10;
     private static final Integer DESCRIPTION_2_ID = 20;
     private static final Integer DESCRIPTION_3_ID = 30;
-    private static final String MOODLE_CATEGORY_ID = "73";
+    private static final String MOODLE_CATEGORY_ID = "2";
 
     @Autowired
     private MoodleCourseBuilder moodleCourseBuilder;

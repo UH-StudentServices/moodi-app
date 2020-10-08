@@ -55,6 +55,7 @@ public class MapperService {
         return getMoodleRole(ROLE_TEACHER);
     }
 
+    // Also known as the synced role
     public long getMoodiRoleId() {
         return getMoodleRole(ROLE_MOODI);
     }
