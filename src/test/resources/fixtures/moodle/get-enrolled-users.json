@@ -8,7 +8,7 @@
         "shortname": "o-student"
       },
       {
-        "roleid": 11,
+        "roleid": 10,
         "name": "Moodi synced",
         "shortname": "o-moodi"
       }
@@ -35,7 +35,7 @@
         "shortname": "o-student"
       },
       {
-        "roleid": 11,
+        "roleid": 10,
         "name": "Moodi synced",
         "shortname": "o-moodi"
       }
@@ -57,7 +57,7 @@
         "shortname": "o-student"
       },
       {
-        "roleid": 11,
+        "roleid": 10,
         "name": "Moodi synced",
         "shortname": "o-moodi"
       }
@@ -72,7 +72,7 @@
         "shortname": "o-student"
       },
       {
-        "roleid": 11,
+        "roleid": 10,
         "name": "Moodi synced",
         "shortname": "o-moodi"
       }
@@ -87,14 +87,14 @@
         "shortname": "o-student"
       },
       {
-        "roleid": 11,
+        "roleid": 10,
         "name": "Moodi synced",
         "shortname": "o-moodi"
       }
     ]
   },
   {
-    "id": 11,
+    "id": 10,
     "roles": [
       {
         "roleid": 5,
@@ -102,7 +102,7 @@
         "shortname": "o-student"
       },
       {
-        "roleid": 11,
+        "roleid": 10,
         "name": "Moodi synced",
         "shortname": "o-moodi"
       }
@@ -117,7 +117,7 @@
         "shortname": "o-student"
       },
       {
-        "roleid": 11,
+        "roleid": 10,
         "name": "Moodi synced",
         "shortname": "o-moodi"
       }
@@ -132,7 +132,7 @@
         "shortname": "o-teacher"
       },
       {
-        "roleid": 11,
+        "roleid": 10,
         "name": "Moodi synced",
         "shortname": "o-moodi"
       }

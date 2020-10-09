@@ -69,9 +69,9 @@ public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegra
     @Autowired
     protected MoodleCourseBuilder moodleCourseBuilder;
 
-    protected static final String STUDENT_USERNAME = "bar_simp";
+    protected static final String STUDENT_USERNAME = "doo_2";
     protected static final String STUDENT_NOT_IN_MOODLE_USERNAME = "username_of_student_not_in_moodle";
-    protected static final String TEACHER_USERNAME = "mag_simp";
+    protected static final String TEACHER_USERNAME = "doo_1";
 
     protected static final String INTEGRATION_TEST_OODI_FIXTURES_PREFIX = "src/itest/resources/fixtures/oodi/";
 

@@ -50,7 +50,7 @@ public class MoodleConfig {
     public MoodleClient moodleClient() {
         final ObjectMapper objectMapper = objectMapper();
         return new MoodleClient(
-            baseUrl(),
+            restUrl(),
             wstoken(),
             objectMapper,
             moodleRestTemplate(),
@@ -89,8 +89,8 @@ public class MoodleConfig {
         return createRestTemplate(new DefaultHttpRequestRetryHandler(RETRY_COUNT, true));
     }
 
-    private String baseUrl() {
-        return environment.getRequiredProperty("integration.moodle.url");
+    private String restUrl() {
+        return environment.getProperty("integration.moodle.baseUrl") + "/webservice/rest/server.php";
     }
 
     private String wstoken() {

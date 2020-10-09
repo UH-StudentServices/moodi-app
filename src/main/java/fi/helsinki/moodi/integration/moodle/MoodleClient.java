@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +51,7 @@ public class MoodleClient {
 
     private static final Logger logger = getLogger(MoodleClient.class);
 
-    private final String baseUrl;
+    private final String restUrl;
     private final RestTemplate restTemplate;
     private final RestTemplate readOnlyRestTemplate;
     private final ObjectMapper objectMapper;
@@ -64,12 +65,12 @@ public class MoodleClient {
     private static final String COURSES = "courses";
     private static final String USERS = "users";
 
-    public MoodleClient(String baseUrl,
+    public MoodleClient(String restUrl,
                         String wstoken,
                         ObjectMapper objectMapper,
                         RestTemplate restTemplate,
                         RestTemplate readOnlyRestTemplate) {
-        this.baseUrl = baseUrl;
+        this.restUrl = restUrl;
         this.wstoken = wstoken;
         this.objectMapper = objectMapper;
         this.restTemplate = restTemplate;
@@ -297,10 +298,10 @@ public class MoodleClient {
             final boolean readOnly)
             throws IOException {
 
-        logger.info("Invoke url: {} with params: {}", baseUrl, paramsToString(params));
+        logger.info("Invoke url: {} with params: {}", restUrl, paramsToString(params));
 
         final String body = getRestTemplate(readOnly)
-            .postForObject(baseUrl, new HttpEntity<>(params, createHeaders()), String.class);
+            .postForObject(restUrl, new HttpEntity<>(params, createHeaders()), String.class);
 
         logger.debug("Got response body:\n{}", body);
 
@@ -351,7 +352,8 @@ public class MoodleClient {
     private static String paramsToString(final MultiValueMap<String, String> params) {
         final StringBuilder sb = new StringBuilder();
         for (final String name : params.keySet()) {
-            sb.append(name).append(": ").append(params.get(name));
+            List<String> values = name.equals("wstoken") ? Arrays.asList("xxxx") : params.get(name);
+            sb.append(name).append(": ").append(values).append("\n");
         }
 
         return sb.toString();

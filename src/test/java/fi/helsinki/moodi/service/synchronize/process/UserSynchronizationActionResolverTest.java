@@ -48,6 +48,9 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
 
     private static final Long MOODLE_USER_ID = 1L;
     private static final Long MOODLE_COURSE_ID = 2L;
+    private static final Long TEACHER_ROLE = 3L;
+    private static final Long STUDENT_ROLE = 5L;
+    private static final Long SYNCED_ROLE = 10L;
 
     @Autowired
     private UserSynchronizationActionResolver userSynchronizationActionResolver;
@@ -58,7 +61,7 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
 
         userSynchronizationActionResolver.enrichWithActions(item);
 
-        assertActions(item, ImmutableMap.of(ADD_ENROLLMENT, newArrayList(5L, 11L)));
+        assertActions(item, ImmutableMap.of(ADD_ENROLLMENT, newArrayList(STUDENT_ROLE, SYNCED_ROLE)));
     }
 
     @Test
@@ -76,7 +79,7 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
 
         userSynchronizationActionResolver.enrichWithActions(item);
 
-        assertActions(item, ImmutableMap.of(ADD_ENROLLMENT, newArrayList(3L, 11L)));
+        assertActions(item, ImmutableMap.of(ADD_ENROLLMENT, newArrayList(TEACHER_ROLE, SYNCED_ROLE)));
     }
 
     @Test
@@ -86,87 +89,87 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
 
         userSynchronizationActionResolver.enrichWithActions(item);
 
-        assertActions(item, ImmutableMap.of(ADD_ENROLLMENT, newArrayList(3L, 5L, 11L)));
+        assertActions(item, ImmutableMap.of(ADD_ENROLLMENT, newArrayList(TEACHER_ROLE, STUDENT_ROLE, SYNCED_ROLE)));
     }
 
     @Test
     public void thatSuspendEnrollmentActionIsResolvedIfAlreadyInDefaultRoleAndNotApproved() {
         UserSynchronizationItem item = getStudentUserSynchronizationItem(false);
-        item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(11L), MOODLE_COURSE_ID));
+        item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(SYNCED_ROLE), MOODLE_COURSE_ID));
 
         userSynchronizationActionResolver.enrichWithActions(item);
 
-        assertActions(item, ImmutableMap.of(SUSPEND_ENROLLMENT, newArrayList(11L)));
+        assertActions(item, ImmutableMap.of(SUSPEND_ENROLLMENT, newArrayList(SYNCED_ROLE)));
     }
 
     @Test
     public void thatAddTeacherRoleActionIsResolvedIfAlreadyInDefaultRole() {
         UserSynchronizationItem item = getTeacherUserSynchronizationItem();
-        item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(11L)));
+        item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(SYNCED_ROLE)));
 
         userSynchronizationActionResolver.enrichWithActions(item);
 
-        assertActions(item, ImmutableMap.of(ADD_ROLES, newArrayList(3L)));
+        assertActions(item, ImmutableMap.of(ADD_ROLES, newArrayList(TEACHER_ROLE)));
     }
 
     @Test
     public void thatAddDefaultRoleActionIsResolvedForStudentIfEnrolledInMoodleWithoutDefaultRole() {
         UserSynchronizationItem item = getStudentUserSynchronizationItem(true);
-        item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(5L)));
+        item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(STUDENT_ROLE)));
 
         userSynchronizationActionResolver.enrichWithActions(item);
 
-        assertActions(item, ImmutableMap.of(ADD_ROLES, newArrayList(11L)));
+        assertActions(item, ImmutableMap.of(ADD_ROLES, newArrayList(SYNCED_ROLE)));
     }
 
     @Test
     public void thatAddDefaultRoleActionIsResolvedForTeacherIfEnrolledInMoodleWithoutDefaultRole() {
         UserSynchronizationItem item = getTeacherUserSynchronizationItem();
-        item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(3L)));
+        item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(TEACHER_ROLE)));
 
         userSynchronizationActionResolver.enrichWithActions(item);
 
-        assertActions(item, ImmutableMap.of(ADD_ROLES, newArrayList(11L)));
+        assertActions(item, ImmutableMap.of(ADD_ROLES, newArrayList(SYNCED_ROLE)));
     }
 
     @Test
     public void thatStudentRoleIsRemoved() {
         UserSynchronizationItem item = getStudentUserSynchronizationItem(false);
-        item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(3L, 5L, 11L)));
+        item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(TEACHER_ROLE, STUDENT_ROLE, SYNCED_ROLE)));
 
         userSynchronizationActionResolver.enrichWithActions(item);
 
-        assertActions(item, ImmutableMap.of(REMOVE_ROLES, newArrayList(5L)));
+        assertActions(item, ImmutableMap.of(REMOVE_ROLES, newArrayList(STUDENT_ROLE)));
     }
 
     @Test
     public void thatStudentIsSuspendedAndStudentRoleIsRemoved() {
         UserSynchronizationItem item = getStudentUserSynchronizationItem(false);
-        item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(5L, 11L), MOODLE_COURSE_ID));
+        item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(STUDENT_ROLE, SYNCED_ROLE), MOODLE_COURSE_ID));
 
         userSynchronizationActionResolver.enrichWithActions(item);
 
         assertActions(item, ImmutableMap.of(
-                SUSPEND_ENROLLMENT, newArrayList(11L),
-                REMOVE_ROLES, newArrayList(5L)));
+                SUSPEND_ENROLLMENT, newArrayList(SYNCED_ROLE),
+                REMOVE_ROLES, newArrayList(STUDENT_ROLE)));
     }
 
     @Test
     public void thatStudentIsReactivatedAndStudentRoleIsAdded() {
         UserSynchronizationItem item = getStudentUserSynchronizationItem(true);
-        item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(11L)));
+        item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(SYNCED_ROLE)));
 
         userSynchronizationActionResolver.enrichWithActions(item);
 
         assertActions(item, ImmutableMap.of(
-                REACTIVATE_ENROLLMENT, newArrayList(5L),
-                ADD_ROLES, newArrayList(5L)));
+                REACTIVATE_ENROLLMENT, newArrayList(STUDENT_ROLE),
+                ADD_ROLES, newArrayList(STUDENT_ROLE)));
     }
 
     @Test
     public void thatTeacherRoleIsNeverRemoved() {
         UserSynchronizationItem item = getStudentUserSynchronizationItem(true);
-        item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(3L, 5L, 11L)));
+        item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(TEACHER_ROLE, STUDENT_ROLE, SYNCED_ROLE)));
 
         userSynchronizationActionResolver.enrichWithActions(item);
 
