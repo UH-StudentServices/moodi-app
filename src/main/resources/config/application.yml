@@ -19,14 +19,15 @@ httpClient:
 
 oodi.enrollmentApprovedStatusCodes: 2, 3, 7, 8
 
-mapper.moodle.defaultCategory: 73
+mapper.moodle.defaultCategory: 2
 
 #
 # Map application roles to Moodle's internal role IDs.
 #
 mapper.moodle.role.teacher: 3
 mapper.moodle.role.student: 5
-mapper.moodle.role.moodi: 11
+# Also known as the synced role
+mapper.moodle.role.moodi: 10
 
 synchronize.FULL.enabled: true
 synchronize.INCREMENTAL.enabled: false
