@@ -44,7 +44,7 @@ public class OodiClient {
         this.restOperations = restOperations;
     }
 
-    public Optional<OodiCourseUnitRealisation> getCourseUnitRealisation(final long courseRealisationId) {
+    public Optional<OodiCourseUnitRealisation> getCourseUnitRealisation(final String courseRealisationId) {
         return getOodiData(
             String.format(
                 "%s/courseunitrealisations/%s?%s&%s",
@@ -56,7 +56,7 @@ public class OodiClient {
             .filter(this::isValid);
     }
 
-    public Optional<BaseOodiCourseUnitRealisation> getCourseUsers(final long courseRealisationId) {
+    public Optional<BaseOodiCourseUnitRealisation> getCourseUsers(final String courseRealisationId) {
         return getOodiData(
             String.format(
                 "%s/courseunitrealisations/%s/users?%s&%s",

@@ -37,7 +37,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
 
-    private static final long REALISATION_ID = 12345L;
+    private static final String REALISATION_ID = "12345";
 
     private static final String COURSE_NOT_FOUND_ERROR_MESSAGE = String.format("Course not found from Oodi with id %s", REALISATION_ID);
     private static final String EXCEPTION_MESSAGE = "Received exception with status 500 from from Oodi: Something went wrong";
@@ -72,7 +72,7 @@ public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
                 MediaType.APPLICATION_JSON));
     }
 
-    private SynchronizationItem createSynchronizationItem(long realisationId) {
+    private SynchronizationItem createSynchronizationItem(String realisationId) {
         Course course = new Course();
         course.realisationId = realisationId;
 

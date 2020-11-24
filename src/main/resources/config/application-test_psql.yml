@@ -1,0 +1,12 @@
+spring:
+    datasource:
+        dataSourceClassName: org.postgresql.ds.PGSimpleDataSource
+        url: jdbc:postgresql://localhost:5432/moodi
+        username: moodi
+        password: password
+    jpa:
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
+        database: PostgreSQL
+    flyway:
+        locations: classpath:db/migration/common,classpath:db/migration/psql
+

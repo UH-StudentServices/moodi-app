@@ -41,11 +41,11 @@ public class OodiClientGetCourseUnitRealisationTest extends AbstractMoodiIntegra
     @Test
     public void deserializeResponse() {
         oodiMockServer.expect(
-                requestTo(getOodiCourseUnitRealisationRequestUrl(102374742)))
+                requestTo(getOodiCourseUnitRealisationRequestUrl("102374742")))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(Fixtures.asString("/oodi/course-realisation.json"), MediaType.APPLICATION_JSON));
 
-        final Optional<OodiCourseUnitRealisation> cur = oodiClient.getCourseUnitRealisation(102374742);
+        final Optional<OodiCourseUnitRealisation> cur = oodiClient.getCourseUnitRealisation("102374742");
         assertOodiCourseUnitRealisation(cur);
     }
 

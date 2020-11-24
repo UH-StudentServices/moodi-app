@@ -34,7 +34,7 @@ import static org.junit.Assert.assertEquals;
 public class MoodleIntegrationSynchronizeVisibleCourseTest extends AbstractMoodleIntegrationTest {
     @Test
     public void testSyncRemovesStudentRoleAndSuspendsIfNotApproved() {
-        long oodiCourseId = getOodiCourseId();
+        String oodiCourseId = getOodiCourseId();
 
         expectCourseRealisationWithUsers(oodiCourseId, singletonList(studentUser), singletonList(teacherUser));
         expectCourseUsersWithUsers(oodiCourseId, singletonList(studentUser.setApproved(false)), singletonList(teacherUser));

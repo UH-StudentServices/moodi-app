@@ -32,11 +32,11 @@ public class OodiService {
         this.oodiClient = oodiClient;
     }
 
-    public Optional<OodiCourseUnitRealisation> getOodiCourseUnitRealisation(final long realisationId) {
+    public Optional<OodiCourseUnitRealisation> getOodiCourseUnitRealisation(final String realisationId) {
         return oodiClient.getCourseUnitRealisation(realisationId);
     }
 
-    public Optional<BaseOodiCourseUnitRealisation> getOodiCourseUsers(final long realisationId) {
+    public Optional<BaseOodiCourseUnitRealisation> getOodiCourseUsers(final String realisationId) {
         return oodiClient.getCourseUsers(realisationId);
     }
 }

@@ -21,5 +21,5 @@ import javax.validation.constraints.NotNull;
 
 public final class ImportCourseRequest {
     @NotNull
-    public Long realisationId;
+    public String realisationId;
 }

@@ -57,7 +57,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractMoodiIntegrationTest.class);
 
-    protected static final long REALISATION_ID = 12345;
+    protected static final String REALISATION_ID = "12345";
     protected static final int MOODLE_COURSE_ID = 54321;
     protected static final int SOME_OTHER_MOODLE_COURSE_ID = 999;
     protected static final int STUDENT_USER_MOODLE_ID = 555;

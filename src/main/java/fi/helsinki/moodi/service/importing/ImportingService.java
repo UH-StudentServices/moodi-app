@@ -91,7 +91,7 @@ public class ImportingService {
 
     }
 
-    public CourseDto getCourse(Long realisationId) {
+    public CourseDto getCourse(String realisationId) {
         Optional<Course> course = courseService.findByRealisationId(realisationId);
         return course
             .map(courseConverter::toDto)
