@@ -32,8 +32,8 @@ import static org.junit.Assert.assertEquals;
 
 public class LockedSynchronizationItemMessageBuilderTest extends AbstractMoodiIntegrationTest {
 
-    private static final Long REALISATION_ID_1 = 1L;
-    private static final Long REALISATION_ID_2 = 2L;
+    private static String REALISATION_ID_1 = "1";
+    private static String REALISATION_ID_2 = "2";
     private static final String EXPECTED_MESSAGE = REALISATION_ID_1 + ", " + REALISATION_ID_2;
 
     @Autowired
@@ -48,7 +48,7 @@ public class LockedSynchronizationItemMessageBuilderTest extends AbstractMoodiIn
         assertEquals(EXPECTED_MESSAGE, message.getText());
     }
 
-    private SynchronizationItem createItem(Long realisationId) {
+    private SynchronizationItem createItem(String realisationId) {
         Course course = new Course();
         course.realisationId = realisationId;
 

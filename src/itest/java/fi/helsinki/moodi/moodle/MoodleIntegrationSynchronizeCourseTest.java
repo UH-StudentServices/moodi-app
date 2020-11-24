@@ -32,7 +32,7 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
 
     @Test
     public void testSyncExistingUsers() {
-        long oodiCourseId = getOodiCourseId();
+        String oodiCourseId = getOodiCourseId();
 
         expectCourseRealisationWithUsers(oodiCourseId, singletonList(studentUser), singletonList(teacherUser));
         expectCourseUsersWithUsers(oodiCourseId, singletonList(studentUser), singletonList(teacherUser));
@@ -51,7 +51,7 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
 
     @Test
     public void testSyncNewStudentEnrollment() {
-        long oodiCourseId = getOodiCourseId();
+        String oodiCourseId = getOodiCourseId();
 
         expectCourseRealisationWithUsers(oodiCourseId, new ArrayList<>(), singletonList(teacherUser));
         expectCourseUsersWithUsers(oodiCourseId, singletonList(studentUser), new ArrayList<>());
@@ -70,7 +70,7 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
 
     @Test
     public void testSyncNewTeacherEnrollment() {
-        long oodiCourseId = getOodiCourseId();
+        String oodiCourseId = getOodiCourseId();
 
         expectCourseRealisationWithUsers(oodiCourseId, singletonList(studentUser), new ArrayList<>());
         expectCourseUsersWithUsers(oodiCourseId, new ArrayList<>(), singletonList(teacherUser));
@@ -89,7 +89,7 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
 
     @Test
     public void testSyncNewStudentAndTeacherEnrollment() {
-        long oodiCourseId = getOodiCourseId();
+        String oodiCourseId = getOodiCourseId();
 
         expectCourseRealisationWithUsers(oodiCourseId, new ArrayList<>(), new ArrayList<>());
         expectCourseUsersWithUsers(oodiCourseId, singletonList(studentUser), singletonList(teacherUser));
@@ -108,7 +108,7 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
 
     @Test
     public void testSyncNewHybridUserEnrollment() {
-        long oodiCourseId = getOodiCourseId();
+        String oodiCourseId = getOodiCourseId();
 
         expectCourseRealisationWithUsers(oodiCourseId, new ArrayList<>(), new ArrayList<>());
         expectCourseUsersWithUsers(oodiCourseId, singletonList(teacherInStudentRole), singletonList(teacherUser));
@@ -126,7 +126,7 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
 
     @Test
     public void testSyncAddTeacherRoleToStudent() {
-        long oodiCourseId = getOodiCourseId();
+        String oodiCourseId = getOodiCourseId();
 
         expectCourseRealisationWithUsers(oodiCourseId, singletonList(studentUser), singletonList(teacherUser));
         expectCourseUsersWithUsers(oodiCourseId, singletonList(studentUser), newArrayList(teacherUser, studentUserInTeacherRole));
@@ -145,7 +145,7 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
 
     @Test
     public void testSyncAddStudentRoleToTeacher() {
-        long oodiCourseId = getOodiCourseId();
+        String oodiCourseId = getOodiCourseId();
 
         expectCourseRealisationWithUsers(oodiCourseId, singletonList(studentUser), singletonList(teacherUser));
         expectCourseUsersWithUsers(oodiCourseId, newArrayList(studentUser, teacherInStudentRole), singletonList(teacherUser));
@@ -164,7 +164,7 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
 
     @Test
     public void testSyncDoesNotRemoveRolesIfOodiDoesNotReturnEnrolledUsers() {
-        long oodiCourseId = getOodiCourseId();
+        String oodiCourseId = getOodiCourseId();
 
         expectCourseRealisationWithUsers(oodiCourseId, singletonList(studentUser), singletonList(teacherUser));
         expectCourseUsersWithUsers(oodiCourseId, new ArrayList<>(), new ArrayList<>());
@@ -183,7 +183,7 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
 
     @Test
     public void testSyncRemovesStudentRoleFromHybridUserIfNotApproved() {
-        long oodiCourseId = getOodiCourseId();
+        String oodiCourseId = getOodiCourseId();
 
         expectCourseRealisationWithUsers(oodiCourseId, singletonList(teacherInStudentRole), singletonList(teacherUser));
         expectCourseUsersWithUsers(oodiCourseId, singletonList(teacherInStudentRole.setApproved(false)), singletonList(teacherUser));

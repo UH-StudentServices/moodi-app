@@ -100,11 +100,11 @@ public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegra
         iamMockServer.verify();
     }
 
-    protected long getOodiCourseId() {
-        return abs(new Random().nextInt());
+    protected String getOodiCourseId() {
+        return "" + abs(new Random().nextInt());
     }
 
-    protected long importCourse(long courseId) {
+    protected long importCourse(String courseId) {
         ImportCourseRequest importCourseRequest = new ImportCourseRequest();
         importCourseRequest.realisationId = courseId;
 
@@ -151,15 +151,15 @@ public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegra
         }
     }
 
-    protected void expectCourseUsersWithUsers(long courseId, List<StudentUser> students, List<TeacherUser> teachers) {
+    protected void expectCourseUsersWithUsers(String courseId, List<StudentUser> students, List<TeacherUser> teachers) {
         expectCourseRealisationWithUsers(this::expectGetCourseUsersRequestToOodi, courseId, students, teachers);
     }
 
-    protected void expectCourseRealisationWithUsers(long courseId, List<StudentUser> students, List<TeacherUser> teachers) {
+    protected void expectCourseRealisationWithUsers(String courseId, List<StudentUser> students, List<TeacherUser> teachers) {
         expectCourseRealisationWithUsers(this::expectGetCourseUnitRealisationRequestToOodi, courseId, students, teachers);
     }
 
-    private void expectCourseRealisationWithUsers(BiConsumer<Long, ResponseCreator> expectationFn, long courseId, List<StudentUser> students,
+    private void expectCourseRealisationWithUsers(BiConsumer<String, ResponseCreator> expectationFn, String courseId, List<StudentUser> students,
         List<TeacherUser> teachers) {
         expectationFn.accept(
             courseId,

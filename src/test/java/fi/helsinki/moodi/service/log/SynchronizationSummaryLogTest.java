@@ -52,7 +52,7 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
     private static final long STUDENT_MOODLE_USER_ID = 2;
 
     private static final long COURSE_MOODLE_ID = 1;
-    private static final long COURSE_REALISATION_ID = 2;
+    private static final String COURSE_REALISATION_ID = "2";
 
     private static final String STUDENT_MOODLE_USERNAME = "studentUsername";
     private static final String TEACHER_MOODLE_USERNAME = "teacherUsername";

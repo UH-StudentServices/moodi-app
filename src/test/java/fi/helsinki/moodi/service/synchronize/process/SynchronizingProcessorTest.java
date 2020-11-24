@@ -337,7 +337,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
         private static final String TEACHER_USERNAME = "teacherUsername";
         private static final String TEACHER_ID = "1";
         private static final String STUDENT_NUMBER = "1";
-        private static final long REALISATION_ID = 12345L;
+        private static final String REALISATION_ID = "12345";
 
         private SynchronizationItem synchronizationItem;
         private BaseOodiCourseUnitRealisation oodiCourseUsers;

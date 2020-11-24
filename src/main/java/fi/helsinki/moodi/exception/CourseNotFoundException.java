@@ -18,7 +18,7 @@
 package fi.helsinki.moodi.exception;
 
 public class CourseNotFoundException extends MoodiException {
-    public CourseNotFoundException(long realisationId) {
+    public CourseNotFoundException(String realisationId) {
         super(String.format("Course with realisationId %s not found", realisationId));
     }
 }

@@ -32,7 +32,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.ResponseCreator;
@@ -58,7 +57,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @SpringBootTest(
     properties = { "server.port:0" },
     classes = { Application.class, TestConfig.class })
-@ActiveProfiles("test")
 public abstract class AbstractMoodiIntegrationTest {
     private static final String MOODLE_EMPTY_LIST_RESPONSE = "[]";
     protected static final String MOODLE_ERROR_RESPONSE =
@@ -121,11 +119,11 @@ public abstract class AbstractMoodiIntegrationTest {
         return environment.getProperty("integration.moodle.baseUrl") + "/webservice/rest/server.php";
     }
 
-    protected String getOodiCourseUnitRealisationRequestUrl(final long realisationId) {
+    protected String getOodiCourseUnitRealisationRequestUrl(final String realisationId) {
         return String.format("%s/courseunitrealisations/%s?include_deleted=true&include_approved_status=true", getOodiUrl(), realisationId);
     }
 
-    protected String getOodiCourseUsersRequestUrl(final long realisationId) {
+    protected String getOodiCourseUsersRequestUrl(final String realisationId) {
         return String.format("%s/courseunitrealisations/%s/users?include_deleted=true&include_approved_status=true", getOodiUrl(), realisationId);
     }
 
@@ -251,7 +249,7 @@ public abstract class AbstractMoodiIntegrationTest {
         return property + "%5B" + index + "%5D%5B" + childProperty + "%5D=" + value;
     }
 
-    protected final ResultActions makeCreateCourseRequest(final long realisationId) throws Exception {
+    protected final ResultActions makeCreateCourseRequest(final String realisationId) throws Exception {
         ImportCourseRequest importCourseRequest = new ImportCourseRequest();
         importCourseRequest.realisationId = realisationId;
 
@@ -309,21 +307,21 @@ public abstract class AbstractMoodiIntegrationTest {
             .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
     }
 
-    protected final void expectGetCourseUsersRequestToOodi(final long realisationId, final ResponseCreator responseCreator) {
+    protected final void expectGetCourseUsersRequestToOodi(final String realisationId, final ResponseCreator responseCreator) {
         final String url = getOodiCourseUsersRequestUrl(realisationId);
         oodiMockServer.expect(requestTo(url))
             .andExpect(method(HttpMethod.GET))
             .andRespond(responseCreator);
     }
 
-    protected final void expectGetCourseUnitRealisationRequestToOodi(final long realisationId, final ResponseCreator responseCreator) {
+    protected final void expectGetCourseUnitRealisationRequestToOodi(final String realisationId, final ResponseCreator responseCreator) {
         final String url = getOodiCourseUnitRealisationRequestUrl(realisationId);
         oodiMockServer.expect(requestTo(url))
             .andExpect(method(HttpMethod.GET))
             .andRespond(responseCreator);
     }
 
-    protected final void expectCreateCourseRequestToMoodle(final long realisationId, final long moodleCourseIdToReturn) {
+    protected final void expectCreateCourseRequestToMoodle(final String realisationId, final long moodleCourseIdToReturn) {
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))

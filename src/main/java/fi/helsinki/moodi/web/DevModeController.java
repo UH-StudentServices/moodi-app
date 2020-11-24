@@ -138,7 +138,7 @@ public class DevModeController {
 
     @RequestMapping(value = "/api/v1/oodi-course/{realisationId}/users", method = RequestMethod.GET)
     @ResponseBody
-    public List<MoodleUser> getOodiCourseUsers(@PathVariable("realisationId") long realisationId) {
+    public List<MoodleUser> getOodiCourseUsers(@PathVariable("realisationId") String realisationId) {
         final OodiCourseUnitRealisation realisation = getOodiCourse(realisationId);
 
         final List<MoodleUser> students = realisation.students.stream()
@@ -169,7 +169,7 @@ public class DevModeController {
 
     @RequestMapping(value = "/api/v1/oodi-course/{realisationId}", method = RequestMethod.GET)
     @ResponseBody
-    public OodiCourseUnitRealisation getOodiCourse(@PathVariable("realisationId") long realisationId) {
+    public OodiCourseUnitRealisation getOodiCourse(@PathVariable("realisationId") String realisationId) {
         return oodiService.getOodiCourseUnitRealisation(realisationId)
                 .orElseThrow(notFoundException("Oodi course not found with realisation id " + realisationId));
 
