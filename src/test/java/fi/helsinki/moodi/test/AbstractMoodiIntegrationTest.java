@@ -328,15 +328,17 @@ public abstract class AbstractMoodiIntegrationTest {
             .andRespond(responseCreator);
     }
 
-    protected final void expectCreateCourseRequestToMoodle(final String realisationId, final String moodleCourseIdPrefix, final String description, final long moodleCourseIdToReturn) {
+    protected final void expectCreateCourseRequestToMoodle(final String realisationId, final String moodleCourseIdPrefix,
+                                                           final String description, final long moodleCourseIdToReturn) {
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andExpect(content().string(
-                "wstoken=xxxx1234&wsfunction=core_course_create_courses&moodlewsrestformat=json&courses%5B0%5D%5Bidnumber%5D=" + moodleCourseIdPrefix + realisationId +
+                "wstoken=xxxx1234&wsfunction=core_course_create_courses&moodlewsrestformat=json&courses%5B0%5D%5Bidnumber%5D="
+                    + moodleCourseIdPrefix + realisationId +
                 "&courses%5B0%5D%5Bfullname%5D=Lapsuus+ja+yhteiskunta&courses%5B0%5D%5Bshortname%5D=Lapsuus++" + realisationId +
                 "&courses%5B0%5D%5Bcategoryid%5D=2" +
-                "&courses%5B0%5D%5Bsummary%5D="+ description + "&courses%5B0%5D%5Bvisible%5D=0" +
+                "&courses%5B0%5D%5Bsummary%5D=" + description + "&courses%5B0%5D%5Bvisible%5D=0" +
                 "&courses%5B0%5D%5Bstartdate%5D=1564952400&courses%5B0%5D%5Benddate%5D=1575496800" + // End date plus one month
                 "&courses%5B0%5D%5Bcourseformatoptions%5D%5B0%5D%5Bname%5D=numsections&courses%5B0%5D%5Bcourseformatoptions%5D%5B0%5D%5Bvalue%5D=7"))
             .andRespond(withSuccess("[{\"id\":\"" + moodleCourseIdToReturn + "\", \"shortname\":\"shortie\"}]", MediaType.APPLICATION_JSON));
