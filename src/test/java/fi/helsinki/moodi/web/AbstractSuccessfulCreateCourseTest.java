@@ -94,6 +94,7 @@ public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIn
         setUpSisuResponses();
         setUpMoodleResponses(SISU_COURSE_REALISATION_ID, EXPECTED_SISU_DESCRIPTION_TO_MOODLE, "sisu_");
     }
+
     private void setUpSisuResponses() {
         mockSisuServer.expectCourseUnitRealisationRequest(SISU_COURSE_REALISATION_ID, "/sisu/course-unit-realisation.json");
         mockSisuServer.expectPersonsRequest(Arrays.asList("hy-hlo-1"), "/sisu/persons.json");

@@ -48,7 +48,9 @@ public class MoodleCourseBuilder {
 
     public MoodleCourse buildMoodleCourse(StudyRegistryCourseUnitRealisation cur) {
         return new MoodleCourse(
-            (cur.origin == StudyRegistryCourseUnitRealisation.Origin.OODI ? MOODLE_COURSE_ID_OODI_PREFIX : MOODLE_COURSE_ID_SISU_PREFIX) + cur.realisationId,
+            (cur.origin == StudyRegistryCourseUnitRealisation.Origin.OODI ?
+                MOODLE_COURSE_ID_OODI_PREFIX :
+                MOODLE_COURSE_ID_SISU_PREFIX) + cur.realisationId,
             cur.realisationName,
             getShortName(cur.realisationName, cur.realisationId),
             mapperService.getDefaultCategory(),

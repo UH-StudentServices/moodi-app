@@ -1,3 +1,20 @@
+/*
+ * This file is part of Moodi application.
+ *
+ * Moodi application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Moodi application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package fi.helsinki.moodi.integration.sisu;
 
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
@@ -30,7 +47,8 @@ public class SisuCourseUnitRealisation {
         ret.realisationId = id;
         ret.realisationName = name.getForLocaleOrDefault(teachingLanguageCode);
         ret.students = enrolments.stream().map(e -> e.person.toStudyRegistryStudent(e.isEnrolled())).collect(Collectors.toList());
-        // Sisu CUR data does not contain teacher user name nor employee number, so we leave this null here, and it will be populated in StudyRegistryService.
+        // Sisu CUR data does not contain teacher user name nor employee number, so we leave this null here,
+        // and it will be populated in StudyRegistryService.
         ret.teachers = null;
         ret.published = "PUBLISHED".equals(flowState);
 
@@ -46,7 +64,6 @@ public class SisuCourseUnitRealisation {
             .sorted((le1, le2) -> SisuLocale.byCodeOrDefaultToFi(le1.language).equals(teachingLanguageCode) ? -1 : 1)
             .map(le -> le.url)
             .findFirst().orElse("");
-
 
         return ret;
     }
