@@ -21,8 +21,8 @@ import fi.helsinki.moodi.exception.CourseAlreadyCreatedException;
 import fi.helsinki.moodi.exception.CourseNotFoundException;
 import fi.helsinki.moodi.integration.moodle.MoodleCourse;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
-import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
-import fi.helsinki.moodi.integration.oodi.OodiService;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryService;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
 import fi.helsinki.moodi.service.Result;
 import fi.helsinki.moodi.service.converter.CourseConverter;
 import fi.helsinki.moodi.service.course.Course;
@@ -41,7 +41,7 @@ public class ImportingService {
 
     private final MoodleService moodleService;
     private final CourseService courseService;
-    private final OodiService oodiService;
+    private final StudyRegistryService studyRegistryService;
     private final CourseConverter courseConverter;
     private final MoodleCourseBuilder moodleCourseBuilder;
     private final EnrollmentExecutor enrollmentExecutor;
@@ -51,7 +51,7 @@ public class ImportingService {
     public ImportingService(
         MoodleService moodleService,
         CourseService courseService,
-        OodiService oodiService,
+        StudyRegistryService studyRegistryService,
         CourseConverter courseConverter,
         MoodleCourseBuilder moodleCourseBuilder,
         EnrollmentExecutor enrollmentExecutor,
@@ -59,7 +59,7 @@ public class ImportingService {
 
         this.moodleService = moodleService;
         this.courseService = courseService;
-        this.oodiService = oodiService;
+        this.studyRegistryService = studyRegistryService;
         this.courseConverter = courseConverter;
         this.moodleCourseBuilder = moodleCourseBuilder;
         this.enrollmentExecutor = enrollmentExecutor;
@@ -73,9 +73,9 @@ public class ImportingService {
             throw new CourseAlreadyCreatedException(request.realisationId);
         }
 
-        final OodiCourseUnitRealisation courseUnitRealisation =
-                oodiService.getOodiCourseUnitRealisation(request.realisationId)
-                        .orElseThrow(notFoundException("Oodi course not found with realisation id " + request
+        final StudyRegistryCourseUnitRealisation courseUnitRealisation =
+                studyRegistryService.getCourseUnitRealisation(request.realisationId)
+                        .orElseThrow(notFoundException("Study registry course not found with realisation id " + request
                             .realisationId));
 
         final MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(courseUnitRealisation);

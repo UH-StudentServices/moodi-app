@@ -35,7 +35,7 @@ public class ImportSummaryLogTest extends AbstractSummaryLogTest {
     public void thatImportSummaryLogIsCreated() {
 
         Enrollment studentEnrollment = Enrollment.forStudent(STUDENT_NUMBER);
-        Enrollment teacherEnrollment = Enrollment.forTeacher(TEACHER_ID);
+        Enrollment teacherEnrollment = Enrollment.forTeacher(TEACHER_ID, null);
 
         List<Enrollment> enrollments = newArrayList(studentEnrollment, teacherEnrollment);
 
@@ -47,7 +47,7 @@ public class ImportSummaryLogTest extends AbstractSummaryLogTest {
         assertEquals(0, importSummaryLog.summary.enrolledTeachers);
         assertEquals(0, importSummaryLog.summary.failedStudents.size());
         assertEquals(1, importSummaryLog.summary.failedTeachers.size());
-        assertEquals(1, importSummaryLog.summary.failedTeachers.get(CODE_ENROLLMENT_FAILED.toString()).intValue());
+        assertEquals(1, importSummaryLog.summary.failedTeachers.get(CODE_ENROLLMENT_FAILED).intValue());
         assertEquals(1, importSummaryLog.enrolledStudents.size());
         assertEquals(0, importSummaryLog.enrolledTeachers.size());
         assertEquals(0, importSummaryLog.failedStudents.size());
@@ -55,7 +55,7 @@ public class ImportSummaryLogTest extends AbstractSummaryLogTest {
         assertEquals(STUDENT_NUMBER, ((StudentEnrollmentEntry) importSummaryLog.enrolledStudents
             .get(0)).studentNumber);
         assertEquals(TEACHER_ID, ((TeacherEnrollmentEntry) importSummaryLog.failedTeachers
-            .get(CODE_ENROLLMENT_FAILED.toString()).get(0)).teacherId);
+            .get(CODE_ENROLLMENT_FAILED).get(0)).employeeNumber);
 
     }
 }

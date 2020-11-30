@@ -29,7 +29,7 @@ public class SuccessfulCreateCourseWithEnrollmentWarningsTest extends AbstractSu
 
     @Before
     public void setUp() {
-        setUpMockServerResponsesWithWarnings();
+        setUpMockServerResponsesWithWarningsForOodiCourse();
     }
 
     @Test

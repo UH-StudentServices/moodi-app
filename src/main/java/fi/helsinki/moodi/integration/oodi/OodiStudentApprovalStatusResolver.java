@@ -28,15 +28,15 @@ import static com.google.common.collect.Lists.newArrayList;
 @Component
 public class OodiStudentApprovalStatusResolver {
 
-    private final List<Integer> enrollmentApprovedStatusCodes;
+    private static List<Integer> enrollmentApprovedStatusCodes;
 
     @Autowired
     public OodiStudentApprovalStatusResolver(final Environment environment) {
-        this.enrollmentApprovedStatusCodes =
+        enrollmentApprovedStatusCodes =
             newArrayList(environment.getRequiredProperty("oodi.enrollmentApprovedStatusCodes", Integer[].class));
     }
 
-    public boolean isApproved(OodiStudent oodiStudent) {
+    public static boolean isApproved(OodiStudent oodiStudent) {
 
         if (!oodiStudent.automaticEnabled) {
             return oodiStudent.approved;

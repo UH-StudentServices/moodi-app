@@ -44,20 +44,20 @@ public class IAMService {
                 .collect(Collectors.toList());
     }
 
-    public List<String> getTeacherUsernameList(final String teacherId) {
-        List<String> usernameList = iamClient.getTeacherUsernameList(getPrefixedTeacherId(teacherId));
+    public List<String> getTeacherUsernameList(final String employeeNumber) {
+        List<String> usernameList = iamClient.getTeacherUsernameList(getPrefixedEmployeeNumber(employeeNumber));
 
         return usernameList.stream()
                 .map(this::appendDomain)
                 .collect(Collectors.toList());
     }
 
-    private String getPrefixedTeacherId(final String teacherId) {
-        if (teacherId.startsWith(TEACHER_ID_PREFIX)) {
-            return teacherId;
+    private String getPrefixedEmployeeNumber(final String employeeNumber) {
+        if (employeeNumber.startsWith(TEACHER_ID_PREFIX)) {
+            return employeeNumber;
         }
 
-        return TEACHER_ID_PREFIX + teacherId;
+        return TEACHER_ID_PREFIX + employeeNumber;
     }
 
     private String appendDomain(final String username) {

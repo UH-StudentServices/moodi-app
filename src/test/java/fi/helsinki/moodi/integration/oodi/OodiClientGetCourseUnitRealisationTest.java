@@ -53,7 +53,7 @@ public class OodiClientGetCourseUnitRealisationTest extends AbstractMoodiIntegra
 
         final OodiCourseUnitRealisation cur = curOptional.get();
 
-        assertEquals("2019-11-04T21:00:00.000Z", cur.endDate);
+        assertEquals("2019-11-04T22:00:00.000Z", cur.endDate);
         assertEquals("Lapsuus ja yhteiskunta", cur.realisationName.get(0).text);
         assertEquals(Integer.valueOf(102374742), cur.realisationId);
 
@@ -87,16 +87,14 @@ public class OodiClientGetCourseUnitRealisationTest extends AbstractMoodiIntegra
     private void assertTeachers(final OodiCourseUnitRealisation cur) {
         assertEquals(1, cur.teachers.size());
         assertTeacher(cur.teachers.get(0),
-                "110588",
-                3);
+                "110588");
     }
 
     private void assertTeacher(
             final OodiTeacher t,
-            final String teacherId,
-            final Integer teacherRoleCode) {
+            final String employeeNumber) {
 
-        assertEquals(teacherId, t.teacherId);
+        assertEquals(employeeNumber, t.employeeNumber);
     }
 
     private void assertStudents(final OodiCourseUnitRealisation cur) {

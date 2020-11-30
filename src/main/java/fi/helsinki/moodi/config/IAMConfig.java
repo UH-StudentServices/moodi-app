@@ -17,7 +17,6 @@
 
 package fi.helsinki.moodi.config;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.helsinki.moodi.integration.http.LoggingInterceptor;
 import fi.helsinki.moodi.integration.http.RequestTimingInterceptor;
@@ -53,11 +52,11 @@ public class IAMConfig {
     private String mockUsers;
 
     @Bean
-    public IAMClient iamClient() {
+    public IAMClient iamClient(ObjectMapper objectMapper) {
         if (mockClientImplementation) {
             return new IAMMockClient(getMockUsers());
         } else {
-            return new IAMRestClient(baseUrl, iamRestTemplate());
+            return new IAMRestClient(baseUrl, iamRestTemplate(objectMapper));
         }
     }
 
@@ -73,15 +72,10 @@ public class IAMConfig {
     }
 
     @Bean
-    public RestTemplate iamRestTemplate() {
-        final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(objectMapper());
+    public RestTemplate iamRestTemplate(ObjectMapper objectMapper) {
+        final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(objectMapper);
         RestTemplate restTemplate = new RestTemplate(Collections.singletonList(converter));
         restTemplate.setInterceptors(newArrayList(new LoggingInterceptor(), new RequestTimingInterceptor()));
         return restTemplate;
-    }
-
-    private ObjectMapper objectMapper() {
-        return new ObjectMapper()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 }
