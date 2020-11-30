@@ -17,6 +17,9 @@ integration:
     wstoken: xxxx1234
   oodi.url: https://esbmt2.it.helsinki.fi/doo-oodi/dev/testdb
   iam.url: https://esbmt2.it.helsinki.fi
+  sisu:
+    baseUrl: http://localhost:9876
+    apiKey: test-apikey
 
 synchronize.FULL.enabled: true
 synchronize.INCREMENTAL.enabled: false

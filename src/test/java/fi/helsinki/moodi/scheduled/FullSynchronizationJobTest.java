@@ -215,8 +215,8 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         expectFindStudentRequestToMoodle(STUDENT_NUMBER + "2", STUDENT_USERNAME + "2", STUDENT_USER_MOODLE_ID + 2);
         expectFindStudentRequestToMoodle(STUDENT_NUMBER + "3", STUDENT_USERNAME + "3", STUDENT_USER_MOODLE_ID + 3);
 
-        expectFindTeacherRequestToMoodle(TEACHER_ID_WITH_PREFIX, TEACHER_USERNAME, TEACHER_USER_MOODLE_ID);
-        expectFindTeacherRequestToMoodle(TEACHER_ID_WITH_PREFIX + "1", TEACHER_USERNAME + "1", TEACHER_USER_MOODLE_ID + 1);
+        expectFindTeacherRequestToMoodle(EMPLOYEE_NUMBER_WITH_PREFIX, TEACHER_USERNAME, TEACHER_USER_MOODLE_ID);
+        expectFindTeacherRequestToMoodle(EMPLOYEE_NUMBER_WITH_PREFIX + "1", TEACHER_USERNAME + "1", TEACHER_USER_MOODLE_ID + 1);
 
         expectEnrollmentRequestToMoodle(
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
@@ -272,8 +272,8 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         expectFindStudentRequestToMoodle(STUDENT_NUMBER + "2", STUDENT_USERNAME + "2", STUDENT_USER_MOODLE_ID + 2);
         expectFindStudentRequestToMoodle(STUDENT_NUMBER + "3", STUDENT_USERNAME + "3", STUDENT_USER_MOODLE_ID + 3);
 
-        expectFindTeacherRequestToMoodle(TEACHER_ID_WITH_PREFIX, TEACHER_USERNAME, TEACHER_USER_MOODLE_ID);
-        expectFindTeacherRequestToMoodle(TEACHER_ID_WITH_PREFIX + "1", TEACHER_USERNAME + "1", TEACHER_USER_MOODLE_ID + 1);
+        expectFindTeacherRequestToMoodle(EMPLOYEE_NUMBER_WITH_PREFIX, TEACHER_USERNAME, TEACHER_USER_MOODLE_ID);
+        expectFindTeacherRequestToMoodle(EMPLOYEE_NUMBER_WITH_PREFIX + "1", TEACHER_USERNAME + "1", TEACHER_USER_MOODLE_ID + 1);
 
         expectEnrollmentRequestToMoodle(
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),

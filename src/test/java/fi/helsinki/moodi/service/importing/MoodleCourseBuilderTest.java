@@ -24,24 +24,24 @@ import fi.helsinki.moodi.integration.oodi.OodiLanguage;
 import fi.helsinki.moodi.integration.oodi.OodiLocale;
 import fi.helsinki.moodi.integration.oodi.OodiLocalizedValue;
 import fi.helsinki.moodi.integration.oodi.OodiOrganisation;
+import fi.helsinki.moodi.integration.sisu.SisuCourseUnitRealisation;
+import fi.helsinki.moodi.integration.sisu.SisuDateRange;
+import fi.helsinki.moodi.integration.sisu.SisuEnrolment;
+import fi.helsinki.moodi.integration.sisu.SisuLocalisedValue;
+import fi.helsinki.moodi.integration.sisu.SisuPerson;
+import fi.helsinki.moodi.integration.sisu.SisuResponsibilityInfo;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static fi.helsinki.moodi.Constants.LANG_EN;
-import static fi.helsinki.moodi.Constants.LANG_FI;
-import static fi.helsinki.moodi.Constants.LANG_SV;
-import static fi.helsinki.moodi.util.DateFormat.OODI_UTC_DATE_FORMAT;
+import static fi.helsinki.moodi.Constants.*;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
 
@@ -63,6 +63,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
     private static final Integer DESCRIPTION_2_ID = 20;
     private static final Integer DESCRIPTION_3_ID = 30;
     private static final String MOODLE_CATEGORY_ID = "2";
+    private static final String TEACHER_URN = "urn:code:course-unit-realisation-responsibility-info-type:responsible-teacher";
 
     @Autowired
     private MoodleCourseBuilder moodleCourseBuilder;
@@ -74,13 +75,42 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
             LANG_SV,
             LANG_EN);
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation);
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation.toStudyRegistryCourseUnitRealisation());
 
         assertEquals(REALISATION_NAME_FI, moodleCourse.fullName);
-        assertEquals(MoodleCourseBuilder.MOODLE_COURSE_ID_PREFIX + REALISATION_ID, moodleCourse.idnumber);
+        assertEquals(MoodleCourseBuilder.MOODLE_COURSE_ID_OODI_PREFIX + REALISATION_ID, moodleCourse.idNumber);
         assertEquals(MOODLE_CATEGORY_ID, moodleCourse.categoryId);
         assertEquals("Course r " + REALISATION_ID, moodleCourse.shortName);
         assertEquals(String.join(" ", DESCRIPTION_1_FI, DESCRIPTION_2_FI, DESCRIPTION_3_FI), moodleCourse.summary);
+    }
+
+    @Test
+    public void thatItCanBuildMoodleCourseFromSisuCur() {
+        SisuCourseUnitRealisation cur = getSisuCur();
+
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation());
+
+        assertEquals(REALISATION_NAME_SV, moodleCourse.fullName);
+        assertEquals("sisu_hy-cur-1", moodleCourse.idNumber);
+        assertEquals("Course r hy-cur-1", moodleCourse.shortName);
+
+    }
+
+    private SisuCourseUnitRealisation getSisuCur() {
+        SisuCourseUnitRealisation ret = new SisuCourseUnitRealisation();
+        ret.id = "hy-cur-1";
+        ret.name = new SisuLocalisedValue(REALISATION_NAME_FI, REALISATION_NAME_SV, REALISATION_NAME_EN);
+        ret.activityPeriod = new SisuDateRange(LocalDate.of(2019, 8, 5), LocalDate.of(2019, 11, 5));
+        ret.flowState = "PUBLISHED";
+        ret.teachingLanguageUrn = "urn:code:language:sv";
+
+        ret.responsibilityInfos.add(new SisuResponsibilityInfo(TEACHER_URN, "foo"));
+        ret.responsibilityInfos.add(new SisuResponsibilityInfo(TEACHER_URN, "bar"));
+        ret.enrolments.add(new SisuEnrolment(SisuEnrolment.EnrolmentState.ENROLLED, new SisuPerson("123", "Jack", "Smith")));
+        ret.enrolments.add(new SisuEnrolment(SisuEnrolment.EnrolmentState.CONFIRMED, new SisuPerson("1234", "Jane", "Smith")));
+        ret.enrolments.add(new SisuEnrolment(SisuEnrolment.EnrolmentState.PROCESSING, new SisuPerson("12345", "Not", "Enrolled")));
+
+        return ret;
     }
 
     @Test
@@ -90,7 +120,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
             LANG_FI,
             LANG_EN);
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation);
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation.toStudyRegistryCourseUnitRealisation());
 
         assertEquals(REALISATION_NAME_SV, moodleCourse.fullName);
         assertEquals(String.join(" ", DESCRIPTION_1_SV, DESCRIPTION_2_SV, DESCRIPTION_3_SV), moodleCourse.summary);
@@ -103,7 +133,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
             LANG_SV,
             LANG_FI);
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation);
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation.toStudyRegistryCourseUnitRealisation());
 
         assertEquals(REALISATION_NAME_EN, moodleCourse.fullName);
         assertEquals(String.join(" ", DESCRIPTION_1_EN, DESCRIPTION_2_EN, DESCRIPTION_3_EN), moodleCourse.summary);
@@ -118,14 +148,10 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         oodiCourseUnitRealisation.startDate = "2019-08-04T21:00:00.000Z";
         oodiCourseUnitRealisation.endDate = "2019-08-04T21:00:00.000Z";
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation);
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation.toStudyRegistryCourseUnitRealisation());
 
-        assertEquals(parseDateTime(oodiCourseUnitRealisation.startDate), moodleCourse.startTime);
-        assertEquals(parseDateTime(oodiCourseUnitRealisation.endDate).plusMonths(1), moodleCourse.endTime);
-    }
-
-    private LocalDateTime parseDateTime(String s) {
-        return LocalDateTime.parse(s, DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
+        assertEquals(LocalDate.of(2019, 8, 5), moodleCourse.startTime);
+        assertEquals(LocalDate.of(2019, 9, 5), moodleCourse.endTime);
     }
 
     @Test
@@ -137,15 +163,10 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         oodiCourseUnitRealisation.startDate = "";
         oodiCourseUnitRealisation.endDate = null;
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation);
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation.toStudyRegistryCourseUnitRealisation());
 
-        assertTimesAreClose(moodleCourse.startTime, LocalDateTime.now());
-        assertTimesAreClose(moodleCourse.endTime, LocalDateTime.now().plusYears(1));
-    }
-
-    private void assertTimesAreClose(LocalDateTime first, LocalDateTime later) {
-        assertTrue(String.format("first: %s, later: %s", first, later), first.isBefore(later.plusSeconds(1)));
-        assertTrue(Duration.between(first, later).getSeconds() < 3);
+        assertEquals(moodleCourse.startTime, LocalDate.now());
+        assertEquals(moodleCourse.endTime, LocalDate.now().plusYears(1));
     }
 
     private OodiCourseUnitRealisation getOodiCourseUnitRealisation(String... langcodes) {

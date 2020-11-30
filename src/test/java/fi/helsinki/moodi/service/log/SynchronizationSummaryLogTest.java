@@ -133,7 +133,7 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
         assertTrue(failedEntry.status.equals(UserSynchronizationItemStatus.ERROR));
         assertTrue(failedEntry.moodleUserId.equals(TEACHER_MOODLE_USER_ID));
         assertNull(failedEntry.oodiStudent);
-        assertEquals(TEACHER_ID, failedEntry.oodiTeacher.teacherId);
+        assertEquals(TEACHER_ID, failedEntry.oodiTeacher.employeeNumber);
         assertSingleAction(
             failedEntry.actions,
             UserSynchronizationActionStatus.ERROR,
@@ -227,7 +227,7 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
 
     private OodiTeacher getOodiTeacher() {
         OodiTeacher teacher = new OodiTeacher();
-        teacher.teacherId = TEACHER_ID;
+        teacher.employeeNumber = TEACHER_ID;
         return teacher;
     }
 }

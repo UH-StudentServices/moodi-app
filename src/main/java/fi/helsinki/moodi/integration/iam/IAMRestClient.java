@@ -68,12 +68,12 @@ public class IAMRestClient implements IAMClient {
     }
 
     @Cacheable(value = "iam-client.teacher-username-by-teacher-id", unless = "#result == null")
-    public List<String> getTeacherUsernameList(final String teacherId) {
-        logger.debug("Get teacher username by teacher id {}", teacherId);
+    public List<String> getTeacherUsernameList(final String employeeNumber) {
+        logger.debug("Get teacher username by teacher id {}", employeeNumber);
 
         try {
             List<IAMEmployee> result = restTemplate.exchange(
-                String.format("%s/iam/findEmployee/%s", baseUrl, teacherId),
+                String.format("%s/iam/findEmployee/%s", baseUrl, employeeNumber),
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<List<IAMEmployee>>() {})

@@ -21,12 +21,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.helsinki.moodi.Application;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.service.importing.ImportCourseRequest;
-import fi.helsinki.moodi.service.importing.MoodleCourseBuilder;
 import fi.helsinki.moodi.service.util.MapperService;
 import org.flywaydb.core.Flyway;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.runner.RunWith;
+import org.mockserver.client.MockServerClient;
+import org.mockserver.junit.MockServerRule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
@@ -69,8 +71,6 @@ public abstract class AbstractMoodiIntegrationTest {
 
     protected static final String EMPTY_RESPONSE = "";
 
-    private static final String EXPECTED_COURSE_ID = MoodleCourseBuilder.MOODLE_COURSE_ID_PREFIX + 102374742;
-
     protected static final int APPROVED_ENROLLMENT_STATUS_CODE = 3;
     protected static final int NON_APPROVED_ENROLLMENT_STATUS_CODE = 10;
 
@@ -102,10 +102,16 @@ public abstract class AbstractMoodiIntegrationTest {
 
     protected MockMvc mockMvc;
 
+    @Rule
+    public MockServerRule mockServerRule = new MockServerRule(this, 9876);
+    // Gets populated by the @Rule above.
+    private MockServerClient mockServerClient;
+
     protected MockRestServiceServer oodiMockServer;
     protected MockRestServiceServer moodleMockServer;
     protected MockRestServiceServer moodleReadOnlyMockServer;
     protected MockRestServiceServer iamMockServer;
+    protected MockSisuServer mockSisuServer;
 
     protected String getMoodleBaseUrl() {
         return environment.getProperty("integration.moodle.baseUrl");
@@ -157,6 +163,7 @@ public abstract class AbstractMoodiIntegrationTest {
         moodleMockServer = MockRestServiceServer.createServer(moodleRestTemplate);
         moodleReadOnlyMockServer = MockRestServiceServer.createServer(moodleReadOnlyRestTemplate);
         iamMockServer = MockRestServiceServer.createServer(iamRestTemplate);
+        mockSisuServer = new MockSisuServer(mockServerClient);
     }
 
     public static String toJson(Object object) throws IOException {
@@ -271,9 +278,9 @@ public abstract class AbstractMoodiIntegrationTest {
         expectFindStudentRequestToIAMWithResponse(studentNumber, response);
     }
 
-    protected final void expectFindEmployeeRequestToIAM(final String teacherId, final String username) {
-        final String response = "[{\"username\":\"" + username + "\",\"personnelNumber\":\"" + teacherId + "\"}]";
-        iamMockServer.expect(requestTo("https://esbmt2.it.helsinki.fi/iam/findEmployee/" + teacherId))
+    protected final void expectFindEmployeeRequestToIAM(final String employeeNumber, final String username) {
+        final String response = "[{\"username\":\"" + username + "\",\"personnelNumber\":\"" + employeeNumber + "\"}]";
+        iamMockServer.expect(requestTo("https://esbmt2.it.helsinki.fi/iam/findEmployee/" + employeeNumber))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
     }
@@ -321,17 +328,16 @@ public abstract class AbstractMoodiIntegrationTest {
             .andRespond(responseCreator);
     }
 
-    protected final void expectCreateCourseRequestToMoodle(final String realisationId, final long moodleCourseIdToReturn) {
+    protected final void expectCreateCourseRequestToMoodle(final String realisationId, final String moodleCourseIdPrefix, final String description, final long moodleCourseIdToReturn) {
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andExpect(content().string(
-                "wstoken=xxxx1234&wsfunction=core_course_create_courses&moodlewsrestformat=json&courses%5B0%5D%5Bidnumber%5D=" +
-                EXPECTED_COURSE_ID +
+                "wstoken=xxxx1234&wsfunction=core_course_create_courses&moodlewsrestformat=json&courses%5B0%5D%5Bidnumber%5D=" + moodleCourseIdPrefix + realisationId +
                 "&courses%5B0%5D%5Bfullname%5D=Lapsuus+ja+yhteiskunta&courses%5B0%5D%5Bshortname%5D=Lapsuus++" + realisationId +
                 "&courses%5B0%5D%5Bcategoryid%5D=2" +
-                "&courses%5B0%5D%5Bsummary%5D=Description+1+%28fi%29+Description+2+%28fi%29&courses%5B0%5D%5Bvisible%5D=0" +
-                "&courses%5B0%5D%5Bstartdate%5D=1564952400&courses%5B0%5D%5Benddate%5D=1575493200" + // Oodi end date plus one month
+                "&courses%5B0%5D%5Bsummary%5D="+ description + "&courses%5B0%5D%5Bvisible%5D=0" +
+                "&courses%5B0%5D%5Bstartdate%5D=1564952400&courses%5B0%5D%5Benddate%5D=1575496800" + // End date plus one month
                 "&courses%5B0%5D%5Bcourseformatoptions%5D%5B0%5D%5Bname%5D=numsections&courses%5B0%5D%5Bcourseformatoptions%5D%5B0%5D%5Bvalue%5D=7"))
             .andRespond(withSuccess("[{\"id\":\"" + moodleCourseIdToReturn + "\", \"shortname\":\"shortie\"}]", MediaType.APPLICATION_JSON));
     }

@@ -18,10 +18,14 @@
 package fi.helsinki.moodi.integration.oodi;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import fi.helsinki.moodi.Constants;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -35,6 +39,48 @@ public class OodiCourseUnitRealisation extends BaseOodiCourseUnitRealisation {
 
     @JsonProperty("realisation_name")
     public List<OodiLocalizedValue> realisationName = newArrayList();
+
+    public StudyRegistryCourseUnitRealisation toStudyRegistryCourseUnitRealisation() {
+        StudyRegistryCourseUnitRealisation ret = super.toStudyRegistryCourseUnitRealisation();
+
+        String preferredLanguage = getPreferredLanguage();
+        ret.realisationName = getTranslation(this.realisationName, preferredLanguage);
+        ret.description =  getDescription(preferredLanguage);
+
+        return ret;
+    }
+
+    private String getDescription(String language) {
+        return descriptions.stream()
+            .map(d -> getTranslation(d.texts, language))
+            .collect(Collectors.joining(" "));
+    }
+
+    private String getTranslation(List<OodiLocalizedValue> oodiLocalizedValues, String language) {
+        return getTranslationByLanguage(oodiLocalizedValues, language)
+            .orElseGet(() -> getFirstTranslation(oodiLocalizedValues)
+                .orElse(""));
+    }
+
+    private String getPreferredLanguage() {
+        return languages.stream()
+            .findFirst()
+            .map(l -> l.langCode)
+            .orElse(Constants.LANG_DEFAULT);
+    }
+
+    private Optional<String> getTranslationByLanguage(List<OodiLocalizedValue> oodiLocalizedValues, String language) {
+        return oodiLocalizedValues.stream()
+            .filter(l -> l.langcode.toString().equals(language))
+            .findFirst()
+            .map(l -> l.text);
+    }
+
+    private Optional<String> getFirstTranslation(List<OodiLocalizedValue> oodiLocalizedValues) {
+        return oodiLocalizedValues.stream()
+            .findFirst()
+            .map(l -> l.text);
+    }
 
     @Override
     public String toString() {

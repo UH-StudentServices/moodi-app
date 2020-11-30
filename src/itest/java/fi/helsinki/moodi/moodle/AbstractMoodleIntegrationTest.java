@@ -135,11 +135,11 @@ public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegra
     }
 
     protected static class TeacherUser extends IntegrationTestUser {
-        public String teacherId;
+        public String employeeNumber;
 
-        public TeacherUser(String username, String teacherId) {
+        public TeacherUser(String username, String employeeNumber) {
             super(username);
-            this.teacherId = teacherId;
+            this.employeeNumber = employeeNumber;
         }
     }
 
@@ -179,7 +179,7 @@ public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegra
         }
 
         for (TeacherUser teacherUser : teachers) {
-            expectFindEmployeeRequestToIAM(TEACHER_ID_PREFIX + teacherUser.teacherId, teacherUser.username);
+            expectFindEmployeeRequestToIAM(TEACHER_ID_PREFIX + teacherUser.employeeNumber, teacherUser.username);
         }
     }
 

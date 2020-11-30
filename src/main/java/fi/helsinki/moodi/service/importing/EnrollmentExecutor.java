@@ -18,14 +18,14 @@
 package fi.helsinki.moodi.service.importing;
 
 import com.google.common.base.Stopwatch;
-import fi.helsinki.moodi.service.iam.IAMService;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
-import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
 import fi.helsinki.moodi.integration.oodi.OodiStudentApprovalStatusResolver;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
 import fi.helsinki.moodi.service.batch.BatchProcessor;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
+import fi.helsinki.moodi.service.iam.IAMService;
 import fi.helsinki.moodi.service.log.LoggingService;
 import fi.helsinki.moodi.service.util.MapperService;
 import org.slf4j.Logger;
@@ -79,7 +79,7 @@ public class EnrollmentExecutor {
 
     @Async("taskExecutor")
     public void processEnrollments(final Course course,
-                                   final OodiCourseUnitRealisation courseUnitRealisation,
+                                   final StudyRegistryCourseUnitRealisation courseUnitRealisation,
                                    final long moodleCourseId) {
         try {
 
@@ -129,24 +129,27 @@ public class EnrollmentExecutor {
     }
 
     private Enrollment enrichEnrollmentWithUsername(final Enrollment enrollment) {
-        enrollment.usernameList = Enrollment.ROLE_TEACHER.equals(enrollment.role) ?
-            iamService.getTeacherUsernameList(enrollment.teacherId.get()) :
-            iamService.getStudentUsernameList(enrollment.studentNumber.get());
+        if (enrollment.usernameList == null || enrollment.usernameList.isEmpty()) {
+            enrollment.usernameList = Enrollment.ROLE_TEACHER.equals(enrollment.role) ?
+                iamService.getTeacherUsernameList(enrollment.employeeNumber.get()) :
+                iamService.getStudentUsernameList(enrollment.studentNumber.get());
+        }
 
         return enrollment;
     }
 
-    private List<Enrollment> createEnrollments(final OodiCourseUnitRealisation cur) {
+    private List<Enrollment> createEnrollments(final StudyRegistryCourseUnitRealisation cur) {
         final List<Enrollment> enrollments = newArrayList();
 
         enrollments.addAll(cur.students.stream()
             .map(s -> Enrollment.forStudent(
                 s.studentNumber,
-                oodiStudentApprovalStatusResolver.isApproved(s)))
+                s.userName,
+                s.isEnrolled))
             .collect(toList()));
 
         enrollments.addAll(cur.teachers.stream()
-            .map(s -> Enrollment.forTeacher(s.teacherId))
+            .map(s -> Enrollment.forTeacher(s.employeeNumber, s.userName))
             .collect(toList()));
 
         return enrollments;

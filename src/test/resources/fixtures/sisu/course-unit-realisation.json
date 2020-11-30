@@ -1,0 +1,92 @@
+{
+  "data": {
+    "course_unit_realisation": {
+      "name": {
+        "fi": "Lapsuus ja yhteiskunta",
+        "sv": "För att testa",
+        "en": "For testing"
+      },
+      "teachingLanguageUrn": "urn:code:language:fi",
+      "id": "hy-CUR-123",
+      "activityPeriod": {
+        "startDate": "2019-08-05",
+        "endDate": "2019-11-05"
+      },
+      "flowState": "PUBLISHED",
+      "responsibilityInfos": [
+        {
+          "roleUrn": "urn:code:course-unit-realisation-responsibility-info-type:responsible-teacher",
+          "personId": "hy-hlo-1"
+        },
+        {
+          "roleUrn": "urn:code:course-unit-realisation-responsibility-info-type:someone-else",
+          "personId": "hy-hlo-not-a-teacher"
+        }
+      ],
+      "enrolments": [
+        {
+          "state": "ENROLLED",
+          "person": {
+            "eduPersonPrincipalName": "niina@helsinki.fi"
+          }
+        },
+        {
+          "state": "ENROLLED",
+          "person": {
+            "eduPersonPrincipalName": "jukka@helsinki.fi"
+          }
+        },
+        {
+          "state": "ENROLLED",
+          "person": {
+            "eduPersonPrincipalName": "make@helsinki.fi"
+          }
+        },
+        {
+          "state": "PROCESSING",
+          "person": {
+            "eduPersonPrincipalName": "ei-mukana-kurssilla@helsinki.fi"
+          }
+        }
+      ],
+      "learningEnvironments": [
+        {
+          "name": "Kurssisivu",
+          "url": "https://courses.helsinki.fi/fi/OODI-FLOW/136394381",
+          "primary": true,
+          "language": "fi"
+        },
+        {
+          "name": "Kurssidan",
+          "url": "https://courses.helsinki.fi/sv/OODI-FLOW/136394381",
+          "primary": true,
+          "language": "sv"
+        },
+        {
+          "name": "Course Page",
+          "url": "https://courses.helsinki.fi/en/OODI-FLOW/136394381",
+          "primary": true,
+          "language": "en"
+        },
+        {
+          "name": "Ilmoittautuminen WebOodissa",
+          "url": "https://weboodi.helsinki.fi/hy/opettaptied.jsp?OpetTap=136394381&html=1&Kieli=1",
+          "primary": false,
+          "language": "fi"
+        },
+        {
+          "name": "Kursanmälning på WebOodi",
+          "url": "https://weboodi.helsinki.fi/hy/opettaptied.jsp?OpetTap=136394381&html=1&Kieli=2",
+          "primary": false,
+          "language": "sv"
+        },
+        {
+          "name": "Course registration in WebOodi",
+          "url": "https://weboodi.helsinki.fi/hy/opettaptied.jsp?OpetTap=136394381&html=1&Kieli=6",
+          "primary": false,
+          "language": "en"
+        }
+      ]
+    }
+  }
+}

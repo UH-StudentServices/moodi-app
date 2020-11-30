@@ -17,7 +17,6 @@
 
 package fi.helsinki.moodi.config;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import fi.helsinki.moodi.integration.http.RequestTimingInterceptor;
@@ -47,8 +46,7 @@ public class MoodleConfig {
     private Environment environment;
 
     @Bean
-    public MoodleClient moodleClient() {
-        final ObjectMapper objectMapper = objectMapper();
+    public MoodleClient moodleClient(ObjectMapper objectMapper) {
         return new MoodleClient(
             restUrl(),
             wstoken(),
@@ -96,10 +94,4 @@ public class MoodleConfig {
     private String wstoken() {
         return environment.getRequiredProperty("integration.moodle.wstoken");
     }
-
-    private ObjectMapper objectMapper() {
-        return new ObjectMapper()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }
-
 }

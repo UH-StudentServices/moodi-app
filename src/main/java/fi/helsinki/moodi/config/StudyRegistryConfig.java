@@ -17,11 +17,12 @@
 
 package fi.helsinki.moodi.config;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.helsinki.moodi.integration.http.LoggingInterceptor;
 import fi.helsinki.moodi.integration.http.RequestTimingInterceptor;
 import fi.helsinki.moodi.integration.oodi.OodiClient;
+import fi.helsinki.moodi.integration.sisu.SisuClient;
+import fi.helsinki.moodi.integration.sisu.SisuGraphQLClient;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
@@ -34,6 +35,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.security.KeyStore;
@@ -42,14 +44,14 @@ import java.util.Collections;
 import static com.google.common.collect.Lists.newArrayList;
 
 @Configuration
-public class OodiConfig {
+public class StudyRegistryConfig {
 
     @Autowired
     private Environment environment;
 
     @Bean
-    public OodiClient oodiClient() {
-        return new OodiClient(baseUrl(), oodiRestTemplate());
+    public OodiClient oodiClient(RestTemplate oodiRestTemplate) {
+        return new OodiClient(environment.getProperty("integration.oodi.url"), oodiRestTemplate);
     }
 
     private KeyStore oodiKeyStore(String keystoreLocation, char[] keystorePassword) throws Exception {
@@ -63,6 +65,17 @@ public class OodiConfig {
 
     private boolean useClientCert() {
         return environment.containsProperty("httpClient.keystoreLocation") && environment.containsProperty("httpClient.keystorePassword");
+    }
+
+    @PostConstruct
+    public void initDefaultSSLContext() {
+        if (useClientCert()) {
+            SSLContext sslContext = sslContext();
+
+            if (sslContext != null) {
+                SSLContext.setDefault(sslContext);
+            }
+        }
     }
 
     private SSLContext sslContext() {
@@ -79,8 +92,8 @@ public class OodiConfig {
     }
 
     @Bean
-    public RestTemplate oodiRestTemplate() {
-        final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(objectMapper());
+    public RestTemplate oodiRestTemplate(ObjectMapper objectMapper) {
+        final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(objectMapper);
 
         RestTemplate restTemplate = new RestTemplate(Collections.singletonList(converter));
         restTemplate.setInterceptors(newArrayList(new LoggingInterceptor(), new RequestTimingInterceptor()));
@@ -91,12 +104,8 @@ public class OodiConfig {
         return restTemplate;
     }
 
-    private String baseUrl() {
-        return environment.getProperty("integration.oodi.url");
-    }
-
-    private ObjectMapper objectMapper() {
-        return new ObjectMapper()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    @Bean
+    public SisuClient sisuClient() {
+        return new SisuGraphQLClient(environment.getProperty("integration.sisu.baseUrl"), environment.getProperty("integration.sisu.apiKey"));
     }
 }

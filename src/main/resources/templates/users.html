@@ -165,7 +165,7 @@ angular.module('testApp', ['jsonFormatter'])
             ctrl.loading = false;
         };
 
-        $http.get('/api/v1/oodi-course/' + ctrl.courseRealisationId + '/users')
+        $http.get('/api/v1/study-registry-course/' + ctrl.courseRealisationId + '/users')
                 .success(callback)
                 .error(callback);
     };
