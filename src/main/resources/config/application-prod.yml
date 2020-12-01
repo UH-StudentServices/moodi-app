@@ -15,6 +15,9 @@ integration:
     baseUrl: https://moodle.helsinki.fi
   oodi.url: https://esbmt1.it.helsinki.fi/secure/doo-oodi/v1/productiondb
   iam.url: https://esbmt1.it.helsinki.fi
+  sisu:
+    baseUrl: https://gw.api.helsinki.fi/secure/sisu
+    apiKey: ${apiGatewayApiKey}
 
 mapper.moodle.defaultCategory: 73
 # Also known as the synced role

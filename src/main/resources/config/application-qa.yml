@@ -15,3 +15,6 @@ integration:
     baseUrl: https://moodi-2-moodle-20.student.helsinki.fi/moodlecurrent
   oodi.url: https://esbmt1.it.helsinki.fi/secure/doo-oodi/v1/productiondb
   iam.url: https://esbmt1.it.helsinki.fi
+  sisu:
+    baseUrl: http://localhost:9876
+    apiKey: qa-apikey
