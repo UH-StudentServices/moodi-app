@@ -13,6 +13,9 @@ integration:
     baseUrl: https://moodi-2-moodle-20.student.helsinki.fi/moodlecurrent
   oodi.url: https://esbmt2.it.helsinki.fi/secure/doo-oodi/dev/testdb
   iam.mock: true
+  sisu:
+    baseUrl: http://localhost:9876
+    apiKey: local-apikey
 
 auth.client.user: password
 auth.enabled: true
