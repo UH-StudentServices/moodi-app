@@ -3,7 +3,7 @@ version: "3"
 services:
     postgres:
         build: .
-        image: postgres:opa_fi
+        image: moodi-postgres:fi
         container_name: moodi-postgres
         environment:
             - POSTGRES_DB=moodi
