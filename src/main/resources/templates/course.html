@@ -117,7 +117,7 @@ angular.module('testApp', ['jsonFormatter'])
 
         ctrl.responseBody = '';
         ctrl.responseStatus = null;
-        
+
         ctrl.oodiResponseBody = '';
         ctrl.oodiResponseStatus = null;
 
@@ -126,7 +126,7 @@ angular.module('testApp', ['jsonFormatter'])
             ctrl.oodiResponseStatus = status;
         };
 
-        $http.get('/api/v1/oodi-course/' + ctrl.courseRealisationId)
+        $http.get('/api/v1/study-registry-course/' + ctrl.courseRealisationId)
                 .success(callback)
                 .error(callback);
     };

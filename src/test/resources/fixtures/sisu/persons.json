@@ -1,0 +1,13 @@
+{
+  "data": {
+    "private_persons": [
+      {
+        "studentNumber": "012376285",
+        "firstNames": "Herra",
+        "lastName": "Opettaja",
+        "employeeNumber": "aivansama",
+        "eduPersonPrincipalName": "hraopettaja@helsinki.fi"
+      }
+    ]
+  }
+}

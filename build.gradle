@@ -58,11 +58,13 @@ if(hasProperty("opintoni_artifactory_base_url")) {
             url "${opintoni_artifactory_base_url}/remote-repos/"
         }
         mavenLocal()
+        maven { url 'https://dl.bintray.com/americanexpress/maven/' }
         jcenter()
     }
 } else {
     repositories {
         mavenLocal()
+        maven { url 'https://dl.bintray.com/americanexpress/maven/' }
         jcenter()
     }
 }
@@ -92,9 +94,13 @@ dependencies {
     compile "org.trimou:trimou-core:1.7.3.Final"
     compile "javax.mail:mail:1.4.7"
 
+    compile group: 'io.aexp.nodes.graphql', name: 'nodes', version: nodes_version
+
     testCompile "com.h2database:h2:1.4.187"
     testCompile "org.springframework.boot:spring-boot-starter-test"
     testCompile "com.jayway.jsonpath:json-path-assert:0.9.1"
+    testCompile group: 'org.mock-server', name: 'mockserver-netty', version: mockserver_version
+    testCompile group: 'org.mock-server', name: 'mockserver-junit-rule', version: mockserver_version
 }
 
 apply from: "gradle-build/test.gradle"

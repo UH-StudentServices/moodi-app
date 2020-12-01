@@ -337,7 +337,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
         private static final String TEACHER_USERNAME = "teacherUsername";
         private static final String TEACHER_ID = "1";
         private static final String STUDENT_NUMBER = "1";
-        private static final long REALISATION_ID = 12345L;
+        private static final String REALISATION_ID = "12345";
 
         private SynchronizationItem synchronizationItem;
         private BaseOodiCourseUnitRealisation oodiCourseUsers;
@@ -385,7 +385,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
 
         public CourseSynchronizationRequestChain withOodiTeacher(long moodleUserId) {
             OodiTeacher oodiTeacher = new OodiTeacher();
-            oodiTeacher.teacherId = TEACHER_ID;
+            oodiTeacher.employeeNumber = TEACHER_ID;
 
             this.oodiCourseUsers.teachers.add(oodiTeacher);
             oodiTeacherMap.put(moodleUserId, oodiTeacher);
@@ -406,7 +406,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             oodiStudentMap.forEach((moodleUserId, oodiStudent) -> expectFindStudentRequestToIAM(oodiStudent.studentNumber,
                 STUDENT_USERNAME));
             oodiTeacherMap.forEach((moodleUserId, oodiTeacher) -> expectFindEmployeeRequestToIAM(
-                IAMService.TEACHER_ID_PREFIX + oodiTeacher.teacherId, TEACHER_USERNAME));
+                IAMService.TEACHER_ID_PREFIX + oodiTeacher.employeeNumber, TEACHER_USERNAME));
             oodiStudentMap.forEach((moodleUserId, oodiStudent) -> expectGetUserRequestToMoodle(
                 STUDENT_USERNAME + IAMService.DOMAIN_SUFFIX, moodleUserId));
             oodiTeacherMap.forEach((moodleUserId, oodiTeacher) -> expectGetUserRequestToMoodle(

@@ -20,32 +20,32 @@ package fi.helsinki.moodi.integration.moodle;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public final class MoodleCourse {
 
-    public final String idnumber;
+    public final String idNumber;
     public final String fullName;
     public final String shortName;
     public final String categoryId;
     public final String summary;
     public final boolean visible;
     public final int numberOfSections;
-    public final LocalDateTime startTime;
-    public final LocalDateTime endTime;
+    public final LocalDate startTime;
+    public final LocalDate endTime;
 
     public MoodleCourse(
-            String idnumber,
+            String idNumber,
             String fullName,
             String shortName,
             String categoryId,
             String summary,
             boolean visible,
             int numberOfSections,
-            LocalDateTime startTime,
-            LocalDateTime endTime) {
+            LocalDate startTime,
+            LocalDate endTime) {
 
-        this.idnumber = idnumber;
+        this.idNumber = idNumber;
         this.fullName = fullName;
         this.shortName = shortName;
         this.categoryId = categoryId;

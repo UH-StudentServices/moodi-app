@@ -18,6 +18,7 @@
 package fi.helsinki.moodi.integration.oodi;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryTeacher;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -27,10 +28,18 @@ public class OodiTeacher {
     public String firstNames;
 
     @JsonProperty("teacher_id")
-    public String teacherId;
+    public String employeeNumber;
 
     @JsonProperty("last_name")
     public String lastName;
+
+    public StudyRegistryTeacher toStudyRegistryTeacher() {
+        StudyRegistryTeacher ret = new StudyRegistryTeacher();
+        ret.firstNames = firstNames;
+        ret.lastName = lastName;
+        ret.employeeNumber = employeeNumber;
+        return ret;
+    }
 
     @Override
     public String toString() {

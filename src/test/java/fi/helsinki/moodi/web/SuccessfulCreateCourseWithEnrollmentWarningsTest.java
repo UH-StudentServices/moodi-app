@@ -25,11 +25,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class SuccessfulCreateCourseWithEnrollmentWarningsTest extends AbstractSuccessfulCreateCourseTest {
 
-    private static final long COURSE_REALISATION_ID = 102374742L;
+    private static final String COURSE_REALISATION_ID = "102374742";
 
     @Before
     public void setUp() {
-        setUpMockServerResponsesWithWarnings();
+        setUpMockServerResponsesWithWarningsForOodiCourse();
     }
 
     @Test

@@ -115,7 +115,7 @@ public class SynchronizationSummaryLog {
     }
 
     public static class SynchronizationItemLogEntry {
-        public final long realisationId;
+        public final String realisationId;
         public final long moodleId;
         public final EnrichmentStatus enrichmentStatus;
         public final ProcessingStatus processingStatus;
@@ -123,7 +123,7 @@ public class SynchronizationSummaryLog {
         public final String enrichmentMessage;
         public final String processingMessage;
 
-        public SynchronizationItemLogEntry(long realisationId,
+        public SynchronizationItemLogEntry(String realisationId,
                                            long moodleId,
                                            EnrichmentStatus enrichmentStatus,
                                            ProcessingStatus processingStatus,

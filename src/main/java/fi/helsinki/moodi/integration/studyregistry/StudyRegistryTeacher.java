@@ -15,28 +15,23 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.integration.oodi;
+package fi.helsinki.moodi.integration.studyregistry;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.util.Optional;
+public class StudyRegistryTeacher {
+    public String firstNames;
 
-@Service
-public class OodiService {
+    // Eg. jdoe@helsinki.fi
+    public String userName;
 
-    private final OodiClient oodiClient;
+    public String employeeNumber;
 
-    @Autowired
-    public OodiService(OodiClient oodiClient) {
-        this.oodiClient = oodiClient;
-    }
+    public String lastName;
 
-    public Optional<OodiCourseUnitRealisation> getOodiCourseUnitRealisation(final long realisationId) {
-        return oodiClient.getCourseUnitRealisation(realisationId);
-    }
-
-    public Optional<BaseOodiCourseUnitRealisation> getOodiCourseUsers(final long realisationId) {
-        return oodiClient.getCourseUsers(realisationId);
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
 }

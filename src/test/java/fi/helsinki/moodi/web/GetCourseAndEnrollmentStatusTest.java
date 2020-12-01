@@ -30,15 +30,15 @@ public class GetCourseAndEnrollmentStatusTest extends AbstractSuccessfulCreateCo
 
     @Before
     public void setUp() {
-        setUpMockServerResponsesWithWarnings();
+        setUpMockServerResponsesWithWarningsForOodiCourse();
     }
 
     @Test
     public void successfulCreateCourseReturnsCorrectResponse() throws Exception {
-        makeCreateCourseRequest(COURSE_REALISATION_ID);
+        makeCreateCourseRequest(OODI_COURSE_REALISATION_ID);
 
         mockMvc.perform(
-            get("/api/v1/courses/" + COURSE_REALISATION_ID)
+            get("/api/v1/courses/" + OODI_COURSE_REALISATION_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("client-id", "testclient")
                 .header("client-token", "xxx123"))

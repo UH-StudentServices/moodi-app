@@ -18,6 +18,7 @@
 package fi.helsinki.moodi.integration.oodi;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryStudent;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -44,5 +45,14 @@ public class OodiStudent {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
+    }
+
+    public StudyRegistryStudent toStudyRegistryStudent() {
+        StudyRegistryStudent ret = new StudyRegistryStudent();
+        ret.firstNames = firstNames;
+        ret.lastName = lastName;
+        ret.studentNumber = studentNumber;
+        ret.isEnrolled = OodiStudentApprovalStatusResolver.isApproved(this);
+        return ret;
     }
 }

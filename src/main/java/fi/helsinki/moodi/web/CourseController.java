@@ -48,7 +48,7 @@ public class CourseController {
 
     @RequestMapping(value = "/api/v1/courses/{realisationId}", method = RequestMethod.GET)
     public ResponseEntity<CourseDto> getCourse(
-        @PathVariable("realisationId") Long realisationId) {
+        @PathVariable("realisationId") String realisationId) {
 
         return response(importingService.getCourse(realisationId));
     }

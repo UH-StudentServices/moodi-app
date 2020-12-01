@@ -23,6 +23,7 @@ import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
 import org.springframework.http.MediaType;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -31,8 +32,9 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIntegrationTest {
 
-    protected static final long COURSE_REALISATION_ID = 102374742L;
-    protected static final  long MOODLE_COURSE_ID = 988888L;
+    protected static final String OODI_COURSE_REALISATION_ID = "102374742";
+    protected static final String SISU_COURSE_REALISATION_ID = "hy-CUR-123";
+    protected static final long MOODLE_COURSE_ID = 988888L;
     protected static final long MOODLE_USER_ID_1 = 1L;
     protected static final long MOODLE_USER_ID_2 = 2L;
     protected static final long MOODLE_USER_ID_3 = 3L;
@@ -53,23 +55,13 @@ public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIn
     protected static final String ESB_USERNAME_3 = "make";
     protected static final String TEACHER_ESB_USERNAME = "hraopettaja";
 
-    protected void setUpMockServerResponses() {
+    protected static final String EXPECTED_OODI_DESCRIPTION_TO_MOODLE = "Description+1+%28fi%29+Description+2+%28fi%29";
+    protected static final String EXPECTED_SISU_DESCRIPTION_TO_MOODLE = "https%3A%2F%2Fcourses.helsinki.fi%2Ffi%2FOODI-FLOW%2F136394381";
 
-        setupCommonResponses();
-
-        expectCreateCourseRequestToMoodle(COURSE_REALISATION_ID, MOODLE_COURSE_ID);
-
-        expectGetUserRequestToMoodle(MOODLE_USERNAME_1, MOODLE_USER_ID_1);
-        expectGetUserRequestToMoodle(MOODLE_USERNAME_2, MOODLE_USER_ID_2);
-        expectGetUserRequestToMoodle(MOODLE_USERNAME_3, MOODLE_USER_ID_3);
-        expectGetUserRequestToMoodle(TEACHER_MOODLE_USERNAME, TEACHER_MOODLE_USER_ID);
-
-        expectEnrollmentsWithAddedMoodiRoles(Lists.newArrayList(
-            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_1, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_2, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_3, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getTeacherRoleId(), TEACHER_MOODLE_USER_ID, MOODLE_COURSE_ID)
-            ));
+    protected void setUpMockServerResponsesForOodiCourse() {
+        setUpOodiResponse();
+        setupIAMResponses();
+        setUpMoodleResponses(OODI_COURSE_REALISATION_ID, EXPECTED_OODI_DESCRIPTION_TO_MOODLE, "oodi_");
     }
 
     protected void expectEnrollmentsWithAddedMoodiRoles(List<MoodleEnrollment> moodleEnrollments) {
@@ -80,10 +72,11 @@ public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIn
         expectEnrollmentRequestToMoodle(moodleEnrollmentsWithMoodiRoles.toArray(new MoodleEnrollment[moodleEnrollmentsWithMoodiRoles.size()]));
     }
 
-    protected void setUpMockServerResponsesWithWarnings() {
-        setupCommonResponses();
+    protected void setUpMockServerResponsesWithWarningsForOodiCourse() {
+        setUpOodiResponse();
+        setupIAMResponses();
 
-        expectCreateCourseRequestToMoodle(COURSE_REALISATION_ID, MOODLE_COURSE_ID);
+        expectCreateCourseRequestToMoodle(OODI_COURSE_REALISATION_ID, "oodi_", EXPECTED_OODI_DESCRIPTION_TO_MOODLE, MOODLE_COURSE_ID);
 
         expectGetUserRequestToMoodle(MOODLE_USERNAME_1, MOODLE_USER_ID_1);
         expectGetUserRequestToMoodle(MOODLE_USERNAME_2, MOODLE_USER_ID_2);
@@ -97,11 +90,39 @@ public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIn
             ));
     }
 
-    private void setupCommonResponses() {
-        expectGetCourseUnitRealisationRequestToOodi(
-            COURSE_REALISATION_ID,
-            withSuccess(Fixtures.asString("/oodi/course-realisation.json"), MediaType.APPLICATION_JSON));
+    protected void setUpMockServerResponsesForSisuCourse() {
+        setUpSisuResponses();
+        setUpMoodleResponses(SISU_COURSE_REALISATION_ID, EXPECTED_SISU_DESCRIPTION_TO_MOODLE, "sisu_");
+    }
 
+    private void setUpSisuResponses() {
+        mockSisuServer.expectCourseUnitRealisationRequest(SISU_COURSE_REALISATION_ID, "/sisu/course-unit-realisation.json");
+        mockSisuServer.expectPersonsRequest(Arrays.asList("hy-hlo-1"), "/sisu/persons.json");
+    }
+
+    private void setUpOodiResponse() {
+        expectGetCourseUnitRealisationRequestToOodi(
+            OODI_COURSE_REALISATION_ID,
+            withSuccess(Fixtures.asString("/oodi/course-realisation.json"), MediaType.APPLICATION_JSON));
+    }
+
+    private void setUpMoodleResponses(String curId, String description, String moodleCourseIdPrefix) {
+        expectCreateCourseRequestToMoodle(curId, moodleCourseIdPrefix, description, MOODLE_COURSE_ID);
+
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_1, MOODLE_USER_ID_1);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_2, MOODLE_USER_ID_2);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_3, MOODLE_USER_ID_3);
+        expectGetUserRequestToMoodle(TEACHER_MOODLE_USERNAME, TEACHER_MOODLE_USER_ID);
+
+        expectEnrollmentsWithAddedMoodiRoles(Lists.newArrayList(
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_1, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_2, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_3, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getTeacherRoleId(), TEACHER_MOODLE_USER_ID, MOODLE_COURSE_ID)
+        ));
+    }
+
+    private void setupIAMResponses() {
         expectFindStudentRequestToIAM(STUDENT_NUMBER_1, ESB_USERNAME_1);
         expectFindStudentRequestToIAM(STUDENT_NUMBER_2, ESB_USERNAME_2);
         expectFindStudentRequestToIAM(STUDENT_NUMBER_3, ESB_USERNAME_3);

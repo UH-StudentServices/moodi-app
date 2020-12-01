@@ -18,8 +18,13 @@
 package fi.helsinki.moodi.integration.oodi;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -42,4 +47,26 @@ public class BaseOodiCourseUnitRealisation {
 
     @JsonProperty("teachers")
     public List<OodiTeacher> teachers = newArrayList();
+
+    public StudyRegistryCourseUnitRealisation toStudyRegistryCourseUnitRealisation() {
+        StudyRegistryCourseUnitRealisation ret = new StudyRegistryCourseUnitRealisation();
+        ret.origin = StudyRegistryCourseUnitRealisation.Origin.OODI;
+        ret.realisationId = "" + realisationId;
+        ret.startDate = parseDateTime(startDate, LocalDate.now());
+        ret.endDate = parseDateTime(endDate, LocalDate.now().plusMonths(11)).plusMonths(1);
+        ret.published = !removed;
+        ret.students = students.stream().map(OodiStudent::toStudyRegistryStudent).collect(Collectors.toList());
+        ret.teachers = teachers.stream().map(OodiTeacher::toStudyRegistryTeacher).collect(Collectors.toList());
+
+        return ret;
+    }
+
+    private LocalDate parseDateTime(String s, LocalDate defaultValue) {
+        try {
+            return ZonedDateTime.parse(s).withZoneSameInstant(ZoneId.of("Europe/Helsinki")).toLocalDate();
+        } catch (Exception e) {
+            // Fall through and return defaultValue
+        }
+        return defaultValue;
+    }
 }

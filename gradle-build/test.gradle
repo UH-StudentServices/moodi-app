@@ -18,4 +18,13 @@
 test {
     testLogging.showStandardStreams = true
     testLogging.exceptionFormat = 'full'
+    doFirst {
+        systemProperty "spring.profiles.active", "test"
+    }
+}
+
+task test_psql(type: Test) {
+    doFirst {
+        systemProperty "spring.profiles.active", "test,test_psql"
+    }
 }

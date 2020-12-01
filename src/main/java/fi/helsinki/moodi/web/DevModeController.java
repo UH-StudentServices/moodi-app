@@ -18,10 +18,10 @@
 package fi.helsinki.moodi.web;
 
 import fi.helsinki.moodi.config.DevMode;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
 import fi.helsinki.moodi.service.iam.IAMService;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
-import fi.helsinki.moodi.integration.oodi.OodiCourseUnitRealisation;
-import fi.helsinki.moodi.integration.oodi.OodiService;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
@@ -54,20 +54,20 @@ public class DevModeController {
     private final Logger logger = LoggerFactory.getLogger(DevModeController.class);
 
     private final Environment environment;
-    private final OodiService oodiService;
+    private final StudyRegistryService studyRegistryService;
     private final IAMService iamService;
     private final MoodleService moodleService;
     private final SynchronizationService synchronizationService;
 
     @Autowired
     public DevModeController(
-        OodiService oodiService,
+        StudyRegistryService studyRegistryService,
         Environment environment,
         IAMService iamService,
         MoodleService moodleService,
         SynchronizationService synchronizationService) {
 
-        this.oodiService = oodiService;
+        this.studyRegistryService = studyRegistryService;
         this.environment = environment;
         this.iamService = iamService;
         this.moodleService = moodleService;
@@ -136,10 +136,10 @@ public class DevModeController {
         }
     }
 
-    @RequestMapping(value = "/api/v1/oodi-course/{realisationId}/users", method = RequestMethod.GET)
+    @RequestMapping(value = "/api/v1/study-registry-course/{realisationId}/users", method = RequestMethod.GET)
     @ResponseBody
-    public List<MoodleUser> getOodiCourseUsers(@PathVariable("realisationId") long realisationId) {
-        final OodiCourseUnitRealisation realisation = getOodiCourse(realisationId);
+    public List<MoodleUser> getOodiCourseUsers(@PathVariable("realisationId") String realisationId) {
+        final StudyRegistryCourseUnitRealisation realisation = getOodiCourse(realisationId);
 
         final List<MoodleUser> students = realisation.students.stream()
                 .map(s -> new MoodleUser("student", s.firstNames, s.lastName,
@@ -147,7 +147,7 @@ public class DevModeController {
                 .collect(Collectors.toList());
 
         final List<MoodleUser> teachers = realisation.teachers.stream()
-                .map(s -> new MoodleUser("teacher", s.firstNames, s.lastName, iamService.getTeacherUsernameList(s.teacherId).get(0), null))
+                .map(s -> new MoodleUser("teacher", s.firstNames, s.lastName, iamService.getTeacherUsernameList(s.employeeNumber).get(0), null))
                 .collect(Collectors.toList());
 
         final List<MoodleUser> users = new ArrayList<>();
@@ -167,10 +167,10 @@ public class DevModeController {
         }
     }
 
-    @RequestMapping(value = "/api/v1/oodi-course/{realisationId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/api/v1/study-registry-course/{realisationId}", method = RequestMethod.GET)
     @ResponseBody
-    public OodiCourseUnitRealisation getOodiCourse(@PathVariable("realisationId") long realisationId) {
-        return oodiService.getOodiCourseUnitRealisation(realisationId)
+    public StudyRegistryCourseUnitRealisation getOodiCourse(@PathVariable("realisationId") String realisationId) {
+        return studyRegistryService.getCourseUnitRealisation(realisationId)
                 .orElseThrow(notFoundException("Oodi course not found with realisation id " + realisationId));
 
     }

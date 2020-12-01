@@ -18,7 +18,7 @@
 package fi.helsinki.moodi.service.synchronize.enrich;
 
 import fi.helsinki.moodi.integration.oodi.BaseOodiCourseUnitRealisation;
-import fi.helsinki.moodi.integration.oodi.OodiService;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryService;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import org.slf4j.Logger;
@@ -37,18 +37,18 @@ public class OodiCourseEnricher extends AbstractEnricher {
 
     private static final Logger logger = LoggerFactory.getLogger(OodiCourseEnricher.class);
 
-    private final OodiService oodiService;
+    private final StudyRegistryService studyRegistryService;
 
     @Autowired
-    public OodiCourseEnricher(OodiService oodiService) {
+    public OodiCourseEnricher(StudyRegistryService studyRegistryService) {
         super(1);
-        this.oodiService = oodiService;
+        this.studyRegistryService = studyRegistryService;
     }
 
     @Override
     protected SynchronizationItem doEnrich(final SynchronizationItem item) {
         final Course course = item.getCourse();
-        final Optional<BaseOodiCourseUnitRealisation> oodiCourse = oodiService.getOodiCourseUsers(course.realisationId);
+        final Optional<BaseOodiCourseUnitRealisation> oodiCourse = studyRegistryService.getOodiCourseUsers(course.realisationId);
 
         if (!oodiCourse.isPresent()) {
             return item.completeEnrichmentPhase(

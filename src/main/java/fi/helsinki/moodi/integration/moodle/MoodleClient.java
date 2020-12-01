@@ -33,8 +33,8 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -106,14 +106,14 @@ public class MoodleClient {
     public long createCourse(final MoodleCourse course) {
         final MultiValueMap<String, String> params = createParametersForFunction("core_course_create_courses");
 
-        params.set(createParamName(COURSES, "idnumber", 0), course.idnumber);
+        params.set(createParamName(COURSES, "idnumber", 0), course.idNumber);
         params.set(createParamName(COURSES, "fullname", 0), course.fullName);
         params.set(createParamName(COURSES, "shortname", 0), course.shortName);
         params.set(createParamName(COURSES, "categoryid", 0), course.categoryId);
         params.set(createParamName(COURSES, "summary", 0), course.summary);
         params.set(createParamName(COURSES, "visible", 0), booleanToIntString(course.visible));
-        params.set(createParamName(COURSES, "startdate", 0), localDateTimeToString(course.startTime));
-        params.set(createParamName(COURSES, "enddate", 0), localDateTimeToString(course.endTime));
+        params.set(createParamName(COURSES, "startdate", 0), localDateToString(course.startTime));
+        params.set(createParamName(COURSES, "enddate", 0), localDateToString(course.endTime));
         params.set(createParamName(COURSES, "courseformatoptions", 0) + "[0][name]", "numsections");
         params.set(createParamName(COURSES, "courseformatoptions", 0) + "[0][value]", String.valueOf(course.numberOfSections));
 
@@ -128,8 +128,8 @@ public class MoodleClient {
         }
     }
 
-    private String localDateTimeToString(LocalDateTime d) {
-        return "" + d.toEpochSecond(ZoneOffset.UTC);
+    private String localDateToString(LocalDate d) {
+        return "" + d.atStartOfDay(ZoneId.of("Europe/Helsinki")).toEpochSecond();
     }
 
     public void addEnrollments(final List<MoodleEnrollment> moodleEnrollments) {
