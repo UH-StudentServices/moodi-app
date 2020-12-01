@@ -32,7 +32,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "course")
 public class Course {
-    
+
     public enum ImportStatus {
         IN_PROGRESS,
         COMPLETED,
@@ -46,7 +46,7 @@ public class Course {
 
     @Column(name = "realisation_id")
     @NotNull
-    public long realisationId;
+    public String realisationId;
 
     @Column(name = "moodle_id")
     @NotNull

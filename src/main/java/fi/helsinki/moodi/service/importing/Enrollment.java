@@ -20,6 +20,7 @@ package fi.helsinki.moodi.service.importing;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,30 +30,30 @@ public final class Enrollment {
     public static final String ROLE_STUDENT = "student";
 
     public String role;
-    public Optional<String> teacherId;
+    public Optional<String> employeeNumber;
     public Optional<String> studentNumber;
     public Optional<Long> moodleId;
     public List<String> usernameList;
     public boolean approved;
 
     public static Enrollment forStudent(final String studentNumber) {
-        return forStudent(studentNumber, true);
+        return forStudent(studentNumber, null, true);
     }
 
-    public static Enrollment forStudent(final String studentNumber, boolean approved) {
-        return new Enrollment(ROLE_STUDENT, Optional.empty(), Optional.of(studentNumber), null, Optional.empty(), approved);
+    public static Enrollment forStudent(final String studentNumber, final String userName, boolean approved) {
+        return new Enrollment(ROLE_STUDENT, Optional.empty(), Optional.ofNullable(studentNumber), userName, Optional.empty(), approved);
     }
 
-    public static Enrollment forTeacher(final String teacherId) {
-        return new Enrollment(ROLE_TEACHER, Optional.of(teacherId), Optional.empty(), null, Optional.empty(), true);
+    public static Enrollment forTeacher(final String employeeNumber, final String userName) {
+        return new Enrollment(ROLE_TEACHER, Optional.ofNullable(employeeNumber), Optional.empty(), userName, Optional.empty(), true);
     }
 
-    private Enrollment(String role, Optional<String> teacherId, Optional<String> studentNumber, List<String> usernameList,
+    private Enrollment(String role, Optional<String> employeeNumber, Optional<String> studentNumber, String userName,
                        Optional<Long> moodleId, boolean approved) {
         this.role = role;
-        this.teacherId = teacherId;
+        this.employeeNumber = employeeNumber;
         this.studentNumber = studentNumber;
-        this.usernameList = usernameList;
+        this.usernameList = userName == null ? null : Arrays.asList(userName);
         this.moodleId = moodleId;
         this.approved = approved;
     }

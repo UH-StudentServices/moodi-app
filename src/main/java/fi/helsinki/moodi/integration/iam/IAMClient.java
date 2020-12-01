@@ -23,5 +23,5 @@ public interface IAMClient {
 
     List<String> getStudentUsernameList(String studentNumber);
 
-    List<String> getTeacherUsernameList(String teacherId);
+    List<String> getTeacherUsernameList(String employeeNumber);
 }

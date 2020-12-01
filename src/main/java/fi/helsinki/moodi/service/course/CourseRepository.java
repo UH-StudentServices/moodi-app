@@ -26,7 +26,7 @@ import static fi.helsinki.moodi.service.course.Course.ImportStatus;
 
 public interface CourseRepository extends JpaRepository<Course, Long> {
 
-    Optional<Course> findByRealisationId(long realisationId);
+    Optional<Course> findByRealisationId(String realisationId);
 
     List<Course> findByImportStatusInAndRemovedFalse(List<ImportStatus> importStatus);
 

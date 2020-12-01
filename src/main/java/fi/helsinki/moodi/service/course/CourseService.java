@@ -49,7 +49,7 @@ public class CourseService {
         saveCourse(course);
     }
 
-    public Optional<Course> findByRealisationId(final long realisationId) {
+    public Optional<Course> findByRealisationId(final String realisationId) {
         return courseRepository.findByRealisationId(realisationId);
     }
 
@@ -57,7 +57,7 @@ public class CourseService {
         return courseRepository.findByImportStatusInAndRemovedFalse(newArrayList(COMPLETED, COMPLETED_FAILED));
     }
 
-    public Course createCourse(final long realisationId, final long moodleCourseId) {
+    public Course createCourse(final String realisationId, final long moodleCourseId) {
         final Course course = new Course();
         course.created = timeService.getCurrentUTCDateTime();
         course.moodleId = moodleCourseId;
@@ -66,7 +66,7 @@ public class CourseService {
         return saveCourse(course);
     }
 
-    public Course completeCourseImport(long realisationId, boolean success) {
+    public Course completeCourseImport(String realisationId, boolean success) {
         Optional<Course> courseOptional = courseRepository.findByRealisationId(realisationId);
 
         Course course = courseOptional

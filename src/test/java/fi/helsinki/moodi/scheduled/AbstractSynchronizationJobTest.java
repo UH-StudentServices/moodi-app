@@ -57,14 +57,14 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractMoodiIntegrationTest.class);
 
-    protected static final long REALISATION_ID = 12345;
+    protected static final String REALISATION_ID = "12345";
     protected static final int MOODLE_COURSE_ID = 54321;
     protected static final int SOME_OTHER_MOODLE_COURSE_ID = 999;
     protected static final int STUDENT_USER_MOODLE_ID = 555;
     protected static final int TEACHER_USER_MOODLE_ID = 3434;
     protected static final String STUDENT_NUMBER = "010342729";
-    protected static final String TEACHER_ID = "110588";
-    protected static final String TEACHER_ID_WITH_PREFIX = 9 + TEACHER_ID;
+    protected static final String EMPLOYEE_NUMBER = "110588";
+    protected static final String EMPLOYEE_NUMBER_WITH_PREFIX = 9 + EMPLOYEE_NUMBER;
     protected static final String STUDENT_USERNAME = "niina";
     protected static final String TEACHER_USERNAME = "jukkapalmu";
     protected static final String USERNAME_SUFFIX = "@helsinki.fi";
@@ -115,7 +115,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
                     "/oodi/parameterized-course-realisation.json",
                     new ImmutableMap.Builder()
                         .put("studentnumber", STUDENT_NUMBER)
-                        .put("teacherid", TEACHER_ID)
+                        .put("teacherid", EMPLOYEE_NUMBER)
                         .put("endDate", endDate)
                         .put("deleted", false)
                         .put("approved", approved)
@@ -224,7 +224,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
 
     protected void expectFindUsersRequestsToMoodle() {
         expectFindStudentRequestToMoodle(STUDENT_NUMBER, STUDENT_USERNAME, STUDENT_USER_MOODLE_ID);
-        expectFindTeacherRequestToMoodle(TEACHER_ID_WITH_PREFIX, TEACHER_USERNAME, TEACHER_USER_MOODLE_ID);
+        expectFindTeacherRequestToMoodle(EMPLOYEE_NUMBER_WITH_PREFIX, TEACHER_USERNAME, TEACHER_USER_MOODLE_ID);
     }
 
     protected void expectFindStudentRequestToMoodle(String studentNumber, String username, int moodleId) {
@@ -232,8 +232,8 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
         expectGetUserRequestToMoodle(username + USERNAME_SUFFIX, moodleId);
     }
 
-    protected void expectFindTeacherRequestToMoodle(String teacherId, String username, int moodleId) {
-        expectFindEmployeeRequestToIAM(teacherId, username);
+    protected void expectFindTeacherRequestToMoodle(String employeeNumber, String username, int moodleId) {
+        expectFindEmployeeRequestToIAM(employeeNumber, username);
         expectGetUserRequestToMoodle(username + USERNAME_SUFFIX, moodleId);
     }
 

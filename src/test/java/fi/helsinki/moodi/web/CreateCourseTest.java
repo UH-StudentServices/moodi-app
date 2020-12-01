@@ -30,13 +30,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
 
-    private static String COURSE_NOT_FOUND_MESSAGE = "Oodi course not found with realisation id %s";
+    private static String COURSE_NOT_FOUND_MESSAGE = "Study registry course not found with realisation id %s";
 
     @Test
     public void successfulCreateCourseReturnsCorrectResponse() throws Exception {
-        setUpMockServerResponses();
+        setUpMockServerResponsesForOodiCourse();
 
-        makeCreateCourseRequest(COURSE_REALISATION_ID)
+        makeCreateCourseRequest(OODI_COURSE_REALISATION_ID)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.moodleCourseId").value(toIntExact(MOODLE_COURSE_ID)));
+    }
+
+    @Test
+    public void successfulCreateCourseBySisuIDReturnsCorrectResponse() throws Exception {
+        setUpMockServerResponsesForSisuCourse();
+
+        makeCreateCourseRequest(SISU_COURSE_REALISATION_ID)
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.moodleCourseId").value(toIntExact(MOODLE_COURSE_ID)));
     }
@@ -54,10 +63,10 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
     @Test
     public void thatAutomaticEnabledCourseEnrollmentsAreMadeCorrectly() throws Exception {
         expectGetCourseUnitRealisationRequestToOodi(
-            COURSE_REALISATION_ID,
+            OODI_COURSE_REALISATION_ID,
             withSuccess(Fixtures.asString("/oodi/course-realisation-automatic-enabled.json"), MediaType.APPLICATION_JSON));
 
-        expectCreateCourseRequestToMoodle(COURSE_REALISATION_ID, MOODLE_COURSE_ID);
+        expectCreateCourseRequestToMoodle(OODI_COURSE_REALISATION_ID, "oodi_", EXPECTED_OODI_DESCRIPTION_TO_MOODLE, MOODLE_COURSE_ID);
 
         expectFindStudentRequestToIAM(STUDENT_NUMBER_1, ESB_USERNAME_1);
         expectFindStudentRequestToIAM(STUDENT_NUMBER_2, ESB_USERNAME_2);
@@ -73,19 +82,19 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_MOODLE_USER_ID, MOODLE_COURSE_ID)
             ));
 
-        makeCreateCourseRequest(COURSE_REALISATION_ID)
+        makeCreateCourseRequest(OODI_COURSE_REALISATION_ID)
             .andExpect(status().isOk());
     }
 
     private void testEmptyOodiResponse(String response) throws Exception {
         expectGetCourseUnitRealisationRequestToOodi(
-            COURSE_REALISATION_ID,
+            OODI_COURSE_REALISATION_ID,
             withSuccess(response, MediaType.APPLICATION_JSON));
 
-        makeCreateCourseRequest(COURSE_REALISATION_ID)
+        makeCreateCourseRequest(OODI_COURSE_REALISATION_ID)
             .andExpect(status().isNotFound())
             .andExpect(jsonPath("$.error")
-                .value(String.format(COURSE_NOT_FOUND_MESSAGE, COURSE_REALISATION_ID)));
+                .value(String.format(COURSE_NOT_FOUND_MESSAGE, OODI_COURSE_REALISATION_ID)));
     }
 }
 

@@ -1,0 +1,20 @@
+version: "3"
+
+services:
+    postgres:
+        build: .
+        image: moodi-postgres:fi
+        container_name: moodi-postgres
+        environment:
+            - POSTGRES_DB=moodi
+            - POSTGRES_USER=moodi
+            - POSTGRES_PASSWORD=password
+        volumes:
+            - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+            - moodi-postgres-data:/var/lib/postgresql/data
+        ports:
+            - "5432:5432"
+
+volumes:
+    moodi-postgres-data:
+

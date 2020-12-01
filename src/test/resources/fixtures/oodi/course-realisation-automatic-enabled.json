@@ -1,7 +1,6 @@
 {
   "status": 200,
   "data": {
-    "course_id": 1234,
     "students": [
       {
         "student_number": "010342729",
@@ -36,7 +35,7 @@
         "teacher_role_code": 3
       }
     ],
-    "end_date": "2019-11-04T21:00:00.000Z",
+    "end_date": "2019-11-04T22:00:00.000Z",
     "start_date": "2019-08-04T21:00:00.000Z",
     "languages": [
       {

@@ -102,17 +102,27 @@ public class ImportSummaryLog {
 
     public static class StudentEnrollmentEntry extends EnrollmentEntry {
         public final String studentNumber;
+        public final String userName;
 
         public StudentEnrollmentEntry(Enrollment enrollment) {
-            this.studentNumber = enrollment.studentNumber.orElseThrow(() -> new RuntimeException("No studentNumber found for student Enrollment"));
+            this.studentNumber = enrollment.studentNumber.orElse(null);
+            this.userName = enrollment.usernameList != null && !enrollment.usernameList.isEmpty() ? enrollment.usernameList.get(0) : null;
+            if (studentNumber == null && userName == null) {
+                throw new RuntimeException("No studentNumber nor userName found for student Enrollment");
+            }
         }
     }
 
     public static class TeacherEnrollmentEntry extends EnrollmentEntry {
-        public final String teacherId;
+        public final String employeeNumber;
+        public final String userName;
 
         public TeacherEnrollmentEntry(Enrollment enrollment) {
-            this.teacherId = enrollment.teacherId.orElseThrow(() -> new RuntimeException("No teacherId found for teacher Enrollment"));
+            this.employeeNumber = enrollment.employeeNumber.orElse(null);
+            this.userName = enrollment.usernameList != null && !enrollment.usernameList.isEmpty() ? enrollment.usernameList.get(0) : null;
+            if (employeeNumber == null && userName == null) {
+                throw new RuntimeException("No employeeNumber found for teacher Enrollment");
+            }
         }
     }
 

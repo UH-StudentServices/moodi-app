@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MoodleIntegrationImportCourseTest extends AbstractMoodleIntegrationTest {
     @Test
     public void testMoodleIntegrationWhenImportingCourse() {
-        long oodiCourseId = getOodiCourseId();
+        String oodiCourseId = getOodiCourseId();
 
         expectCourseRealisationWithUsers(
             oodiCourseId,

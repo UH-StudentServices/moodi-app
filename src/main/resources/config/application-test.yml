@@ -6,7 +6,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     database: PostgreSQL
   flyway:
-    locations: classpath:db/migration/common
+    locations: classpath:db/migration/common, classpath:db/migration/h2
 
 auth.client.testclient: xxx123
 auth.enabled: true
@@ -17,6 +17,9 @@ integration:
     wstoken: xxxx1234
   oodi.url: https://esbmt2.it.helsinki.fi/doo-oodi/dev/testdb
   iam.url: https://esbmt2.it.helsinki.fi
+  sisu:
+    baseUrl: http://localhost:9876
+    apiKey: test-apikey
 
 synchronize.FULL.enabled: true
 synchronize.INCREMENTAL.enabled: false
