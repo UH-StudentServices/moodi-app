@@ -87,7 +87,7 @@ public class StudyRegistryConfig {
             return SSLContextBuilder.create()
                     .loadKeyMaterial(oodiKeyStore(keystoreLocation, keystorePasswordCharArray), keystorePasswordCharArray).build();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to load client keystore");
+            throw new RuntimeException("Failed to load client keystore " + keystoreLocation, e);
         }
     }
 
