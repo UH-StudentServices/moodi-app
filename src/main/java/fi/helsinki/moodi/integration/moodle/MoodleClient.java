@@ -129,7 +129,7 @@ public class MoodleClient {
     }
 
     private String localDateToString(LocalDate d) {
-        return "" + d.atStartOfDay(ZoneId.of("EET")).toEpochSecond();
+        return "" + d.atStartOfDay(ZoneId.of("Europe/Helsinki")).toEpochSecond();
     }
 
     public void addEnrollments(final List<MoodleEnrollment> moodleEnrollments) {

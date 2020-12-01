@@ -26,8 +26,8 @@ import org.springframework.stereotype.Component;
 import static fi.helsinki.moodi.service.synchronize.SynchronizationType.INCREMENTAL;
 
 /**
- * Scheduled job that performs full synchronization
- * to all Moodle courses create by Moodi.
+ * Scheduled job that performs incremental synchronization
+ * to courses that have changed in the study registry since last incremental sync.
  */
 @Component
 public class IncrementalSynchronizationJob {

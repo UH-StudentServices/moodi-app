@@ -23,13 +23,10 @@ import fi.helsinki.moodi.integration.oodi.OodiDescription;
 import fi.helsinki.moodi.integration.oodi.OodiLanguage;
 import fi.helsinki.moodi.integration.oodi.OodiLocale;
 import fi.helsinki.moodi.integration.oodi.OodiLocalizedValue;
-import fi.helsinki.moodi.integration.oodi.OodiOrganisation;
 import fi.helsinki.moodi.integration.sisu.SisuCourseUnitRealisation;
 import fi.helsinki.moodi.integration.sisu.SisuDateRange;
-import fi.helsinki.moodi.integration.sisu.SisuEnrolment;
+import fi.helsinki.moodi.integration.sisu.SisuLearningEnvironment;
 import fi.helsinki.moodi.integration.sisu.SisuLocalisedValue;
-import fi.helsinki.moodi.integration.sisu.SisuPerson;
-import fi.helsinki.moodi.integration.sisu.SisuResponsibilityInfo;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,9 +42,9 @@ import static org.junit.Assert.assertEquals;
 
 public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
 
-    private static final String REALISATION_NAME_FI = "Course realisation name (fi)";
-    private static final String REALISATION_NAME_SV = "Course realisation name (sv)";
-    private static final String REALISATION_NAME_EN = "Course realisation name (en)";
+    private static final String REALISATION_NAME_FI = "Kurssin nimi";
+    private static final String REALISATION_NAME_SV = "Kurs namn";
+    private static final String REALISATION_NAME_EN = "Course name";
     private static final int REALISATION_ID = 1;
 
     private static final String DESCRIPTION_1_FI = "Course description 1 (fi)";
@@ -63,7 +60,6 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
     private static final Integer DESCRIPTION_2_ID = 20;
     private static final Integer DESCRIPTION_3_ID = 30;
     private static final String MOODLE_CATEGORY_ID = "2";
-    private static final String TEACHER_URN = "urn:code:course-unit-realisation-responsibility-info-type:responsible-teacher";
 
     @Autowired
     private MoodleCourseBuilder moodleCourseBuilder;
@@ -80,7 +76,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         assertEquals(REALISATION_NAME_FI, moodleCourse.fullName);
         assertEquals(MoodleCourseBuilder.MOODLE_COURSE_ID_OODI_PREFIX + REALISATION_ID, moodleCourse.idNumber);
         assertEquals(MOODLE_CATEGORY_ID, moodleCourse.categoryId);
-        assertEquals("Course r " + REALISATION_ID, moodleCourse.shortName);
+        assertEquals("Kurssin  " + REALISATION_ID, moodleCourse.shortName);
         assertEquals(String.join(" ", DESCRIPTION_1_FI, DESCRIPTION_2_FI, DESCRIPTION_3_FI), moodleCourse.summary);
     }
 
@@ -92,8 +88,26 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
 
         assertEquals(REALISATION_NAME_SV, moodleCourse.fullName);
         assertEquals("sisu_hy-cur-1", moodleCourse.idNumber);
-        assertEquals("Course r hy-cur-1", moodleCourse.shortName);
+        assertEquals("Kurs nam hy-cur-1", moodleCourse.shortName);
+        assertEquals("korrekt url på svenska", moodleCourse.summary);
+        assertEquals(LocalDate.of(2019, 8, 5), moodleCourse.startTime);
+        assertEquals(LocalDate.of(2019, 12, 5), moodleCourse.endTime);
+    }
 
+    @Test
+    public void thatItCanBuildMoodleCourseFromSisuCurUsingFallbacks() {
+        SisuCourseUnitRealisation cur = getSisuCur();
+        cur.teachingLanguageUrn = "urn:code:language:no";
+        cur.activityPeriod = null;
+
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation());
+
+        assertEquals(REALISATION_NAME_FI, moodleCourse.fullName);
+        assertEquals("sisu_hy-cur-1", moodleCourse.idNumber);
+        assertEquals("Kurssin  hy-cur-1", moodleCourse.shortName);
+        assertEquals("urli suomeksi", moodleCourse.summary);
+        assertEquals(LocalDate.now(), moodleCourse.startTime);
+        assertEquals(LocalDate.now().plusYears(1), moodleCourse.endTime);
     }
 
     private SisuCourseUnitRealisation getSisuCur() {
@@ -103,12 +117,9 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         ret.activityPeriod = new SisuDateRange(LocalDate.of(2019, 8, 5), LocalDate.of(2019, 11, 5));
         ret.flowState = "PUBLISHED";
         ret.teachingLanguageUrn = "urn:code:language:sv";
-
-        ret.responsibilityInfos.add(new SisuResponsibilityInfo(TEACHER_URN, "foo"));
-        ret.responsibilityInfos.add(new SisuResponsibilityInfo(TEACHER_URN, "bar"));
-        ret.enrolments.add(new SisuEnrolment(SisuEnrolment.EnrolmentState.ENROLLED, new SisuPerson("123", "Jack", "Smith")));
-        ret.enrolments.add(new SisuEnrolment(SisuEnrolment.EnrolmentState.CONFIRMED, new SisuPerson("1234", "Jane", "Smith")));
-        ret.enrolments.add(new SisuEnrolment(SisuEnrolment.EnrolmentState.PROCESSING, new SisuPerson("12345", "Not", "Enrolled")));
+        ret.learningEnvironments.add(new SisuLearningEnvironment("urli suomeksi", "fi", true));
+        ret.learningEnvironments.add(new SisuLearningEnvironment("fel url på svenska", "sv", false));
+        ret.learningEnvironments.add(new SisuLearningEnvironment("korrekt url på svenska", "sv", true));
 
         return ret;
     }
@@ -165,8 +176,8 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
 
         MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation.toStudyRegistryCourseUnitRealisation());
 
-        assertEquals(moodleCourse.startTime, LocalDate.now());
-        assertEquals(moodleCourse.endTime, LocalDate.now().plusYears(1));
+        assertEquals(LocalDate.now(), moodleCourse.startTime);
+        assertEquals(LocalDate.now().plusYears(1), moodleCourse.endTime);
     }
 
     private OodiCourseUnitRealisation getOodiCourseUnitRealisation(String... langcodes) {
@@ -224,13 +235,6 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         oodiLocalizedValue.langcode = OodiLocale.valueOf(langCode.toUpperCase());
         oodiLocalizedValue.text = value;
         return oodiLocalizedValue;
-    }
-
-    private OodiOrganisation getOodiOrganisation(int percentage, String code) {
-        OodiOrganisation oodiOrganisation = new OodiOrganisation();
-        oodiOrganisation.percentage = percentage;
-        oodiOrganisation.code = code;
-        return oodiOrganisation;
     }
 
 }

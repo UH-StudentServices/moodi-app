@@ -63,7 +63,7 @@ public class BaseOodiCourseUnitRealisation {
 
     private LocalDate parseDateTime(String s, LocalDate defaultValue) {
         try {
-            return ZonedDateTime.parse(s).withZoneSameInstant(ZoneId.of("EET")).toLocalDate();
+            return ZonedDateTime.parse(s).withZoneSameInstant(ZoneId.of("Europe/Helsinki")).toLocalDate();
         } catch (Exception e) {
             // Fall through and return defaultValue
         }

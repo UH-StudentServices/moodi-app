@@ -55,6 +55,9 @@ public class SisuCourseUnitRealisation {
         if (activityPeriod != null) {
             ret.startDate = activityPeriod.startDate != null ? activityPeriod.startDate : LocalDate.now();
             ret.endDate =  activityPeriod.endDate != null ? activityPeriod.endDate.plusMonths(1) : LocalDate.now().plusMonths(12);
+        } else {
+            ret.startDate = LocalDate.now();
+            ret.endDate = LocalDate.now().plusMonths(12);
         }
 
         // Use the URL of primary learningEnvironment, in language of the course teaching language, or if

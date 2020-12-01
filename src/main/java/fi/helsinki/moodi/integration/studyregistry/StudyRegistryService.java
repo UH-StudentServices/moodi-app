@@ -22,14 +22,18 @@ import fi.helsinki.moodi.integration.oodi.OodiClient;
 import fi.helsinki.moodi.integration.sisu.SisuClient;
 import fi.helsinki.moodi.integration.sisu.SisuCourseUnitRealisation;
 import fi.helsinki.moodi.integration.sisu.SisuPerson;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 @Service
 public class StudyRegistryService {
 
+    private static final Logger logger = getLogger(StudyRegistryService.class);
     private final OodiClient oodiClient;
     private final SisuClient sisuClient;
 
@@ -61,7 +65,8 @@ public class StudyRegistryService {
         if (isOodiId(realisationId)) {
             return oodiClient.getCourseUsers(realisationId);
         } else {
-            throw new RuntimeException("Sisu sync not supported yet");
+            logger.warn("Synchronization for Sisu courses not supported yet, ignoring course " + realisationId);
+            return Optional.empty();
         }
     }
 
