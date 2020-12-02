@@ -36,18 +36,23 @@ public class IAMService {
         this.iamClient = iamClient;
     }
 
-    public List<String> getStudentUsernameList(final String studentNumber) {
-        List<String> usernameList = iamClient.getStudentUsernameList(studentNumber);
+    public List<String> getStudentUserNameList(final String studentNumber) {
+        List<String> userNameList = iamClient.getStudentUserNameList(studentNumber);
 
-        return usernameList.stream()
+        return userNameList.stream()
                 .map(this::appendDomain)
                 .collect(Collectors.toList());
     }
 
-    public List<String> getTeacherUsernameList(final String employeeNumber) {
-        List<String> usernameList = iamClient.getTeacherUsernameList(getPrefixedEmployeeNumber(employeeNumber));
+    public String getStudentUserName(final String studentNumber) {
+        List<String> usernameList = getStudentUserNameList(studentNumber);
+        return usernameList.isEmpty() ? "not_found_in_iam" : usernameList.get(0);
+    }
 
-        return usernameList.stream()
+    public List<String> getTeacherUserNameList(final String employeeNumber) {
+        List<String> userNameList = iamClient.getTeacherUserNameList(getPrefixedEmployeeNumber(employeeNumber));
+
+        return userNameList.stream()
                 .map(this::appendDomain)
                 .collect(Collectors.toList());
     }

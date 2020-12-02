@@ -45,7 +45,7 @@ public class IAMClientGetTeacherUsernameTest extends AbstractMoodiIntegrationTes
             .andRespond(withSuccess(Fixtures.asString("/iam/employee-username-19691981.json"),
                 MediaType.APPLICATION_JSON));
 
-        assertEquals(Arrays.asList("employee-username"), iamClient.getTeacherUsernameList("19691981"));
+        assertEquals(Arrays.asList("employee-username"), iamClient.getTeacherUserNameList("19691981"));
     }
 
     @Test
@@ -55,7 +55,7 @@ public class IAMClientGetTeacherUsernameTest extends AbstractMoodiIntegrationTes
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess("", MediaType.APPLICATION_JSON));
 
-        assertNotNull(iamClient.getTeacherUsernameList("007"));
+        assertNotNull(iamClient.getTeacherUserNameList("007"));
     }
 
 }

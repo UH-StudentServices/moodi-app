@@ -143,11 +143,11 @@ public class DevModeController {
 
         final List<MoodleUser> students = realisation.students.stream()
                 .map(s -> new MoodleUser("student", s.firstNames, s.lastName,
-                    iamService.getStudentUsernameList(s.studentNumber).get(0), s.studentNumber))
+                    iamService.getStudentUserName(s.studentNumber), s.studentNumber))
                 .collect(Collectors.toList());
 
         final List<MoodleUser> teachers = realisation.teachers.stream()
-                .map(s -> new MoodleUser("teacher", s.firstNames, s.lastName, iamService.getTeacherUsernameList(s.employeeNumber).get(0), null))
+                .map(s -> new MoodleUser("teacher", s.firstNames, s.lastName, iamService.getTeacherUserNameList(s.employeeNumber).get(0), null))
                 .collect(Collectors.toList());
 
         final List<MoodleUser> users = new ArrayList<>();
