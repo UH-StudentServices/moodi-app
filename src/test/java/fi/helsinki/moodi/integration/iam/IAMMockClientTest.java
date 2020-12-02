@@ -39,12 +39,12 @@ public class IAMMockClientTest {
 
     @Test
     public void thatStudentUsernameIsFound() {
-        assertUsernameResult(STUDENT_USERNAME, iamClient.getStudentUsernameList(STUDENT_NUMBER));
+        assertUsernameResult(STUDENT_USERNAME, iamClient.getStudentUserNameList(STUDENT_NUMBER));
     }
 
     @Test
     public void thatTeacherUsernameIsFound() {
-        assertUsernameResult(TEACHER_USERNAME, iamClient.getTeacherUsernameList(TEACHER_ID));
+        assertUsernameResult(TEACHER_USERNAME, iamClient.getTeacherUserNameList(TEACHER_ID));
     }
 
     private void assertUsernameResult(String expectedUsername, List<String> result) {
@@ -54,6 +54,6 @@ public class IAMMockClientTest {
 
     @Test
     public void thatEmptyListIsReturnedIfUsernameIsNotFound() {
-        assertEquals(0, iamClient.getStudentUsernameList("1").size());
+        assertEquals(0, iamClient.getStudentUserNameList("1").size());
     }
 }

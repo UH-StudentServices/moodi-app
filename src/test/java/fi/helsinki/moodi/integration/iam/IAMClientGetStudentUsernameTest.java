@@ -44,7 +44,7 @@ public class IAMClientGetStudentUsernameTest extends AbstractMoodiIntegrationTes
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess(Fixtures.asString("/iam/student-username-007.json"), MediaType.APPLICATION_JSON));
 
-        assertEquals(Arrays.asList("aunesluo"), iamClient.getStudentUsernameList("007"));
+        assertEquals(Arrays.asList("aunesluo"), iamClient.getStudentUserNameList("007"));
     }
 
     @Test
@@ -54,7 +54,7 @@ public class IAMClientGetStudentUsernameTest extends AbstractMoodiIntegrationTes
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(Fixtures.asString("/iam/student-username-008.json"), MediaType.APPLICATION_JSON));
 
-        assertEquals(Arrays.asList("auneslu1", "aunesluo"), iamClient.getStudentUsernameList("008"));
+        assertEquals(Arrays.asList("auneslu1", "aunesluo"), iamClient.getStudentUserNameList("008"));
     }
 
     @Test
@@ -64,7 +64,7 @@ public class IAMClientGetStudentUsernameTest extends AbstractMoodiIntegrationTes
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess("", MediaType.APPLICATION_JSON));
 
-        assertNotNull(iamClient.getStudentUsernameList("009"));
+        assertNotNull(iamClient.getStudentUserNameList("009"));
     }
 
     @Test
@@ -74,7 +74,7 @@ public class IAMClientGetStudentUsernameTest extends AbstractMoodiIntegrationTes
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
 
-        assertNotNull(iamClient.getStudentUsernameList("0010"));
+        assertNotNull(iamClient.getStudentUserNameList("0010"));
     }
 
 }

@@ -21,7 +21,7 @@ import java.util.List;
 
 public interface IAMClient {
 
-    List<String> getStudentUsernameList(String studentNumber);
+    List<String> getStudentUserNameList(String studentNumber);
 
-    List<String> getTeacherUsernameList(String employeeNumber);
+    List<String> getTeacherUserNameList(String employeeNumber);
 }

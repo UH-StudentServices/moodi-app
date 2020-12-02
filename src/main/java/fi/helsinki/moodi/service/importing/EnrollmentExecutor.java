@@ -131,8 +131,8 @@ public class EnrollmentExecutor {
     private Enrollment enrichEnrollmentWithUsername(final Enrollment enrollment) {
         if (enrollment.usernameList == null || enrollment.usernameList.isEmpty()) {
             enrollment.usernameList = Enrollment.ROLE_TEACHER.equals(enrollment.role) ?
-                iamService.getTeacherUsernameList(enrollment.employeeNumber.get()) :
-                iamService.getStudentUsernameList(enrollment.studentNumber.get());
+                iamService.getTeacherUserNameList(enrollment.employeeNumber.get()) :
+                iamService.getStudentUserNameList(enrollment.studentNumber.get());
         }
 
         return enrollment;

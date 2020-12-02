@@ -38,12 +38,12 @@ public class IAMMockClient implements IAMClient {
     }
 
     @Override
-    public List<String> getStudentUsernameList(String studentNumber) {
+    public List<String> getStudentUserNameList(String studentNumber) {
         return getUsernameForKey(studentNumber);
     }
 
     @Override
-    public List<String> getTeacherUsernameList(String employeeNumber) {
+    public List<String> getTeacherUserNameList(String employeeNumber) {
         return getUsernameForKey(employeeNumber);
     }
 

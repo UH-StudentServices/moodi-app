@@ -290,11 +290,11 @@ public class SynchronizingProcessor extends AbstractProcessor {
     }
 
     private List<String> getUsernameList(OodiStudent student) {
-        return iamService.getStudentUsernameList(student.studentNumber);
+        return iamService.getStudentUserNameList(student.studentNumber);
     }
 
     private List<String> getUsernameList(OodiTeacher teacher) {
-        return iamService.getTeacherUsernameList(teacher.employeeNumber);
+        return iamService.getTeacherUserNameList(teacher.employeeNumber);
     }
 
     private Optional<MoodleUser> getMoodleUser(final List<String> usernameList) {

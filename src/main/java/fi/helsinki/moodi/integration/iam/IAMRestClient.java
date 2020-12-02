@@ -43,7 +43,7 @@ public class IAMRestClient implements IAMClient {
     }
 
     @Cacheable(value = "iam-client.student-username-by-student-number", unless = "#result == null")
-    public List<String> getStudentUsernameList(final String studentNumber) {
+    public List<String> getStudentUserNameList(final String studentNumber) {
         logger.debug("Get student username by student number {}", studentNumber);
 
         try {
@@ -68,7 +68,7 @@ public class IAMRestClient implements IAMClient {
     }
 
     @Cacheable(value = "iam-client.teacher-username-by-teacher-id", unless = "#result == null")
-    public List<String> getTeacherUsernameList(final String employeeNumber) {
+    public List<String> getTeacherUserNameList(final String employeeNumber) {
         logger.debug("Get teacher username by teacher id {}", employeeNumber);
 
         try {

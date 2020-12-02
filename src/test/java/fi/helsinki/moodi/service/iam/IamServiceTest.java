@@ -42,15 +42,15 @@ public class IamServiceTest extends AbstractMoodiIntegrationTest {
 
     @Test
     public void thatEmployeeNumberPrefixIsAddedWhenMissing() {
-        iamService.getTeacherUsernameList(TEACHER_ID);
+        iamService.getTeacherUserNameList(TEACHER_ID);
 
-        verify(mockIamClient, times(1)).getTeacherUsernameList(PREFIXED_TEACHER_ID);
+        verify(mockIamClient, times(1)).getTeacherUserNameList(PREFIXED_TEACHER_ID);
     }
 
     @Test
     public void thatEmployeeNumberPrefixIsNotAddedIfAlreadyExists() {
-        iamService.getTeacherUsernameList(PREFIXED_TEACHER_ID);
+        iamService.getTeacherUserNameList(PREFIXED_TEACHER_ID);
 
-        verify(mockIamClient, times(1)).getTeacherUsernameList(PREFIXED_TEACHER_ID);
+        verify(mockIamClient, times(1)).getTeacherUserNameList(PREFIXED_TEACHER_ID);
     }
 }
