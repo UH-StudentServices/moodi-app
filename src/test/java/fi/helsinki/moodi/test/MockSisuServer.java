@@ -29,7 +29,9 @@ import org.mockserver.client.MockServerClient;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -46,12 +48,21 @@ public class MockSisuServer {
         expectRequest(SisuCourseUnitRealisation.class, responseFile, arguments);
     }
 
+    public void expectCourseUnitRealisationsRequest(List<String> curIds, String responseFile) {
+        Arguments arguments = new Arguments("course_unit_realisations", new Argument<>("ids", curIds));
+        expectRequest(SisuCourseUnitRealisation.SisuCURWrapper.class, responseFile, arguments);
+    }
+
     public void expectPersonsRequest(List<String> personIds, String responseFile) {
         Arguments arguments = new Arguments("private_persons", new Argument<>("ids", personIds));
         expectRequest(SisuPerson.SisuPersonWrapper.class, responseFile, arguments);
     }
 
     private <T> void expectRequest(Class<T> requestClass, String responseFile, Arguments... arguments) {
+        expectRequest(requestClass, responseFile, new HashMap<>(), arguments);
+    }
+
+    private <T> void expectRequest(Class<T> requestClass, String responseFile, final Map<String, ?> variables, Arguments... arguments) {
         client
             .when(
                 request()
@@ -62,7 +73,7 @@ public class MockSisuServer {
             .respond(
                 response()
                     .withStatusCode(200)
-                    .withBody(Fixtures.asString(responseFile)));
+                    .withBody(Fixtures.asString(responseFile, variables)));
     }
 
     private <T> String requestBodyMatcher(Class<T> requestClass, Arguments... arguments) {

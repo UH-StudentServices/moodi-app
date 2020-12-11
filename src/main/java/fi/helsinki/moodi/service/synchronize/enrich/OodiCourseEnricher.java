@@ -18,6 +18,7 @@
 package fi.helsinki.moodi.service.synchronize.enrich;
 
 import fi.helsinki.moodi.integration.oodi.BaseOodiCourseUnitRealisation;
+import fi.helsinki.moodi.integration.oodi.OodiClient;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryService;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
@@ -37,18 +38,21 @@ public class OodiCourseEnricher extends AbstractEnricher {
 
     private static final Logger logger = LoggerFactory.getLogger(OodiCourseEnricher.class);
 
-    private final StudyRegistryService studyRegistryService;
+    private final OodiClient oodiClient;
 
     @Autowired
-    public OodiCourseEnricher(StudyRegistryService studyRegistryService) {
+    public OodiCourseEnricher(OodiClient oodiClient) {
         super(1);
-        this.studyRegistryService = studyRegistryService;
+        this.oodiClient = oodiClient;
     }
 
     @Override
     protected SynchronizationItem doEnrich(final SynchronizationItem item) {
         final Course course = item.getCourse();
-        final Optional<BaseOodiCourseUnitRealisation> oodiCourse = studyRegistryService.getOodiCourseUsers(course.realisationId);
+        if (!StudyRegistryService.isOodiId(course.realisationId)) {
+            return item;
+        }
+        final Optional<BaseOodiCourseUnitRealisation> oodiCourse = oodiClient.getCourseUsers(course.realisationId);
 
         if (!oodiCourse.isPresent()) {
             return item.completeEnrichmentPhase(
@@ -56,14 +60,14 @@ public class OodiCourseEnricher extends AbstractEnricher {
                 String.format("Course not found from Oodi with id %s", course.realisationId));
         } else if (oodiCourse.map(c -> c.removed).orElse(false)) {
             return item.completeEnrichmentPhase(
-                EnrichmentStatus.OODI_COURSE_REMOVED,
+                EnrichmentStatus.COURSE_NOT_PUBLIC,
                 String.format("Course with id %s removed from Oodi", course.realisationId));
         } else if (oodiCourse.map(this::isCourseEnded).orElse(false)) {
             return item.completeEnrichmentPhase(
-                EnrichmentStatus.OODI_COURSE_ENDED,
+                EnrichmentStatus.COURSE_ENDED,
                 String.format("Course with realisation id %s has ended", course.realisationId));
         } else {
-            return item.setOodiCourse(oodiCourse);
+            return item.setStudyRegistryCourse(Optional.of(oodiCourse.get().toStudyRegistryCourseUnitRealisation()));
         }
     }
 

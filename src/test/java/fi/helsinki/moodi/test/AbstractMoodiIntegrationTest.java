@@ -18,10 +18,13 @@
 package fi.helsinki.moodi.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import fi.helsinki.moodi.Application;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.service.importing.ImportCourseRequest;
+import fi.helsinki.moodi.service.synchronize.enrich.SisuCourseEnricher;
 import fi.helsinki.moodi.service.util.MapperService;
+import fi.helsinki.moodi.test.fixtures.Fixtures;
 import org.flywaydb.core.Flyway;
 import org.junit.After;
 import org.junit.Before;
@@ -46,6 +49,8 @@ import org.springframework.web.context.WebApplicationContext;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -59,7 +64,33 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @SpringBootTest(
     properties = { "server.port:0" },
     classes = { Application.class, TestConfig.class })
+
+/*
+  Many tests rely on there being exactly one course in the Moodi DB.
+  Flyway does that: see test/resources/db/migration
+ */
 public abstract class AbstractMoodiIntegrationTest {
+    protected static final long MOODLE_COURSE_ID = 988888L;
+    protected static final long MOODLE_USER_ID_NIINA = 1L;
+    protected static final long MOODLE_USER_ID_JUKKA = 2L;
+    protected static final long MOODLE_USER_ID_MAKE = 3L;
+    protected static final long MOODLE_USER_HRAOPE = 4L;
+    protected static final long MOODLE_USER_TEACH_ONE = 5L;
+    protected static final long MOODLE_USER_TEACH_TWO = 6L;
+    protected static final long MOODLE_USER_TEACH_THREE = 7L;
+    protected static final long MOODLE_USER_NIINA2 = 8L;
+    protected static final long MOODLE_USER_NOT_ENROLLED = 9L;
+
+    protected static final String MOODLE_USERNAME_NIINA = "niina@helsinki.fi";
+    protected static final String MOODLE_USERNAME_JUKKA = "jukka@helsinki.fi";
+    protected static final String MOODLE_USERNAME_MAKE = "make@helsinki.fi";
+    protected static final String MOODLE_USERNAME_HRAOPE = "hraopettaja@helsinki.fi";
+    protected static final String MOODLE_USERNAME_ONE = "one@helsinki.fi";
+    protected static final String MOODLE_USERNAME_TWO = "two@helsinki.fi";
+    protected static final String MOODLE_USERNAME_THREE = "three@helsinki.fi";
+    protected static final String MOODLE_USERNAME_NIINA2 = "niina2@helsinki.fi";
+    protected static final String MOODLE_USERNAME_NOT_ENROLLED = "ei-mukana-kurssilla@helsinki.fi";
+
     private static final String MOODLE_EMPTY_LIST_RESPONSE = "[]";
     protected static final String MOODLE_ERROR_RESPONSE =
         "{\"exception\":\"webservice_access_exception\",\"errorcode\":\"accessexception\",\"message\":\"P\\u00e4\\u00e4syn hallinnan poikkeus\"}";
@@ -68,6 +99,12 @@ public abstract class AbstractMoodiIntegrationTest {
     protected static final String OODI_ERROR_RESPONSE = "{\"exception\": {\"message\": \"Something went wrong\"}, \"status\": 500}";
     protected static final String OODI_NULL_DATA_RESPONSE = "{\"data\": null, \"status\": 200}";
     protected static final String OODI_EMPTY_RESPONSE = "{\"data\": { \"students\": [], \"teachers\": [] }, \"status\": 200}";
+
+    protected static final List<String> SISU_COURSE_REALISATION_IDS = Arrays.asList("hy-CUR-1", "hy-CUR-2", "hy-CUR-ended", "hy-CUR-archived");
+    private static final List<String> OODI_COURSE_REALISATION_IDS = Arrays.asList("111", "222", "333");
+    private static final List<String> ALL_CUR_IDS = Stream.concat(SISU_COURSE_REALISATION_IDS.stream(), OODI_COURSE_REALISATION_IDS.stream())
+        .distinct()
+        .collect(Collectors.toList());
 
     protected static final String EMPTY_RESPONSE = "";
 
@@ -99,6 +136,9 @@ public abstract class AbstractMoodiIntegrationTest {
 
     @Autowired
     private MapperService mapperService;
+
+    @Autowired
+    protected SisuCourseEnricher sisuCourseEnricher;
 
     protected MockMvc mockMvc;
 
@@ -344,6 +384,21 @@ public abstract class AbstractMoodiIntegrationTest {
             .andRespond(withSuccess("[{\"id\":\"" + moodleCourseIdToReturn + "\", \"shortname\":\"shortie\"}]", MediaType.APPLICATION_JSON));
     }
 
+    protected void setupMoodleGetCourseResponse(int moodleId) {
+        moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
+            .andExpect(method(HttpMethod.POST))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
+            .andRespond(withSuccess(Fixtures.asString("/moodle/get-courses-parameterized.json",
+                new ImmutableMap.Builder()
+                    .put("moodleId", moodleId)
+                    .build()
+                ), MediaType.APPLICATION_JSON));
+    }
+
+    protected void setupMoodleGetCourseResponse() {
+        setupMoodleGetCourseResponse(54321);
+    }
+
     protected final void expectGetEnrollmentsRequestToMoodle(final int courseId) {
         expectGetEnrollmentsRequestToMoodle(courseId, "[]");
     }
@@ -356,6 +411,21 @@ public abstract class AbstractMoodiIntegrationTest {
             .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andExpect(content().string(payload))
             .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
+    }
+
+    protected void setUpMockSisuAndPrefetchCourses() {
+        // With batch size 2 Moodi makes 2 calls to fetch Sisu CURs
+        mockSisuServer.expectCourseUnitRealisationsRequest(SISU_COURSE_REALISATION_IDS.stream().limit(2).collect(Collectors.toList()),
+            "/sisu/course-unit-realisations-1.json");
+        mockSisuServer.expectCourseUnitRealisationsRequest(SISU_COURSE_REALISATION_IDS.stream().skip(2).collect(Collectors.toList()),
+            "/sisu/course-unit-realisations-2.json");
+
+        mockSisuServer.expectPersonsRequest(Arrays.asList("hy-hlo-1", "hy-hlo-2"), "/sisu/persons-many-1.json");
+        mockSisuServer.expectPersonsRequest(Arrays.asList("hy-hlo-2.1", "hy-hlo-3"), "/sisu/persons-many-2.json");
+        mockSisuServer.expectPersonsRequest(Arrays.asList("hy-hlo-4"), "/sisu/persons.json");
+
+        // Include Oodi course IDs, that should be ignored.
+        sisuCourseEnricher.prefetchCourses(ALL_CUR_IDS);
     }
 
     private String urlEncode(final String string) {

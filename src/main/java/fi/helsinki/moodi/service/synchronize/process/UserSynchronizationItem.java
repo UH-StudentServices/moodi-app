@@ -19,8 +19,8 @@ package fi.helsinki.moodi.service.synchronize.process;
 
 import fi.helsinki.moodi.integration.moodle.MoodleUser;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
-import fi.helsinki.moodi.integration.oodi.OodiStudent;
-import fi.helsinki.moodi.integration.oodi.OodiTeacher;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryStudent;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryTeacher;
 
 import java.util.List;
 
@@ -42,24 +42,24 @@ public class UserSynchronizationItem {
     private Long moodleCourseId;
     private MoodleUserEnrollments moodleUserEnrollments;
 
-    private OodiStudent oodiStudent;
-    private OodiTeacher oodiTeacher;
+    private StudyRegistryStudent student;
+    private StudyRegistryTeacher teacher;
 
     private List<UserSynchronizationAction> actions = newArrayList();
 
-    public UserSynchronizationItem(OodiStudent oodiStudent) {
-        this.oodiStudent = oodiStudent;
+    public UserSynchronizationItem(StudyRegistryStudent student) {
+        this.student = student;
     }
 
-    public UserSynchronizationItem(OodiTeacher oodiTeacher) {
-        this.oodiTeacher = oodiTeacher;
+    public UserSynchronizationItem(StudyRegistryTeacher teacher) {
+        this.teacher = teacher;
     }
 
     public static UserSynchronizationItem combine(UserSynchronizationItem firstItem, UserSynchronizationItem secondItem) {
-        if (firstItem.getOodiStudent() == null) {
-            firstItem.setOodiStudent(secondItem.getOodiStudent());
-        } else if (firstItem.getOodiTeacher() == null) {
-            firstItem.setOodiTeacher(secondItem.getOodiTeacher());
+        if (firstItem.getStudent() == null) {
+            firstItem.setStudent(secondItem.getStudent());
+        } else if (firstItem.getTeacher() == null) {
+            firstItem.setTeacher(secondItem.getTeacher());
         }
         return firstItem;
     }
@@ -69,12 +69,12 @@ public class UserSynchronizationItem {
         return this;
     }
 
-    public void setOodiStudent(OodiStudent oodiStudent) {
-        this.oodiStudent = oodiStudent;
+    public void setStudent(StudyRegistryStudent student) {
+        this.student = student;
     }
 
-    public void setOodiTeacher(OodiTeacher oodiTeacher) {
-        this.oodiTeacher = oodiTeacher;
+    public void setTeacher(StudyRegistryTeacher teacher) {
+        this.teacher = teacher;
     }
 
     public MoodleUser getMoodleUser() {
@@ -85,12 +85,12 @@ public class UserSynchronizationItem {
         return moodleUser != null ? moodleUser.id : null;
     }
 
-    public OodiStudent getOodiStudent() {
-        return oodiStudent;
+    public StudyRegistryStudent getStudent() {
+        return student;
     }
 
-    public OodiTeacher getOodiTeacher() {
-        return oodiTeacher;
+    public StudyRegistryTeacher getTeacher() {
+        return teacher;
     }
 
     public boolean isCompleted() {
@@ -138,7 +138,7 @@ public class UserSynchronizationItem {
     }
 
     public boolean userSeesCourseInMoodle() {
-        return moodleUserEnrollments == null ? false : moodleUserEnrollments.seesCourse(this.moodleCourseId);
+        return moodleUserEnrollments != null && moodleUserEnrollments.seesCourse(this.moodleCourseId);
     }
 
 }

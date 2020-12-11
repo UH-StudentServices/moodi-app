@@ -33,8 +33,8 @@ public final class ActionResolver {
         switch (item.getEnrichmentStatus()) {
             case SUCCESS:
                 return Action.SYNCHRONIZE;
-            case OODI_COURSE_REMOVED:
-            case OODI_COURSE_ENDED:
+            case COURSE_NOT_PUBLIC:
+            case COURSE_ENDED:
                 return Action.REMOVE;
             case MOODLE_COURSE_NOT_FOUND:
             case LOCKED:

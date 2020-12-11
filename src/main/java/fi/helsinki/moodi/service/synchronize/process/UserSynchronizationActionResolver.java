@@ -18,7 +18,6 @@
 package fi.helsinki.moodi.service.synchronize.process;
 
 import com.google.common.collect.Sets;
-import fi.helsinki.moodi.integration.oodi.OodiStudentApprovalStatusResolver;
 import fi.helsinki.moodi.service.util.MapperService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -33,27 +32,24 @@ import static com.google.common.collect.Lists.newArrayList;
 public class UserSynchronizationActionResolver {
 
     private final MapperService mapperService;
-    private final OodiStudentApprovalStatusResolver oodiStudentApprovalStatusResolver;
 
     @Autowired
-    public UserSynchronizationActionResolver(MapperService mapperService,
-                                             OodiStudentApprovalStatusResolver oodiStudentApprovalStatusResolver) {
+    public UserSynchronizationActionResolver(MapperService mapperService) {
         this.mapperService = mapperService;
-        this.oodiStudentApprovalStatusResolver = oodiStudentApprovalStatusResolver;
     }
 
-    private Set<Long> getCurrentOodiRoles(UserSynchronizationItem item) {
-        Set<Long> currentOodiRoles = Sets.newHashSet();
+    private Set<Long> getCurrentStudyRegistryRoles(UserSynchronizationItem item) {
+        Set<Long> currentRoles = Sets.newHashSet();
 
-        if (item.getOodiStudent() != null && oodiStudentApprovalStatusResolver.isApproved(item.getOodiStudent())) {
-            currentOodiRoles.add(mapperService.getStudentRoleId());
+        if (item.getStudent() != null && item.getStudent().isEnrolled) {
+            currentRoles.add(mapperService.getStudentRoleId());
         }
 
-        if (item.getOodiTeacher() != null) {
-            currentOodiRoles.add(mapperService.getTeacherRoleId());
+        if (item.getTeacher() != null) {
+            currentRoles.add(mapperService.getTeacherRoleId());
         }
 
-        return currentOodiRoles;
+        return currentRoles;
     }
 
     private Set<Long> addDefaultRoleIfNotEmpty(Set<Long> roles) {
@@ -138,17 +134,17 @@ public class UserSynchronizationActionResolver {
     }
 
     public UserSynchronizationItem enrichWithActions(final UserSynchronizationItem item) {
-        Set<Long> currentRolesInOodiWithDefaultRole = addDefaultRoleIfNotEmpty(getCurrentOodiRoles(item));
+        Set<Long> currentStudyRegistryRolesWithDefaultRole = addDefaultRoleIfNotEmpty(getCurrentStudyRegistryRoles(item));
         Long moodleUserId = item.getMoodleUserId();
 
         if (item.getMoodleUserEnrollments() != null) {
             return item.withActions(createRoleChangeAndSuspendActions(
                     moodleUserId,
-                    currentRolesInOodiWithDefaultRole,
+                    currentStudyRegistryRolesWithDefaultRole,
                     getCurrentMoodleRoles(item),
                     item.userSeesCourseInMoodle()));
         } else {
-            return item.withActions(createEnrollmentActions(moodleUserId, currentRolesInOodiWithDefaultRole));
+            return item.withActions(createEnrollmentActions(moodleUserId, currentStudyRegistryRolesWithDefaultRole));
         }
     }
 }

@@ -37,7 +37,6 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mail.MailSender;
 
@@ -45,12 +44,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.junit.Assert.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegrationTest {
@@ -98,13 +92,6 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
         setupOodiCourseUnitRealisationResponse(endDate, approved, false, APPROVED_ENROLLMENT_STATUS_CODE);
     }
 
-    protected void setupMoodleGetCourseResponse() {
-        moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
-            .andExpect(method(HttpMethod.POST))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
-            .andRespond(withSuccess(Fixtures.asString("/moodle/get-courses-12345.json"), MediaType.APPLICATION_JSON));
-    }
-
     protected void setupOodiCourseUnitRealisationResponse(String endDate,
                                                           boolean approved,
                                                           boolean automaticEnabled,
@@ -115,7 +102,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
                     "/oodi/parameterized-course-realisation.json",
                     new ImmutableMap.Builder()
                         .put("studentnumber", STUDENT_NUMBER)
-                        .put("teacherid", EMPLOYEE_NUMBER)
+                        .put("employeeNumber", EMPLOYEE_NUMBER)
                         .put("endDate", endDate)
                         .put("deleted", false)
                         .put("approved", approved)
@@ -144,7 +131,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
             MOODLE_COURSE_ID,
             getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID, mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId()));
 
-        expectFindUsersRequestsToMoodle();
+        expectFindUsersRequestsToIAMAndMoodle();
 
         expectEnrollmentRequestToMoodleWithResponse(moodleResponse,
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
@@ -174,7 +161,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
             MOODLE_COURSE_ID,
             getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
 
-        expectFindUsersRequestsToMoodle();
+        expectFindUsersRequestsToIAMAndMoodle();
 
         SynchronizationSummary summary = synchronizationService.synchronize(synchronizationType);
 
@@ -222,17 +209,17 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
             "";
     }
 
-    protected void expectFindUsersRequestsToMoodle() {
-        expectFindStudentRequestToMoodle(STUDENT_NUMBER, STUDENT_USERNAME, STUDENT_USER_MOODLE_ID);
-        expectFindTeacherRequestToMoodle(EMPLOYEE_NUMBER_WITH_PREFIX, TEACHER_USERNAME, TEACHER_USER_MOODLE_ID);
+    protected void expectFindUsersRequestsToIAMAndMoodle() {
+        expectFindStudentRequestToIAMAndMoodle(STUDENT_NUMBER, STUDENT_USERNAME, STUDENT_USER_MOODLE_ID);
+        expectFindTeacherRequestToIAMAndMoodle(EMPLOYEE_NUMBER_WITH_PREFIX, TEACHER_USERNAME, TEACHER_USER_MOODLE_ID);
     }
 
-    protected void expectFindStudentRequestToMoodle(String studentNumber, String username, int moodleId) {
+    protected void expectFindStudentRequestToIAMAndMoodle(String studentNumber, String username, int moodleId) {
         expectFindStudentRequestToIAM(studentNumber, username);
         expectGetUserRequestToMoodle(username + USERNAME_SUFFIX, moodleId);
     }
 
-    protected void expectFindTeacherRequestToMoodle(String employeeNumber, String username, int moodleId) {
+    protected void expectFindTeacherRequestToIAMAndMoodle(String employeeNumber, String username, int moodleId) {
         expectFindEmployeeRequestToIAM(employeeNumber, username);
         expectGetUserRequestToMoodle(username + USERNAME_SUFFIX, moodleId);
     }
