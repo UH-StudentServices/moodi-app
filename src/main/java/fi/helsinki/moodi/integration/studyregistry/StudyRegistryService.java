@@ -30,6 +30,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.partitioningBy;
+
 @Service
 public class StudyRegistryService {
 
@@ -61,10 +63,9 @@ public class StudyRegistryService {
     }
 
     public List<StudyRegistryCourseUnitRealisation> getCourseUnitRealisations(final List<String> realisationIds) {
-        List<String> sisuIds = realisationIds.stream().filter(id -> !isOodiId(id)).collect(Collectors.toList());
-        List<String> oodiIds = realisationIds.stream().filter(id -> isOodiId(id)).collect(Collectors.toList());
+        Map<Boolean, List<String>> idsByIsOodiId = realisationIds.stream().collect(partitioningBy(StudyRegistryService::isOodiId));
 
-        List<SisuCourseUnitRealisation> sisuCurs = sisuClient.getCourseUnitRealisations(sisuIds);
+        List<SisuCourseUnitRealisation> sisuCurs = sisuClient.getCourseUnitRealisations(idsByIsOodiId.get(false));
 
         Map<String, StudyRegistryTeacher> teachersById =
             sisuClient.getPersons(sisuCurs.stream().flatMap(cur -> cur.teacherSisuIds().stream()).collect(Collectors.toList()))
@@ -74,7 +75,7 @@ public class StudyRegistryService {
             .map(cur -> cur.toStudyRegistryCourseUnitRealisation(teachersById));
 
         Stream<StudyRegistryCourseUnitRealisation> oodi =
-            oodiIds.stream().map(id -> getCourseUnitRealisation(id)).filter(o -> o.isPresent()).map(o -> o.get());
+            idsByIsOodiId.get(true).stream().map(id -> getCourseUnitRealisation(id)).filter(o -> o.isPresent()).map(o -> o.get());
 
         return Stream.concat(sisu, oodi).collect(Collectors.toList());
 
