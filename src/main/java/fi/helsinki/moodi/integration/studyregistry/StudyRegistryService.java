@@ -17,23 +17,22 @@
 
 package fi.helsinki.moodi.integration.studyregistry;
 
-import fi.helsinki.moodi.integration.oodi.BaseOodiCourseUnitRealisation;
 import fi.helsinki.moodi.integration.oodi.OodiClient;
 import fi.helsinki.moodi.integration.sisu.SisuClient;
 import fi.helsinki.moodi.integration.sisu.SisuCourseUnitRealisation;
 import fi.helsinki.moodi.integration.sisu.SisuPerson;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-
-import static org.slf4j.LoggerFactory.getLogger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class StudyRegistryService {
 
-    private static final Logger logger = getLogger(StudyRegistryService.class);
     private final OodiClient oodiClient;
     private final SisuClient sisuClient;
 
@@ -47,13 +46,13 @@ public class StudyRegistryService {
         if (isOodiId(realisationId)) {
             return oodiClient.getCourseUnitRealisation(realisationId).flatMap(cur -> Optional.of(cur.toStudyRegistryCourseUnitRealisation()));
         } else {
-            SisuCourseUnitRealisation sisuCur = sisuClient.getCourseUnitRealisationData(realisationId);
+            SisuCourseUnitRealisation sisuCur = sisuClient.getCourseUnitRealisation(realisationId);
             if (sisuCur != null) {
                 StudyRegistryCourseUnitRealisation cur = sisuCur.toStudyRegistryCourseUnitRealisation();
                 // Diverging from existing pattern here:
                 // Getting all teacher user names immediately, as opposed to getting them one by one in EnrollmentExecutor,
                 // because it is simpler and more efficient this way.
-                cur.teachers = SisuPerson.toStudyRegistryTeachers(sisuClient.getPersonData(sisuCur.teacherSisuIds()));
+                cur.teachers = SisuPerson.toStudyRegistryTeachers(sisuClient.getPersons(sisuCur.teacherSisuIds()));
                 return Optional.of(cur);
             } else {
                 return Optional.empty();
@@ -61,16 +60,27 @@ public class StudyRegistryService {
         }
     }
 
-    public Optional<BaseOodiCourseUnitRealisation> getOodiCourseUsers(final String realisationId) {
-        if (isOodiId(realisationId)) {
-            return oodiClient.getCourseUsers(realisationId);
-        } else {
-            logger.warn("Synchronization for Sisu courses not supported yet, ignoring course " + realisationId);
-            return Optional.empty();
-        }
+    public List<StudyRegistryCourseUnitRealisation> getCourseUnitRealisations(final List<String> realisationIds) {
+        List<String> sisuIds = realisationIds.stream().filter(id -> !isOodiId(id)).collect(Collectors.toList());
+        List<String> oodiIds = realisationIds.stream().filter(id -> isOodiId(id)).collect(Collectors.toList());
+
+        List<SisuCourseUnitRealisation> sisuCurs = sisuClient.getCourseUnitRealisations(sisuIds);
+
+        Map<String, StudyRegistryTeacher> teachersById =
+            sisuClient.getPersons(sisuCurs.stream().flatMap(cur -> cur.teacherSisuIds().stream()).collect(Collectors.toList()))
+                .stream().collect(Collectors.toMap(p -> p.id, p -> p.toStudyRegistryTeacher()));
+
+        Stream<StudyRegistryCourseUnitRealisation> sisu = sisuCurs.stream()
+            .map(cur -> cur.toStudyRegistryCourseUnitRealisation(teachersById));
+
+        Stream<StudyRegistryCourseUnitRealisation> oodi =
+            oodiIds.stream().map(id -> getCourseUnitRealisation(id)).filter(o -> o.isPresent()).map(o -> o.get());
+
+        return Stream.concat(sisu, oodi).collect(Collectors.toList());
+
     }
 
-    public boolean isOodiId(final String realisationId) {
+    public static boolean isOodiId(final String realisationId) {
         return realisationId != null && realisationId.matches("\\d+");
     }
 }

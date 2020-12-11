@@ -20,10 +20,11 @@ package fi.helsinki.moodi.service.synchronize;
 import com.google.common.base.Stopwatch;
 import fi.helsinki.moodi.exception.SynchronizationInProgressException;
 import fi.helsinki.moodi.service.course.Course;
+import fi.helsinki.moodi.service.log.LoggingService;
 import fi.helsinki.moodi.service.synchronize.enrich.EnricherService;
+import fi.helsinki.moodi.service.synchronize.enrich.SisuCourseEnricher;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRunService;
 import fi.helsinki.moodi.service.synchronize.loader.CourseLoaderService;
-import fi.helsinki.moodi.service.log.LoggingService;
 import fi.helsinki.moodi.service.synchronize.notify.SynchronizationItemNotifier;
 import fi.helsinki.moodi.service.synchronize.process.ProcessorService;
 import org.slf4j.Logger;
@@ -47,23 +48,26 @@ public class SynchronizationService {
     private final ProcessorService processorService;
     private final SynchronizationJobRunService synchronizationJobRunService;
     private final CourseLoaderService courseLoaderService;
+    private final SisuCourseEnricher sisuCourseEnricher;
     private final LoggingService loggingService;
     private final List<SynchronizationItemNotifier> notifiers;
 
     @Autowired
     public SynchronizationService(
-            EnricherService enricherService,
-            ProcessorService processorService,
-            SynchronizationJobRunService synchronizationJobRunService,
-            CourseLoaderService courseLoaderService,
-            LoggingService loggingService,
-            List<SynchronizationItemNotifier> notifiers) {
+        EnricherService enricherService,
+        ProcessorService processorService,
+        SynchronizationJobRunService synchronizationJobRunService,
+        CourseLoaderService courseLoaderService,
+        LoggingService loggingService,
+        SisuCourseEnricher sisuCourseEnricher,
+        List<SynchronizationItemNotifier> notifiers) {
 
         this.enricherService = enricherService;
         this.processorService = processorService;
         this.synchronizationJobRunService = synchronizationJobRunService;
         this.courseLoaderService = courseLoaderService;
         this.loggingService = loggingService;
+        this.sisuCourseEnricher = sisuCourseEnricher;
         this.notifiers = notifiers;
     }
 
@@ -79,6 +83,9 @@ public class SynchronizationService {
         logger.info("Synchronization of type {} started with jobId {}", type, jobId);
 
         final List<Course> courses = loadCourses(type);
+        // The current software architecture does not easily support fetching several courses with one API call.
+        // Instead of refactoring the whole overcomplicated architecture now, we implement this hack to fetch several Sisu courses at once.
+        sisuCourseEnricher.prefetchCourses(courses.stream().map(c -> c.realisationId).collect(toList()));
         final List<SynchronizationItem> items = makeItems(courses, type);
         final List<SynchronizationItem> enrichedItems = enrichItems(items);
         final List<SynchronizationItem> processedItems = processItems(enrichedItems);

@@ -38,37 +38,37 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger logger = getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(value = IntegrationConnectionException.class)
-    public ResponseEntity<Result<?, String>> handleIntegrationConnectionException(IntegrationConnectionException e) throws Exception {
+    public ResponseEntity<Result<?, String>> handleIntegrationConnectionException(IntegrationConnectionException e) {
         logger.error("Caught an exception", e);
         return new ResponseEntity(Result.error("Connection error", STATUS_CONNECTION_ERROR, e.getMessage()), HttpStatus.BAD_GATEWAY);
     }
 
     @ExceptionHandler(value = NotFoundException.class)
-    public ResponseEntity<Result<?, String>> handleNotFoundException(NotFoundException e) throws Exception {
+    public ResponseEntity<Result<?, String>> handleNotFoundException(NotFoundException e) {
         logger.error("Caught an exception", e);
         return new ResponseEntity(Result.error(e.getMessage(), STATUS_NOT_FOUND, e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(value = CourseNotFoundException.class)
-    public ResponseEntity<Result<?, String>> handleCourseNotFoundException(CourseNotFoundException e) throws Exception {
-        logger.error(e.getMessage());
+    public ResponseEntity<Result<?, String>> handleCourseNotFoundException(CourseNotFoundException e) {
+        logger.info(e.getMessage());
         return new ResponseEntity(Result.error(e.getMessage(), STATUS_NOT_FOUND, e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(value = MoodiException.class)
-    public ResponseEntity<Result<?, String>> handleMoodiException(MoodiException e) throws Exception {
+    public ResponseEntity<Result<?, String>> handleMoodiException(MoodiException e) {
         logger.error("Caught an exception", e);
         return new ResponseEntity(Result.error("Error", STATUS_ERROR, e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = UnauthorizedException.class)
-    public ResponseEntity<Result<?, String>> handleUnauthorizedException(Exception e) throws Exception {
-        logger.error("Caught an exception", e);
+    public ResponseEntity<Result<?, String>> handleUnauthorizedException(Exception e) {
+        logger.warn("Unauthorized. " + e);
         return new ResponseEntity(Result.error("Error", STATUS_ERROR, e.getMessage()), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(value = Exception.class)
-    public ResponseEntity<Result<?, String>> handleException(Exception e) throws Exception {
+    public ResponseEntity<Result<?, String>> handleException(Exception e) {
         logger.error("Caught an exception", e);
         return new ResponseEntity(Result.error("Error", STATUS_ERROR, "Internal server error"), HttpStatus.INTERNAL_SERVER_ERROR);
     }

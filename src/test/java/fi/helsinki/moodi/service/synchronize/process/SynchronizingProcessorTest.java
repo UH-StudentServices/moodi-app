@@ -18,15 +18,17 @@
 package fi.helsinki.moodi.service.synchronize.process;
 
 import fi.helsinki.moodi.integration.moodle.MoodleCourseData;
-import fi.helsinki.moodi.service.iam.IAMService;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.integration.moodle.MoodleFullCourse;
 import fi.helsinki.moodi.integration.moodle.MoodleRole;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
-import fi.helsinki.moodi.integration.oodi.BaseOodiCourseUnitRealisation;
 import fi.helsinki.moodi.integration.oodi.OodiStudent;
 import fi.helsinki.moodi.integration.oodi.OodiTeacher;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryStudent;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryTeacher;
 import fi.helsinki.moodi.service.course.CourseService;
+import fi.helsinki.moodi.service.iam.IAMService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
@@ -340,25 +342,25 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
         private static final String REALISATION_ID = "12345";
 
         private SynchronizationItem synchronizationItem;
-        private BaseOodiCourseUnitRealisation oodiCourseUsers;
+        private StudyRegistryCourseUnitRealisation courseUnitRealisation;
 
-        private Map<Long, OodiStudent> oodiStudentMap = new HashMap<>();
-        private Map<Long, OodiTeacher> oodiTeacherMap = new HashMap<>();
+        private Map<Long, StudyRegistryStudent> studentMap = new HashMap<>();
+        private Map<Long, StudyRegistryTeacher> teacherMap = new HashMap<>();
 
         public CourseSynchronizationRequestChain(long moodleCourseId) {
             SynchronizationItem synchronizationItem = new SynchronizationItem(
                 courseService.findByRealisationId(REALISATION_ID).get(),
                 SynchronizationType.FULL);
 
-            BaseOodiCourseUnitRealisation oodiCourseUsers = new BaseOodiCourseUnitRealisation();
-            oodiCourseUsers.students = newArrayList();
-            oodiCourseUsers.teachers = newArrayList();
+            StudyRegistryCourseUnitRealisation cur = new StudyRegistryCourseUnitRealisation();
+            cur.students = newArrayList();
+            cur.teachers = newArrayList();
 
-            SynchronizationItem synchronizationItemWithOodiCourse = synchronizationItem.setOodiCourse(Optional.of(oodiCourseUsers));
+            SynchronizationItem synchronizationItemWithOodiCourse = synchronizationItem.setStudyRegistryCourse(Optional.of(cur));
             SynchronizationItem synchronizationItemWithMoodleCourse = synchronizationItemWithOodiCourse
                 .setMoodleCourse(Optional.of(createMoodleCourse(moodleCourseId)));
 
-            this.oodiCourseUsers = oodiCourseUsers;
+            this.courseUnitRealisation = cur;
             this.synchronizationItem = synchronizationItemWithMoodleCourse;
 
         }
@@ -377,8 +379,8 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             oodiStudent.automaticEnabled = automaticEnabled;
             oodiStudent.enrollmentStatusCode = enrollmentStatusCode;
 
-            this.oodiCourseUsers.students.add(oodiStudent);
-            oodiStudentMap.put(moodleUserId, oodiStudent);
+            this.courseUnitRealisation.students.add(oodiStudent.toStudyRegistryStudent());
+            studentMap.put(moodleUserId, oodiStudent.toStudyRegistryStudent());
 
             return this;
         }
@@ -387,8 +389,8 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             OodiTeacher oodiTeacher = new OodiTeacher();
             oodiTeacher.employeeNumber = TEACHER_ID;
 
-            this.oodiCourseUsers.teachers.add(oodiTeacher);
-            oodiTeacherMap.put(moodleUserId, oodiTeacher);
+            this.courseUnitRealisation.teachers.add(oodiTeacher.toStudyRegistryTeacher());
+            teacherMap.put(moodleUserId, oodiTeacher.toStudyRegistryTeacher());
 
             return this;
         }
@@ -403,13 +405,13 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
         }
 
         public CourseSynchronizationRequestChain expectUserRequestsToIAMAndMoodle() {
-            oodiStudentMap.forEach((moodleUserId, oodiStudent) -> expectFindStudentRequestToIAM(oodiStudent.studentNumber,
+            studentMap.forEach((moodleUserId, oodiStudent) -> expectFindStudentRequestToIAM(oodiStudent.studentNumber,
                 STUDENT_USERNAME));
-            oodiTeacherMap.forEach((moodleUserId, oodiTeacher) -> expectFindEmployeeRequestToIAM(
+            teacherMap.forEach((moodleUserId, oodiTeacher) -> expectFindEmployeeRequestToIAM(
                 IAMService.TEACHER_ID_PREFIX + oodiTeacher.employeeNumber, TEACHER_USERNAME));
-            oodiStudentMap.forEach((moodleUserId, oodiStudent) -> expectGetUserRequestToMoodle(
+            studentMap.forEach((moodleUserId, oodiStudent) -> expectGetUserRequestToMoodle(
                 STUDENT_USERNAME + IAMService.DOMAIN_SUFFIX, moodleUserId));
-            oodiTeacherMap.forEach((moodleUserId, oodiTeacher) -> expectGetUserRequestToMoodle(
+            teacherMap.forEach((moodleUserId, oodiTeacher) -> expectGetUserRequestToMoodle(
                 TEACHER_USERNAME + IAMService.DOMAIN_SUFFIX, moodleUserId));
 
             return this;

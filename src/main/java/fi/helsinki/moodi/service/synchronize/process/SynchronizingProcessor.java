@@ -18,24 +18,25 @@
 package fi.helsinki.moodi.service.synchronize.process;
 
 import fi.helsinki.moodi.exception.ProcessingException;
-import fi.helsinki.moodi.service.iam.IAMService;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
 import fi.helsinki.moodi.integration.moodle.MoodleUser;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
-import fi.helsinki.moodi.integration.oodi.BaseOodiCourseUnitRealisation;
-import fi.helsinki.moodi.integration.oodi.OodiStudent;
-import fi.helsinki.moodi.integration.oodi.OodiTeacher;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryStudent;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryTeacher;
 import fi.helsinki.moodi.service.batch.BatchProcessor;
 import fi.helsinki.moodi.service.course.CourseService;
-import fi.helsinki.moodi.service.synclock.SyncLockService;
+import fi.helsinki.moodi.service.iam.IAMService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
+import fi.helsinki.moodi.service.synclock.SyncLockService;
 import fi.helsinki.moodi.service.util.MapperService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -112,7 +113,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
         SynchronizationItem parentItem,
         Map<Long, MoodleUserEnrollments> moodleEnrollmentsByUserId) {
 
-        List<UserSynchronizationItem> userSynchronizationItems = createUserSyncronizationItems(parentItem, moodleEnrollmentsByUserId);
+        List<UserSynchronizationItem> userSynchronizationItems = createUserSynchronizationItems(parentItem, moodleEnrollmentsByUserId);
 
         Map<UserSynchronizationActionType, List<UserSynchronizationAction>> userSynchronizationActionMap = userSynchronizationItems.stream()
             .filter(item -> !item.isCompleted())
@@ -192,9 +193,9 @@ public class SynchronizingProcessor extends AbstractProcessor {
     private void checkThresholdLimits(Map<UserSynchronizationActionType, List<UserSynchronizationAction>> itemsByAction,
                                       SynchronizationItem parentItem) {
 
-        final BaseOodiCourseUnitRealisation oodiCourse = parentItem.getOodiCourse().get();
-        final long studentCount = oodiCourse.students.size();
-        final long teacherCount = oodiCourse.teachers.size();
+        final StudyRegistryCourseUnitRealisation cur = parentItem.getStudyRegistryCourse().get();
+        final long studentCount = cur.students.size();
+        final long teacherCount = cur.teachers.size();
 
         if (!parentItem.isUnlock()) {
             checkThresholdLimitsForRole(itemsByAction, mapperService.getStudentRoleId(), studentCount, parentItem);
@@ -240,15 +241,15 @@ public class SynchronizingProcessor extends AbstractProcessor {
             .map(role -> new MoodleEnrollment(role, action.getMoodleUserId(), parentItem.getMoodleCourse().get().id));
     }
 
-    private List<UserSynchronizationItem> createUserSyncronizationItems(final SynchronizationItem item,
-                                                                        final Map<Long, MoodleUserEnrollments> moodleEnrollmentsByUserId) {
+    private List<UserSynchronizationItem> createUserSynchronizationItems(final SynchronizationItem item,
+                                                                         final Map<Long, MoodleUserEnrollments> moodleEnrollmentsByUserId) {
 
-        final BaseOodiCourseUnitRealisation oodiCourse = item.getOodiCourse().get();
+        final StudyRegistryCourseUnitRealisation course = item.getStudyRegistryCourse().get();
 
-        Stream<UserSynchronizationItem> studentItemStream = oodiCourse.students
+        Stream<UserSynchronizationItem> studentItemStream = course.students
             .stream()
             .map(UserSynchronizationItem::new);
-        Stream<UserSynchronizationItem> teacherItemStream = oodiCourse.teachers
+        Stream<UserSynchronizationItem> teacherItemStream = course.teachers
             .stream()
             .map(UserSynchronizationItem::new);
 
@@ -281,7 +282,21 @@ public class SynchronizingProcessor extends AbstractProcessor {
     }
 
     private UserSynchronizationItem enrichWithMoodleUser(UserSynchronizationItem item) {
-        List<String> usernames = item.getOodiStudent() != null ? getUsernameList(item.getOodiStudent()) : getUsernameList(item.getOodiTeacher());
+        List<String> usernames = new ArrayList<>();
+        if (item.getStudent() != null) {
+            if (item.getStudent().userName == null) {
+                usernames = getUsernameList(item.getStudent());
+            } else {
+                usernames.add(item.getStudent().userName);
+            }
+        }
+        if (item.getTeacher() != null) {
+            if (item.getTeacher().userName == null) {
+                usernames = getUsernameList(item.getTeacher());
+            } else {
+                usernames.add(item.getTeacher().userName);
+            }
+        }
 
         if (usernames.isEmpty()) {
             return item.withStatus(USERNAME_NOT_FOUND);
@@ -289,11 +304,11 @@ public class SynchronizingProcessor extends AbstractProcessor {
         return getMoodleUser(usernames).map(item::withMoodleUser).orElseGet(() -> item.withStatus(MOODLE_USER_NOT_FOUND));
     }
 
-    private List<String> getUsernameList(OodiStudent student) {
+    private List<String> getUsernameList(StudyRegistryStudent student) {
         return iamService.getStudentUserNameList(student.studentNumber);
     }
 
-    private List<String> getUsernameList(OodiTeacher teacher) {
+    private List<String> getUsernameList(StudyRegistryTeacher teacher) {
         return iamService.getTeacherUserNameList(teacher.employeeNumber);
     }
 

@@ -1,0 +1,86 @@
+{
+  "data": {
+    "course_unit_realisations": [
+      {
+        "name": {
+          "fi": "Päättynyt 3",
+          "sv": "Kurs 3",
+          "en": "Course 3"
+        },
+        "teachingLanguageUrn": "urn:code:language:fi",
+        "id": "hy-CUR-ended",
+        "activityPeriod": {
+          "startDate": "2019-08-05",
+          "endDate": "2019-11-05"
+        },
+        "flowState": "PUBLISHED",
+        "responsibilityInfos": [
+          {
+            "roleUrn": "urn:code:course-unit-realisation-responsibility-info-type:responsible-teacher",
+            "personId": "hy-hlo-3"
+          },
+          {
+            "roleUrn": "urn:code:course-unit-realisation-responsibility-info-type:someone-else",
+            "personId": "hy-hlo-not-a-teacher"
+          }
+        ],
+        "enrolments": [
+          {
+            "state": "ENROLLED",
+            "person": {
+              "eduPersonPrincipalName": "niina3@helsinki.fi"
+            }
+          }
+        ],
+        "learningEnvironments": [
+          {
+            "name": "Kurssisivu",
+            "url": "https://courses.helsinki.fi/fi/OODI-FLOW/136394381",
+            "primary": true,
+            "language": "fi"
+          }
+        ]
+      },
+      {
+        "name": {
+          "fi": "Arkistoitu 4",
+          "sv": "Kurs 4",
+          "en": "Course 4"
+        },
+        "teachingLanguageUrn": "urn:code:language:fi",
+        "id": "hy-CUR-archived",
+        "activityPeriod": {
+          "startDate": "2019-08-05",
+          "endDate": "2019-11-05"
+        },
+        "flowState": "ARCHIVED",
+        "responsibilityInfos": [
+          {
+            "roleUrn": "urn:code:course-unit-realisation-responsibility-info-type:responsible-teacher",
+            "personId": "hy-hlo-4"
+          },
+          {
+            "roleUrn": "urn:code:course-unit-realisation-responsibility-info-type:someone-else",
+            "personId": "hy-hlo-not-a-teacher"
+          }
+        ],
+        "enrolments": [
+          {
+            "state": "ENROLLED",
+            "person": {
+              "eduPersonPrincipalName": "niina4@helsinki.fi"
+            }
+          }
+        ],
+        "learningEnvironments": [
+          {
+            "name": "Kurssisivu",
+            "url": "https://courses.helsinki.fi/fi/OODI-FLOW/136394381",
+            "primary": true,
+            "language": "fi"
+          }
+        ]
+      }
+    ]
+  }
+}

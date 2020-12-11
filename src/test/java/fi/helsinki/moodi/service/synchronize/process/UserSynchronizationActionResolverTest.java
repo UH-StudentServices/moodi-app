@@ -23,8 +23,8 @@ import fi.helsinki.moodi.integration.moodle.MoodleCourseData;
 import fi.helsinki.moodi.integration.moodle.MoodleRole;
 import fi.helsinki.moodi.integration.moodle.MoodleUser;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
-import fi.helsinki.moodi.integration.oodi.OodiStudent;
-import fi.helsinki.moodi.integration.oodi.OodiTeacher;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryStudent;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryTeacher;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,11 +36,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static fi.helsinki.moodi.service.synchronize.process.UserSynchronizationActionType.ADD_ENROLLMENT;
-import static fi.helsinki.moodi.service.synchronize.process.UserSynchronizationActionType.ADD_ROLES;
-import static fi.helsinki.moodi.service.synchronize.process.UserSynchronizationActionType.REACTIVATE_ENROLLMENT;
-import static fi.helsinki.moodi.service.synchronize.process.UserSynchronizationActionType.REMOVE_ROLES;
-import static fi.helsinki.moodi.service.synchronize.process.UserSynchronizationActionType.SUSPEND_ENROLLMENT;
+import static fi.helsinki.moodi.service.synchronize.process.UserSynchronizationActionType.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -85,7 +81,7 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
     @Test
     public void thatAddEnrollmentActionIsResolvedForHybridUser() {
         UserSynchronizationItem item = getStudentUserSynchronizationItem(true);
-        item.setOodiTeacher(getOodiTeacher());
+        item.setTeacher(getTeacher());
 
         userSynchronizationActionResolver.enrichWithActions(item);
 
@@ -209,26 +205,26 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
     }
 
     private UserSynchronizationItem getStudentUserSynchronizationItem(boolean approved) {
-        UserSynchronizationItem item = new UserSynchronizationItem(getOodiStudent(approved));
+        UserSynchronizationItem item = new UserSynchronizationItem(getStudent(approved));
         item.withMoodleUser(getMoodleUser());
         item.withMoodleCourseId(MOODLE_COURSE_ID);
         return item;
     }
 
     private UserSynchronizationItem getTeacherUserSynchronizationItem() {
-        UserSynchronizationItem item = new UserSynchronizationItem(new OodiTeacher());
+        UserSynchronizationItem item = new UserSynchronizationItem(getTeacher());
         item.withMoodleUser(getMoodleUser());
         return item;
     }
 
-    private OodiStudent getOodiStudent(boolean approved) {
-        OodiStudent student = new OodiStudent();
-        student.approved = approved;
+    private StudyRegistryStudent getStudent(boolean approved) {
+        StudyRegistryStudent student = new StudyRegistryStudent();
+        student.isEnrolled = approved;
         return student;
     }
 
-    private OodiTeacher getOodiTeacher() {
-        return new OodiTeacher();
+    private StudyRegistryTeacher getTeacher() {
+        return new StudyRegistryTeacher();
     }
 
     private MoodleUser getMoodleUser() {

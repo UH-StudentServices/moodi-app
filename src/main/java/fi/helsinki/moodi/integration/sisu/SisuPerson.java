@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class SisuPerson {
+    public String id;
     public String studentNumber;
     public String lastName;
     public String firstNames;
