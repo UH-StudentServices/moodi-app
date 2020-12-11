@@ -68,18 +68,18 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
 
         expectCreateCourseRequestToMoodle(OODI_COURSE_REALISATION_ID, "oodi_", EXPECTED_OODI_DESCRIPTION_TO_MOODLE, MOODLE_COURSE_ID);
 
-        expectFindStudentRequestToIAM(STUDENT_NUMBER_1, ESB_USERNAME_1);
-        expectFindStudentRequestToIAM(STUDENT_NUMBER_2, ESB_USERNAME_2);
-        expectFindEmployeeRequestToIAM(TEACHER_ID, TEACHER_ESB_USERNAME);
+        expectFindStudentRequestToIAM(STUDENT_NUMBER_NIINA, ESB_USERNAME_NIINA);
+        expectFindStudentRequestToIAM(STUDENT_NUMBER_JUKKA, ESB_USERNAME_JUKKA);
+        expectFindEmployeeRequestToIAM(EMP_NUMBER_HRAOPE, ESB_USERNAME_HRAOPE);
 
-        expectGetUserRequestToMoodle(MOODLE_USERNAME_1, MOODLE_USER_ID_1);
-        expectGetUserRequestToMoodle(MOODLE_USERNAME_2, MOODLE_USER_ID_2);
-        expectGetUserRequestToMoodle(TEACHER_MOODLE_USERNAME, TEACHER_MOODLE_USER_ID);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_JUKKA, MOODLE_USER_ID_JUKKA);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE);
 
         expectEnrollmentsWithAddedMoodiRoles(Lists.newArrayList(
-            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_1, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_2, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getTeacherRoleId(), TEACHER_MOODLE_USER_ID, MOODLE_COURSE_ID)
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_JUKKA, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID)
             ));
 
         makeCreateCourseRequest(OODI_COURSE_REALISATION_ID)

@@ -20,7 +20,6 @@ package fi.helsinki.moodi.service.importing;
 import com.google.common.base.Stopwatch;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
-import fi.helsinki.moodi.integration.oodi.OodiStudentApprovalStatusResolver;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
 import fi.helsinki.moodi.service.batch.BatchProcessor;
 import fi.helsinki.moodi.service.course.Course;
@@ -57,7 +56,6 @@ public class EnrollmentExecutor {
     private final CourseService courseService;
     private final LoggingService loggingService;
     private final BatchProcessor<Enrollment> batchProcessor;
-    private final OodiStudentApprovalStatusResolver oodiStudentApprovalStatusResolver;
 
     @Autowired
     public EnrollmentExecutor(
@@ -66,15 +64,13 @@ public class EnrollmentExecutor {
         MapperService mapperService,
         CourseService courseService,
         LoggingService loggingService,
-        BatchProcessor batchProcessor,
-        OodiStudentApprovalStatusResolver oodiStudentApprovalStatusResolver) {
+        BatchProcessor batchProcessor) {
         this.moodleService = moodleService;
         this.iamService = iamService;
         this.mapperService = mapperService;
         this.courseService = courseService;
         this.loggingService = loggingService;
         this.batchProcessor = batchProcessor;
-        this.oodiStudentApprovalStatusResolver = oodiStudentApprovalStatusResolver;
     }
 
     @Async("taskExecutor")

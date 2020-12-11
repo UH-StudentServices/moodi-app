@@ -48,19 +48,19 @@ public class IncrementalSynchronizationCourseLoader implements CourseLoader {
     private final CourseService courseService;
     private final SynchronizationJobRunService synchronizationJobRunService;
     private final SystemTimeService timeService;
-    private final OodiClient oodiService;
+    private final OodiClient oodiClient;
 
     @Autowired
     public IncrementalSynchronizationCourseLoader(
             CourseService courseService,
             SynchronizationJobRunService synchronizationJobRunService,
             SystemTimeService timeService,
-            OodiClient oodiService) {
+            OodiClient oodiClient) {
 
         this.courseService = courseService;
         this.synchronizationJobRunService = synchronizationJobRunService;
         this.timeService = timeService;
-        this.oodiService = oodiService;
+        this.oodiClient = oodiClient;
     }
 
     @Override
@@ -72,9 +72,9 @@ public class IncrementalSynchronizationCourseLoader implements CourseLoader {
 
         logger.debug("Last successful synchronization run at {}", FORMATTER.format(afterDate));
 
-        final List<Long> realisationIds = oodiService.getCourseChanges(afterDate)
+        final List<String> realisationIds = oodiClient.getCourseChanges(afterDate)
                 .stream()
-                .map(o -> o.courseUnitRealisationId)
+                .map(o -> "" + o.courseUnitRealisationId)
                 .collect(Collectors.toList());
 
         return courseService.findCompletedByRealisationIds(realisationIds);

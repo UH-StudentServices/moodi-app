@@ -18,7 +18,7 @@
 package fi.helsinki.moodi.service.synchronize.enrich;
 
 import com.google.common.collect.ImmutableMap;
-import fi.helsinki.moodi.integration.oodi.BaseOodiCourseUnitRealisation;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
@@ -88,7 +88,7 @@ public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
 
         SynchronizationItem enrichedItem = oodiCourseEnricher.doEnrich(synchronizationItem);
 
-        Optional<BaseOodiCourseUnitRealisation> oodiCourseUsers = enrichedItem.getOodiCourse();
+        Optional<StudyRegistryCourseUnitRealisation> oodiCourseUsers = enrichedItem.getStudyRegistryCourse();
 
         assertTrue(oodiCourseUsers.isPresent());
         assertEquals(enrichedItem.getEnrichmentStatus(), EnrichmentStatus.IN_PROGESS);
@@ -121,7 +121,7 @@ public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
 
         SynchronizationItem enrichedItem = oodiCourseEnricher.enrich(synchronizationItem);
 
-        Optional<BaseOodiCourseUnitRealisation> oodiCourseUsers = enrichedItem.getOodiCourse();
+        Optional<StudyRegistryCourseUnitRealisation> oodiCourseUsers = enrichedItem.getStudyRegistryCourse();
 
         assertFalse(oodiCourseUsers.isPresent());
         assertEquals(EnrichmentStatus.ERROR, enrichedItem.getEnrichmentStatus());
@@ -137,7 +137,7 @@ public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
 
         SynchronizationItem enrichedItem = oodiCourseEnricher.doEnrich(synchronizationItem);
 
-        assertEquals(enrichedItem.getEnrichmentStatus(), EnrichmentStatus.OODI_COURSE_ENDED);
+        assertEquals(enrichedItem.getEnrichmentStatus(), EnrichmentStatus.COURSE_ENDED);
     }
 
     @Test
@@ -148,6 +148,6 @@ public class OodiCourseEnricherTest extends AbstractMoodiIntegrationTest {
 
         SynchronizationItem enrichedItem = oodiCourseEnricher.doEnrich(synchronizationItem);
 
-        assertEquals(enrichedItem.getEnrichmentStatus(), EnrichmentStatus.OODI_COURSE_REMOVED);
+        assertEquals(enrichedItem.getEnrichmentStatus(), EnrichmentStatus.COURSE_NOT_PUBLIC);
     }
 }

@@ -49,8 +49,10 @@ public class IncrementalSynchronizationJob {
         }
     }
 
+    // Has been disabled since 9/2016, as Oodi API did not really support getting enrollment updates.
+    // Do not enable until that is working AND Incremental sync has been implemented for Sisu.
     private boolean isEnabled() {
         final String key = String.format("synchronize.%s.enabled", INCREMENTAL);
-        return environment.getRequiredProperty(key, Boolean.class);
+        return false;
     }
 }
