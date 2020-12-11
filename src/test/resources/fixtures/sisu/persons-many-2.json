@@ -1,0 +1,14 @@
+{
+  "data": {
+    "private_persons": [
+      {
+        "id": "hy-hlo-2.1",
+        "studentNumber": null,
+        "firstNames": "Teacher3",
+        "lastName": "Last3",
+        "employeeNumber": "9999993",
+        "eduPersonPrincipalName": "three@helsinki.fi"
+      }
+    ]
+  }
+}

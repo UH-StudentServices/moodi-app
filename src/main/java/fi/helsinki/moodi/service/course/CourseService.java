@@ -77,7 +77,7 @@ public class CourseService {
         return saveCourse(course);
     }
 
-    public List<Course> findCompletedByRealisationIds(List<Long> realisationIds) {
+    public List<Course> findCompletedByRealisationIds(List<String> realisationIds) {
         return courseRepository.findByImportStatusInAndRealisationIdIn(newArrayList(COMPLETED, COMPLETED_FAILED), realisationIds);
     }
 

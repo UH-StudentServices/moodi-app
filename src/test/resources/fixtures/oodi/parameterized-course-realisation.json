@@ -14,7 +14,7 @@
     "realisationtypecode": 5,
     "teachers": [
       {
-        "teacher_id": "{{ teacherid }}",
+        "teacher_id": "{{ employeeNumber }}",
         "teacher_role_code": 3
       }
     ],

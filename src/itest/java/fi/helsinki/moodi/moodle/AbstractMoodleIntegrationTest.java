@@ -32,6 +32,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.ResponseCreator;
 
@@ -49,6 +50,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
+@ActiveProfiles("test")
 public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegrationTest {
 
     @Autowired

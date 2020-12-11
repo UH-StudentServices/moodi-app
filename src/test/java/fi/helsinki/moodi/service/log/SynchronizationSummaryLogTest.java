@@ -24,6 +24,8 @@ import fi.helsinki.moodi.integration.moodle.MoodleUser;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.integration.oodi.OodiStudent;
 import fi.helsinki.moodi.integration.oodi.OodiTeacher;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryStudent;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryTeacher;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.log.SynchronizationSummaryLog.*;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
@@ -116,11 +118,9 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
 
         assertTrue(successfulEntry.status.equals(UserSynchronizationItemStatus.SUCCESS));
         assertTrue(successfulEntry.moodleUserId.equals(STUDENT_MOODLE_USER_ID));
-        assertEquals(STUDENT_NUMBER, successfulEntry.oodiStudent.studentNumber);
-        assertEquals(ENROLLMENT_STATUS_CODE, successfulEntry.oodiStudent.enrollmentStatusCode);
-        assertTrue(successfulEntry.oodiStudent.approved);
-        assertFalse(successfulEntry.oodiStudent.automaticEnabled);
-        assertNull(successfulEntry.oodiTeacher);
+        assertEquals(STUDENT_NUMBER, successfulEntry.student.studentNumber);
+        assertTrue(successfulEntry.student.isEnrolled);
+        assertNull(successfulEntry.teacher);
         assertSingleAction(
             successfulEntry.actions,
             UserSynchronizationActionStatus.SUCCESS,
@@ -132,8 +132,8 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
         UserSyncronizationItemLogEntry failedEntry = failedUserEntries.get(0);
         assertTrue(failedEntry.status.equals(UserSynchronizationItemStatus.ERROR));
         assertTrue(failedEntry.moodleUserId.equals(TEACHER_MOODLE_USER_ID));
-        assertNull(failedEntry.oodiStudent);
-        assertEquals(TEACHER_ID, failedEntry.oodiTeacher.employeeNumber);
+        assertNull(failedEntry.student);
+        assertEquals(TEACHER_ID, failedEntry.teacher.employeeNumber);
         assertSingleAction(
             failedEntry.actions,
             UserSynchronizationActionStatus.ERROR,
@@ -172,7 +172,7 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
         moodleRole.roleId = STUDENT_ROLE_ID;
         moodleUserEnrollments.username = STUDENT_MOODLE_USERNAME;
         moodleUserEnrollments.roles = singletonList(moodleRole);
-        UserSynchronizationItem item = new UserSynchronizationItem(getOodiStudent());
+        UserSynchronizationItem item = new UserSynchronizationItem(getStudent());
 
         return enrichUserSynchronizationItem(
             item,
@@ -185,7 +185,7 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
     }
 
     private UserSynchronizationItem getFailedTeacherUserStudentUserSynchronizationItem() {
-        UserSynchronizationItem item = new UserSynchronizationItem(getOodiTeacher());
+        UserSynchronizationItem item = new UserSynchronizationItem(getTeacher());
 
         MoodleUserEnrollments moodleUserEnrollments = new MoodleUserEnrollments();
         moodleUserEnrollments.username = TEACHER_MOODLE_USERNAME;
@@ -216,18 +216,18 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
             .withMoodleUserEnrollments(moodleUserEnrollments);
     }
 
-    private OodiStudent getOodiStudent() {
+    private StudyRegistryStudent getStudent() {
         OodiStudent student = new OodiStudent();
         student.studentNumber = STUDENT_NUMBER;
         student.approved = true;
         student.automaticEnabled = false;
         student.enrollmentStatusCode = ENROLLMENT_STATUS_CODE;
-        return student;
+        return student.toStudyRegistryStudent();
     }
 
-    private OodiTeacher getOodiTeacher() {
+    private StudyRegistryTeacher getTeacher() {
         OodiTeacher teacher = new OodiTeacher();
         teacher.employeeNumber = TEACHER_ID;
-        return teacher;
+        return teacher.toStudyRegistryTeacher();
     }
 }

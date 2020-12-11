@@ -42,7 +42,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
         expectGetEnrollmentsRequestToMoodle(MOODLE_COURSE_ID);
 
-        expectFindUsersRequestsToMoodle();
+        expectFindUsersRequestsToIAMAndMoodle();
 
         expectEnrollmentRequestToMoodle(
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
@@ -72,11 +72,11 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         course = findCourse();
 
         assertTrue(course.removed);
-        assertEquals(course.removedMessage, EnrichmentStatus.OODI_COURSE_ENDED.toString());
+        assertEquals(course.removedMessage, EnrichmentStatus.COURSE_ENDED.toString());
     }
 
     @Test
-    public void thatEndedCourseIsStillSynchedIfLessThanYearHasPassed() {
+    public void thatEndedCourseIsStillSyncedIfLessThanYearHasPassed() {
 
         Course course = findCourse();
 
@@ -105,7 +105,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
         expectGetEnrollmentsRequestToMoodle(MOODLE_COURSE_ID);
 
-        expectFindUsersRequestsToMoodle();
+        expectFindUsersRequestsToIAMAndMoodle();
 
         expectEnrollmentRequestToMoodle(
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
@@ -123,7 +123,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
             MOODLE_COURSE_ID,
             getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID, mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId()));
 
-        expectFindUsersRequestsToMoodle();
+        expectFindUsersRequestsToIAMAndMoodle();
 
         expectEnrollmentRequestToMoodle(
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
@@ -143,7 +143,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
             MOODLE_COURSE_ID,
             getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
 
-        expectFindUsersRequestsToMoodle();
+        expectFindUsersRequestsToIAMAndMoodle();
 
         expectEnrollmentRequestToMoodle(
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
@@ -167,7 +167,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
             MOODLE_COURSE_ID,
             getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID, mapperService.getMoodiRoleId()));
 
-        expectFindUsersRequestsToMoodle();
+        expectFindUsersRequestsToIAMAndMoodle();
 
         expectEnrollmentRequestToMoodle(
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
@@ -190,7 +190,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
             MOODLE_COURSE_ID,
             getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, SOME_OTHER_MOODLE_COURSE_ID, mapperService.getMoodiRoleId()));
 
-        expectFindUsersRequestsToMoodle();
+        expectFindUsersRequestsToIAMAndMoodle();
 
         expectEnrollmentRequestToMoodle(
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
@@ -210,13 +210,13 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
             MOODLE_COURSE_ID,
             getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
 
-        expectFindStudentRequestToMoodle(STUDENT_NUMBER, STUDENT_USERNAME, STUDENT_USER_MOODLE_ID);
-        expectFindStudentRequestToMoodle(STUDENT_NUMBER + "1", STUDENT_USERNAME + "1", STUDENT_USER_MOODLE_ID + 1);
-        expectFindStudentRequestToMoodle(STUDENT_NUMBER + "2", STUDENT_USERNAME + "2", STUDENT_USER_MOODLE_ID + 2);
-        expectFindStudentRequestToMoodle(STUDENT_NUMBER + "3", STUDENT_USERNAME + "3", STUDENT_USER_MOODLE_ID + 3);
+        expectFindStudentRequestToIAMAndMoodle(STUDENT_NUMBER, STUDENT_USERNAME, STUDENT_USER_MOODLE_ID);
+        expectFindStudentRequestToIAMAndMoodle(STUDENT_NUMBER + "1", STUDENT_USERNAME + "1", STUDENT_USER_MOODLE_ID + 1);
+        expectFindStudentRequestToIAMAndMoodle(STUDENT_NUMBER + "2", STUDENT_USERNAME + "2", STUDENT_USER_MOODLE_ID + 2);
+        expectFindStudentRequestToIAMAndMoodle(STUDENT_NUMBER + "3", STUDENT_USERNAME + "3", STUDENT_USER_MOODLE_ID + 3);
 
-        expectFindTeacherRequestToMoodle(EMPLOYEE_NUMBER_WITH_PREFIX, TEACHER_USERNAME, TEACHER_USER_MOODLE_ID);
-        expectFindTeacherRequestToMoodle(EMPLOYEE_NUMBER_WITH_PREFIX + "1", TEACHER_USERNAME + "1", TEACHER_USER_MOODLE_ID + 1);
+        expectFindTeacherRequestToIAMAndMoodle(EMPLOYEE_NUMBER_WITH_PREFIX, TEACHER_USERNAME, TEACHER_USER_MOODLE_ID);
+        expectFindTeacherRequestToIAMAndMoodle(EMPLOYEE_NUMBER_WITH_PREFIX + "1", TEACHER_USERNAME + "1", TEACHER_USER_MOODLE_ID + 1);
 
         expectEnrollmentRequestToMoodle(
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
@@ -267,13 +267,13 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
             MOODLE_COURSE_ID,
             getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
 
-        expectFindStudentRequestToMoodle(STUDENT_NUMBER, STUDENT_USERNAME, STUDENT_USER_MOODLE_ID);
-        expectFindStudentRequestToMoodle(STUDENT_NUMBER + "1", STUDENT_USERNAME + "1", STUDENT_USER_MOODLE_ID + 1);
-        expectFindStudentRequestToMoodle(STUDENT_NUMBER + "2", STUDENT_USERNAME + "2", STUDENT_USER_MOODLE_ID + 2);
-        expectFindStudentRequestToMoodle(STUDENT_NUMBER + "3", STUDENT_USERNAME + "3", STUDENT_USER_MOODLE_ID + 3);
+        expectFindStudentRequestToIAMAndMoodle(STUDENT_NUMBER, STUDENT_USERNAME, STUDENT_USER_MOODLE_ID);
+        expectFindStudentRequestToIAMAndMoodle(STUDENT_NUMBER + "1", STUDENT_USERNAME + "1", STUDENT_USER_MOODLE_ID + 1);
+        expectFindStudentRequestToIAMAndMoodle(STUDENT_NUMBER + "2", STUDENT_USERNAME + "2", STUDENT_USER_MOODLE_ID + 2);
+        expectFindStudentRequestToIAMAndMoodle(STUDENT_NUMBER + "3", STUDENT_USERNAME + "3", STUDENT_USER_MOODLE_ID + 3);
 
-        expectFindTeacherRequestToMoodle(EMPLOYEE_NUMBER_WITH_PREFIX, TEACHER_USERNAME, TEACHER_USER_MOODLE_ID);
-        expectFindTeacherRequestToMoodle(EMPLOYEE_NUMBER_WITH_PREFIX + "1", TEACHER_USERNAME + "1", TEACHER_USER_MOODLE_ID + 1);
+        expectFindTeacherRequestToIAMAndMoodle(EMPLOYEE_NUMBER_WITH_PREFIX, TEACHER_USERNAME, TEACHER_USER_MOODLE_ID);
+        expectFindTeacherRequestToIAMAndMoodle(EMPLOYEE_NUMBER_WITH_PREFIX + "1", TEACHER_USERNAME + "1", TEACHER_USER_MOODLE_ID + 1);
 
         expectEnrollmentRequestToMoodle(
             new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),

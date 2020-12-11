@@ -21,8 +21,8 @@ public enum EnrichmentStatus {
 
     IN_PROGESS,
     MOODLE_COURSE_NOT_FOUND,
-    OODI_COURSE_REMOVED,
-    OODI_COURSE_ENDED,
+    COURSE_NOT_PUBLIC,
+    COURSE_ENDED,
     SUCCESS,
     ERROR,
     LOCKED

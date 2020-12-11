@@ -18,12 +18,14 @@
 package fi.helsinki.moodi.integration.sisu;
 
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryTeacher;
 import io.aexp.nodes.graphql.annotations.GraphQLArgument;
 import io.aexp.nodes.graphql.annotations.GraphQLProperty;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @GraphQLProperty(name = "course_unit_realisation", arguments = {
@@ -47,9 +49,6 @@ public class SisuCourseUnitRealisation {
         ret.realisationId = id;
         ret.realisationName = name.getForLocaleOrDefault(teachingLanguageCode);
         ret.students = enrolments.stream().map(e -> e.person.toStudyRegistryStudent(e.isEnrolled())).collect(Collectors.toList());
-        // Sisu CUR data does not contain teacher user name nor employee number, so we leave this null here,
-        // and it will be populated in StudyRegistryService.
-        ret.teachers = null;
         ret.published = "PUBLISHED".equals(flowState);
 
         if (activityPeriod != null) {
@@ -71,9 +70,31 @@ public class SisuCourseUnitRealisation {
         return ret;
     }
 
+    // Sisu CUR data does not contain teacher user name nor employee number, so teachers need to be populated separately.
+    public StudyRegistryCourseUnitRealisation toStudyRegistryCourseUnitRealisation(Map<String, StudyRegistryTeacher> teachersById) {
+        StudyRegistryCourseUnitRealisation ret = this.toStudyRegistryCourseUnitRealisation();
+
+        this.teacherSisuIds().stream().forEach(id -> {
+            if (teachersById.get(id) != null) {
+                ret.teachers.add(teachersById.get(id));
+            }
+        });
+
+        return ret;
+    }
+
     public List<String> teacherSisuIds() {
         return responsibilityInfos.stream()
+            // Accept both responsible teacher and teacher.
             .filter(r -> r.roleUrn != null && r.roleUrn.contains("teacher"))
             .map(r -> r.personId).collect(Collectors.toList());
+    }
+
+    public static class SisuCURWrapper {
+        @GraphQLProperty(name = "course_unit_realisations", arguments = {
+            @GraphQLArgument(name = "ids", type = "String")
+        })
+        @SuppressWarnings("checkstyle:MemberName")
+        public List<SisuCourseUnitRealisation> course_unit_realisations;
     }
 }

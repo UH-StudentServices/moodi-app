@@ -14,7 +14,7 @@
     "teachers": [
       {{#teachers}}
       {
-        "teacher_id": "{{ teacherId }}"
+        "teacher_id": "{{ employeeNumber }}"
       }{{#iterHasNext}},{{/iterHasNext}}
       {{/teachers}}
     ],

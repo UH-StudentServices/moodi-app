@@ -21,7 +21,9 @@ import java.util.List;
 
 public interface SisuClient {
 
-    SisuCourseUnitRealisation getCourseUnitRealisationData(String id);
+    SisuCourseUnitRealisation getCourseUnitRealisation(String id);
 
-    List<SisuPerson> getPersonData(List<String> ids);
+    List<SisuPerson> getPersons(List<String> ids);
+
+    List<SisuCourseUnitRealisation> getCourseUnitRealisations(List<String> realisationIds);
 }
