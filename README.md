@@ -39,11 +39,11 @@ when new features are added.
 ```
 
 ### Running Moodi-Moodle integration tests
-This is normally done in Jenkins, but if you want to test something locally:
+This is normally done in Jenkins, but if you want to test something locally, you need to go via an ssh tunnel.
 
 Into /etc/hosts: 
 ```
-127.0.0.1       moodi-2-moodle-20.student.helsinki.fi # I think there is an IP check at Moodle end. 
+127.0.0.1       moodi-2-moodle-20.student.helsinki.fi 
 ```
 
 Open an ssh tunnel to call the Moodle API:
@@ -60,7 +60,7 @@ read MOODLE_WS_TOKEN
 
 ### Running Moodi locally
 #### Prerequisites
-Open an ssh tunnel to call Sisu through the API GW and the Moodle API:
+Open an ssh tunnel to call Sisu through the test API GW and the Moodle API:
 ```
 ssh moodi-dev -L 1443:gw-api-test.it.helsinki.fi:443 -L 1444:moodi-2-moodle-20.student.helsinki.fi:443
 ```
@@ -75,8 +75,8 @@ Copy moodi-dev:/opt/moodi/config/keystore/moodi.p12 this directory.
 
 Into /etc/hosts: 
 ```
-127.0.0.1       gw-api-test.it.helsinki.fi # Bypass API GW firewall.   
-127.0.0.1       moodi-2-moodle-20.student.helsinki.fi # I think there is an IP check at Moodle end. 
+127.0.0.1       gw-api-test.it.helsinki.fi   
+127.0.0.1       moodi-2-moodle-20.student.helsinki.fi 
 ```
 
 application-dev.yml:

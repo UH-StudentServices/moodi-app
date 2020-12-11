@@ -62,7 +62,7 @@ public class SisuCourseEnricherTest extends AbstractMoodiIntegrationTest  {
     }
 
     @Test
-    public void thatSynchronizationItemIsSetToNotEndedStatusWhenCourseIsEnded() {
+    public void thatSynchronizationItemIsSetToEndedStatusWhenCourseIsEnded() {
         setUpMockSisuAndPrefetchCourses();
         SynchronizationItem synchronizationItem = createFullSynchronizationItem("hy-CUR-ended");
 
