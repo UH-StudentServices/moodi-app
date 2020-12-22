@@ -79,11 +79,11 @@ public class UserSynchronizationActionResolver {
     }
 
     private List<UserSynchronizationAction> createRoleChangeAndSuspendActions(Long moodleUserId,
-                                                                              Set<Long> currentRolesInOodi,
+                                                                              Set<Long> currentRegistryRoles,
                                                                               Set<Long> currentRolesInMoodle,
                                                                               boolean userSeesCourseInMoodle) {
-        Set<Long> rolesToAdd = difference(currentRolesInOodi, currentRolesInMoodle);
-        Set<Long> rolesToRemove = difference(currentRolesInMoodle, currentRolesInOodi).stream()
+        Set<Long> rolesToAdd = difference(currentRegistryRoles, currentRolesInMoodle);
+        Set<Long> rolesToRemove = difference(currentRolesInMoodle, currentRegistryRoles).stream()
             .filter(this::roleCanBeRemoved)
             .collect(Collectors.toSet());
 
@@ -91,12 +91,18 @@ public class UserSynchronizationActionResolver {
 
         addAction(moodleUserId, rolesToAdd, UserSynchronizationActionType.ADD_ROLES, actions);
 
-        // Suspend when student role is removed from Oodi,
-        // or if the user can see the course and only has the sync role in Moodle, but no student role in Oodi
+        // Suspend when
+        //  the user can see the course AND
+        //  user does not have teacher role in Moodle AND
+        //  student role is removed from student registry OR user only has the sync role in Moodle, AND no student role in student registry
         boolean suspendStudent =
-                (rolesToRemove.contains(mapperService.getStudentRoleId()) ||
-                        hasOnlySyncRole(currentRolesInMoodle) && !currentRolesInOodi.contains(mapperService.getStudentRoleId())) &&
+            (rolesToRemove.contains(mapperService.getStudentRoleId()) ||
+                hasOnlySyncRole(currentRolesInMoodle) && !currentRegistryRoles.contains(mapperService.getStudentRoleId())) &&
                 !currentRolesInMoodle.contains(mapperService.getTeacherRoleId()) &&
+                // Prevents user getting continuously suspended, as a suspended user does not see the course.
+                // User sees course if field "enrolledcourses" in the response to core_enrol_get_enrolled_users contains the id
+                // of the course.
+                // Also, if the course is not visible in Moodle, user does not see it.
                 userSeesCourseInMoodle;
 
         if (suspendStudent) {

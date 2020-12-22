@@ -40,7 +40,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mail.MailSender;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
@@ -187,26 +186,6 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
         Mockito.verify(mailSender).send(lockedSynchronizationItemMessageBuilder.buildMessage(summary.getItems()));
 
         assertTrue(syncLockService.isLocked(course));
-    }
-
-    protected String getEnrollmentsResponse(int moodleUserId, int enrolledCourseId, long...roleIds) {
-        long[] enrolledCourseIds = new long[] { enrolledCourseId };
-        String ret = String.format(
-            "[{ \"id\" : \"%s\" , \"roles\" : [%s], \"enrolledcourses\" : [%s]}]",
-            moodleUserId,
-            longArrayJson("roleid", roleIds),
-            longArrayJson("id", enrolledCourseIds));
-
-        return ret;
-    }
-
-    private String longArrayJson(String key, long[] ids) {
-        return ids.length > 0 ?
-            Arrays.stream(ids)
-            .mapToObj(id -> String.format("{\"%s\" : %d}", key, id))
-            .reduce((a, b) -> a.concat(",").concat(b))
-            .get() :
-            "";
     }
 
     protected void expectFindUsersRequestsToIAMAndMoodle() {

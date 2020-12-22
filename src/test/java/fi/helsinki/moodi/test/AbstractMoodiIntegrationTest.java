@@ -399,6 +399,26 @@ public abstract class AbstractMoodiIntegrationTest {
         setupMoodleGetCourseResponse(54321);
     }
 
+    protected String getEnrollmentsResponse(int moodleUserId, int enrolledCourseId, long...roleIds) {
+        long[] enrolledCourseIds = new long[] { enrolledCourseId };
+        String ret = String.format(
+            "[{ \"id\" : \"%s\" , \"roles\" : [%s], \"enrolledcourses\" : [%s]}]",
+            moodleUserId,
+            longArrayJson("roleid", roleIds),
+            longArrayJson("id", enrolledCourseIds));
+
+        return ret;
+    }
+
+    private String longArrayJson(String key, long[] ids) {
+        return ids.length > 0 ?
+            Arrays.stream(ids)
+                .mapToObj(id -> String.format("{\"%s\" : %d}", key, id))
+                .reduce((a, b) -> a.concat(",").concat(b))
+                .get() :
+            "";
+    }
+
     protected final void expectGetEnrollmentsRequestToMoodle(final int courseId) {
         expectGetEnrollmentsRequestToMoodle(courseId, "[]");
     }
