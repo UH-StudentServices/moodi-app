@@ -94,7 +94,7 @@ public class UserSynchronizationActionResolver {
         // Suspend when
         //  the user can see the course AND
         //  user does not have teacher role in Moodle AND
-        //  student role is removed from Oodi OR user only has the sync role in Moodle, AND no student role in Oodi
+        //  student role is removed from student registry OR user only has the sync role in Moodle, AND no student role in student registry
         boolean suspendStudent =
             (rolesToRemove.contains(mapperService.getStudentRoleId()) ||
                 hasOnlySyncRole(currentRolesInMoodle) && !currentRegistryRoles.contains(mapperService.getStudentRoleId())) &&
