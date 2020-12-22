@@ -48,7 +48,7 @@ public class SisuCourseEnricher extends AbstractEnricher {
 
     public void prefetchCourses(List<String> curIds) {
         List<String> uniqueSisuIds = new LinkedHashSet<String>(curIds).stream()
-            .filter(id -> !studyRegistryService.isOodiId(id)).collect(Collectors.toList());
+            .filter(id -> !StudyRegistryService.isOodiId(id)).collect(Collectors.toList());
         prefetchedCursById = studyRegistryService.getCourseUnitRealisations(uniqueSisuIds).stream()
             .collect(Collectors.toMap(c -> c.realisationId, c -> c));
     }
@@ -56,7 +56,7 @@ public class SisuCourseEnricher extends AbstractEnricher {
     @Override
     protected SynchronizationItem doEnrich(SynchronizationItem item) {
         final Course course = item.getCourse();
-        if (studyRegistryService.isOodiId(course.realisationId)) {
+        if (StudyRegistryService.isOodiId(course.realisationId)) {
             return item;
         }
         final StudyRegistryCourseUnitRealisation cur = prefetchedCursById.get(course.realisationId);

@@ -67,8 +67,10 @@ public class StudyRegistryService {
 
         List<SisuCourseUnitRealisation> sisuCurs = sisuClient.getCourseUnitRealisations(idsByIsOodiId.get(false));
 
+        List<String> uniquePersonIds = sisuCurs.stream().flatMap(cur -> cur.teacherSisuIds().stream()).distinct().collect(Collectors.toList());
+
         Map<String, StudyRegistryTeacher> teachersById =
-            sisuClient.getPersons(sisuCurs.stream().flatMap(cur -> cur.teacherSisuIds().stream()).collect(Collectors.toList()))
+            sisuClient.getPersons(uniquePersonIds)
                 .stream().collect(Collectors.toMap(p -> p.id, p -> p.toStudyRegistryTeacher()));
 
         Stream<StudyRegistryCourseUnitRealisation> sisu = sisuCurs.stream()
@@ -78,7 +80,6 @@ public class StudyRegistryService {
             idsByIsOodiId.get(true).stream().map(id -> getCourseUnitRealisation(id)).filter(o -> o.isPresent()).map(o -> o.get());
 
         return Stream.concat(sisu, oodi).collect(Collectors.toList());
-
     }
 
     public static boolean isOodiId(final String realisationId) {
