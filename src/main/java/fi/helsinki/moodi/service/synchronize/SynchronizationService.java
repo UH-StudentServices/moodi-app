@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -79,18 +80,23 @@ public class SynchronizationService {
 
         final Stopwatch stopwatch = Stopwatch.createStarted();
         final long jobId  = begin(type);
+        final List<SynchronizationItem> processedItems = new ArrayList<>();
+        SynchronizationSummary summary;
+        try {
+            logger.info("Synchronization of type {} started with jobId {}", type, jobId);
 
-        logger.info("Synchronization of type {} started with jobId {}", type, jobId);
-
-        final List<Course> courses = loadCourses(type);
-        // The current software architecture does not easily support fetching several courses with one API call.
-        // Instead of refactoring the whole overcomplicated architecture now, we implement this hack to fetch several Sisu courses at once.
-        sisuCourseEnricher.prefetchCourses(courses.stream().map(c -> c.realisationId).collect(toList()));
-        final List<SynchronizationItem> items = makeItems(courses, type);
-        final List<SynchronizationItem> enrichedItems = enrichItems(items);
-        final List<SynchronizationItem> processedItems = processItems(enrichedItems);
-
-        final SynchronizationSummary summary = complete(type, jobId, stopwatch, processedItems);
+            final List<Course> courses = loadCourses(type);
+            // The current software architecture does not easily support fetching several courses with one API call.
+            // Instead of refactoring the whole overcomplicated architecture now, we implement this hack to fetch several Sisu courses at once.
+            sisuCourseEnricher.prefetchCourses(courses.stream().map(c -> c.realisationId).collect(toList()));
+            final List<SynchronizationItem> items = makeItems(courses, type);
+            final List<SynchronizationItem> enrichedItems = enrichItems(items);
+            processedItems.addAll(processItems(enrichedItems));
+        } catch (Exception e) {
+            logger.error("Exception in SynchronizationService", e);
+        } finally {
+            summary = complete(type, jobId, stopwatch, processedItems);
+        }
 
         logger.info("Synchronization with jobId {} completed in {}", jobId, stopwatch.toString());
 

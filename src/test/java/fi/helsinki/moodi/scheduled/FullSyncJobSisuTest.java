@@ -20,6 +20,7 @@ package fi.helsinki.moodi.scheduled;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseRepository;
+import fi.helsinki.moodi.service.util.MapperService;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,6 +49,9 @@ public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
     @Autowired
     private FullSynchronizationJob job;
 
+    @Autowired
+    protected MapperService mapperService;
+
     @MockBean
     private CourseRepository courseRepository;
 
@@ -69,7 +73,11 @@ public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
         setUpMockSisuAndPrefetchCourses();
 
         setupMoodleGetCourseResponse(MOODLE_COURSE_ID_1);
-        expectGetEnrollmentsRequestToMoodle(MOODLE_COURSE_ID_1);
+        // One user is already enrolled with student and synced roles.
+        expectGetEnrollmentsRequestToMoodle(
+            MOODLE_COURSE_ID_1,
+            getEnrollmentsResponse((int) MOODLE_USER_NOT_ENROLLED, MOODLE_COURSE_ID_1,
+                mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
         setupMoodleGetCourseResponse(MOODLE_COURSE_ID_2);
         expectGetEnrollmentsRequestToMoodle(MOODLE_COURSE_ID_2);
 
@@ -99,6 +107,10 @@ public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
             new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_TEACH_ONE, MOODLE_COURSE_ID_1),
             new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_TEACH_ONE, MOODLE_COURSE_ID_1)
         );
+
+        // The existing student gets suspended and student role removed, because no longer enrolled in Sisu.
+        expectSuspendRequestToMoodle(new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_NOT_ENROLLED, MOODLE_COURSE_ID_1));
+        expectAssignRolesToMoodle(false, new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_NOT_ENROLLED, MOODLE_COURSE_ID_1));
 
         // Course two student and teachers are enrolled.
         expectEnrollmentRequestToMoodle(
