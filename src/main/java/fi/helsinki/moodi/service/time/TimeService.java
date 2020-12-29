@@ -17,13 +17,18 @@
 
 package fi.helsinki.moodi.service.time;
 
+import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
-public interface TimeService {
+@Service
+public class TimeService {
+    public LocalDateTime getCurrentUTCDateTime() {
+        return LocalDateTime.now(ZoneOffset.UTC);
+    }
 
-    LocalDateTime getCurrentUTCDateTime();
-
-    long getCurrentUTCTimestamp();
-
-    LocalDateTime getCurrentDateTime();
+    public LocalDateTime getCurrentDateTime() {
+        return LocalDateTime.now();
+    }
 }

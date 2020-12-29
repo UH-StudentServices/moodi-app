@@ -20,7 +20,7 @@ package fi.helsinki.moodi.service.synchronize.job;
 import com.google.common.collect.Lists;
 import fi.helsinki.moodi.service.synchronize.SynchronizationStatus;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
-import fi.helsinki.moodi.service.time.SystemTimeService;
+import fi.helsinki.moodi.service.time.TimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -32,9 +32,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static fi.helsinki.moodi.service.synchronize.SynchronizationStatus.COMPLETED_FAILURE;
-import static fi.helsinki.moodi.service.synchronize.SynchronizationStatus.COMPLETED_SUCCESS;
-import static fi.helsinki.moodi.service.synchronize.SynchronizationStatus.STARTED;
+import static fi.helsinki.moodi.service.synchronize.SynchronizationStatus.*;
 import static fi.helsinki.moodi.service.synchronize.SynchronizationType.INCREMENTAL;
 
 @Service
@@ -42,13 +40,13 @@ import static fi.helsinki.moodi.service.synchronize.SynchronizationType.INCREMEN
 public class SynchronizationJobRunService {
 
     private final SynchronizationJobRunRepository synchronizationJobRunRepository;
-    private final SystemTimeService timeService;
+    private final TimeService timeService;
     private final Environment environment;
 
     @Autowired
     public SynchronizationJobRunService(
             SynchronizationJobRunRepository synchronizationJobRunRepository,
-            SystemTimeService timeService,
+            TimeService timeService,
             Environment environment) {
         this.synchronizationJobRunRepository = synchronizationJobRunRepository;
         this.timeService = timeService;
@@ -75,6 +73,10 @@ public class SynchronizationJobRunService {
 
     public Optional<SynchronizationJobRun> findLatestJob(SynchronizationType type) {
         return synchronizationJobRunRepository.findFirstByTypeOrderByCompletedDesc(type);
+    }
+
+    public Optional<SynchronizationJobRun> findLatestCompletedJob() {
+        return synchronizationJobRunRepository.findFirstByStatusInOrderByCompletedDesc(Lists.newArrayList(COMPLETED_SUCCESS, COMPLETED_FAILURE));
     }
 
     public long begin(final SynchronizationType type) {

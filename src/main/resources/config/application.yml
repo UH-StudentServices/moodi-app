@@ -10,6 +10,7 @@ management:
   endpoint:
     health:
       enabled: true
+      show-details: always # The health endpoint is not publicly reachable, so we can give out details to facilitate troubleshooting.
 
 httpClient:
   readTimeout: 15000

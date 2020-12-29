@@ -1,0 +1,93 @@
+/*
+ * This file is part of Moodi application.
+ *
+ * Moodi application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Moodi application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package fi.helsinki.moodi;
+
+import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRun;
+import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRunService;
+import fi.helsinki.moodi.service.time.TimeService;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+@Component
+public class MoodiHealthIndicator implements HealthIndicator {
+    private static final int MAX_HOURS_SINCE_COMPLETED_SYNC = 3;
+    private static final int MIN_MINUTES_SINCE_ERROR = 30;
+    private Error reportedError;
+
+    private final SynchronizationJobRunService synchronizationJobRunService;
+    private final TimeService timeService;
+
+    public MoodiHealthIndicator(SynchronizationJobRunService synchronizationJobRunService, TimeService timeService) {
+        this.synchronizationJobRunService = synchronizationJobRunService;
+        this.timeService = timeService;
+    }
+
+    // Return DOWN, if
+    // -  a sync job has not completed within 3 hours. Cannot really inspect the status of the sync job, since in production
+    //    all sync jobs seem to be COMPLETED_FAILURE.
+    // - an important API action has failed within 30 minutes, and has not succeeded since.
+    @Override
+    public Health health() {
+        LocalDateTime now = timeService.getCurrentDateTime();
+        try {
+            Optional<SynchronizationJobRun> searched = synchronizationJobRunService.findLatestCompletedJob();
+            if (searched.isPresent()) {
+                SynchronizationJobRun latest = searched.get();
+                if (latest.completed == null || latest.completed.isBefore(now.minusHours(MAX_HOURS_SINCE_COMPLETED_SYNC))) {
+                    return indicateError(String.format("No job completed in %d hours. Latest job completed at %s",
+                        MAX_HOURS_SINCE_COMPLETED_SYNC, latest.completed));
+                }
+            } else {
+                return indicateError("No sync jobs in the DB.");
+            }
+
+            if (reportedError != null && reportedError.when.isAfter(now.minusMinutes(MIN_MINUTES_SINCE_ERROR))) {
+                return indicateError(reportedError.message);
+            }
+        } catch (Exception e) {
+            return indicateError(e.toString());
+        }
+        return Health.up().build();
+    }
+
+    public void reportError(String error) {
+        reportedError = new Error(error);
+    }
+
+    public void clearError() {
+        reportedError = null;
+    }
+
+    private Health indicateError(String message) {
+        return Health.down().withDetail("error", message).build();
+    }
+
+    private class Error {
+        public String message;
+        public LocalDateTime when;
+
+        public Error(String error) {
+            this.message = error;
+            this.when = timeService.getCurrentDateTime();
+        }
+    }
+}
