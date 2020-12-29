@@ -139,7 +139,7 @@ public class DevModeController {
     @RequestMapping(value = "/api/v1/study-registry-course/{realisationId}/users", method = RequestMethod.GET)
     @ResponseBody
     public List<MoodleUser> getOodiCourseUsers(@PathVariable("realisationId") String realisationId) {
-        final StudyRegistryCourseUnitRealisation realisation = getOodiCourse(realisationId);
+        final StudyRegistryCourseUnitRealisation realisation = getStudyRegistryCourse(realisationId);
 
         final List<MoodleUser> students = realisation.students.stream()
                 .map(s -> new MoodleUser("student", s.firstNames, s.lastName,
@@ -169,9 +169,9 @@ public class DevModeController {
 
     @RequestMapping(value = "/api/v1/study-registry-course/{realisationId}", method = RequestMethod.GET)
     @ResponseBody
-    public StudyRegistryCourseUnitRealisation getOodiCourse(@PathVariable("realisationId") String realisationId) {
+    public StudyRegistryCourseUnitRealisation getStudyRegistryCourse(@PathVariable("realisationId") String realisationId) {
         return studyRegistryService.getCourseUnitRealisation(realisationId)
-                .orElseThrow(notFoundException("Oodi course not found with realisation id " + realisationId));
+                .orElseThrow(notFoundException("Study registry course not found with realisation id " + realisationId));
 
     }
 

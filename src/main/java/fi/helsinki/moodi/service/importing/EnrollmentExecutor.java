@@ -104,8 +104,7 @@ public class EnrollmentExecutor {
 
         } catch (Exception e) {
             courseService.completeCourseImport(course.realisationId, false);
-            logger.error("Enrollment execution failed for course " + course.realisationId);
-            e.printStackTrace();
+            logger.error("Enrollment execution failed for course " + course.realisationId, e);
         }
     }
 

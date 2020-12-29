@@ -17,6 +17,7 @@
 
 package fi.helsinki.moodi.web;
 
+import fi.helsinki.moodi.MoodiHealthIndicator;
 import fi.helsinki.moodi.service.Result;
 import fi.helsinki.moodi.service.dto.CourseDto;
 import fi.helsinki.moodi.service.importing.ImportCourseRequest;
@@ -33,17 +34,26 @@ import javax.validation.Valid;
 public class CourseController {
 
     private final ImportingService importingService;
+    private final MoodiHealthIndicator moodiHealthIndicator;
 
     @Autowired
-    public CourseController(ImportingService importingService) {
+    public CourseController(ImportingService importingService, MoodiHealthIndicator moodiHealthIndicator) {
         this.importingService = importingService;
+        this.moodiHealthIndicator = moodiHealthIndicator;
     }
 
     @RequestMapping(value = "/api/v1/courses", method = RequestMethod.POST)
     public ResponseEntity<Result<ImportCourseResponse, String>> importCourse(
         @Valid @RequestBody final ImportCourseRequest request) {
 
-        return response(importingService.importCourse(request));
+        try {
+            Result<ImportCourseResponse, String> ret = importingService.importCourse(request);
+            moodiHealthIndicator.clearError();
+            return response(ret);
+        } catch (Exception e) {
+            moodiHealthIndicator.reportError(e.toString());
+            throw e;
+        }
     }
 
     @RequestMapping(value = "/api/v1/courses/{realisationId}", method = RequestMethod.GET)

@@ -17,6 +17,7 @@
 
 package fi.helsinki.moodi.exception;
 
+// Indicates a course is not found in Moodi.
 public class CourseNotFoundException extends MoodiException {
     public CourseNotFoundException(String realisationId) {
         super(String.format("Course with realisationId %s not found", realisationId));
