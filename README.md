@@ -13,10 +13,8 @@ Integrations
 Environments
 ================
 
-Currently Moodi has 4 environments: local, dev, (qa*) and prod. Integrations are mapped for each environment in corresponding application-<env>.yml. 
-Currently only IAM has a mock implementatation that is used in local and dev environments.
-
-*) Will be removed.
+Currently Moodi has 3 environments: local, dev, and prod. Integrations are mapped for each environment in corresponding application-<env>.yml. 
+Currently only IAM has a mock implementation that is used in local and dev environments.
 
 Requirements
 ---------------
