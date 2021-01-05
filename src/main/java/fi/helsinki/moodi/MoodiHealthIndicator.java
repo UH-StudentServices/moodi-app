@@ -24,6 +24,8 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -61,7 +63,7 @@ public class MoodiHealthIndicator implements HealthIndicator {
             }
 
             if (reportedError != null && reportedError.when.isAfter(now.minusMinutes(MIN_MINUTES_SINCE_ERROR))) {
-                return indicateError(reportedError.message);
+                return indicateError(reportedError.message, reportedError.exception);
             }
         } catch (Exception e) {
             return indicateError(e.toString());
@@ -69,8 +71,8 @@ public class MoodiHealthIndicator implements HealthIndicator {
         return Health.up().build();
     }
 
-    public void reportError(String error) {
-        reportedError = new Error(error);
+    public void reportError(String error, Exception e) {
+        reportedError = new Error(error, e);
     }
 
     public void clearError() {
@@ -78,15 +80,31 @@ public class MoodiHealthIndicator implements HealthIndicator {
     }
 
     private Health indicateError(String message) {
-        return Health.down().withDetail("error", message).build();
+        return indicateError(message, null);
+    }
+
+    private Health indicateError(String message, Exception e) {
+        return Health.down()
+            .withDetail("error", message)
+            .withDetail("stack", e != null ? stackString(e) : "none")
+            .build();
+    }
+
+    private Object stackString(Exception e) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        return sw.toString();
     }
 
     private class Error {
         public String message;
+        public Exception exception;
         public LocalDateTime when;
 
-        public Error(String error) {
+        public Error(String error, Exception e) {
             this.message = error;
+            this.exception = e;
             this.when = timeService.getCurrentDateTime();
         }
     }

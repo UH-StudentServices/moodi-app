@@ -19,6 +19,7 @@ package fi.helsinki.moodi.web;
 
 import fi.helsinki.moodi.MoodiHealthIndicator;
 import fi.helsinki.moodi.service.Result;
+import fi.helsinki.moodi.service.importing.ImportCourseRequest;
 import fi.helsinki.moodi.service.importing.ImportCourseResponse;
 import fi.helsinki.moodi.service.importing.ImportingService;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRun;
@@ -34,8 +35,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -44,6 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class HealthCheckTest extends AbstractMoodiIntegrationTest {
     private static String EXCEPTION_MESSAGE = "It's all gone Pete Tong";
+    private static String STACK_PART = "at fi.helsinki.moodi.web.CourseController.importCourse";
 
     @MockBean
     private TimeService timeService;
@@ -72,6 +73,7 @@ public class HealthCheckTest extends AbstractMoodiIntegrationTest {
             .andExpect(jsonPath("$.status").value("UP"));
     }
 
+    @Test
     public void thatReturnsOkWhenCourseImportFailedFortyMinutesAgo() throws Exception {
         setupJobRunHoursAgo(1);
 
@@ -86,17 +88,18 @@ public class HealthCheckTest extends AbstractMoodiIntegrationTest {
             .andExpect(jsonPath("$.status").value("UP"));
     }
 
+    @Test
     public void thatReturnsOkWhenCourseImportFailedTenMinutesAgoButSucceededAfterThat() throws Exception {
         setupJobRunHoursAgo(1);
 
         setTime(-10);
-        when(importingService.importCourse(any())).thenThrow(new NullPointerException(EXCEPTION_MESSAGE));
+        when(importingService.importCourse(new ImportCourseRequest("123"))).thenThrow(new NullPointerException(EXCEPTION_MESSAGE));
         makeCreateCourseRequest("123").andExpect(status().is5xxServerError());
 
         setTime(0);
 
-        when(importingService.importCourse(any())).thenReturn(Result.success(new ImportCourseResponse(456)));
-        makeCreateCourseRequest("123").andExpect(status().isOk());
+        when(importingService.importCourse(new ImportCourseRequest("456"))).thenReturn(Result.success(new ImportCourseResponse(456)));
+        makeCreateCourseRequest("456").andExpect(status().isOk());
 
         mockMvc.perform(get("/health"))
             .andExpect(status().isOk())
@@ -136,7 +139,8 @@ public class HealthCheckTest extends AbstractMoodiIntegrationTest {
             .andDo(print())
             .andExpect(status().is5xxServerError())
             .andExpect(jsonPath("$.status").value("DOWN"))
-            .andExpect(jsonPath("$.details.moodi.details.error").value("java.lang.NullPointerException: " + EXCEPTION_MESSAGE));
+            .andExpect(jsonPath("$.details.moodi.details.error").value("java.lang.NullPointerException: " + EXCEPTION_MESSAGE))
+            .andExpect(jsonPath("$.details.moodi.details.stack").hasJsonPath());
     }
 
     private LocalDateTime setupJobRunHoursAgo(int hours) {
