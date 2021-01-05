@@ -44,7 +44,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class HealthCheckTest extends AbstractMoodiIntegrationTest {
     private static String EXCEPTION_MESSAGE = "It's all gone Pete Tong";
-    private static String STACK_PART = "at fi.helsinki.moodi.web.CourseController.importCourse";
 
     @MockBean
     private TimeService timeService;
