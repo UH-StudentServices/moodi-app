@@ -18,8 +18,32 @@
 package fi.helsinki.moodi.service.importing;
 
 import javax.validation.constraints.NotNull;
+import java.util.Objects;
 
 public final class ImportCourseRequest {
     @NotNull
     public String realisationId;
+
+    public ImportCourseRequest() {}
+
+    public ImportCourseRequest(String i) {
+        this.realisationId = i;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ImportCourseRequest that = (ImportCourseRequest) o;
+        return Objects.equals(realisationId, that.realisationId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(realisationId);
+    }
 }

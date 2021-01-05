@@ -51,7 +51,7 @@ public class CourseController {
             moodiHealthIndicator.clearError();
             return response(ret);
         } catch (Exception e) {
-            moodiHealthIndicator.reportError(e.toString());
+            moodiHealthIndicator.reportError(e.toString(), e);
             throw e;
         }
     }
