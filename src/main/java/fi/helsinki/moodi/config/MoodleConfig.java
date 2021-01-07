@@ -46,18 +46,17 @@ public class MoodleConfig {
     private Environment environment;
 
     @Bean
-    public MoodleClient moodleClient(ObjectMapper objectMapper) {
+    public MoodleClient moodleClient(ObjectMapper objectMapper, HttpClientBuilder clientBuilder) {
         return new MoodleClient(
             restUrl(),
             wstoken(),
             objectMapper,
-            moodleRestTemplate(),
-            moodleReadOnlyRestTemplate());
+            moodleRestTemplate(clientBuilder),
+            moodleReadOnlyRestTemplate(clientBuilder));
     }
 
-    private RestTemplate createRestTemplate(HttpRequestRetryHandler httpRequestRetryHandler) {
-        final HttpClient httpClient = HttpClientBuilder
-            .create()
+    private RestTemplate createRestTemplate(HttpRequestRetryHandler httpRequestRetryHandler, HttpClientBuilder clientBuilder) {
+        final HttpClient httpClient = clientBuilder
             .setRetryHandler(httpRequestRetryHandler)
             .build();
 
@@ -77,14 +76,14 @@ public class MoodleConfig {
 
     //RestTemplate for requests that make modifications to Moodle. Do not get retried immediately in case of error.
     @Bean
-    public RestTemplate moodleRestTemplate() {
-        return createRestTemplate(new DefaultHttpRequestRetryHandler(RETRY_COUNT, false));
+    public RestTemplate moodleRestTemplate(HttpClientBuilder clientBuilder) {
+        return createRestTemplate(new DefaultHttpRequestRetryHandler(RETRY_COUNT, false), clientBuilder);
     }
 
     //RestTemplate for request that only read data from Moodle. May get retried up to RETRY_COUNT times in case of failure.
     @Bean
-    public RestTemplate moodleReadOnlyRestTemplate() {
-        return createRestTemplate(new DefaultHttpRequestRetryHandler(RETRY_COUNT, true));
+    public RestTemplate moodleReadOnlyRestTemplate(HttpClientBuilder clientBuilder) {
+        return createRestTemplate(new DefaultHttpRequestRetryHandler(RETRY_COUNT, true), clientBuilder);
     }
 
     private String restUrl() {

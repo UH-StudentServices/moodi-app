@@ -46,10 +46,14 @@ public class SisuGraphQLClient implements SisuClient {
     private final String endPointURL;
     @Value("${SisuGraphQLClient.batchsize:100}")
     private int batchSize;
+    private int connectTimeout;
+    private int socketTimeout;
 
-    public SisuGraphQLClient(String sisuBaseUrl, String apiKey) {
+    public SisuGraphQLClient(String sisuBaseUrl, String apiKey, int connectTimeout, int socketTimeout) {
         this.endPointURL = sisuBaseUrl + "/graphql";
         this.headers.put(API_KEY_HEADER_NAME, apiKey);
+        this.connectTimeout = connectTimeout;
+        this.socketTimeout = socketTimeout;
     }
 
     @Override
@@ -94,7 +98,7 @@ public class SisuGraphQLClient implements SisuClient {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
-        GraphQLTemplate graphQLTemplate = new GraphQLTemplate();
+        GraphQLTemplate graphQLTemplate = new GraphQLTemplate(connectTimeout, socketTimeout);
         GraphQLResponseEntity<T> responseEntity;
 
         try {
