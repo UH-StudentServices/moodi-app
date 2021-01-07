@@ -23,10 +23,15 @@ import fi.helsinki.moodi.integration.http.RequestTimingInterceptor;
 import fi.helsinki.moodi.integration.iam.IAMClient;
 import fi.helsinki.moodi.integration.iam.IAMMockClient;
 import fi.helsinki.moodi.integration.iam.IAMRestClient;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.client.BufferingClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
@@ -52,11 +57,11 @@ public class IAMConfig {
     private String mockUsers;
 
     @Bean
-    public IAMClient iamClient(ObjectMapper objectMapper) {
+    public IAMClient iamClient(ObjectMapper objectMapper, HttpClientBuilder clientBuilder) {
         if (mockClientImplementation) {
             return new IAMMockClient(getMockUsers());
         } else {
-            return new IAMRestClient(baseUrl, iamRestTemplate(objectMapper));
+            return new IAMRestClient(baseUrl, iamRestTemplate(objectMapper, clientBuilder));
         }
     }
 
@@ -72,9 +77,15 @@ public class IAMConfig {
     }
 
     @Bean
-    public RestTemplate iamRestTemplate(ObjectMapper objectMapper) {
+    public RestTemplate iamRestTemplate(ObjectMapper objectMapper, HttpClientBuilder clientBuilder) {
+        final HttpClient httpClient = clientBuilder.build();
+
+        final ClientHttpRequestFactory requestFactory =
+            new BufferingClientHttpRequestFactory(new HttpComponentsClientHttpRequestFactory(httpClient));
+
         final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(objectMapper);
-        RestTemplate restTemplate = new RestTemplate(Collections.singletonList(converter));
+        RestTemplate restTemplate = new RestTemplate(requestFactory);
+        restTemplate.setMessageConverters(Collections.singletonList(converter));
         restTemplate.setInterceptors(newArrayList(new LoggingInterceptor(), new RequestTimingInterceptor()));
         return restTemplate;
     }

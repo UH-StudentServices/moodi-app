@@ -40,4 +40,5 @@ public interface SynchronizationJobRunRepository extends JpaRepository<Synchroni
     @Query("delete from #{#entityName} where type = ?1 and started < ?2")
     void deleteByTypeAndDate(SynchronizationType type, LocalDateTime date);
 
+    Optional<SynchronizationJobRun> findFirstByStatusInOrderByCompletedDesc(List<SynchronizationStatus> statuses);
 }

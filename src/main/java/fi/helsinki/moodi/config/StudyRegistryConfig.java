@@ -23,10 +23,10 @@ import fi.helsinki.moodi.integration.http.RequestTimingInterceptor;
 import fi.helsinki.moodi.integration.oodi.OodiClient;
 import fi.helsinki.moodi.integration.sisu.SisuClient;
 import fi.helsinki.moodi.integration.sisu.SisuGraphQLClient;
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -45,6 +45,11 @@ import static com.google.common.collect.Lists.newArrayList;
 
 @Configuration
 public class StudyRegistryConfig {
+    @Value("${httpClient.connectTimeout}")
+    private int connectTimeout;
+
+    @Value("${httpClient.socketTimeout}")
+    private int socketTimeout;
 
     @Autowired
     private Environment environment;
@@ -92,20 +97,24 @@ public class StudyRegistryConfig {
     }
 
     @Bean
-    public RestTemplate oodiRestTemplate(ObjectMapper objectMapper) {
+    public RestTemplate oodiRestTemplate(ObjectMapper objectMapper, HttpClientBuilder clientBuilder) {
         final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(objectMapper);
 
         RestTemplate restTemplate = new RestTemplate(Collections.singletonList(converter));
         restTemplate.setInterceptors(newArrayList(new LoggingInterceptor(), new RequestTimingInterceptor()));
+
         if (useClientCert()) {
-            final HttpClient client = HttpClients.custom().setSSLContext(sslContext()).build();
-            restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(client));
+            clientBuilder.setSSLContext(sslContext());
         }
+        restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(clientBuilder.build()));
         return restTemplate;
     }
 
     @Bean
     public SisuClient sisuClient() {
-        return new SisuGraphQLClient(environment.getProperty("integration.sisu.baseUrl"), environment.getProperty("integration.sisu.apiKey"));
+        return new SisuGraphQLClient(environment.getProperty("integration.sisu.baseUrl"),
+            environment.getProperty("integration.sisu.apiKey"),
+            connectTimeout,
+            socketTimeout);
     }
 }

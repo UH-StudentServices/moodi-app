@@ -10,12 +10,15 @@ management:
   endpoint:
     health:
       enabled: true
+      show-details: always # The health endpoint is not publicly reachable, so we can give out details to facilitate troubleshooting.
 
 httpClient:
-  readTimeout: 15000
+  # Determines the timeout in milliseconds until a connection is established.
   connectTimeout: 3000
-  maxTotal: 500
-  defaultMaxPerRoute: 500
+  # Defines the socket timeout (SO_TIMEOUT) in milliseconds,
+  # which is the timeout for waiting for data  or, put differently,
+  # a maximum period inactivity between two consecutive data packets).
+  socketTimeout: 3000
 
 oodi.enrollmentApprovedStatusCodes: 2, 3, 7, 8
 

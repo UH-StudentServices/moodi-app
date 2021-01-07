@@ -23,7 +23,7 @@ import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRun;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRunService;
-import fi.helsinki.moodi.service.time.SystemTimeService;
+import fi.helsinki.moodi.service.time.TimeService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -47,14 +47,14 @@ public class IncrementalSynchronizationCourseLoader implements CourseLoader {
 
     private final CourseService courseService;
     private final SynchronizationJobRunService synchronizationJobRunService;
-    private final SystemTimeService timeService;
+    private final TimeService timeService;
     private final OodiClient oodiClient;
 
     @Autowired
     public IncrementalSynchronizationCourseLoader(
             CourseService courseService,
             SynchronizationJobRunService synchronizationJobRunService,
-            SystemTimeService timeService,
+            TimeService timeService,
             OodiClient oodiClient) {
 
         this.courseService = courseService;
