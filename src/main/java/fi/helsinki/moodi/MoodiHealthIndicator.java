@@ -49,13 +49,13 @@ public class MoodiHealthIndicator implements HealthIndicator {
     // - an important API action has failed within 30 minutes, and has not succeeded since.
     @Override
     public Health health() {
-        LocalDateTime now = timeService.getCurrentDateTime();
+        LocalDateTime now = timeService.getCurrentUTCDateTime(); // DB timestamps are in UTC.
         try {
             Optional<SynchronizationJobRun> searched = synchronizationJobRunService.findLatestCompletedJob();
             if (searched.isPresent()) {
                 SynchronizationJobRun latest = searched.get();
                 if (latest.completed == null || latest.completed.isBefore(now.minusHours(MAX_HOURS_SINCE_COMPLETED_SYNC))) {
-                    return indicateError(String.format("No job completed in %d hours. Latest job completed at %s",
+                    return indicateError(String.format("No job completed in %d hours. Latest job completed at %s UTC",
                         MAX_HOURS_SINCE_COMPLETED_SYNC, latest.completed));
                 }
             } else {
@@ -105,7 +105,7 @@ public class MoodiHealthIndicator implements HealthIndicator {
         public Error(String error, Exception e) {
             this.message = error;
             this.exception = e;
-            this.when = timeService.getCurrentDateTime();
+            this.when = timeService.getCurrentUTCDateTime(); // This class uses UTC, because DB timestamps are in UTC.
         }
     }
 }
