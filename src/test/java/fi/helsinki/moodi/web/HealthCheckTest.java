@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -112,7 +113,8 @@ public class HealthCheckTest extends AbstractMoodiIntegrationTest {
         mockMvc.perform(get("/health"))
             .andExpect(status().is5xxServerError())
             .andExpect(jsonPath("$.status").value("DOWN"))
-            .andExpect(jsonPath("$.details.moodi.details.error").value("No job completed in 3 hours. Latest job completed at " + fourHoursAgo));
+            .andExpect(jsonPath("$.details.moodi.details.error")
+                .value(String.format("No job completed in 3 hours. Latest job completed at %s UTC", fourHoursAgo)));
     }
 
     @Test
@@ -143,7 +145,7 @@ public class HealthCheckTest extends AbstractMoodiIntegrationTest {
     }
 
     private LocalDateTime setupJobRunHoursAgo(int hours) {
-        LocalDateTime hoursAgo = LocalDateTime.now().minusHours(hours);
+        LocalDateTime hoursAgo = LocalDateTime.now(ZoneOffset.UTC).minusHours(hours);
         setupLastRun(getRun(hoursAgo));
 
         setTime(0);
@@ -151,7 +153,7 @@ public class HealthCheckTest extends AbstractMoodiIntegrationTest {
     }
 
     private void setTime(int diffMinutes) {
-        when(timeService.getCurrentDateTime()).thenReturn(LocalDateTime.now().plusMinutes(diffMinutes));
+        when(timeService.getCurrentUTCDateTime()).thenReturn(LocalDateTime.now(ZoneOffset.UTC).plusMinutes(diffMinutes));
     }
 
     private void setupLastRun(Optional<SynchronizationJobRun> jobRun) {
