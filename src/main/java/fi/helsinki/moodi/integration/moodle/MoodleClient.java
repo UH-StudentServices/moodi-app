@@ -85,7 +85,7 @@ public class MoodleClient {
         try {
             return execute(params, new TypeReference<List<MoodleFullCourse>>() {}, DEFAULT_EVALUATION, true);
         } catch (Exception e) {
-            return handleException("Error executing method: core_course_get_courses", e);
+            return handleException("Error executing method: getCourses", e);
         }
     }
 
@@ -124,7 +124,7 @@ public class MoodleClient {
                 .map(s -> s.id)
                 .orElse(null);
         } catch (Exception e) {
-            return handleException("Error executing method: importCourse", e);
+            return handleException("Error executing method: createCourse", e);
         }
     }
 
@@ -179,7 +179,7 @@ public class MoodleClient {
                 .findFirst()
                 .orElse(null);
         } catch (Exception e) {
-            return handleException("Error executing method: getUsers", e);
+            return handleException("Error executing method: getUser", e);
         }
     }
 
@@ -223,7 +223,7 @@ public class MoodleClient {
         try {
             return execute(params, new TypeReference<List<MoodleUserEnrollments>>() {}, DEFAULT_EVALUATION, true);
         } catch (Exception e) {
-            return handleException("Error executing method: getUsers", e);
+            return handleException("Error executing method: getEnrolledUsers", e);
         }
     }
 
