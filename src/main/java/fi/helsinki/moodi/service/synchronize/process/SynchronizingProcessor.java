@@ -299,17 +299,31 @@ public class SynchronizingProcessor extends AbstractProcessor {
         }
 
         if (usernames.isEmpty()) {
-            return item.withStatus(USERNAME_NOT_FOUND);
+            // https://jira.it.helsinki.fi/browse/MOODI-126
+            // Username not found in IAM is no longer considered an error. Should not happen at all with Sisu courses.
+            return item;
         }
-        return getMoodleUser(usernames).map(item::withMoodleUser).orElseGet(() -> item.withStatus(MOODLE_USER_NOT_FOUND));
+        List<String> finalUsernames = usernames;
+        return getMoodleUser(usernames).map(item::withMoodleUser).orElseGet(() ->  {
+            logger.warn("User not found from Moodle with usernames " + finalUsernames);
+            return item.withStatus(MOODLE_USER_NOT_FOUND);
+        });
     }
 
     private List<String> getUsernameList(StudyRegistryStudent student) {
-        return iamService.getStudentUserNameList(student.studentNumber);
+        List<String> ret = iamService.getStudentUserNameList(student.studentNumber);
+        if (ret.isEmpty()) {
+            logger.warn("User not found from IAM with student number " + student.studentNumber);
+        }
+        return ret;
     }
 
     private List<String> getUsernameList(StudyRegistryTeacher teacher) {
-        return iamService.getTeacherUserNameList(teacher.employeeNumber);
+        List<String> ret = iamService.getTeacherUserNameList(teacher.employeeNumber);
+        if (ret.isEmpty()) {
+            logger.warn("User not found from IAM with employee number " + teacher.employeeNumber);
+        }
+        return ret;
     }
 
     private Optional<MoodleUser> getMoodleUser(final List<String> usernameList) {

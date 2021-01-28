@@ -49,7 +49,7 @@ public class FullSynchronizationJob {
         }
     }
 
-    private boolean isEnabled() {
+    public boolean isEnabled() {
         final String key = String.format("synchronize.%s.enabled", FULL);
         return environment.getRequiredProperty(key, Boolean.class);
     }

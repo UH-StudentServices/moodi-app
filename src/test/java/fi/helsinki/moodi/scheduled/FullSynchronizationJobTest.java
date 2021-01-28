@@ -310,12 +310,12 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
     }
 
     @Test
-    public void thatIfUsernameIsNotFoundFromIAMSynchronizationIsNotCompleted() {
+    public void thatIfUsernameIsNotFoundFromIAMSynchronizationIsSuccessful() {
         ExpectationsForUserThatCannotBeMappedToMoodleUser expectations = () -> {
             expectFindStudentRequestToIAMAndRespondWithEmptyResult(STUDENT_NUMBER);
         };
 
-        testSynchronizationForUserThatCanNotBeMappedToMoodleUser(expectations, UserSynchronizationItemStatus.USERNAME_NOT_FOUND);
+        testSynchronizationForUserThatCanNotBeMappedToMoodleUser(expectations, UserSynchronizationItemStatus.SUCCESS);
     }
 
     @Test
