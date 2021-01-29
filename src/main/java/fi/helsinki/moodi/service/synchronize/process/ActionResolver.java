@@ -35,8 +35,8 @@ public final class ActionResolver {
                 return Action.SYNCHRONIZE;
             case COURSE_NOT_PUBLIC:
             case COURSE_ENDED:
-                return Action.REMOVE;
             case MOODLE_COURSE_NOT_FOUND:
+                return Action.REMOVE;
             case LOCKED:
             default:
                 return Action.SKIP;
