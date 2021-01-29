@@ -22,6 +22,7 @@ import fi.helsinki.moodi.service.Result;
 import fi.helsinki.moodi.service.importing.ImportCourseRequest;
 import fi.helsinki.moodi.service.importing.ImportCourseResponse;
 import fi.helsinki.moodi.service.importing.ImportingService;
+import fi.helsinki.moodi.service.synchronize.SynchronizationStatus;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRun;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRunRepository;
 import fi.helsinki.moodi.service.time.TimeService;
@@ -107,6 +108,17 @@ public class HealthCheckTest extends AbstractMoodiIntegrationTest {
     }
 
     @Test
+    public void thatReturnsErrorWhenJobCompletedFailure() throws Exception {
+        setupJobRunHoursAgo(1, SynchronizationStatus.COMPLETED_FAILURE);
+
+        mockMvc.perform(get("/health"))
+            .andExpect(status().is5xxServerError())
+            .andExpect(jsonPath("$.status").value("DOWN"))
+            .andExpect(jsonPath("$.details.moodi.details.error")
+                .value("Status of the last sync job is not COMPLETED_SUCCESS, but COMPLETED_FAILURE"));
+    }
+
+    @Test
     public void thatReturnsErrorWhenNoJobCompletedInThreeHours() throws Exception {
         LocalDateTime fourHoursAgo = setupJobRunHoursAgo(4);
 
@@ -114,7 +126,7 @@ public class HealthCheckTest extends AbstractMoodiIntegrationTest {
             .andExpect(status().is5xxServerError())
             .andExpect(jsonPath("$.status").value("DOWN"))
             .andExpect(jsonPath("$.details.moodi.details.error")
-                .value(String.format("No job completed in 3 hours. Latest job completed at %s UTC", fourHoursAgo)));
+                .value(String.format("No sync job completed in 3 hours. Latest job completed at %s UTC", fourHoursAgo)));
     }
 
     @Test
@@ -145,8 +157,12 @@ public class HealthCheckTest extends AbstractMoodiIntegrationTest {
     }
 
     private LocalDateTime setupJobRunHoursAgo(int hours) {
+        return setupJobRunHoursAgo(hours, SynchronizationStatus.COMPLETED_SUCCESS);
+    }
+
+    private LocalDateTime setupJobRunHoursAgo(int hours, SynchronizationStatus status) {
         LocalDateTime hoursAgo = LocalDateTime.now(ZoneOffset.UTC).minusHours(hours);
-        setupLastRun(getRun(hoursAgo));
+        setupLastRun(getRun(hoursAgo, status));
 
         setTime(0);
         return hoursAgo;
@@ -160,9 +176,10 @@ public class HealthCheckTest extends AbstractMoodiIntegrationTest {
         when(synchronizationJobRunRepository.findFirstByStatusInOrderByCompletedDesc(anyList())).thenReturn(jobRun);
     }
 
-    private Optional<SynchronizationJobRun> getRun(LocalDateTime completed) {
+    private Optional<SynchronizationJobRun> getRun(LocalDateTime completed, SynchronizationStatus status) {
         SynchronizationJobRun ret = new SynchronizationJobRun();
         ret.completed = completed;
+        ret.status = status;
         return Optional.of(ret);
     }
 }

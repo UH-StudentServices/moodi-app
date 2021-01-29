@@ -17,6 +17,8 @@
 
 package fi.helsinki.moodi;
 
+import fi.helsinki.moodi.scheduled.FullSynchronizationJob;
+import fi.helsinki.moodi.service.synchronize.SynchronizationStatus;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRun;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRunService;
 import fi.helsinki.moodi.service.time.TimeService;
@@ -37,29 +39,35 @@ public class MoodiHealthIndicator implements HealthIndicator {
 
     private final SynchronizationJobRunService synchronizationJobRunService;
     private final TimeService timeService;
+    private final FullSynchronizationJob fullSynchronizationJob;
 
-    public MoodiHealthIndicator(SynchronizationJobRunService synchronizationJobRunService, TimeService timeService) {
+    public MoodiHealthIndicator(SynchronizationJobRunService synchronizationJobRunService, TimeService timeService,
+                                FullSynchronizationJob fullSynchronizationJob) {
         this.synchronizationJobRunService = synchronizationJobRunService;
         this.timeService = timeService;
+        this.fullSynchronizationJob = fullSynchronizationJob;
     }
 
     // Return DOWN, if
-    // -  a sync job has not completed within 3 hours. Cannot really inspect the status of the sync job, since in production
-    //    all sync jobs seem to be COMPLETED_FAILURE.
+    // - a sync job has not completed SUCCESSFULLY within 3 hours.
     // - an important API action has failed within 30 minutes, and has not succeeded since.
     @Override
     public Health health() {
         LocalDateTime now = timeService.getCurrentUTCDateTime(); // DB timestamps are in UTC.
         try {
-            Optional<SynchronizationJobRun> searched = synchronizationJobRunService.findLatestCompletedJob();
-            if (searched.isPresent()) {
-                SynchronizationJobRun latest = searched.get();
-                if (latest.completed == null || latest.completed.isBefore(now.minusHours(MAX_HOURS_SINCE_COMPLETED_SYNC))) {
-                    return indicateError(String.format("No job completed in %d hours. Latest job completed at %s UTC",
-                        MAX_HOURS_SINCE_COMPLETED_SYNC, latest.completed));
+            if (fullSynchronizationJob.isEnabled()) {
+                Optional<SynchronizationJobRun> searched = synchronizationJobRunService.findLatestCompletedJob();
+                if (searched.isPresent()) {
+                    SynchronizationJobRun latest = searched.get();
+                    if (latest.completed == null || latest.completed.isBefore(now.minusHours(MAX_HOURS_SINCE_COMPLETED_SYNC))) {
+                        return indicateError(String.format("No sync job completed in %d hours. Latest job completed at %s UTC",
+                            MAX_HOURS_SINCE_COMPLETED_SYNC, latest.completed));
+                    } else if (latest.status != SynchronizationStatus.COMPLETED_SUCCESS) {
+                        return indicateError("Status of the last sync job is not COMPLETED_SUCCESS, but " + latest.status);
+                    }
+                } else {
+                    return indicateError("No sync jobs in the DB.");
                 }
-            } else {
-                return indicateError("No sync jobs in the DB.");
             }
 
             if (reportedError != null && reportedError.when.isAfter(now.minusMinutes(MIN_MINUTES_SINCE_ERROR))) {

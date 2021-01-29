@@ -51,6 +51,7 @@ public class IncrementalSynchronizationJob {
 
     // Has been disabled since 9/2016, as Oodi API did not really support getting enrollment updates.
     // Do not enable until that is working AND Incremental sync has been implemented for Sisu.
+    // If you enable this, remember to modify MoodiHealthIndicator.
     private boolean isEnabled() {
         final String key = String.format("synchronize.%s.enabled", INCREMENTAL);
         return false;
