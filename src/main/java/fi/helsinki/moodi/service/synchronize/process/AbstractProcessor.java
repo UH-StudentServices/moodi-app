@@ -46,15 +46,15 @@ abstract class AbstractProcessor implements Processor {
         try {
             return doProcess(item);
         } catch (ProcessingException e) {
-            return synchronizationError(item, e.getStatus(), e.getMessage());
+            return synchronizationError(item, e.getStatus(), e);
         } catch (Exception e) {
-            return synchronizationError(item, ProcessingStatus.ERROR, e.getMessage());
+            return synchronizationError(item, ProcessingStatus.ERROR, e);
         }
     }
 
-    private SynchronizationItem synchronizationError(SynchronizationItem item, ProcessingStatus status, String message) {
-        getLogger().error("Error while processing item", message);
-        return item.completeProcessingPhase(status, message);
+    private SynchronizationItem synchronizationError(SynchronizationItem item, ProcessingStatus status, Exception e) {
+        getLogger().error("Error while processing item: ", e);
+        return item.completeProcessingPhase(status, e.getMessage());
     }
 
     @Override
