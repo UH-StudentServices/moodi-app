@@ -301,7 +301,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
         if (usernames.isEmpty()) {
             // https://jira.it.helsinki.fi/browse/MOODI-126
             // Username not found in IAM is no longer considered an error. Should not happen at all with Sisu courses.
-            return item;
+            return item.withStatus(SUCCESS);
         }
         List<String> finalUsernames = usernames;
         return getMoodleUser(usernames).map(item::withMoodleUser).orElseGet(() ->  {
