@@ -29,4 +29,10 @@ public final class MoodleRole {
 
     @JsonProperty("shortname")
     public String shortName;
+
+    public MoodleRole() {}
+
+    public MoodleRole(long roleId) {
+        this.roleId = roleId;
+    }
 }
