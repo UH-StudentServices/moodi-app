@@ -14,7 +14,7 @@ management:
 
 httpClient:
   # Determines the timeout in milliseconds until a connection is established.
-  connectTimeout: 3000
+  connectTimeout: 9000
   # Defines the socket timeout (SO_TIMEOUT) in milliseconds,
   # which is the timeout for waiting for data  or, put differently,
   # a maximum period inactivity between two consecutive data packets).

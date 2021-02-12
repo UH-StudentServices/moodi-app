@@ -59,6 +59,10 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
     private CourseService courseService;
 
     private List<MoodleUserEnrollments> moodleUserEnrollments(long moodleCourseId, MoodleRole... roles) {
+        return newArrayList(moodleUserEnrollmentsForUser(moodleCourseId, MOODLE_USER_ID, "studentUsername@helsinki.fi", roles));
+    }
+
+    private MoodleUserEnrollments moodleUserEnrollmentsForUser(long moodleCourseId, long moodleUserId, String userName, MoodleRole... roles) {
         MoodleUserEnrollments moodleUserEnrollments = new MoodleUserEnrollments();
 
         moodleUserEnrollments.roles = newArrayList();
@@ -67,11 +71,11 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             moodleUserEnrollments.roles.add(role);
         }
 
-        moodleUserEnrollments.id = MOODLE_USER_ID;
-
+        moodleUserEnrollments.id = moodleUserId;
+        moodleUserEnrollments.username = userName;
         moodleUserEnrollments.enrolledCourses = Arrays.asList(new MoodleCourseData(moodleCourseId));
 
-        return newArrayList(moodleUserEnrollments);
+        return moodleUserEnrollments;
     }
 
     private MoodleRole teacherRole() {
@@ -200,6 +204,41 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
                 studentRole(),
                 moodiRole()))
             .expectUserRequestsToIAMAndMoodle()
+            .expectSuspendsToMoodleCourse(
+                studentEnrollment()
+            )
+            .expectUnAssignRolesToMoodleCourse(studentEnrollment())
+            .getSynchronizationItem();
+
+        synchronizingProcessor.doProcess(item);
+    }
+
+    @Test
+    public void thatStudentWithSyncedRoleIsSuspendedIfNotPresentInStudyRegistry() {
+        String usernameOfOodiStudent = "user4";
+        // Should get suspended, as has synced role and is not in Oodi.
+        MoodleUserEnrollments studentWithSyncedRole =
+            moodleUserEnrollmentsForUser(MOODLE_COURSE_ID, MOODLE_USER_ID, "user1@helsinki.fi", studentRole(), moodiRole());
+        // Should not get suspended, because does not have synced role.
+        MoodleUserEnrollments studentWithoutSyncedRole =
+            moodleUserEnrollmentsForUser(MOODLE_COURSE_ID, 2, "user2@helsinki.fi", studentRole());
+        // Should not get suspended, because is a teacher.
+        MoodleUserEnrollments teacherWithSyncedRole =
+            moodleUserEnrollmentsForUser(MOODLE_COURSE_ID, 3, "user3@helsinki.fi", teacherRole(), moodiRole());
+        // Should not get suspended, because is in Oodi.
+        MoodleUserEnrollments studentInOodi =
+            moodleUserEnrollmentsForUser(MOODLE_COURSE_ID, 4, usernameOfOodiStudent + IAMService.DOMAIN_SUFFIX, studentRole(), moodiRole());
+
+        SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)
+            .withOodiStudent(4, true, true, APPROVED_ENROLLMENT_STATUS_CODE)
+            .withMoodleEnrollments(Arrays.asList(
+                studentWithSyncedRole,
+                studentWithoutSyncedRole,
+                teacherWithSyncedRole,
+                studentInOodi
+            ))
+            .expectUserRequestsToIAMAndMoodle(usernameOfOodiStudent)
+            // Only one suspend and role de-assignment: for studentWithSyncedRole
             .expectSuspendsToMoodleCourse(
                 studentEnrollment()
             )
@@ -404,17 +443,21 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             return this.withMoodleEnrollments(newArrayList());
         }
 
-        public CourseSynchronizationRequestChain expectUserRequestsToIAMAndMoodle() {
+        public CourseSynchronizationRequestChain expectUserRequestsToIAMAndMoodle(String studentUserName) {
             studentMap.forEach((moodleUserId, oodiStudent) -> expectFindStudentRequestToIAM(oodiStudent.studentNumber,
-                STUDENT_USERNAME));
+                studentUserName));
             teacherMap.forEach((moodleUserId, oodiTeacher) -> expectFindEmployeeRequestToIAM(
                 IAMService.TEACHER_ID_PREFIX + oodiTeacher.employeeNumber, TEACHER_USERNAME));
             studentMap.forEach((moodleUserId, oodiStudent) -> expectGetUserRequestToMoodle(
-                STUDENT_USERNAME + IAMService.DOMAIN_SUFFIX, moodleUserId));
+                studentUserName + IAMService.DOMAIN_SUFFIX, moodleUserId));
             teacherMap.forEach((moodleUserId, oodiTeacher) -> expectGetUserRequestToMoodle(
                 TEACHER_USERNAME + IAMService.DOMAIN_SUFFIX, moodleUserId));
 
             return this;
+        }
+
+        public CourseSynchronizationRequestChain expectUserRequestsToIAMAndMoodle() {
+            return expectUserRequestsToIAMAndMoodle(STUDENT_USERNAME);
         }
 
         public CourseSynchronizationRequestChain expectAddEnrollmentsToMoodleCourse(MoodleEnrollment... enrollments) {
