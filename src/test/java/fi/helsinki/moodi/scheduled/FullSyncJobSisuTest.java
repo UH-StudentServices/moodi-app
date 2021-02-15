@@ -73,11 +73,16 @@ public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
         setUpMockSisuAndPrefetchCourses();
 
         setupMoodleGetCourseResponse(MOODLE_COURSE_ID_1);
-        // One user is already enrolled with student and synced roles.
+        // Two users are already enrolled with student and synced roles.
+        // One of them now gets returned from Sisu with a non-enrolled status, and the
+        // other one does not get returned from Sisu at all, as someone has totally removed the whole enrollment from Sisu.
         expectGetEnrollmentsRequestToMoodle(
             MOODLE_COURSE_ID_1,
-            getEnrollmentsResponse((int) MOODLE_USER_NOT_ENROLLED, MOODLE_COURSE_ID_1,
-                mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
+            getMoodleUserEnrollments((int) MOODLE_USER_NOT_ENROLLED, MOODLE_USERNAME_NOT_ENROLLED, MOODLE_COURSE_ID_1,
+                mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()),
+            getMoodleUserEnrollments((int) MOODLE_USER_NOT_IN_STUDY_REGISTRY, MOODLE_USERNAME_NOT_IN_STUDY_REGISTRY, MOODLE_COURSE_ID_1,
+                mapperService.getStudentRoleId(), mapperService.getMoodiRoleId())
+        );
         setupMoodleGetCourseResponse(MOODLE_COURSE_ID_2);
         expectGetEnrollmentsRequestToMoodle(MOODLE_COURSE_ID_2);
 
@@ -108,9 +113,13 @@ public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
             new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_TEACH_ONE, MOODLE_COURSE_ID_1)
         );
 
-        // The existing student gets suspended and student role removed, because no longer enrolled in Sisu.
-        expectSuspendRequestToMoodle(new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_NOT_ENROLLED, MOODLE_COURSE_ID_1));
-        expectAssignRolesToMoodle(false, new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_NOT_ENROLLED, MOODLE_COURSE_ID_1));
+        // The existing students gets suspended and student role removed, because no longer enrolled or found in Sisu.
+        expectSuspendRequestToMoodle(
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_NOT_IN_STUDY_REGISTRY, MOODLE_COURSE_ID_1),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_NOT_ENROLLED, MOODLE_COURSE_ID_1));
+        expectAssignRolesToMoodle(false,
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_NOT_IN_STUDY_REGISTRY, MOODLE_COURSE_ID_1),
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_NOT_ENROLLED, MOODLE_COURSE_ID_1));
 
         // Course two student and teachers are enrolled.
         expectEnrollmentRequestToMoodle(

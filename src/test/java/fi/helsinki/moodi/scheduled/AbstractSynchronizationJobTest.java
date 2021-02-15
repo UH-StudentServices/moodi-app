@@ -128,7 +128,8 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
 
         expectGetEnrollmentsRequestToMoodle(
             MOODLE_COURSE_ID,
-            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID, mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId()));
+            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, STUDENT_USERNAME + USERNAME_SUFFIX,
+                MOODLE_COURSE_ID, mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId()));
 
         expectFindUsersRequestsToIAMAndMoodle();
 
@@ -158,7 +159,8 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
 
         expectGetEnrollmentsRequestToMoodle(
             MOODLE_COURSE_ID,
-            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
+            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, STUDENT_USERNAME + USERNAME_SUFFIX,
+                MOODLE_COURSE_ID, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
 
         expectFindUsersRequestsToIAMAndMoodle();
 
