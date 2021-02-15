@@ -276,8 +276,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
         // https://jira.it.helsinki.fi/browse/MOODI-122 process Moodle users that do not appear in StudyRegistry.
         Stream<UserSynchronizationItem> moodleUsersNotInStudyRegistry =
             moodleEnrollmentsByUserId.values().stream().filter(m -> m.username != null & !studyRegistryStudentUsernames.contains(m.username))
-            .map(m -> new UserSynchronizationItem(m))
-            .map(i -> i.withMoodleCourseId(item.getCourse().moodleId));
+            .map(m -> new UserSynchronizationItem(m).withMoodleCourseId(item.getCourse().moodleId));
 
         return Stream.concat(
             moodleUsersNotInStudyRegistry,

@@ -74,7 +74,8 @@ public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
 
         setupMoodleGetCourseResponse(MOODLE_COURSE_ID_1);
         // Two users are already enrolled with student and synced roles.
-        // One of them is not enrolled for the course, and the other not in Sisu at all.
+        // One of them now gets returned from Sisu with a non-enrolled status, and the
+        // other one does not get returned from Sisu at all, as someone has totally removed the whole enrollment from Sisu.
         expectGetEnrollmentsRequestToMoodle(
             MOODLE_COURSE_ID_1,
             getMoodleUserEnrollments((int) MOODLE_USER_NOT_ENROLLED, MOODLE_USERNAME_NOT_ENROLLED, MOODLE_COURSE_ID_1,
