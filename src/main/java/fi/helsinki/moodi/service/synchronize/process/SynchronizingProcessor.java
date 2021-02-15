@@ -41,6 +41,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -48,6 +49,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem.UserSynchronizationItemStatus.*;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 /**
  * Processor implementation that synchronizes courses.
@@ -165,7 +167,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
                 .collect(Collectors.toList());
 
         } catch (Exception e) {
-            logger.error(String.format("Error when executing action %s", e));
+            logger.error(String.format("Error when executing action %s", e), e);
             return actions.stream()
                 .map(UserSynchronizationAction::withErrorStatus)
                 .collect(Collectors.toList());
@@ -269,9 +271,19 @@ public class SynchronizingProcessor extends AbstractProcessor {
                 UserSynchronizationItem::combine))
             .values();
 
+        Set<String> studyRegistryStudentUsernames = course.students.stream().map(s -> s.userName).collect(Collectors.toSet());
+
+        // https://jira.it.helsinki.fi/browse/MOODI-122 process Moodle users that do not appear in StudyRegistry.
+        Stream<UserSynchronizationItem> moodleUsersNotInStudyRegistry =
+            moodleEnrollmentsByUserId.values().stream().filter(m -> m.username != null & !studyRegistryStudentUsernames.contains(m.username))
+            .map(m -> new UserSynchronizationItem(m).withMoodleCourseId(item.getCourse().moodleId));
+
         return Stream.concat(
-            combinedUncompletedItems.stream().map(enrichWithMoodleUserEnrollments(moodleEnrollmentsByUserId)),
-            completedItems.stream()).collect(Collectors.toList());
+            moodleUsersNotInStudyRegistry,
+            Stream.concat(
+                combinedUncompletedItems.stream().map(enrichWithMoodleUserEnrollments(moodleEnrollmentsByUserId)),
+                completedItems.stream())
+        ).collect(Collectors.toList());
     }
 
     private Function<UserSynchronizationItem, UserSynchronizationItem> enrichWithMoodleUserEnrollments(final Map<Long,
@@ -286,6 +298,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
         if (item.getStudent() != null) {
             if (item.getStudent().userName == null) {
                 usernames = getUsernameList(item.getStudent());
+                item.getStudent().userName = isEmpty(usernames) ? null : usernames.get(0);
             } else {
                 usernames.add(item.getStudent().userName);
             }
@@ -293,6 +306,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
         if (item.getTeacher() != null) {
             if (item.getTeacher().userName == null) {
                 usernames = getUsernameList(item.getTeacher());
+                item.getTeacher().userName = isEmpty(usernames) ? null : usernames.get(0);
             } else {
                 usernames.add(item.getTeacher().userName);
             }

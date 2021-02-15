@@ -17,10 +17,14 @@
 
 package fi.helsinki.moodi.test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import fi.helsinki.moodi.Application;
+import fi.helsinki.moodi.integration.moodle.MoodleCourseData;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
+import fi.helsinki.moodi.integration.moodle.MoodleRole;
+import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.service.importing.ImportCourseRequest;
 import fi.helsinki.moodi.service.synchronize.enrich.SisuCourseEnricher;
 import fi.helsinki.moodi.service.util.MapperService;
@@ -46,7 +50,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
@@ -80,6 +83,7 @@ public abstract class AbstractMoodiIntegrationTest {
     protected static final long MOODLE_USER_TEACH_THREE = 7L;
     protected static final long MOODLE_USER_NIINA2 = 8L;
     protected static final long MOODLE_USER_NOT_ENROLLED = 9L;
+    protected static final long MOODLE_USER_NOT_IN_STUDY_REGISTRY = 10L;
 
     protected static final String MOODLE_USERNAME_NIINA = "niina@helsinki.fi";
     protected static final String MOODLE_USERNAME_JUKKA = "jukka@helsinki.fi";
@@ -90,6 +94,7 @@ public abstract class AbstractMoodiIntegrationTest {
     protected static final String MOODLE_USERNAME_THREE = "three@helsinki.fi";
     protected static final String MOODLE_USERNAME_NIINA2 = "niina2@helsinki.fi";
     protected static final String MOODLE_USERNAME_NOT_ENROLLED = "ei-mukana-kurssilla@helsinki.fi";
+    protected static final String MOODLE_USERNAME_NOT_IN_STUDY_REGISTRY = "ei-sisussa@helsinki.fi";
 
     private static final String MOODLE_EMPTY_LIST_RESPONSE = "[]";
     protected static final String MOODLE_ERROR_RESPONSE =
@@ -206,8 +211,12 @@ public abstract class AbstractMoodiIntegrationTest {
         mockSisuServer = new MockSisuServer(mockServerClient);
     }
 
-    public static String toJson(Object object) throws IOException {
-        return testObjectMapper.writeValueAsString(object);
+    public static String toJson(Object object) {
+        try {
+            return testObjectMapper.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected final void expectEnrollmentRequestToMoodle(final MoodleEnrollment... enrollments) {
@@ -399,11 +408,21 @@ public abstract class AbstractMoodiIntegrationTest {
         setupMoodleGetCourseResponse(54321);
     }
 
-    protected String getEnrollmentsResponse(int moodleUserId, int enrolledCourseId, long...roleIds) {
+    protected final MoodleUserEnrollments getMoodleUserEnrollments(int moodleUserId, String userName, int enrolledCourseId, long...roleIds) {
+        MoodleUserEnrollments ret = new MoodleUserEnrollments();
+        ret.id = Long.valueOf(moodleUserId);
+        ret.username = userName;
+        ret.enrolledCourses = Arrays.asList(new MoodleCourseData(enrolledCourseId));
+        ret.roles = Arrays.stream(roleIds).mapToObj(rid -> new MoodleRole(rid)).collect(Collectors.toList());
+        return ret;
+    }
+
+    protected String getEnrollmentsResponse(int moodleUserId, String userName, int enrolledCourseId, long...roleIds) {
         long[] enrolledCourseIds = new long[] { enrolledCourseId };
         String ret = String.format(
-            "[{ \"id\" : \"%s\" , \"roles\" : [%s], \"enrolledcourses\" : [%s]}]",
+            "[{ \"id\" : \"%s\", \"username\" : \"%s\", \"roles\" : [%s], \"enrolledcourses\" : [%s]}]",
             moodleUserId,
+            userName,
             longArrayJson("roleid", roleIds),
             longArrayJson("id", enrolledCourseIds));
 
@@ -421,6 +440,10 @@ public abstract class AbstractMoodiIntegrationTest {
 
     protected final void expectGetEnrollmentsRequestToMoodle(final int courseId) {
         expectGetEnrollmentsRequestToMoodle(courseId, "[]");
+    }
+
+    protected final void expectGetEnrollmentsRequestToMoodle(final int courseId, MoodleUserEnrollments... responseEnrollments) {
+        expectGetEnrollmentsRequestToMoodle(courseId, toJson(responseEnrollments));
     }
 
     protected final void expectGetEnrollmentsRequestToMoodle(final int courseId, final String response) {

@@ -51,6 +51,12 @@ public class UserSynchronizationItem {
         this.student = student;
     }
 
+    public UserSynchronizationItem(MoodleUserEnrollments moodleUserEnrollments) {
+        this.moodleUserEnrollments = moodleUserEnrollments;
+        this.moodleUser = new MoodleUser();
+        this.moodleUser.id = moodleUserEnrollments.id;
+    }
+
     public UserSynchronizationItem(StudyRegistryTeacher teacher) {
         this.teacher = teacher;
     }
