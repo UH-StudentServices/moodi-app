@@ -17,8 +17,12 @@
 
 package fi.helsinki.moodi.service.synchronize.enrich;
 
+import fi.helsinki.moodi.integration.sisu.SisuClient;
+import fi.helsinki.moodi.integration.sisu.SisuCourseUnitRealisation;
+import fi.helsinki.moodi.integration.sisu.SisuPerson;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryService;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryTeacher;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import org.slf4j.Logger;
@@ -34,23 +38,40 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.partitioningBy;
+
 @Component
 public class SisuCourseEnricher extends AbstractEnricher {
     private static final Logger logger = LoggerFactory.getLogger(SisuCourseEnricher.class);
-    private final StudyRegistryService studyRegistryService;
+    private final SisuClient sisuClient;
     private Map<String, StudyRegistryCourseUnitRealisation> prefetchedCursById = new HashMap<>();
 
     @Autowired
-    protected SisuCourseEnricher(StudyRegistryService studyRegistryService) {
+    protected SisuCourseEnricher(SisuClient sisuClient) {
         super(1);
-        this.studyRegistryService = studyRegistryService;
+        this.sisuClient = sisuClient;
     }
 
     public void prefetchCourses(List<String> curIds) {
-        List<String> uniqueSisuIds = new LinkedHashSet<String>(curIds).stream()
+        List<String> uniqueSisuIds = new LinkedHashSet<>(curIds).stream()
             .filter(id -> !StudyRegistryService.isOodiId(id)).collect(Collectors.toList());
-        prefetchedCursById = studyRegistryService.getCourseUnitRealisations(uniqueSisuIds).stream()
+        prefetchedCursById = getSisuCourseUnitRealisations(uniqueSisuIds).stream()
             .collect(Collectors.toMap(c -> c.realisationId, c -> c));
+    }
+
+    private List<StudyRegistryCourseUnitRealisation> getSisuCourseUnitRealisations(final List<String> realisationIds) {
+        Map<Boolean, List<String>> idsByIsOodiId = realisationIds.stream().collect(partitioningBy(StudyRegistryService::isOodiId));
+
+        List<SisuCourseUnitRealisation> sisuCurs = sisuClient.getCourseUnitRealisations(idsByIsOodiId.get(false));
+
+        List<String> uniquePersonIds = sisuCurs.stream().flatMap(cur -> cur.teacherSisuIds().stream()).distinct().collect(Collectors.toList());
+
+        Map<String, StudyRegistryTeacher> teachersById =
+            sisuClient.getPersons(uniquePersonIds)
+                .stream().collect(Collectors.toMap(p -> p.id, SisuPerson::toStudyRegistryTeacher));
+
+        return sisuCurs.stream()
+            .map(cur -> cur.toStudyRegistryCourseUnitRealisation(teachersById)).collect(Collectors.toList());
     }
 
     @Override
