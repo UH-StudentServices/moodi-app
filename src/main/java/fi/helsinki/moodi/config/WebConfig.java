@@ -21,6 +21,7 @@ import fi.helsinki.moodi.interceptor.AccessLoggingInterceptor;
 import fi.helsinki.moodi.interceptor.AuthorizingInterceptor;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.SocketConfig;
+import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,9 +61,9 @@ public class WebConfig implements WebMvcConfigurer {
         SocketConfig socketConfig = SocketConfig.custom()
             .setSoTimeout(socketTimeout)
             .build();
-        HttpClientBuilder clientBuilder = HttpClients.custom()
+        return HttpClients.custom()
             .setDefaultRequestConfig(requestConfig)
-            .setDefaultSocketConfig(socketConfig);
-        return clientBuilder;
+            .setDefaultSocketConfig(socketConfig)
+            .setConnectionReuseStrategy(new NoConnectionReuseStrategy()); // Try to get rid of NoHttpResponseExceptions.
     }
 }

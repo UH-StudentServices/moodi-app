@@ -28,8 +28,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class GetCourseTest extends AbstractMoodiIntegrationTest {
 
-    private static long REALISATION_ID_FOUND = 12345;
-    private static long REALISATION_ID_NOT_FOUND = 54321;
+    private static String REALISATION_ID_FOUND = "12345";
+    private static String REALISATION_ID_NOT_FOUND = "54321";
     private static String NOT_FOUND_RESPONSE_ERROR = "Course with realisationId %s not found";
     private static String NOT_FOUND_STATUS_STRING = "not-found";
 
