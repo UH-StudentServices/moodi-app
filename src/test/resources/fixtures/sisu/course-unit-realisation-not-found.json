@@ -1,0 +1,70 @@
+{
+  "errors": [
+    {
+      "message": "404: Not Found",
+      "locations": [
+        {
+          "line": 1,
+          "column": 3
+        }
+      ],
+      "path": [
+        "course_unit_realisation"
+      ],
+      "extensions": {
+        "code": "INTERNAL_SERVER_ERROR",
+        "response": {
+          "body": {
+            "cause": null,
+            "stackTrace": [],
+            "deeper": [],
+            "message": "CourseUnitRealisationStore#hy-CUR-foo",
+            "suppressed": [],
+            "localizedMessage": "CourseUnitRealisationStore#hy-CUR-foo"
+          },
+          "url": "http://localhost/kori/api/course-unit-realisations?id=hy-CUR-foo",
+          "status": 404,
+          "statusText": "Not Found"
+        },
+        "exception": {
+          "stacktrace": [
+            "Error: 404: Not Found",
+            "    at l.<anonymous> (/app/dist/index.js:1:4429)",
+            "    at Generator.next (<anonymous>)",
+            "    at /app/dist/index.js:1:2187",
+            "    at new Promise (<anonymous>)",
+            "    at i (/app/dist/index.js:1:1932)",
+            "    at l.errorFromResponse (/app/dist/index.js:1:4249)",
+            "    at l.<anonymous> (/app/dist/index.js:1:4146)",
+            "    at Generator.next (<anonymous>)",
+            "    at /app/dist/index.js:1:2187",
+            "    at new Promise (<anonymous>)"
+          ]
+        }
+      }
+    }
+  ],
+  "data": null,
+  "extensions": {
+    "tracing": {
+      "version": 1,
+      "startTime": "2021-02-19T15:55:08.916Z",
+      "endTime": "2021-02-19T15:55:08.925Z",
+      "duration": 9019287,
+      "execution": {
+        "resolvers": [
+          {
+            "path": [
+              "course_unit_realisation"
+            ],
+            "parentType": "Query",
+            "fieldName": "course_unit_realisation",
+            "returnType": "CourseUnitRealisation!",
+            "startOffset": 899717,
+            "duration": 8040281
+          }
+        ]
+      }
+    }
+  }
+}

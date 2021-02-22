@@ -23,6 +23,7 @@ import io.aexp.nodes.graphql.GraphQLRequestEntity;
 import io.aexp.nodes.graphql.GraphQLResponseEntity;
 import io.aexp.nodes.graphql.GraphQLTemplate;
 import io.aexp.nodes.graphql.exceptions.GraphQLException;
+import io.aexp.nodes.graphql.internal.Error;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -119,10 +120,18 @@ public class SisuGraphQLClient implements SisuClient {
             log.info("GrapQL query {} took {} seconds", Arrays.asList(arguments), stopWatch.getTotalTimeSeconds());
         }
         if (responseEntity.getErrors() != null && responseEntity.getErrors().length > 0) {
-            throw new RuntimeException("GraphQL query returned one or more errors. " +
-                Arrays.stream(responseEntity.getErrors()).map(e -> e.toString()).reduce("", (a, b) -> a + b + "\n")
-            );
+            if (!isOne404(responseEntity)) {
+                throw new RuntimeException("GraphQL query returned one or more errors. " +
+                    Arrays.stream(responseEntity.getErrors()).map(Error::toString).reduce("", (a, b) -> a + b + "\n")
+                );
+            }
         }
         return responseEntity.getResponse();
+    }
+
+    private boolean isOne404(GraphQLResponseEntity responseEntity) {
+        return responseEntity.getErrors() != null &&
+            responseEntity.getErrors().length == 1 &&
+            "404: Not Found".equals(responseEntity.getErrors()[0].getMessage());
     }
 }
