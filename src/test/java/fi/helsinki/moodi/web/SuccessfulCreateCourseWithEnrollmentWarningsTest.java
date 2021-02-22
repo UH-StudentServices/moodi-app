@@ -25,17 +25,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class SuccessfulCreateCourseWithEnrollmentWarningsTest extends AbstractSuccessfulCreateCourseTest {
 
-    private static final String COURSE_REALISATION_ID = "102374742";
-
     @Before
     public void setUp() {
-        setUpMockServerResponsesWithWarningsForOodiCourse();
+        setUpMockServerResponsesForSisuCourse123(false);
     }
 
     @Test
     public void successfulCreateCourseReturnsCorrectResponse() throws Exception {
-        makeCreateCourseRequest(COURSE_REALISATION_ID)
+        makeCreateCourseRequest(SISU_COURSE_REALISATION_ID)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.moodleCourseId").value(988888));
+                .andExpect(jsonPath("$.data.moodleCourseId").value(MOODLE_COURSE_ID));
     }
 }

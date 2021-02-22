@@ -35,6 +35,8 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 import static fi.helsinki.moodi.exception.NotFoundException.notFoundException;
+import static fi.helsinki.moodi.integration.studyregistry.StudyRegistryService.SISU_OODI_COURSE_PREFIX;
+import static fi.helsinki.moodi.integration.studyregistry.StudyRegistryService.isOodiId;
 
 @Service
 public class ImportingService {
@@ -67,32 +69,43 @@ public class ImportingService {
     }
 
     public Result<ImportCourseResponse, String> importCourse(final ImportCourseRequest request) {
-        final Optional<Course> existingCourse = courseService.findByRealisationId(request.realisationId);
+        final String sisuRealisationId = sisuRealisationId(request.realisationId);
+
+        final Optional<Course> existingCourse = courseService.findByRealisationId(sisuRealisationId);
 
         if (existingCourse.isPresent()) {
-            throw new CourseAlreadyCreatedException(request.realisationId);
+            throw new CourseAlreadyCreatedException(sisuRealisationId);
         }
 
         final StudyRegistryCourseUnitRealisation courseUnitRealisation =
-                studyRegistryService.getCourseUnitRealisation(request.realisationId)
-                        .orElseThrow(notFoundException("Study registry course not found with realisation id " + request
-                            .realisationId));
+                studyRegistryService.getCourseUnitRealisation(sisuRealisationId)
+                        .orElseThrow(notFoundException(
+                            String.format("Study registry course not found with realisation id %s (%s)",
+                                sisuRealisationId, request.realisationId)));
 
         final MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(courseUnitRealisation);
         final long moodleCourseId = moodleService.createCourse(moodleCourse);
 
-        Course savedCourse = courseService.createCourse(request.realisationId, moodleCourseId);
+        Course savedCourse = courseService.createCourse(sisuRealisationId, moodleCourseId);
 
         enrollmentExecutor.processEnrollments(savedCourse, courseUnitRealisation, moodleCourseId);
 
         loggingService.logCourseImport(savedCourse);
 
         return Result.success(new ImportCourseResponse(moodleCourseId));
+    }
 
+    // Does a straightforward conversion, which only works for Oodi native courses, not ones that are created in Optime.
+    private String sisuRealisationId(String realisationId) {
+        return isOodiId(realisationId) ? SISU_OODI_COURSE_PREFIX + realisationId
+            : realisationId;
     }
 
     public CourseDto getCourse(String realisationId) {
         Optional<Course> course = courseService.findByRealisationId(realisationId);
+        if (!course.isPresent() && isOodiId(realisationId)) {
+            course = courseService.findByRealisationId(sisuRealisationId(realisationId));
+        }
         return course
             .map(courseConverter::toDto)
             .orElseThrow(() -> new CourseNotFoundException(realisationId));
