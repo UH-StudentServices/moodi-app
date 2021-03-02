@@ -40,25 +40,25 @@
 
         <h2>Load</h2>
 
-        <p>Select course realisation id from the list or type one in input field</p>
+        <p>Enter a course unit realisation ID</p>
 
         <span style="margin-right: 5px" ng-repeat="id in formCtrl.courseRealisationIds">
             <a href="#" ng-click="formCtrl.setCourseRealisationId(id)">{{id}}</a>
         </span>
 
-        <form ng-submit="formCtrl.loadOodiCourse()">
+        <form ng-submit="formCtrl.loadSisuCourse()">
             <div class="form-group">
-                <label for="courseRealisationId">Course realisation id</label>
+                <label for="courseRealisationId">Course unit realisation id</label>
                 <input type="text" class="form-control" ng-model="formCtrl.courseRealisationId" id="courseRealisationId" placeholder="Course realisation id"/>
             </div>
-            <input type="submit" value="Get course from Oodi or Sisu" class="btn btn-default" />
+            <input type="submit" value="Get course from Sisu" class="btn btn-default" />
             <button ng-click="formCtrl.reset($event)" class="btn btn-default">Reset</button>
-            <div ng-if="formCtrl.oodiResponseBody != ''">
-                <json-formatter json="formCtrl.oodiResponseBody" open="3"></json-formatter>
+            <div ng-if="formCtrl.sisuResponseBody != ''">
+                <json-formatter json="formCtrl.sisuResponseBody" open="3"></json-formatter>
             </div>
         </form>
 
-        <div ng-if="formCtrl.oodiResponseBody != ''">
+        <div ng-if="formCtrl.sisuResponseBody != ''">
             <h2>Create</h2>
 
             <div ng-if="formCtrl.responseStatus">
@@ -92,8 +92,8 @@ angular.module('testApp', ['jsonFormatter'])
     ctrl.courseRealisationId = '';
     ctrl.responseBody = '';
     ctrl.responseStatus = null;
-    ctrl.oodiResponseBody = '';
-    ctrl.oodiResponseStatus = null;
+    ctrl.sisuResponseBody = '';
+    ctrl.sisuResponseStatus = null;
     ctrl.syncResponseBody = '';
     ctrl.syncResponseStatus = null;
 
@@ -101,8 +101,8 @@ angular.module('testApp', ['jsonFormatter'])
       ctrl.courseRealisationId = '';
       ctrl.responseBody = '';
       ctrl.responseStatus = null;
-      ctrl.oodiResponseBody = '';
-      ctrl.oodiResponseStatus = null;
+      ctrl.sisuResponseBody = '';
+      ctrl.sisuResponseStatus = null;
       ctrl.syncResponseBody = '';
       ctrl.syncResponseStatus = null;
       $event.preventDefault();
@@ -110,20 +110,20 @@ angular.module('testApp', ['jsonFormatter'])
 
     ctrl.setCourseRealisationId = function(id) {
       ctrl.courseRealisationId = id;
-      ctrl.loadOodiCourse();
+      ctrl.loadSisuCourse();
     };
 
-    ctrl.loadOodiCourse = function() {
+    ctrl.loadSisuCourse = function() {
 
         ctrl.responseBody = '';
         ctrl.responseStatus = null;
 
-        ctrl.oodiResponseBody = '';
-        ctrl.oodiResponseStatus = null;
+        ctrl.sisuResponseBody = '';
+        ctrl.sisuResponseStatus = null;
 
         var callback = function(data, status, headers, config) {
-            ctrl.oodiResponseBody = data;
-            ctrl.oodiResponseStatus = status;
+            ctrl.sisuResponseBody = data;
+            ctrl.sisuResponseStatus = status;
         };
 
         $http.get('/api/v1/study-registry-course/' + ctrl.courseRealisationId)

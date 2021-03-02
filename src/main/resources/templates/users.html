@@ -38,9 +38,9 @@
             <li role="presentation"><a href="/test/sync">Synchronize</a></li>
         </ul>
 
-        <h2>Load</h2>
+        <h2>Load course users from Sisu and Moodle</h2>
 
-        <p>Select course realisation id from the list or type one in input field</p>
+        <p>Enter a course unit realisation ID</p>
 
         <span style="margin-right: 5px" ng-repeat="id in formCtrl.courseRealisationIds">
             <a href="#" ng-click="formCtrl.setCourseRealisationId(id)">{{id}}</a>
@@ -48,13 +48,19 @@
 
         <form ng-submit="formCtrl.loadUsers()">
             <div class="form-group">
-                <label for="courseRealisationId">Course realisation id</label>
+                <label for="courseRealisationId">Course unit realisation id</label>
                 <input type="text" class="form-control" ng-model="formCtrl.courseRealisationId" id="courseRealisationId" placeholder="Course realisation id"/>
             </div>
             <input type="submit" value="Get course users from Oodi or Sisu" class="btn btn-default" />
             <button ng-click="formCtrl.reset($event)" class="btn btn-default">Reset</button>
         </form>
         <br/>
+        <div ng-if="formCtrl.status > 400">
+            Status: <span class="label label-danger">{{ formCtrl.status }}</span>
+            <json-formatter json="formCtrl.users" open="3"></json-formatter>
+        </div>
+
+        </div>
         <table class="table" ng-if="formCtrl.users.length > 0">
             <tr>
                 <th>Role</th>
@@ -71,8 +77,8 @@
                 <td>{{ user.moodleId }}</td>
                 <td>
                     <div ng-if="user.username !== null">
-                        <button ng-if="user.moodleId === 0" ng-click="formCtrl.addUser(user)" class="btn btn-default">Add</button>
-                        <button ng-if="user.moodleId !== 0" ng-click="formCtrl.dropUser(user)" class="btn btn-default">Remove</button>
+                        <button ng-if="user.moodleId === 0" ng-click="formCtrl.addUser(user)" class="btn btn-default">Add to Moodle</button>
+                        <button ng-if="user.moodleId !== 0" ng-click="formCtrl.dropUser(user)" class="btn btn-default">Remove from Moodle</button>
                     </div>
                 </td>
 
@@ -97,8 +103,9 @@ angular.module('testApp', ['jsonFormatter'])
     ctrl.users = [];
     ctrl.loading = false;
     ctrl.courseRealisationId = '';
+    ctrl.status = 0;
 
-    ctrl.courseRealisationIds = [108419100, 108480204, 107290210, 108501672, 108140537, 108832825, 108897089, 107800929];
+    ctrl.courseRealisationIds = [];
 
     ctrl.reset = function() {
       ctrl.courseRealisationId = '';
@@ -160,9 +167,10 @@ angular.module('testApp', ['jsonFormatter'])
 
         ctrl.loading = true;
 
-        var callback = function(data) {
+        var callback = function(data, status) {
             ctrl.users = data;
             ctrl.loading = false;
+            ctrl.status = status;
         };
 
         $http.get('/api/v1/study-registry-course/' + ctrl.courseRealisationId + '/users')
