@@ -95,6 +95,16 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
     }
 
     @Test
+    public void thatShortNameIsShort() {
+        SisuCourseUnitRealisation cur = getSisuCur();
+        cur.id = "hy-opt-cur-2021-e34bb357-2f08-4a15-a652-6034b9988be2";
+        cur.name.sv = "Contemporary European History";
+
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation());
+        assertEquals("Contempo hy-opt-...-6034b9988be2", moodleCourse.shortName);
+    }
+
+    @Test
     public void thatItCanBuildMoodleCourseFromSisuCurUsingFallbacks() {
         SisuCourseUnitRealisation cur = getSisuCur();
         cur.teachingLanguageUrn = "urn:code:language:no";
@@ -181,7 +191,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
     }
 
     private OodiCourseUnitRealisation getOodiCourseUnitRealisation(String... langcodes) {
-        List<OodiLanguage> languages = Arrays.asList(langcodes).stream()
+        List<OodiLanguage> languages = Arrays.stream(langcodes)
             .map(this::getOodiLanguage)
             .collect(Collectors.toList());
 

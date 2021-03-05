@@ -43,7 +43,10 @@ public class MoodleCourseBuilder {
     }
 
     private String getShortName(String realisationName, String realisationId) {
-        return StringUtils.substring(realisationName, 0, 8) + " " + realisationId;
+        String shortId = realisationId.length() < 23 ?
+            realisationId :
+            StringUtils.left(realisationId, 6) + "-...-" + StringUtils.right(realisationId, 12);
+        return StringUtils.substring(realisationName, 0, 8) + " " + shortId;
     }
 
     public MoodleCourse buildMoodleCourse(StudyRegistryCourseUnitRealisation cur) {
