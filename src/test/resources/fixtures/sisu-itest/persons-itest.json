@@ -1,0 +1,16 @@
+{
+  "data": {
+    "private_persons": [
+      {{#teachers}}
+      {
+        "id": "{{ personId }}",
+        "studentNumber": "{{ personId }}",
+        "firstNames": "Herra",
+        "lastName": "Opettaja",
+        "employeeNumber": "aivansama",
+        "eduPersonPrincipalName": "{{ username }}"
+      }{{#iterHasNext}},{{/iterHasNext}}
+      {{/teachers}}
+    ]
+  }
+}

@@ -32,13 +32,13 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
 
     @Test
     public void testSyncExistingUsers() {
-        String oodiCourseId = getOodiCourseId();
+        String sisuCourseId = getSisuCourseId();
 
-        expectCourseRealisationWithUsers(oodiCourseId, singletonList(studentUser), singletonList(teacherUser));
-        expectCourseUsersWithUsers(oodiCourseId, singletonList(studentUser), singletonList(teacherUser));
+        expectCourseRealisationWithUsers(sisuCourseId, singletonList(studentUser), singletonList(teacherUser));
 
-        long moodleCourseId = importCourse(oodiCourseId);
+        long moodleCourseId = importCourse(sisuCourseId);
 
+        expectCourseRealisationsWithUsers(sisuCourseId, singletonList(studentUser), singletonList(teacherUser));
         synchronizationService.synchronize(SynchronizationType.FULL);
 
         List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
@@ -51,13 +51,13 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
 
     @Test
     public void testSyncNewStudentEnrollment() {
-        String oodiCourseId = getOodiCourseId();
+        String sisuCourseId = getSisuCourseId();
 
-        expectCourseRealisationWithUsers(oodiCourseId, new ArrayList<>(), singletonList(teacherUser));
-        expectCourseUsersWithUsers(oodiCourseId, singletonList(studentUser), new ArrayList<>());
+        expectCourseRealisationWithUsers(sisuCourseId, new ArrayList<>(), singletonList(teacherUser));
 
-        long moodleCourseId = importCourse(oodiCourseId);
+        long moodleCourseId = importCourse(sisuCourseId);
 
+        expectCourseRealisationsWithUsers(sisuCourseId, singletonList(studentUser), new ArrayList<>());
         synchronizationService.synchronize(SynchronizationType.FULL);
 
         List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
@@ -70,13 +70,13 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
 
     @Test
     public void testSyncNewTeacherEnrollment() {
-        String oodiCourseId = getOodiCourseId();
+        String sisuCourseId = getSisuCourseId();
 
-        expectCourseRealisationWithUsers(oodiCourseId, singletonList(studentUser), new ArrayList<>());
-        expectCourseUsersWithUsers(oodiCourseId, new ArrayList<>(), singletonList(teacherUser));
+        expectCourseRealisationWithUsers(sisuCourseId, singletonList(studentUser), new ArrayList<>());
 
-        long moodleCourseId = importCourse(oodiCourseId);
+        long moodleCourseId = importCourse(sisuCourseId);
 
+        expectCourseRealisationsWithUsers(sisuCourseId, singletonList(studentUser), singletonList(teacherUser));
         synchronizationService.synchronize(SynchronizationType.FULL);
 
         List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
@@ -89,13 +89,13 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
 
     @Test
     public void testSyncNewStudentAndTeacherEnrollment() {
-        String oodiCourseId = getOodiCourseId();
+        String sisuCourseId = getSisuCourseId();
 
-        expectCourseRealisationWithUsers(oodiCourseId, new ArrayList<>(), new ArrayList<>());
-        expectCourseUsersWithUsers(oodiCourseId, singletonList(studentUser), singletonList(teacherUser));
+        expectCourseRealisationWithUsers(sisuCourseId, new ArrayList<>(), new ArrayList<>());
 
-        long moodleCourseId = importCourse(oodiCourseId);
+        long moodleCourseId = importCourse(sisuCourseId);
 
+        expectCourseRealisationsWithUsers(sisuCourseId, singletonList(studentUser), singletonList(teacherUser));
         synchronizationService.synchronize(SynchronizationType.FULL);
 
         List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
@@ -108,13 +108,13 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
 
     @Test
     public void testSyncNewHybridUserEnrollment() {
-        String oodiCourseId = getOodiCourseId();
+        String sisuCourseId = getSisuCourseId();
 
-        expectCourseRealisationWithUsers(oodiCourseId, new ArrayList<>(), new ArrayList<>());
-        expectCourseUsersWithUsers(oodiCourseId, singletonList(teacherInStudentRole), singletonList(teacherUser));
+        expectCourseRealisationWithUsers(sisuCourseId, new ArrayList<>(), new ArrayList<>());
 
-        long moodleCourseId = importCourse(oodiCourseId);
+        long moodleCourseId = importCourse(sisuCourseId);
 
+        expectCourseRealisationsWithUsers(sisuCourseId, singletonList(teacherInStudentRole), singletonList(teacherUser));
         synchronizationService.synchronize(SynchronizationType.FULL);
 
         List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
@@ -126,13 +126,13 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
 
     @Test
     public void testSyncAddTeacherRoleToStudent() {
-        String oodiCourseId = getOodiCourseId();
+        String sisuCourseId = getSisuCourseId();
 
-        expectCourseRealisationWithUsers(oodiCourseId, singletonList(studentUser), singletonList(teacherUser));
-        expectCourseUsersWithUsers(oodiCourseId, singletonList(studentUser), newArrayList(teacherUser, studentUserInTeacherRole));
+        expectCourseRealisationWithUsers(sisuCourseId, singletonList(studentUser), singletonList(teacherUser));
 
-        long moodleCourseId = importCourse(oodiCourseId);
+        long moodleCourseId = importCourse(sisuCourseId);
 
+        expectCourseRealisationsWithUsers(sisuCourseId, singletonList(studentUser), newArrayList(teacherUser, studentUserInTeacherRole));
         synchronizationService.synchronize(SynchronizationType.FULL);
 
         List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
@@ -145,13 +145,13 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
 
     @Test
     public void testSyncAddStudentRoleToTeacher() {
-        String oodiCourseId = getOodiCourseId();
+        String sisuCourseId = getSisuCourseId();
 
-        expectCourseRealisationWithUsers(oodiCourseId, singletonList(studentUser), singletonList(teacherUser));
-        expectCourseUsersWithUsers(oodiCourseId, newArrayList(studentUser, teacherInStudentRole), singletonList(teacherUser));
+        expectCourseRealisationWithUsers(sisuCourseId, singletonList(studentUser), singletonList(teacherUser));
 
-        long moodleCourseId = importCourse(oodiCourseId);
+        long moodleCourseId = importCourse(sisuCourseId);
 
+        expectCourseRealisationsWithUsers(sisuCourseId, newArrayList(studentUser, teacherInStudentRole), singletonList(teacherUser));
         synchronizationService.synchronize(SynchronizationType.FULL);
 
         List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
@@ -163,37 +163,37 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
     }
 
     @Test
-    public void testSyncDoesNotRemoveRolesIfOodiDoesNotReturnEnrolledUsers() {
-        String oodiCourseId = getOodiCourseId();
+    public void testSyncRemovesRolesIfSosuDoesNotReturnEnrolledUsers() {
+        String sisuCourseId = getSisuCourseId();
 
-        expectCourseRealisationWithUsers(oodiCourseId, singletonList(studentUser), singletonList(teacherUser));
-        expectCourseUsersWithUsers(oodiCourseId, new ArrayList<>(), new ArrayList<>());
+        expectCourseRealisationWithUsers(sisuCourseId, singletonList(studentUser), singletonList(teacherUser));
 
-        long moodleCourseId = importCourse(oodiCourseId);
+        long moodleCourseId = importCourse(sisuCourseId);
 
+        expectCourseRealisationsWithUsers(sisuCourseId, new ArrayList<>(), new ArrayList<>());
         synchronizationService.synchronize(SynchronizationType.FULL);
 
         List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
 
         assertEquals(2, moodleUserEnrollmentsList.size());
 
-        assertStudentEnrollment(STUDENT_USERNAME, moodleUserEnrollmentsList);
+        assertMoodiRoleEnrollment(STUDENT_USERNAME, moodleUserEnrollmentsList);
         assertTeacherEnrollment(TEACHER_USERNAME, moodleUserEnrollmentsList);
     }
 
     @Test
     public void testSyncRemovesStudentRoleFromHybridUserIfNotApproved() {
-        String oodiCourseId = getOodiCourseId();
+        String sisuCourseId = getSisuCourseId();
 
-        expectCourseRealisationWithUsers(oodiCourseId, singletonList(teacherInStudentRole), singletonList(teacherUser));
-        expectCourseUsersWithUsers(oodiCourseId, singletonList(teacherInStudentRole.setApproved(false)), singletonList(teacherUser));
+        expectCourseRealisationWithUsers(sisuCourseId, singletonList(teacherInStudentRole), singletonList(teacherUser));
 
-        long moodleCourseId = importCourse(oodiCourseId);
+        long moodleCourseId = importCourse(sisuCourseId);
 
         List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
 
         assertHybridEnrollment(TEACHER_USERNAME, moodleUserEnrollmentsList);
 
+        expectCourseRealisationsWithUsers(sisuCourseId, singletonList(teacherInStudentRole.setApproved(false)), singletonList(teacherUser));
         synchronizationService.synchronize(SynchronizationType.FULL);
 
         moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
