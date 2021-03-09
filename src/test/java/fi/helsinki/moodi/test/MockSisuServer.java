@@ -43,23 +43,31 @@ public class MockSisuServer {
         this.client = client;
     }
 
-    public void expectCourseUnitRealisationRequest(String curId, String responseFile) {
+    public void expectCourseUnitRealisationRequest(String curId, String responseFile, Map<String, ?> variables) {
         Arguments arguments = new Arguments("course_unit_realisation", new Argument<>("id", curId));
-        expectRequest(SisuCourseUnitRealisation.class, responseFile, arguments);
+        expectRequest(SisuCourseUnitRealisation.class, responseFile, variables, arguments);
+    }
+
+    public void expectCourseUnitRealisationRequest(String curId, String responseFile) {
+        expectCourseUnitRealisationRequest(curId, responseFile, new HashMap<>());
+    }
+
+    public void expectCourseUnitRealisationsRequest(List<String> curIds, String responseFile, Map<String, ?> variables) {
+        Arguments arguments = new Arguments("course_unit_realisations", new Argument<>("ids", curIds));
+        expectRequest(SisuCourseUnitRealisation.SisuCURWrapper.class, responseFile, variables, arguments);
     }
 
     public void expectCourseUnitRealisationsRequest(List<String> curIds, String responseFile) {
-        Arguments arguments = new Arguments("course_unit_realisations", new Argument<>("ids", curIds));
-        expectRequest(SisuCourseUnitRealisation.SisuCURWrapper.class, responseFile, arguments);
+        expectCourseUnitRealisationsRequest(curIds, responseFile, new HashMap<>());
+    }
+
+    public void expectPersonsRequest(List<String> personIds, String responseFile, Map<String, ?> variables) {
+        Arguments arguments = new Arguments("private_persons", new Argument<>("ids", personIds));
+        expectRequest(SisuPerson.SisuPersonWrapper.class, responseFile, variables, arguments);
     }
 
     public void expectPersonsRequest(List<String> personIds, String responseFile) {
-        Arguments arguments = new Arguments("private_persons", new Argument<>("ids", personIds));
-        expectRequest(SisuPerson.SisuPersonWrapper.class, responseFile, arguments);
-    }
-
-    private <T> void expectRequest(Class<T> requestClass, String responseFile, Arguments... arguments) {
-        expectRequest(requestClass, responseFile, new HashMap<>(), arguments);
+        expectPersonsRequest(personIds, responseFile, new HashMap<>());
     }
 
     private <T> void expectRequest(Class<T> requestClass, String responseFile, final Map<String, ?> variables, Arguments... arguments) {

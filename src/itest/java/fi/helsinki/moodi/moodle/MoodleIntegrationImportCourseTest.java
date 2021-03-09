@@ -34,14 +34,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MoodleIntegrationImportCourseTest extends AbstractMoodleIntegrationTest {
     @Test
     public void testMoodleIntegrationWhenImportingCourse() {
-        String oodiCourseId = getOodiCourseId();
+        String sisuCourseId = getSisuCourseId();
 
         expectCourseRealisationWithUsers(
-            oodiCourseId,
+            sisuCourseId,
             newArrayList(studentUser, studentUserNotInMoodle),
             singletonList(teacherUser));
 
-        long moodleCourseId = importCourse(oodiCourseId);
+        long moodleCourseId = importCourse(sisuCourseId);
 
         List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
 
@@ -67,10 +67,10 @@ public class MoodleIntegrationImportCourseTest extends AbstractMoodleIntegration
         assertThat(mfc.fullName).isEqualTo("Lapsuus ja yhteiskunta");
         assertThat(mfc.displayName).isEqualTo("Lapsuus ja yhteiskunta");
         assertThat(mfc.endDate).isGreaterThan(mfc.startDate);
-        assertThat(mfc.shortName).contains(Long.valueOf(oodiCourseId).toString());
-        assertThat(mfc.idNumber).isEqualTo("oodi_" + Long.valueOf(oodiCourseId).toString());
+        assertThat(mfc.shortName).contains(sisuCourseId);
+        assertThat(mfc.idNumber).isEqualTo("sisu_" + sisuCourseId);
         assertThat(mfc.lang).isEmpty();
-        assertThat(mfc.summary).isEqualTo("Description 1 (fi) Description 2 (fi)");
+        assertThat(mfc.summary).isEqualTo("https://courses.helsinki.fi/fi/OODI-FLOW/136394381");
     }
 
 }
