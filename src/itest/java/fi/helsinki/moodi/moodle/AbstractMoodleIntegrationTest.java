@@ -18,6 +18,7 @@
 package fi.helsinki.moodi.moodle;
 
 import com.google.common.collect.ImmutableMap;
+import fi.helsinki.moodi.Application;
 import fi.helsinki.moodi.integration.moodle.MoodleClient;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.service.course.CourseRepository;
@@ -26,32 +27,37 @@ import fi.helsinki.moodi.service.importing.ImportingService;
 import fi.helsinki.moodi.service.importing.MoodleCourseBuilder;
 import fi.helsinki.moodi.service.synchronize.SynchronizationService;
 import fi.helsinki.moodi.service.util.MapperService;
-import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
-import fi.helsinki.moodi.test.fixtures.Fixtures;
-import org.junit.After;
+import fi.helsinki.moodi.test.MockSisuServer;
+import fi.helsinki.moodi.test.TestConfig;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.runner.RunWith;
+import org.mockserver.client.MockServerClient;
+import org.mockserver.junit.MockServerRule;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.test.web.client.ResponseCreator;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
-import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static fi.helsinki.moodi.service.iam.IAMService.DOMAIN_SUFFIX;
-import static fi.helsinki.moodi.service.iam.IAMService.TEACHER_ID_PREFIX;
 import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
 import static java.lang.Math.abs;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @ActiveProfiles("test")
-public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegrationTest {
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest(
+    properties = { "server.port:0" },
+    classes = { Application.class, TestConfig.class })
+public abstract class AbstractMoodleIntegrationTest {
 
     @Autowired
     private ImportingService importingService;
@@ -71,16 +77,20 @@ public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegra
     @Autowired
     protected MoodleCourseBuilder moodleCourseBuilder;
 
-    protected static final String STUDENT_USERNAME = "doo_2";
-    protected static final String STUDENT_NOT_IN_MOODLE_USERNAME = "username_of_student_not_in_moodle";
-    protected static final String TEACHER_USERNAME = "doo_1";
+    @Rule
+    public MockServerRule mockServerRule = new MockServerRule(this, 9876);
+    // Gets populated by the @Rule above.
+    private MockServerClient mockServerClient;
+    protected MockSisuServer mockSisuServer;
 
-    protected static final String INTEGRATION_TEST_OODI_FIXTURES_PREFIX = "src/itest/resources/fixtures/oodi/";
+    protected static final String STUDENT_USERNAME = "doo_2@helsinki.fi";
+    protected static final String STUDENT_NOT_IN_MOODLE_USERNAME = "username_of_student_not_in_moodle";
+    protected static final String TEACHER_USERNAME = "doo_1@helsinki.fi";
 
     protected final StudentUser studentUser = new StudentUser(STUDENT_USERNAME, "014010293", true);
-    protected final TeacherUser studentUserInTeacherRole = new TeacherUser(STUDENT_USERNAME, "01143451");
+    protected final TeacherUser studentUserInTeacherRole = new TeacherUser(STUDENT_USERNAME, "hy-hlo-student-1");
     protected final StudentUser studentUserNotInMoodle = new StudentUser(STUDENT_NOT_IN_MOODLE_USERNAME, "012345678", true);
-    protected final TeacherUser teacherUser = new TeacherUser(TEACHER_USERNAME, "011631484");
+    protected final TeacherUser teacherUser = new TeacherUser(TEACHER_USERNAME, "hy-hlo-teacher-1");
     protected final StudentUser teacherInStudentRole = new StudentUser(TEACHER_USERNAME, "011911609", true);
 
     @Before
@@ -89,21 +99,12 @@ public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegra
     }
 
     @Before
-    @Override
     public final void setUpMockServers() {
-        oodiMockServer = MockRestServiceServer.createServer(oodiRestTemplate);
-        iamMockServer = MockRestServiceServer.createServer(iamRestTemplate);
+        mockSisuServer = new MockSisuServer(mockServerClient);
     }
 
-    @After
-    @Override
-    public final void verifyMockServers() {
-        oodiMockServer.verify();
-        iamMockServer.verify();
-    }
-
-    protected String getOodiCourseId() {
-        return "" + abs(new Random().nextInt());
+    protected String getSisuCourseId() {
+        return "hy-CUR-" + abs(new Random().nextInt());
     }
 
     protected long importCourse(String courseId) {
@@ -116,7 +117,7 @@ public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegra
 
     protected MoodleUserEnrollments findEnrollmentsByUsername(List<MoodleUserEnrollments> moodleUserEnrollmentsList, String username) {
         return moodleUserEnrollmentsList.stream()
-            .filter(e -> (username + DOMAIN_SUFFIX).equals(e.username))
+            .filter(e -> username.equals(e.username))
             .findFirst()
             .orElseThrow(() -> new RuntimeException("Enrollment not found for " + username));
     }
@@ -134,14 +135,18 @@ public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegra
         public StudentUser setApproved(boolean newApproved) {
             return new StudentUser(this.username, this.studentNumber, newApproved);
         }
+
+        public String getState() {
+            return this.approved ? "ENROLLED" : "REJECTED";
+        }
     }
 
     protected static class TeacherUser extends IntegrationTestUser {
-        public String employeeNumber;
+        public String personId;
 
-        public TeacherUser(String username, String employeeNumber) {
+        public TeacherUser(String username, String personId) {
             super(username);
-            this.employeeNumber = employeeNumber;
+            this.personId = personId;
         }
     }
 
@@ -153,36 +158,36 @@ public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegra
         }
     }
 
-    protected void expectCourseUsersWithUsers(String courseId, List<StudentUser> students, List<TeacherUser> teachers) {
-        expectCourseRealisationWithUsers(this::expectGetCourseUsersRequestToOodi, courseId, students, teachers);
+    private Map curVariables(String courseId, List<StudentUser> students, List<TeacherUser> teachers) {
+        return new ImmutableMap.Builder()
+            .put("courseId", courseId)
+            .put("students", students)
+            .put("teachers", teachers)
+            .put("endDate", getFutureDateString())
+            .build();
+    }
+
+    private void expectTeachers(List<TeacherUser> teachers) {
+        mockSisuServer.expectPersonsRequest(teachers.stream().map(t -> t.personId).collect(Collectors.toList()),
+            "/sisu-itest/persons-itest.json",
+            new ImmutableMap.Builder<String, List<TeacherUser>>()
+                .put("teachers", teachers).build());
     }
 
     protected void expectCourseRealisationWithUsers(String courseId, List<StudentUser> students, List<TeacherUser> teachers) {
-        expectCourseRealisationWithUsers(this::expectGetCourseUnitRealisationRequestToOodi, courseId, students, teachers);
+        mockSisuServer.expectCourseUnitRealisationRequest(courseId,
+            "/sisu-itest/course-unit-realisation-itest.json",
+            curVariables(courseId, students, teachers));
+
+        expectTeachers(teachers);
     }
 
-    private void expectCourseRealisationWithUsers(BiConsumer<String, ResponseCreator> expectationFn, String courseId, List<StudentUser> students,
-        List<TeacherUser> teachers) {
-        expectationFn.accept(
-            courseId,
-            withSuccess(Fixtures.asString(
-                INTEGRATION_TEST_OODI_FIXTURES_PREFIX,
-                "course-realisation-itest.json",
-                new ImmutableMap.Builder()
-                    .put("courseId", courseId)
-                    .put("students", students)
-                    .put("teachers", teachers)
-                    .put("endDate", getFutureDateString())
-                    .build()),
-                MediaType.APPLICATION_JSON));
+    protected void expectCourseRealisationsWithUsers(String courseId, List<StudentUser> students, List<TeacherUser> teachers) {
+        mockSisuServer.expectCourseUnitRealisationsRequest(Arrays.asList(courseId),
+            "/sisu-itest/course-unit-realisations-itest.json",
+            curVariables(courseId, students, teachers));
 
-        for (StudentUser studentUser : students) {
-            expectFindStudentRequestToIAM(studentUser.studentNumber, studentUser.username);
-        }
-
-        for (TeacherUser teacherUser : teachers) {
-            expectFindEmployeeRequestToIAM(TEACHER_ID_PREFIX + teacherUser.employeeNumber, teacherUser.username);
-        }
+        expectTeachers(teachers);
     }
 
     protected void assertUserEnrollments(String username,
@@ -222,12 +227,12 @@ public abstract class AbstractMoodleIntegrationTest extends AbstractMoodiIntegra
             moodleUserEnrollmentsList,
             newArrayList(mapperService.getStudentRoleId(), mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId()));
     }
+
     /*
         Every user is that has been enrolled or updated by moodi is tagged with "moodi role".
-        This role is never removed, even if other roles are removed. Note that only student role can be removed by Moodi
-        if student is returned from Oodi with approved set to false.
+        This role is never removed, even if other roles are removed. Note that only student role can be removed by Moodi,
+        if student is returned from Sisu with approved set to false, or is not returned at in the enrollments list at all.
      */
-
     protected void assertMoodiRoleEnrollment(String username, List<MoodleUserEnrollments> moodleUserEnrollmentsList) {
         assertUserEnrollments(
             username,
