@@ -163,7 +163,7 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
     }
 
     @Test
-    public void testSyncRemovesRolesIfSosuDoesNotReturnEnrolledUsers() {
+    public void testSyncRemovesRolesIfSisuDoesNotReturnEnrolledUsers() {
         String sisuCourseId = getSisuCourseId();
 
         expectCourseRealisationWithUsers(sisuCourseId, singletonList(studentUser), singletonList(teacherUser));
