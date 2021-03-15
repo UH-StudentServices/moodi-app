@@ -23,7 +23,13 @@ import fi.helsinki.moodi.integration.sisu.SisuPerson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.partitioningBy;
 
 @Service
 public class StudyRegistryService {
@@ -35,18 +41,26 @@ public class StudyRegistryService {
         this.sisuClient = sisuClient;
     }
 
-    public Optional<StudyRegistryCourseUnitRealisation> getCourseUnitRealisation(final String realisationId) {
-        SisuCourseUnitRealisation sisuCur = sisuClient.getCourseUnitRealisation(realisationId);
-        if (sisuCur != null) {
-            StudyRegistryCourseUnitRealisation cur = sisuCur.toStudyRegistryCourseUnitRealisation();
-            // Diverging from existing pattern here:
-            // Getting all teacher user names immediately, as opposed to getting them one by one in EnrollmentExecutor,
-            // because it is simpler and more efficient this way.
-            cur.teachers = SisuPerson.toStudyRegistryTeachers(sisuClient.getPersons(sisuCur.teacherSisuIds()));
-            return Optional.of(cur);
-        } else {
-            return Optional.empty();
-        }
+    public Optional<StudyRegistryCourseUnitRealisation> getSisuCourseUnitRealisation(final String realisationId) {
+        return getSisuCourseUnitRealisations(Arrays.asList(realisationId)).stream().findFirst();
+    }
+
+    public List<StudyRegistryCourseUnitRealisation> getSisuCourseUnitRealisations(final List<String> realisationIds) {
+        Map<Boolean, List<String>> idsByIsOodiId = realisationIds.stream().collect(partitioningBy(StudyRegistryService::isOodiId));
+
+        List<SisuCourseUnitRealisation> sisuCurs = sisuClient.getCourseUnitRealisations(idsByIsOodiId.get(false));
+
+        List<String> uniquePersonIds = sisuCurs.stream().flatMap(cur -> cur.teacherSisuIds().stream()).distinct().collect(Collectors.toList());
+
+        // Diverging from existing pattern here:
+        // Getting all teacher user names immediately, as opposed to getting them one by one in EnrollmentExecutor,
+        // because it is simpler and more efficient this way.
+        Map<String, StudyRegistryTeacher> teachersById =
+            sisuClient.getPersons(uniquePersonIds)
+                .stream().collect(Collectors.toMap(p -> p.id, SisuPerson::toStudyRegistryTeacher));
+
+        return sisuCurs.stream()
+            .map(cur -> cur.toStudyRegistryCourseUnitRealisation(teachersById)).collect(Collectors.toList());
     }
 
     public static boolean isOodiId(final String realisationId) {

@@ -27,11 +27,14 @@ import fi.helsinki.moodi.integration.sisu.SisuCourseUnitRealisation;
 import fi.helsinki.moodi.integration.sisu.SisuDateRange;
 import fi.helsinki.moodi.integration.sisu.SisuLearningEnvironment;
 import fi.helsinki.moodi.integration.sisu.SisuLocalisedValue;
+import fi.helsinki.moodi.integration.sisu.SisuOrganisation;
+import fi.helsinki.moodi.integration.sisu.SisuOrganisationRoleShare;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -59,7 +62,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
     private static final Integer DESCRIPTION_1_ID = 10;
     private static final Integer DESCRIPTION_2_ID = 20;
     private static final Integer DESCRIPTION_3_ID = 30;
-    private static final String MOODLE_CATEGORY_ID = "2";
+    private static final String MOODLE_DEFAULT_CATEGORY_ID = "17";
 
     @Autowired
     private MoodleCourseBuilder moodleCourseBuilder;
@@ -75,7 +78,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
 
         assertEquals(REALISATION_NAME_FI, moodleCourse.fullName);
         assertEquals(MoodleCourseBuilder.MOODLE_COURSE_ID_OODI_PREFIX + REALISATION_ID, moodleCourse.idNumber);
-        assertEquals(MOODLE_CATEGORY_ID, moodleCourse.categoryId);
+        assertEquals(MOODLE_DEFAULT_CATEGORY_ID, moodleCourse.categoryId);
         assertEquals("Kurssin  " + REALISATION_ID, moodleCourse.shortName);
         assertEquals(String.join(" ", DESCRIPTION_1_FI, DESCRIPTION_2_FI, DESCRIPTION_3_FI), moodleCourse.summary);
     }
@@ -83,6 +86,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
     @Test
     public void thatItCanBuildMoodleCourseFromSisuCur() {
         SisuCourseUnitRealisation cur = getSisuCur();
+        expectSisuOrganisationExportRequest();
 
         MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation());
 
@@ -92,6 +96,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         assertEquals("korrekt url på svenska", moodleCourse.summary);
         assertEquals(LocalDate.of(2019, 8, 5), moodleCourse.startTime);
         assertEquals(LocalDate.of(2019, 12, 5), moodleCourse.endTime);
+        assertEquals("9", moodleCourse.categoryId);
     }
 
     @Test
@@ -99,6 +104,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         SisuCourseUnitRealisation cur = getSisuCur();
         cur.id = "hy-opt-cur-2021-e34bb357-2f08-4a15-a652-6034b9988be2";
         cur.name.sv = "Contemporary European History";
+        expectSisuOrganisationExportRequest();
 
         MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation());
         assertEquals("Contempo hy-opt-...-6034b9988be2", moodleCourse.shortName);
@@ -109,6 +115,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         SisuCourseUnitRealisation cur = getSisuCur();
         cur.teachingLanguageUrn = "urn:code:language:no";
         cur.activityPeriod = null;
+        cur.organisations = new ArrayList<>();
 
         MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation());
 
@@ -118,6 +125,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         assertEquals("urli suomeksi", moodleCourse.summary);
         assertEquals(LocalDate.now(), moodleCourse.startTime);
         assertEquals(LocalDate.now().plusYears(1), moodleCourse.endTime);
+        assertEquals(MOODLE_DEFAULT_CATEGORY_ID, moodleCourse.categoryId);
     }
 
     private SisuCourseUnitRealisation getSisuCur() {
@@ -130,6 +138,14 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         ret.learningEnvironments.add(new SisuLearningEnvironment("urli suomeksi", "fi", true));
         ret.learningEnvironments.add(new SisuLearningEnvironment("fel url på svenska", "sv", false));
         ret.learningEnvironments.add(new SisuLearningEnvironment("korrekt url på svenska", "sv", true));
+        ret.organisations = Arrays.asList(
+                // Poliittinen historia, not responsible org -> not main org
+                new SisuOrganisationRoleShare("urn:code:organisation-role:coordinating-organisation", 1, new SisuOrganisation("hy-org-1000003039")),
+                // Fysikaalisen kemian laboratorio, responsible org with largest share -> Is main org = Matlu=Moodle category 9
+                new SisuOrganisationRoleShare(SisuOrganisationRoleShare.RESPONSIBLE, 0.6, new SisuOrganisation("hy-org-1000002996")),
+                // Teologian ja uskonnontutkimuksen kandiohjelma, responsible with small share -> -> not main org
+                new SisuOrganisationRoleShare(SisuOrganisationRoleShare.RESPONSIBLE, 0.4, new SisuOrganisation("hy-org-116716365"))
+        );
 
         return ret;
     }

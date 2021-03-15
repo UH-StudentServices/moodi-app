@@ -56,7 +56,7 @@ public class MoodleCourseBuilder {
                 MOODLE_COURSE_ID_SISU_PREFIX) + cur.realisationId,
             cur.realisationName,
             getShortName(cur.realisationName, cur.realisationId),
-            mapperService.getDefaultCategory(),
+            mapperService.getMoodleCategoryByOrganisationId(cur.mainOrganisationId),
             cur.description,
             courseVisibility,
             DEFAULT_NUMBER_OF_SECTIONS,

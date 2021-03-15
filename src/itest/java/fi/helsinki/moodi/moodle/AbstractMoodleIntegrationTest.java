@@ -27,8 +27,9 @@ import fi.helsinki.moodi.service.importing.ImportingService;
 import fi.helsinki.moodi.service.importing.MoodleCourseBuilder;
 import fi.helsinki.moodi.service.synchronize.SynchronizationService;
 import fi.helsinki.moodi.service.util.MapperService;
-import fi.helsinki.moodi.test.MockSisuServer;
+import fi.helsinki.moodi.test.MockSisuGraphQLServer;
 import fi.helsinki.moodi.test.TestConfig;
+import fi.helsinki.moodi.test.fixtures.Fixtures;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
@@ -36,8 +37,14 @@ import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.CacheManager;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.List;
@@ -51,6 +58,9 @@ import static java.lang.Math.abs;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @ActiveProfiles("test")
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -77,11 +87,21 @@ public abstract class AbstractMoodleIntegrationTest {
     @Autowired
     protected MoodleCourseBuilder moodleCourseBuilder;
 
+    @Autowired
+    protected RestTemplate studyRegistryRestTemplate;
+
+    @Autowired
+    protected Environment environment;
+
+    @Autowired
+    private CacheManager cacheManager;
+
     @Rule
     public MockServerRule mockServerRule = new MockServerRule(this, 9876);
     // Gets populated by the @Rule above.
     private MockServerClient mockServerClient;
-    protected MockSisuServer mockSisuServer;
+    protected MockSisuGraphQLServer mockSisuGraphQLServer;
+    protected MockRestServiceServer studyRegistryMockServer;
 
     protected static final String STUDENT_USERNAME = "doo_2@helsinki.fi";
     protected static final String STUDENT_NOT_IN_MOODLE_USERNAME = "username_of_student_not_in_moodle";
@@ -94,13 +114,17 @@ public abstract class AbstractMoodleIntegrationTest {
     protected final StudentUser teacherInStudentRole = new StudentUser(TEACHER_USERNAME, "011911609", true);
 
     @Before
-    public void emptyCourses() {
+    public void emptyCoursesAndClearCaches() {
         courseRepository.deleteAll();
+        cacheManager.getCacheNames().stream().forEach(c -> cacheManager.getCache(c).clear());
+
     }
 
     @Before
     public final void setUpMockServers() {
-        mockSisuServer = new MockSisuServer(mockServerClient);
+        mockSisuGraphQLServer = new MockSisuGraphQLServer(mockServerClient);
+        studyRegistryMockServer = MockRestServiceServer.createServer(studyRegistryRestTemplate);
+        expectSisuOrganisationsRequest();
     }
 
     protected String getSisuCourseId() {
@@ -168,26 +192,30 @@ public abstract class AbstractMoodleIntegrationTest {
     }
 
     private void expectTeachers(List<TeacherUser> teachers) {
-        mockSisuServer.expectPersonsRequest(teachers.stream().map(t -> t.personId).collect(Collectors.toList()),
+        mockSisuGraphQLServer.expectPersonsRequest(teachers.stream().map(t -> t.personId).collect(Collectors.toList()),
             "/sisu-itest/persons-itest.json",
             new ImmutableMap.Builder<String, List<TeacherUser>>()
                 .put("teachers", teachers).build());
     }
 
-    protected void expectCourseRealisationWithUsers(String courseId, List<StudentUser> students, List<TeacherUser> teachers) {
-        mockSisuServer.expectCourseUnitRealisationRequest(courseId,
-            "/sisu-itest/course-unit-realisation-itest.json",
+    protected void expectCourseRealisationsWithUsers(String courseId, List<StudentUser> students, List<TeacherUser> teachers) {
+        mockSisuGraphQLServer.expectCourseUnitRealisationsRequest(Arrays.asList(courseId),
+            "/sisu-itest/course-unit-realisations-itest.json",
             curVariables(courseId, students, teachers));
 
         expectTeachers(teachers);
     }
 
-    protected void expectCourseRealisationsWithUsers(String courseId, List<StudentUser> students, List<TeacherUser> teachers) {
-        mockSisuServer.expectCourseUnitRealisationsRequest(Arrays.asList(courseId),
-            "/sisu-itest/course-unit-realisations-itest.json",
-            curVariables(courseId, students, teachers));
+    protected void expectSisuOrganisationsRequest() {
+        studyRegistryMockServer.expect(requestTo(environment.getProperty("integration.sisu.baseUrl") +
+                "/kori/api/organisations/v2/export?limit=10000&since=0"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess(Fixtures.asString("/sisu/organisation-export.json"), MediaType.APPLICATION_JSON));
+    }
 
-        expectTeachers(teachers);
+    protected void resetAndExpectCourseRealisationsWithUsers(String courseId, List<StudentUser> students, List<TeacherUser> teachers) {
+        mockSisuGraphQLServer.reset();
+        expectCourseRealisationsWithUsers(courseId, students, teachers);
     }
 
     protected void assertUserEnrollments(String username,

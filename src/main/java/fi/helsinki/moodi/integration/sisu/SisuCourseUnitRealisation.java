@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static fi.helsinki.moodi.integration.sisu.SisuOrganisationRoleShare.RESPONSIBLE;
+
 @GraphQLProperty(name = "course_unit_realisation", arguments = {
     @GraphQLArgument(name = "id", type = "String")
 })
@@ -41,6 +43,7 @@ public class SisuCourseUnitRealisation {
     public List<SisuLearningEnvironment> learningEnvironments = new ArrayList<>();
     public List<SisuResponsibilityInfo> responsibilityInfos = new ArrayList<>();
     public List<SisuEnrolment> enrolments = new ArrayList<>();
+    public List<SisuOrganisationRoleShare> organisations = new ArrayList<>();
 
     public StudyRegistryCourseUnitRealisation toStudyRegistryCourseUnitRealisation() {
         StudyRegistryCourseUnitRealisation ret = new StudyRegistryCourseUnitRealisation();
@@ -58,6 +61,8 @@ public class SisuCourseUnitRealisation {
             ret.startDate = LocalDate.now();
             ret.endDate = LocalDate.now().plusMonths(12);
         }
+
+        ret.mainOrganisationId = getMainOrganisationId();
 
         // Use the URL of primary learningEnvironment, in language of the course teaching language, or if
         // that language is not found, some other language.
@@ -81,6 +86,14 @@ public class SisuCourseUnitRealisation {
         });
 
         return ret;
+    }
+
+    private String getMainOrganisationId() {
+        return organisations.stream()
+                .filter(o -> RESPONSIBLE.equals(o.roleUrn) && o.share > 0.5)
+                .findFirst()
+                .map(o -> o.organisation.id)
+                .orElse(null);
     }
 
     public List<String> teacherSisuIds() {

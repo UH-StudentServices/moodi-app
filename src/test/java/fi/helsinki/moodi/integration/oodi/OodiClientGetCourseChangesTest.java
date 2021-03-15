@@ -39,7 +39,7 @@ public class OodiClientGetCourseChangesTest extends AbstractMoodiIntegrationTest
 
     @Test
     public void deserializeRespose() {
-        oodiMockServer.expect(
+        studyRegistryMockServer.expect(
             requestTo("https://esbmt2.it.helsinki.fi/doo-oodi/dev/testdb/courseunitrealisations/changes/ids/2015-01-20T00:00:00.000Z"))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess(Fixtures.asString("/oodi/course-changes.json"), MediaType.APPLICATION_JSON));

@@ -19,6 +19,13 @@ integration:
     baseUrl: https://gw.api.helsinki.fi/secure/sisu
     apiKey: ${apiGatewayApiKey}
 
-mapper.moodle.defaultCategory: 73
 # Also known as the synced role
 mapper.moodle.role.moodi: 11
+
+mapper:
+  moodle:
+    categoriesByOrgId:
+      hy-org-46074265: 2 # Bio- ja ympäristötieteellinen
+      hy-org-75261982: 31 # Helsingin yliopiston kirjasto
+      hy-org-1000000957: 54 # Svenska social- och kommunalhögskolan
+      hy-org-48645785: 75 # Avoin yliopisto

@@ -12,6 +12,22 @@
         "startDate": "2019-11-05",
         "endDate": "{{ endDate }}"
       },
+      "organisations": [
+        {
+          "roleUrn": "urn:code:organisation-role:responsible-organisation",
+          "share": 1,
+          "organisation": {
+            "id" : "hy-org-116712512",
+            "code" : "500-K001",
+            "parentId" : "hy-org-1000000911",
+            "name" : {
+              "en" : "Bachelor's Programme in Mathematical Sciences",
+              "fi" : "Matemaattisten tieteiden kandiohjelma",
+              "sv" : "Kandidatprogrammet i matematiska vetenskaper"
+            }
+          }
+        }
+      ],
       "flowState": "PUBLISHED",
       "responsibilityInfos": [
         {{#teachers}}

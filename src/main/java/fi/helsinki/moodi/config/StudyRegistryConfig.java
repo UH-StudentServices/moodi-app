@@ -22,7 +22,6 @@ import fi.helsinki.moodi.integration.http.LoggingInterceptor;
 import fi.helsinki.moodi.integration.http.RequestTimingInterceptor;
 import fi.helsinki.moodi.integration.oodi.OodiClient;
 import fi.helsinki.moodi.integration.sisu.SisuClient;
-import fi.helsinki.moodi.integration.sisu.SisuGraphQLClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,8 +54,8 @@ public class StudyRegistryConfig {
     private Environment environment;
 
     @Bean
-    public OodiClient oodiClient(RestTemplate oodiRestTemplate) {
-        return new OodiClient(environment.getProperty("integration.oodi.url"), oodiRestTemplate);
+    public OodiClient oodiClient(RestTemplate studyRegistryRestTemplate) {
+        return new OodiClient(environment.getProperty("integration.oodi.url"), studyRegistryRestTemplate);
     }
 
     private KeyStore oodiKeyStore(String keystoreLocation, char[] keystorePassword) throws Exception {
@@ -97,7 +96,7 @@ public class StudyRegistryConfig {
     }
 
     @Bean
-    public RestTemplate oodiRestTemplate(ObjectMapper objectMapper, HttpClientBuilder clientBuilder) {
+    public RestTemplate studyRegistryRestTemplate(ObjectMapper objectMapper, HttpClientBuilder clientBuilder) {
         final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(objectMapper);
 
         RestTemplate restTemplate = new RestTemplate(Collections.singletonList(converter));
@@ -111,10 +110,11 @@ public class StudyRegistryConfig {
     }
 
     @Bean
-    public SisuClient sisuClient() {
-        return new SisuGraphQLClient(environment.getProperty("integration.sisu.baseUrl"),
-            environment.getProperty("integration.sisu.apiKey"),
-            connectTimeout,
-            socketTimeout);
+    public SisuClient sisuClient(RestTemplate studyRegistryRestTemplate) {
+        return new SisuClient(environment.getProperty("integration.sisu.baseUrl"),
+                environment.getProperty("integration.sisu.apiKey"),
+                connectTimeout,
+                socketTimeout,
+                studyRegistryRestTemplate);
     }
 }

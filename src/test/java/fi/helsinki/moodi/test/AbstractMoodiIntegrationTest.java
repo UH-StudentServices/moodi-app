@@ -38,6 +38,7 @@ import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.CacheManager;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -122,7 +123,7 @@ public abstract class AbstractMoodiIntegrationTest {
     private WebApplicationContext context;
 
     @Autowired
-    protected RestTemplate oodiRestTemplate;
+    protected RestTemplate studyRegistryRestTemplate;
 
     @Autowired
     protected RestTemplate moodleRestTemplate;
@@ -145,6 +146,9 @@ public abstract class AbstractMoodiIntegrationTest {
     @Autowired
     protected SisuCourseEnricher sisuCourseEnricher;
 
+    @Autowired
+    private CacheManager cacheManager;
+
     protected MockMvc mockMvc;
 
     @Rule
@@ -152,11 +156,11 @@ public abstract class AbstractMoodiIntegrationTest {
     // Gets populated by the @Rule above.
     private MockServerClient mockServerClient;
 
-    protected MockRestServiceServer oodiMockServer;
+    protected MockRestServiceServer studyRegistryMockServer;
     protected MockRestServiceServer moodleMockServer;
     protected MockRestServiceServer moodleReadOnlyMockServer;
     protected MockRestServiceServer iamMockServer;
-    protected MockSisuServer mockSisuServer;
+    protected MockSisuGraphQLServer mockSisuGraphQLServer;
 
     protected String getMoodleBaseUrl() {
         return environment.getProperty("integration.moodle.baseUrl");
@@ -164,6 +168,10 @@ public abstract class AbstractMoodiIntegrationTest {
 
     protected String getOodiUrl() {
         return environment.getProperty("integration.oodi.url");
+    }
+
+    protected String getSisuUrl() {
+        return environment.getProperty("integration.sisu.baseUrl");
     }
 
     protected String getMoodleRestUrl() {
@@ -197,18 +205,19 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     @Before
-    public final void executeMigrations() {
+    public final void resetDBAndClearCache() {
         flyway.clean();
         flyway.migrate();
+        cacheManager.getCacheNames().stream().forEach(c -> cacheManager.getCache(c).clear());
     }
 
     @Before
     public void setUpMockServers() {
-        oodiMockServer = MockRestServiceServer.createServer(oodiRestTemplate);
+        studyRegistryMockServer = MockRestServiceServer.createServer(studyRegistryRestTemplate);
         moodleMockServer = MockRestServiceServer.createServer(moodleRestTemplate);
         moodleReadOnlyMockServer = MockRestServiceServer.createServer(moodleReadOnlyRestTemplate);
         iamMockServer = MockRestServiceServer.createServer(iamRestTemplate);
-        mockSisuServer = new MockSisuServer(mockServerClient);
+        mockSisuGraphQLServer = new MockSisuGraphQLServer(mockServerClient);
     }
 
     public static String toJson(Object object) {
@@ -365,20 +374,14 @@ public abstract class AbstractMoodiIntegrationTest {
 
     protected final void expectGetCourseUsersRequestToOodi(final String realisationId, final ResponseCreator responseCreator) {
         final String url = getOodiCourseUsersRequestUrl(realisationId);
-        oodiMockServer.expect(requestTo(url))
-            .andExpect(method(HttpMethod.GET))
-            .andRespond(responseCreator);
-    }
-
-    protected final void expectGetCourseUnitRealisationRequestToOodi(final String realisationId, final ResponseCreator responseCreator) {
-        final String url = getOodiCourseUnitRealisationRequestUrl(realisationId);
-        oodiMockServer.expect(requestTo(url))
+        studyRegistryMockServer.expect(requestTo(url))
             .andExpect(method(HttpMethod.GET))
             .andRespond(responseCreator);
     }
 
     protected final void expectCreateCourseRequestToMoodle(final String realisationId, final String moodleCourseIdPrefix,
-                                                           final String description, final long moodleCourseIdToReturn) {
+                                                           final String description, final long moodleCourseIdToReturn,
+                                                           final String categoryId) {
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
@@ -386,7 +389,7 @@ public abstract class AbstractMoodiIntegrationTest {
                 "wstoken=xxxx1234&wsfunction=core_course_create_courses&moodlewsrestformat=json&courses%5B0%5D%5Bidnumber%5D="
                     + moodleCourseIdPrefix + realisationId +
                 "&courses%5B0%5D%5Bfullname%5D=Lapsuus+ja+yhteiskunta&courses%5B0%5D%5Bshortname%5D=Lapsuus++" + realisationId +
-                "&courses%5B0%5D%5Bcategoryid%5D=2" +
+                "&courses%5B0%5D%5Bcategoryid%5D=" + categoryId +
                 "&courses%5B0%5D%5Bsummary%5D=" + description + "&courses%5B0%5D%5Bvisible%5D=0" +
                 "&courses%5B0%5D%5Bstartdate%5D=1564952400&courses%5B0%5D%5Benddate%5D=1575496800" + // End date plus one month
                 "&courses%5B0%5D%5Bcourseformatoptions%5D%5B0%5D%5Bname%5D=numsections&courses%5B0%5D%5Bcourseformatoptions%5D%5B0%5D%5Bvalue%5D=7"))
@@ -458,17 +461,23 @@ public abstract class AbstractMoodiIntegrationTest {
 
     protected void setUpMockSisuAndPrefetchCourses() {
         // With batch size 2 Moodi makes 2 calls to fetch Sisu CURs
-        mockSisuServer.expectCourseUnitRealisationsRequest(SISU_COURSE_REALISATION_IDS.stream().limit(2).collect(Collectors.toList()),
+        mockSisuGraphQLServer.expectCourseUnitRealisationsRequest(SISU_COURSE_REALISATION_IDS.stream().limit(2).collect(Collectors.toList()),
             "/sisu/course-unit-realisations-1.json");
-        mockSisuServer.expectCourseUnitRealisationsRequest(SISU_COURSE_REALISATION_IDS.stream().skip(2).collect(Collectors.toList()),
+        mockSisuGraphQLServer.expectCourseUnitRealisationsRequest(SISU_COURSE_REALISATION_IDS.stream().skip(2).collect(Collectors.toList()),
             "/sisu/course-unit-realisations-2.json");
 
-        mockSisuServer.expectPersonsRequest(Arrays.asList("hy-hlo-1", "hy-hlo-2"), "/sisu/persons-many-1.json");
-        mockSisuServer.expectPersonsRequest(Arrays.asList("hy-hlo-2.1", "hy-hlo-3"), "/sisu/persons-many-2.json");
-        mockSisuServer.expectPersonsRequest(Arrays.asList("hy-hlo-4"), "/sisu/persons.json");
+        mockSisuGraphQLServer.expectPersonsRequest(Arrays.asList("hy-hlo-1", "hy-hlo-2"), "/sisu/persons-many-1.json");
+        mockSisuGraphQLServer.expectPersonsRequest(Arrays.asList("hy-hlo-2.1", "hy-hlo-3"), "/sisu/persons-many-2.json");
+        mockSisuGraphQLServer.expectPersonsRequest(Arrays.asList("hy-hlo-4"), "/sisu/persons.json");
 
         // Include Oodi course IDs, that should be ignored.
         sisuCourseEnricher.prefetchCourses(ALL_CUR_IDS);
+    }
+
+    protected void expectSisuOrganisationExportRequest() {
+        studyRegistryMockServer.expect(requestTo(getSisuUrl() + "/kori/api/organisations/v2/export?limit=10000&since=0"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess(Fixtures.asString("/sisu/organisation-export.json"), MediaType.APPLICATION_JSON));
     }
 
     private String urlEncode(final String string) {
@@ -481,7 +490,7 @@ public abstract class AbstractMoodiIntegrationTest {
 
     @After
     public void verifyMockServers() {
-        oodiMockServer.verify();
+        studyRegistryMockServer.verify();
         moodleMockServer.verify();
         moodleReadOnlyMockServer.verify();
         iamMockServer.verify();
