@@ -17,12 +17,17 @@
 
 package fi.helsinki.moodi.service.util;
 
+import fi.helsinki.moodi.integration.sisu.SisuClient;
+import fi.helsinki.moodi.integration.sisu.SisuOrganisation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Service
+@ConfigurationProperties(prefix = "mapper.moodle")
 public class MapperService {
 
     private static final String ROLE_STUDENT = "student";
@@ -30,13 +35,16 @@ public class MapperService {
     private static final String ROLE_MOODI = "moodi";
 
     private final Environment environment;
+    private final SisuClient sisuClient;
 
-    @Value("${mapper.moodle.defaultCategory}")
+    // These get populated by @ConfigurationProperties
     private String defaultCategory;
+    private Map<String, String> moodleCategoriesByOrgId;
 
     @Autowired
-    public MapperService(final Environment environment) {
+    public MapperService(final Environment environment, SisuClient sisuClient) {
         this.environment = environment;
+        this.sisuClient = sisuClient;
     }
 
     public void setDefaultCategory(String defaultCategory) {
@@ -45,6 +53,14 @@ public class MapperService {
 
     public String getDefaultCategory() {
         return defaultCategory;
+    }
+
+    public Map<String, String> getCategoriesByOrgId() {
+        return moodleCategoriesByOrgId;
+    }
+
+    public void setCategoriesByOrgId(Map<String, String> moodleCategoriesByOrgId) {
+        this.moodleCategoriesByOrgId = moodleCategoriesByOrgId;
     }
 
     public long getStudentRoleId() {
@@ -62,5 +78,18 @@ public class MapperService {
 
     public long getMoodleRole(final String role) {
         return environment.getRequiredProperty("mapper.moodle.role." + role, Long.class);
+    }
+
+    public String getMoodleCategoryByOrganisationId(String orgId) {
+        if (orgId == null) {
+            return defaultCategory;
+        }
+        String cat = moodleCategoriesByOrgId.get(orgId);
+        if (cat != null) {
+            return cat;
+        } else {
+            SisuOrganisation organisation = sisuClient.getAllOrganisationsById().get(orgId);
+            return organisation != null ? getMoodleCategoryByOrganisationId(organisation.parentId) : defaultCategory;
+        }
     }
 }

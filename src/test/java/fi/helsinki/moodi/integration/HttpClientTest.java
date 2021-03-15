@@ -34,11 +34,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.net.SocketTimeoutException;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -114,7 +116,7 @@ public class HttpClientTest {
     }
 
     private void callSisu(String id) {
-        sisuClient.getCourseUnitRealisation(id);
+        sisuClient.getCourseUnitRealisations(Arrays.asList(id));
     }
 
     private void callMoodle(String id) {
