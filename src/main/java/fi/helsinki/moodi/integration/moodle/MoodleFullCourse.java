@@ -48,4 +48,7 @@ public final class MoodleFullCourse {
     @JsonProperty("lang")
     public String lang;
 
+    @JsonProperty("categoryid")
+    public Long categoryId;
+
 }

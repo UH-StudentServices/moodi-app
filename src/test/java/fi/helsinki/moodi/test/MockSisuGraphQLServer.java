@@ -36,25 +36,22 @@ import java.util.Map;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
-public class MockSisuServer {
+public class MockSisuGraphQLServer {
     private final MockServerClient client;
+    private static final String API_KEY_HEADER_NAME = "X-Api-Key";
+    private static final String API_KEY = "test-apikey";
 
-    public MockSisuServer(MockServerClient client) {
+    public MockSisuGraphQLServer(MockServerClient client) {
         this.client = client;
     }
 
-    public void expectCourseUnitRealisationRequest(String curId, String responseFile, Map<String, ?> variables) {
-        Arguments arguments = new Arguments("course_unit_realisation", new Argument<>("id", curId));
-        expectRequest(SisuCourseUnitRealisation.class, responseFile, variables, arguments);
-    }
-
-    public void expectCourseUnitRealisationRequest(String curId, String responseFile) {
-        expectCourseUnitRealisationRequest(curId, responseFile, new HashMap<>());
+    public void reset() {
+        client.reset();
     }
 
     public void expectCourseUnitRealisationsRequest(List<String> curIds, String responseFile, Map<String, ?> variables) {
         Arguments arguments = new Arguments("course_unit_realisations", new Argument<>("ids", curIds));
-        expectRequest(SisuCourseUnitRealisation.SisuCURWrapper.class, responseFile, variables, arguments);
+        expectGraphqlRequest(responseFile, variables, SisuCourseUnitRealisation.SisuCURWrapper.class, arguments);
     }
 
     public void expectCourseUnitRealisationsRequest(List<String> curIds, String responseFile) {
@@ -63,25 +60,26 @@ public class MockSisuServer {
 
     public void expectPersonsRequest(List<String> personIds, String responseFile, Map<String, ?> variables) {
         Arguments arguments = new Arguments("private_persons", new Argument<>("ids", personIds));
-        expectRequest(SisuPerson.SisuPersonWrapper.class, responseFile, variables, arguments);
+        expectGraphqlRequest(responseFile, variables, SisuPerson.SisuPersonWrapper.class, arguments);
     }
 
     public void expectPersonsRequest(List<String> personIds, String responseFile) {
         expectPersonsRequest(personIds, responseFile, new HashMap<>());
     }
 
-    private <T> void expectRequest(Class<T> requestClass, String responseFile, final Map<String, ?> variables, Arguments... arguments) {
+    private <T> void expectGraphqlRequest(String responseFile, final Map<String, ?> responseVariables,
+                                          Class<T> requestClass, Arguments... requestArguments) {
         client
             .when(
                 request()
                     .withMethod("POST")
                     .withPath("/graphql")
-                    .withHeader("X-Api-Key", "test-apikey")
-                    .withBody(requestBodyMatcher(requestClass, arguments)))
+                    .withHeader(API_KEY_HEADER_NAME, API_KEY)
+                    .withBody(requestBodyMatcher(requestClass, requestArguments)))
             .respond(
                 response()
                     .withStatusCode(200)
-                    .withBody(Fixtures.asString(responseFile, variables)));
+                    .withBody(Fixtures.asString(responseFile, responseVariables)));
     }
 
     private <T> String requestBodyMatcher(Class<T> requestClass, Arguments... arguments) {

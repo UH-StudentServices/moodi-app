@@ -38,20 +38,23 @@ public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIn
 
     protected void setUpMockServerResponsesForSisuCourse123(boolean allUsersFound) {
         setUpSisuResponsesFor123();
-        setUpMoodleResponses(SISU_COURSE_REALISATION_ID, EXPECTED_SISU_DESCRIPTION_TO_MOODLE, "sisu_", allUsersFound);
+        expectSisuOrganisationExportRequest();
+        setUpMoodleResponses(SISU_COURSE_REALISATION_ID, EXPECTED_SISU_DESCRIPTION_TO_MOODLE, "sisu_", allUsersFound, "9");
     }
 
     protected void setUpSisuResponseCourse123NotFound() {
-        mockSisuServer.expectCourseUnitRealisationRequest(SISU_COURSE_REALISATION_ID, "/sisu/course-unit-realisation-not-found.json");
+        mockSisuGraphQLServer.expectCourseUnitRealisationsRequest(Arrays.asList(SISU_COURSE_REALISATION_ID),
+                "/sisu/course-unit-realisation-not-found.json");
     }
 
     protected void setUpSisuResponsesFor123() {
-        mockSisuServer.expectCourseUnitRealisationRequest(SISU_COURSE_REALISATION_ID, "/sisu/course-unit-realisation.json");
-        mockSisuServer.expectPersonsRequest(Arrays.asList("hy-hlo-4"), "/sisu/persons.json");
+        mockSisuGraphQLServer.expectCourseUnitRealisationsRequest(Arrays.asList(SISU_COURSE_REALISATION_ID),
+                "/sisu/course-unit-realisation.json");
+        mockSisuGraphQLServer.expectPersonsRequest(Arrays.asList("hy-hlo-4"), "/sisu/persons.json");
     }
 
-    private void setUpMoodleResponses(String curId, String description, String moodleCourseIdPrefix, boolean allUsersFound) {
-        expectCreateCourseRequestToMoodle(curId, moodleCourseIdPrefix, description, MOODLE_COURSE_ID);
+    private void setUpMoodleResponses(String curId, String description, String moodleCourseIdPrefix, boolean allUsersFound, String categoryId) {
+        expectCreateCourseRequestToMoodle(curId, moodleCourseIdPrefix, description, MOODLE_COURSE_ID, categoryId);
 
         expectGetUserRequestToMoodle(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA);
         expectGetUserRequestToMoodle(MOODLE_USERNAME_JUKKA, MOODLE_USER_ID_JUKKA);

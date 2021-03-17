@@ -33,13 +33,15 @@ public final class Templates {
             MustacheEngineBuilder.newBuilder().build();
 
     public static String render(final String templateContent, final Map<String, ?> variables) {
-        LOGGER.debug("About to render template {}", templateContent);
+        LOGGER.debug("About to render template {}", templateContent.length() < 5000 ?
+                templateContent :
+                templateContent.length() + " characters");
 
         final String content = ENGINE.compileMustache(
                 String.valueOf(templateContent.hashCode()),
                 templateContent).render(variables);
 
-        LOGGER.debug("Rendered template: {}", content);
+        LOGGER.debug("Rendered template");
 
         return content;
     }
