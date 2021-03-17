@@ -22,7 +22,29 @@ httpClient:
 
 oodi.enrollmentApprovedStatusCodes: 2, 3, 7, 8
 
-mapper.moodle.defaultCategory: 2
+mapper.moodle.defaultCategory: 17
+# Some Moodle categories are overridden for the prod environment.
+mapper:
+  moodle:
+    categoriesByOrgId:
+      hy-org-46074265: 22 # Bio- ja ympäristötieteellinen
+      hy-org-1001813360: 3 # Eläinlääketieteellinen
+      hy-org-41547372: 4 # Farmasian tiedekunta
+      hy-org-1000000842: 5 # Humanistinen tiedekunta
+      hy-org-1000000939: 6 # Kasvatustieteellinen tiedekunta
+      hy-org-1000000836: 7 # Lääketieteellinen tiedekunta
+      hy-org-1000000941: 8 # Maatalous-metsätieteellinen tiedekunta
+      hy-org-1000000911: 9 # Matemaattis-luonnontieteellinen tiedekunta
+      hy-org-1000000821: 10 # Oikeustieteellinen tiedekunta
+      hy-org-1000000580: 11 # Teologinen tiedekunta
+      hy-org-1000000940: 12 # Valtiotieteellinen tiedekunta
+      hy-org-75261977: 13 # Erillislaitokset
+      hy-org-1000003401: 15 # Kielikeskus
+      hy-org-1001813375: 20 # Henkilöstökoulutus
+      hy-org-122782928: 21 # Tutkimusyksiköt ja verkostot
+      hy-org-75261982: 22 # Helsingin yliopiston kirjasto
+      hy-org-1000000957: 19 # Svenska social- och kommunalhögskolan
+      hy-org-48645785: 24 # Avoin yliopisto
 
 #
 # Map application roles to Moodle's internal role IDs.

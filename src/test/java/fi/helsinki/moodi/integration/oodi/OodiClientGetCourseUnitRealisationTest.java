@@ -40,7 +40,7 @@ public class OodiClientGetCourseUnitRealisationTest extends AbstractMoodiIntegra
 
     @Test
     public void deserializeResponse() {
-        oodiMockServer.expect(
+        studyRegistryMockServer.expect(
                 requestTo(getOodiCourseUnitRealisationRequestUrl("102374742")))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(Fixtures.asString("/oodi/course-realisation.json"), MediaType.APPLICATION_JSON));

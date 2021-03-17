@@ -36,7 +36,7 @@ public class MoodleIntegrationImportCourseTest extends AbstractMoodleIntegration
     public void testMoodleIntegrationWhenImportingCourse() {
         String sisuCourseId = getSisuCourseId();
 
-        expectCourseRealisationWithUsers(
+        expectCourseRealisationsWithUsers(
             sisuCourseId,
             newArrayList(studentUser, studentUserNotInMoodle),
             singletonList(teacherUser));
@@ -71,6 +71,7 @@ public class MoodleIntegrationImportCourseTest extends AbstractMoodleIntegration
         assertThat(mfc.idNumber).isEqualTo("sisu_" + sisuCourseId);
         assertThat(mfc.lang).isEmpty();
         assertThat(mfc.summary).isEqualTo("https://courses.helsinki.fi/fi/OODI-FLOW/136394381");
+        assertThat(mfc.categoryId).isEqualTo(9);
     }
 
 }

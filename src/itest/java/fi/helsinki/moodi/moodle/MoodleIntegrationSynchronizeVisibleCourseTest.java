@@ -36,7 +36,7 @@ public class MoodleIntegrationSynchronizeVisibleCourseTest extends AbstractMoodl
     public void testSyncRemovesStudentRoleAndSuspendsIfNotApproved() {
         String sisuCourseId = getSisuCourseId();
 
-        expectCourseRealisationWithUsers(sisuCourseId, singletonList(studentUser), singletonList(teacherUser));
+        expectCourseRealisationsWithUsers(sisuCourseId, singletonList(studentUser), singletonList(teacherUser));
 
         long moodleCourseId = importCourse(sisuCourseId);
 
@@ -47,7 +47,7 @@ public class MoodleIntegrationSynchronizeVisibleCourseTest extends AbstractMoodl
         assertTeacherEnrollment(TEACHER_USERNAME, moodleUserEnrollmentsList);
 
         // Now set the student as non-approved, and run the sync
-        expectCourseRealisationsWithUsers(sisuCourseId, singletonList(studentUser.setApproved(false)), singletonList(teacherUser));
+        resetAndExpectCourseRealisationsWithUsers(sisuCourseId, singletonList(studentUser.setApproved(false)), singletonList(teacherUser));
         synchronizationService.synchronize(SynchronizationType.FULL);
 
         moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);

@@ -170,7 +170,7 @@ public class DevModeController {
     @RequestMapping(value = "/api/v1/study-registry-course/{realisationId}", method = RequestMethod.GET)
     @ResponseBody
     public StudyRegistryCourseUnitRealisation getStudyRegistryCourse(@PathVariable("realisationId") String realisationId) {
-        return studyRegistryService.getCourseUnitRealisation(realisationId)
+        return studyRegistryService.getSisuCourseUnitRealisation(realisationId)
                 .orElseThrow(notFoundException("Study registry course not found with realisation id " + realisationId));
 
     }

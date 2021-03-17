@@ -78,7 +78,7 @@ public class ImportingService {
         }
 
         final StudyRegistryCourseUnitRealisation courseUnitRealisation =
-                studyRegistryService.getCourseUnitRealisation(sisuRealisationId)
+                studyRegistryService.getSisuCourseUnitRealisation(sisuRealisationId)
                         .orElseThrow(notFoundException(
                             String.format("Study registry course not found with realisation id %s (%s)",
                                 sisuRealisationId, request.realisationId)));

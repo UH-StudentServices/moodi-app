@@ -15,40 +15,19 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.integration.moodle;
+package fi.helsinki.moodi.integration.sisu;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+public class SisuOrganisationRoleShare {
+    public static final String RESPONSIBLE = "urn:code:organisation-role:responsible-organisation";
+    public String roleUrn;
+    public double share;
+    public SisuOrganisation organisation;
 
-public final class MoodleFullCourse {
+    public SisuOrganisationRoleShare() {}
 
-    @JsonProperty("id")
-    public Long id;
-
-    @JsonProperty("idnumber")
-    public String idNumber;
-
-    @JsonProperty("shortname")
-    public String shortName;
-
-    @JsonProperty("fullname")
-    public String fullName;
-
-    @JsonProperty("displayname")
-    public String displayName;
-
-    @JsonProperty("summary")
-    public String summary;
-
-    @JsonProperty("startdate")
-    public Long startDate;
-
-    @JsonProperty("enddate")
-    public Long endDate;
-
-    @JsonProperty("lang")
-    public String lang;
-
-    @JsonProperty("categoryid")
-    public Long categoryId;
-
+    public SisuOrganisationRoleShare(String roleUrn, double share, SisuOrganisation organisation) {
+        this.roleUrn = roleUrn;
+        this.share = share;
+        this.organisation = organisation;
+    }
 }
