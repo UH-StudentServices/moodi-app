@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static fi.helsinki.moodi.integration.sisu.SisuOrganisationRoleShare.RESPONSIBLE;
+import static fi.helsinki.moodi.Constants.RESPONSIBLE;
 
 @GraphQLProperty(name = "course_unit_realisation", arguments = {
     @GraphQLArgument(name = "id", type = "String")

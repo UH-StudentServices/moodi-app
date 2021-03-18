@@ -49,7 +49,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static fi.helsinki.moodi.integration.sisu.SisuOrganisation.ACTIVE;
+import static fi.helsinki.moodi.Constants.ACTIVE;
 
 public class SisuClient {
 

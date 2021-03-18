@@ -18,7 +18,6 @@
 package fi.helsinki.moodi.integration.sisu;
 
 public class SisuOrganisationRoleShare {
-    public static final String RESPONSIBLE = "urn:code:organisation-role:responsible-organisation";
     public String roleUrn;
     public double share;
     public SisuOrganisation organisation;

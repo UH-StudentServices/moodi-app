@@ -142,9 +142,9 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
                 // Poliittinen historia, not responsible org -> not main org
                 new SisuOrganisationRoleShare("urn:code:organisation-role:coordinating-organisation", 1, new SisuOrganisation("hy-org-1000003039")),
                 // Fysikaalisen kemian laboratorio, responsible org with largest share -> Is main org = Matlu=Moodle category 9
-                new SisuOrganisationRoleShare(SisuOrganisationRoleShare.RESPONSIBLE, 0.6, new SisuOrganisation("hy-org-1000002996")),
+                new SisuOrganisationRoleShare(RESPONSIBLE, 0.6, new SisuOrganisation("hy-org-1000002996")),
                 // Teologian ja uskonnontutkimuksen kandiohjelma, responsible with small share -> -> not main org
-                new SisuOrganisationRoleShare(SisuOrganisationRoleShare.RESPONSIBLE, 0.4, new SisuOrganisation("hy-org-116716365"))
+                new SisuOrganisationRoleShare(RESPONSIBLE, 0.4, new SisuOrganisation("hy-org-116716365"))
         );
 
         return ret;
