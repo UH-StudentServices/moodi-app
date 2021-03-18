@@ -17,16 +17,20 @@
 
 package fi.helsinki.moodi.integration.sisu;
 
+import io.aexp.nodes.graphql.annotations.GraphQLIgnore;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SisuOrganisation {
     public String id;
+    @GraphQLIgnore // Only in REST data model.
     public LocalDateTime snapshotDateTime;
     public SisuLocalisedValue name;
     public String code;
     public String parentId;
+    @GraphQLIgnore // Only in REST data model.
     public String status;
     public String documentState;
 
