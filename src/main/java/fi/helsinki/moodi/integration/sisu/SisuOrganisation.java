@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SisuOrganisation {
-    public static final String ACTIVE = "ACTIVE";
     public String id;
     public LocalDateTime snapshotDateTime;
     public SisuLocalisedValue name;

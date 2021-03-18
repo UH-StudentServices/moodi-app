@@ -23,6 +23,8 @@ public final class Constants {
     public static final String LANG_SV = "sv";
     public static final String LANG_EN = "en";
     public static final String LANG_DEFAULT = LANG_FI;
+    public static final String ACTIVE = "ACTIVE";
+    public static final String RESPONSIBLE = "urn:code:organisation-role:responsible-organisation";
 
     private Constants() {}
 }
