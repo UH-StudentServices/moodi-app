@@ -30,7 +30,7 @@ public class SisuEnrolment {
     }
 
     public boolean isEnrolled() {
-        return EnrolmentState.ENROLLED.equals(state) || EnrolmentState.CONFIRMED.equals(state);
+        return EnrolmentState.ENROLLED.equals(state);
     }
 
     public enum EnrolmentState {
