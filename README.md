@@ -13,7 +13,7 @@ Integrations
 Environments
 ================
 
-Currently Moodi has 3 environments: local, dev, and prod. Integrations are mapped for each environment in corresponding application-<env>.yml. 
+Currently Moodi has 3 environments: local, dev, and prod. Integrations are mapped for each environment in corresponding application-<env>.yml.
 Currently only IAM has a mock implementation that is used in local and dev environments.
 
 Requirements
@@ -25,9 +25,21 @@ The following programs must be installed:
 Local development
 ---------------
 
-This is an integration application and as such running locally requires a lot of setup work with ssh tunnels, certificates etc. The 
+This is an integration application and as such running locally requires a lot of setup work with ssh tunnels, certificates etc. The
 recommended way to test changes to the application locally is by running automated tests. Therefore good automated test coverage is essential
 when new features are added.
+
+### Building
+
+To compile locally and download all dependencies, you need a ssh tunnel to opintoni artifactory
+```sh
+ssh -L 127.0.0.1:8081:127.0.0.1:8081 [username]@opi-1.student.helsinki.fi
+```
+
+You then need to run all gradle commands with parameter `-Popintoni_artifactory_base_url=http://127.0.0.1:8081/artifactory`.
+Gradle might complain about missing `opintoni_artifactory_username` and `opintoni_artifactory_password` parameters. If these are missing, just append parameters `-Popintoni_artifactory_username=[username]` and `-Popintoni_artifactory_password=[password]` to the command.
+
+Note: for running tests and compiling, you DO NOT need the username and password, you just need to append the parameters to the gradle command. The values of the parameters do not matter.
 
 ### Running tests
 ```sh
@@ -39,9 +51,9 @@ when new features are added.
 ### Running Moodi-Moodle integration tests
 This is normally done in Jenkins, but if you want to test something locally, you need to go via an ssh tunnel.
 
-Into /etc/hosts: 
+Into /etc/hosts:
 ```
-127.0.0.1       moodi-2-moodle-20.student.helsinki.fi 
+127.0.0.1       moodi-2-moodle-20.student.helsinki.fi
 ```
 
 Open an ssh tunnel to call the Moodle API:
@@ -52,8 +64,8 @@ ssh moodi-dev -L 1444:moodi-2-moodle-20.student.helsinki.fi:443
 Then run the tests
 ```
 # Get the token from moodi-dev:/opt/moodi/config/moodi.properties
-read MOODLE_WS_TOKEN 
-./gradlew itest --rerun-tasks -Pmoodle_base_url=https://moodi-2-moodle-20.student.helsinki.fi:1444/moodlecurrent/webservice/rest/server.php -Pmoodle_ws_token=$MOODLE_WS_TOKEN   
+read MOODLE_WS_TOKEN
+./gradlew itest --rerun-tasks -Pmoodle_base_url=https://moodi-2-moodle-20.student.helsinki.fi:1444/moodlecurrent/webservice/rest/server.php -Pmoodle_ws_token=$MOODLE_WS_TOKEN
 ```
 
 ### Running Moodi locally
@@ -71,10 +83,10 @@ integration.moodle.wstoken: <see moodi-dev:/opt/moodi/config/moodi.properties>
 ```
 Copy moodi-dev:/opt/moodi/config/keystore/moodi.p12 this directory.
 
-Into /etc/hosts: 
+Into /etc/hosts:
 ```
-127.0.0.1       gw-api-test.it.helsinki.fi   
-127.0.0.1       moodi-2-moodle-20.student.helsinki.fi 
+127.0.0.1       gw-api-test.it.helsinki.fi
+127.0.0.1       moodi-2-moodle-20.student.helsinki.fi
 ```
 
 application-dev.yml:
@@ -105,16 +117,16 @@ Credentials are: user/password
 The server environments use Postgres 9.4.
 
 ## Local
-The local environment and tests use a H2 database. 
+The local environment and tests use a H2 database.
 
 ### Dockerized local Postgres
 
-Use this, if you want to test DB changes locally with Postgres. For example, if you want to test column type changes with existing 
+Use this, if you want to test DB changes locally with Postgres. For example, if you want to test column type changes with existing
 data in the DB.
 
 The DB is populated with a dump from Moodi dev environment.
 
-Start the DB by running 
+Start the DB by running
 ```
 docker-compose up
 ```
@@ -122,7 +134,7 @@ docker-compose up
 To clear the data, first stop the container and then:
 ```
 docker rm moodi-postgres
-docker volume rm moodi-app_moodi-postgres-data 
+docker volume rm moodi-app_moodi-postgres-data
 ```
 To create a new dump:
 
