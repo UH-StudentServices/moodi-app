@@ -58,13 +58,13 @@ if(hasProperty("opintoni_artifactory_base_url")) {
             url "${opintoni_artifactory_base_url}/remote-repos/"
         }
         mavenLocal()
-        maven { url 'https://dl.bintray.com/americanexpress/maven/' }
+        maven { url 'https://jitpack.io' }
         jcenter()
     }
 } else {
     repositories {
         mavenLocal()
-        maven { url 'https://dl.bintray.com/americanexpress/maven/' }
+        maven { url 'https://jitpack.io' }
         jcenter()
     }
 }
@@ -94,7 +94,7 @@ dependencies {
     compile "org.trimou:trimou-core:1.7.3.Final"
     compile "javax.mail:mail:1.4.7"
 
-    compile group: 'io.aexp.nodes.graphql', name: 'nodes', version: nodes_version
+    implementation 'com.github.americanexpress:nodes:v0.5.0'
 
     testCompile "com.h2database:h2:1.4.187"
     testCompile "org.springframework.boot:spring-boot-starter-test"
