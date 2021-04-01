@@ -94,7 +94,7 @@ dependencies {
     compile "org.trimou:trimou-core:1.7.3.Final"
     compile "javax.mail:mail:1.4.7"
 
-    implementation 'com.github.americanexpress:nodes:v0.5.0'
+    compile group: 'com.github.americanexpress.nodes', name: 'nodes', version: nodes_version
 
     testCompile "com.h2database:h2:1.4.187"
     testCompile "org.springframework.boot:spring-boot-starter-test"
