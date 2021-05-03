@@ -50,6 +50,9 @@ public class IAMConfig {
     @Value("${integration.iam.url:#{null}}")
     private String baseUrl;
 
+    @Value("${integration.iam.apiKey:#{null}}")
+    private String apiKey;
+
     @Value("${integration.iam.mock:false}")
     private boolean mockClientImplementation;
 
@@ -61,7 +64,7 @@ public class IAMConfig {
         if (mockClientImplementation) {
             return new IAMMockClient(getMockUsers());
         } else {
-            return new IAMRestClient(baseUrl, iamRestTemplate(objectMapper, clientBuilder));
+            return new IAMRestClient(baseUrl, apiKey, iamRestTemplate(objectMapper, clientBuilder));
         }
     }
 

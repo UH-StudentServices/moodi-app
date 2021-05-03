@@ -21,7 +21,10 @@ import fi.helsinki.moodi.exception.IntegrationConnectionException;
 import org.slf4j.Logger;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
@@ -35,10 +38,12 @@ public class IAMRestClient implements IAMClient {
     private static final Logger logger = getLogger(IAMRestClient.class);
 
     private final String baseUrl;
+    private String apiKey;
     private final RestTemplate restTemplate;
 
-    public IAMRestClient(String baseUrl, RestTemplate restTemplate) {
+    public IAMRestClient(String baseUrl, String apiKey, RestTemplate restTemplate) {
         this.baseUrl = baseUrl;
+        this.apiKey = apiKey;
         this.restTemplate = restTemplate;
     }
 
@@ -50,7 +55,7 @@ public class IAMRestClient implements IAMClient {
             List<IAMStudent> result = restTemplate.exchange(
                 String.format("%s/iam/findStudent/%s", baseUrl, studentNumber),
                 HttpMethod.GET,
-                null,
+                apiKeyHeaders(),
                 new ParameterizedTypeReference<List<IAMStudent>>() {})
                 .getBody();
 
@@ -75,7 +80,7 @@ public class IAMRestClient implements IAMClient {
             List<IAMEmployee> result = restTemplate.exchange(
                 String.format("%s/iam/findEmployee/%s", baseUrl, employeeNumber),
                 HttpMethod.GET,
-                null,
+                apiKeyHeaders(),
                 new ParameterizedTypeReference<List<IAMEmployee>>() {})
                 .getBody();
 
@@ -90,5 +95,11 @@ public class IAMRestClient implements IAMClient {
         } catch (ResourceAccessException e) {
             throw new IntegrationConnectionException("IAM connection failure", e);
         }
+    }
+
+    private HttpEntity apiKeyHeaders() {
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+        headers.add("Apikey", apiKey);
+        return new HttpEntity(headers);
     }
 }
