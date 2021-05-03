@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
+import org.mockserver.model.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -50,6 +51,7 @@ import static org.mockserver.model.HttpResponse.response;
         "integration.oodi.url=http://localhost:9876",
         "integration.moodle.baseUrl=http://localhost:9876",
         "integration.iam.url=http://localhost:9876",
+        "integration.iam.apiKey=abloy",
         "integration.sisu.baseUrl=http://localhost:9876",
         "httpClient.connectTimeout=100",
         "httpClient.socketTimeout=100"
@@ -91,6 +93,13 @@ public class HttpClientTest {
     @Test
     public void thatIAMClientDoesNotHang() {
         testTimeout(this::callIAM);
+    }
+
+    @Test
+    public void thatIAMClientPassesApiKey() {
+        mockServerClient.when(request().withHeader("Apikey", "abloy"))
+                .respond(response().withBody("[]").withContentType(MediaType.JSON_UTF_8));
+        iamClient.getStudentUserNameList("1");
     }
 
     private void testTimeout(Consumer<String> f) {
