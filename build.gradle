@@ -101,6 +101,7 @@ dependencies {
     testCompile "com.jayway.jsonpath:json-path-assert:0.9.1"
     testCompile group: 'org.mock-server', name: 'mockserver-netty', version: mockserver_version
     testCompile group: 'org.mock-server', name: 'mockserver-junit-rule', version: mockserver_version
+    testCompile group: 'com.graphql-java', name: 'graphql-java', version: graphql_java_version
 }
 
 apply from: "gradle-build/test.gradle"
