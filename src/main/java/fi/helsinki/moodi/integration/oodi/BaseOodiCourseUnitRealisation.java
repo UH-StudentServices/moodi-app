@@ -53,7 +53,8 @@ public class BaseOodiCourseUnitRealisation {
         ret.origin = StudyRegistryCourseUnitRealisation.Origin.OODI;
         ret.realisationId = "" + realisationId;
         ret.startDate = parseDateTime(startDate, LocalDate.now());
-        ret.endDate = parseDateTime(endDate, LocalDate.now().plusMonths(11)).plusMonths(1);
+        LocalDate parsedEndDate = parseDateTime(endDate, null);
+        ret.endDate = parsedEndDate != null ? parsedEndDate.plusMonths(1) : LocalDate.now().plusMonths(12);
         ret.published = !removed;
         ret.students = students.stream().map(OodiStudent::toStudyRegistryStudent).collect(Collectors.toList());
         ret.teachers = teachers.stream().map(OodiTeacher::toStudyRegistryTeacher).collect(Collectors.toList());
