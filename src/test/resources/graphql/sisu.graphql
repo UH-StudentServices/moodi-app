@@ -1,0 +1,1881 @@
+# Exposes a URL that specifies the behaviour of this scalar.
+directive @specifiedBy(
+  # The URL that specifies the behaviour of this scalar.
+  url: String!
+) on SCALAR
+type AcceptorPerson {
+  personId: ID
+  person: PublicPerson
+  roleUrn: String!
+  text: LocalizedString
+}
+
+type Address {
+  city: String
+  cityAsMarkupString: String
+  countryUrn: String
+  country: Code
+  postalCode: String
+  postalCodeAsMarkupString: String
+  streetAddress: String
+  streetAddressAsMarkupString: String
+  address: [String!]
+  addressAsMarkupString: [String!]
+  type: String!
+  isUserEditable: Boolean!
+}
+
+type AssessmentItem {
+  id: ID!
+  assessmentItemType: String!
+  contentDescription: LocalizedMarkupString
+  courseUnitRealisations: [CourseUnitRealisation!]!
+  completionMethods: [CompletionMethod!]
+  credits: CreditRange!
+  documentState: String!
+  gradeScaleId: ID
+  grading: LocalizedString
+  learningMaterial: LocalizedMarkupString
+  literature: [LocalId!]
+  name: LocalizedString!
+  nameSpecifier: LocalizedString
+  organisations: [CourseUnitRealisationOrganisation!]
+  possibleAttainmentLanguageUrns: [String!]
+  possibleAttainmentLanguages: [Code!]
+  primaryCourseUnitGroupId: ID!
+  primaryCourseUnits: [CourseUnit!]!
+  snapshotDateTime: String
+  responsibilityInfos: [ResponsibilityInfo!]
+  studyLevelUrn: String
+  studyLevel: Code
+  studyFormat: LocalizedMarkupString
+  subjectUrn: String
+  subject: Code
+  universityOrgIds: [ID!]
+  universityOrgs: [Organisation!]
+}
+
+type AssociatedStudy {
+  description: String!
+  descriptionAsMarkupString: String!
+  credits: Float!
+  attainmentLocationUrn: String!
+  attainmentLocation: Code
+  associatedDegree: String!
+  associatedDegreeAsMarkupString: String!
+  attainmentDate: String!
+}
+
+type AttainableDegree {
+  degreeName: String
+  internationalInstitutionUrn: String!
+  internationalInstitution: Code
+}
+
+type AttainedQualification {
+  id: ID!
+  personId: ID!
+  documentState: String!
+  qualificationId: ID!
+  qualification: Qualification
+  studyRightId: ID
+  studyRight: StudyRight
+  educationalInstitutionUrn: String!
+  moduleGroupId: ID!
+  additionalInformation: String
+  additionalInformationAsMarkupString: String
+  associatedStudies: [AssociatedStudy!]
+  attainmentDate: String
+  studyFieldUrn: String
+  type: String
+  childAttainedQualificationIds: [ID!]
+  childAttainedQualifications(
+    includeDrafts: Boolean = false
+  ): [AttainedQualification!]
+  credits: Float
+}
+
+type Attainment {
+  acceptorPersons: [AcceptorPerson!]
+  acceptorOrganisationIds: [String!]
+  acceptorOrganisations: [Organisation!]
+  additionalInfo: LocalizedString
+  attainmentDate: String!
+  attainmentLanguageUrn: String
+  attainmentLanguageCanonizedUrn: String
+  attainmentLanguage: Code
+  credits: Float!
+  degreeTitleUrn: String
+  degreeTitle: Code
+  documentState: String!
+  expiryDate: String
+  gradeAverage: GradeAverage
+  gradeId: ID!
+  gradeScaleId: ID!
+  gradeScale: GradeScale
+  grade: Grade
+  honoraryTitleUrn: String
+  honoraryTitle: Code
+  id: ID!
+  misregistration: Boolean!
+  misregistrationRationale: String
+  misregistrationRationaleAsMarkupString: String
+  organisations: [OrganisationShare!]
+  personFirstNames: String
+  personFirstNamesAsMarkupString: String
+  personId: ID!
+  person: PrivatePerson!
+  personLastName: String
+  personLastNameAsMarkupString: String
+  personStudentNumber: String
+  personStudentNumberAsMarkupString: String
+  primary: Boolean!
+  registrationDate: String!
+  state: String!
+  studyFieldUrn: String
+  educationClassificationUrn: String
+  educationClassification: Code
+  studyField: Code
+  studyRightId: ID
+  studyRight: StudyRight
+  studyWeeks: Float
+  type: String!
+  verifierPersonId: ID
+  verifierPerson: PublicPerson
+  nodes: [AttainmentNode!]
+  assessmentItemId: ID
+  assessmentItem: AssessmentItem
+  assessmentItemSnapshot: AssessmentItem
+  assessmentItemAttainmentIds: [ID!]
+  courseUnitId: ID
+  courseUnit: CourseUnit
+  courseUnitTypeUrn: ID
+  moduleId: ID
+  moduleGroupId: ID
+  module: Module
+  name: LocalizedString
+  code: String
+  codeAsMarkupString: String
+  childAttainments: [Attainment!]
+  educationalInstitutionUrn: String!
+  creditTransferInfo: CreditTransferInfo
+  attainedQualifications(
+    includeDrafts: Boolean = false
+  ): [AttainedQualification!]
+  internationalContractualDegree: InternationalContractualDegree
+}
+
+type AttainmentNode {
+  attainmentId: ID
+  attainment: Attainment
+  name: LocalizedString
+  nodes: [AttainmentNode!]
+  type: String
+}
+
+type Building {
+  address: Address
+  documentState: String!
+  id: ID!
+  name: LocalizedString
+  universityOrgIds: [ID!]
+}
+
+type Code {
+  name: LocalizedString!
+  shortName: LocalizedString
+  urn: String!
+  deprecated: Boolean
+}
+
+type CompletionMethod {
+  description: LocalizedMarkupString
+  assessmentItemOptionalityDescription: LocalizedMarkupString
+  automaticEvaluation: Boolean!
+  require: Range
+  typeOfRequire: String!
+  assessmentItemIds: [ID!]!
+  assessmentItems: [AssessmentItem!]!
+  repeats: [CompletionMethodRepeat!]
+  evaluationCriteria: LocalizedString
+  courseUnit: CourseUnit!
+  studyType: String!
+  prerequisites: LocalizedString
+}
+
+type CompletionMethodRepeat {
+  studyYearRange: YearRange!
+  yearInterval: Int
+  repeatPossibilityString: [String!]
+  repeatPossibility: [StudyPeriodTemplateLocator!]
+}
+
+type ContentFilter {
+  studyRightSelectionTypeUrn: String
+  studyRightSelectionType: Code
+}
+
+type CountryCode {
+  name: LocalizedString!
+  shortName: LocalizedString
+  urn: String!
+  deprecated: Boolean
+  numeric: String!
+  alpha2: String
+}
+
+type CourseUnit {
+  id: ID!
+  abbreviation: String
+  abbreviationAsMarkupString: String
+  additionalInfo: LocalizedMarkupString
+  approvalState: String
+  assessmentItemOrder: [String!]
+  categoryTagUrns: [String!]
+  categoryTags: [Code!]
+  cefrLevelUrn: String
+  cefrLevel: Code
+  code: String
+  codeAsMarkupString: String
+  completionMethods: [CompletionMethod!]
+  compulsoryFormalPrerequisites: [PrerequisiteGroup!]
+  content: LocalizedMarkupString
+  courseUnitTypeUrn: String
+  courseUnitType: Code
+  courseUnitRealisations(
+    activityStatus: String
+    flowStates: [String!]
+  ): [CourseUnitRealisation!]
+  credits: CreditRange
+  curriculumPeriodIds: [ID!]
+  curriculumPeriods: [CurriculumPeriod!]
+  customCodeUrns: [String!]
+  documentState: String!
+  equivalentCoursesInfo: LocalizedMarkupString
+  gradeScaleId: ID
+  gradeScale: GradeScale
+  groupId: ID!
+  inclusionApplicationInstruction: LocalizedMarkupString
+  learningMaterial: LocalizedMarkupString
+  literature: [Literature!]
+  name: LocalizedString
+  organisations: [CourseUnitRealisationOrganisation!]
+  outcomes: LocalizedMarkupString
+  possibleAttainmentLanguageUrns: [String!]
+  possibleAttainmentLanguages: [Code!]
+  prerequisites: LocalizedMarkupString
+  recommendedFormalPrerequisites: [PrerequisiteGroup!]
+  responsibilityInfos: [ResponsibilityInfo!]
+  searchTags: [String!]
+  studyFieldUrns: [String!]
+  studyFields: [Code!]
+  studyLevelUrn: String
+  studyLevel: Code
+  subjectUrn: String
+  subject: Code
+  substitutions: [Substitution!]
+  tweetText: LocalizedString
+  universityOrgIds: [ID!]
+  universityOrgs: [Organisation!]
+  validityPeriod: DatePeriod
+}
+
+type CourseUnitRealisation {
+  id: ID!
+  activityPeriod: DatePeriod!
+  additionalInfo: LocalizedMarkupString
+  assessmentItemIds: [ID!]
+  assessmentItems: [AssessmentItem!]
+  continuousEnrolment: Boolean!
+  courseUnitRealisationTypeUrn: String
+  courseUnitRealisationType: Code
+  courseUnits: [CourseUnit!]
+  enrolments: [Enrolment!]
+  enrolmentAdditionalCancellationEnd: String
+  enrolmentCalculationConfig: EnrolmentCalculationConfig
+  enrolmentPeriod: DateTimePeriod
+  externalEnrolmentLink: Link
+  lateEnrolmentEnd: String
+  flowState: String
+  gradeDistributions: [GradeDistribution!]
+  learningEnvironmentsDescription: LocalizedString
+  learningEnvironments: [LearningEnvironment!]
+  learningMaterial: LocalizedMarkupString
+  literature: [Literature!]
+  name: LocalizedString
+  nameSpecifier: LocalizedString
+  organisations: [CourseUnitRealisationOrganisation!]
+  publishDate: String
+  responsibilityInfos: [ResponsibilityInfo!]
+  studyFormat: LocalizedMarkupString
+  studyGroupSets: [StudyGroupSet!]
+  teachingLanguageUrn: String
+  teachingLanguage: Code
+  tweetText: LocalizedString
+  universityOrgIds: [ID!]!
+  universityOrgs: [Organisation!]
+  usesExternalEnrolment: Boolean!
+  enrolmentQuestionnaire: EnrolmentQuestionnaire
+}
+
+type CourseUnitRealisationOrganisation {
+  organisationId: ID!
+  organisation: Organisation
+  roleUrn: String
+  educationalInstitutionUrn: String
+  educationalInstitution: Code
+  share: Float
+  validityPeriod: DatePeriod
+}
+
+type CourseUnitSubstitution {
+  courseUnitGroupId: ID!
+  courseUnits(universityOrgId: ID!): [CourseUnit!]
+  credits: Float
+}
+
+type CourseUnitTiming {
+  courseUnit(curriculumPeriodId: String!, universityOrgId: String!): CourseUnit
+  courseUnitGroupId: ID!
+  plannedPeriodsAsStrings: [String!]!
+  plannedPeriods: [StudyPeriodLocator!]!
+}
+
+type CreditRange {
+  min: Float
+  max: Float
+}
+
+type CreditTransferInfo {
+  educationalInstitutionUrn: String
+  internationalInstitutionUrn: String
+  organisation: String
+  organisationAsMarkupString: String
+  creditTransferDate: String
+  educationalInstitution: Code
+  internationalInstitution: Code
+}
+
+type CurriculumPeriod {
+  id: ID!
+  name: LocalizedString!
+  abbreviation: LocalizedString!
+  activePeriod: DatePeriod!
+  universityOrgId: ID
+}
+
+type DatePeriod {
+  endDate: String
+  startDate: String
+}
+
+input DatePeriodInput {
+  endDate: String
+  startDate: String
+}
+
+type DateTimePeriod {
+  startDateTime: String!
+  endDateTime: String!
+}
+
+type DegreeProgramme {
+  id: ID!
+  abbreviation: String
+  abbreviationAsMarkupString: String
+  additionalInfo: LocalizedMarkupString
+  approvalState: String
+  code: String
+  codeAsMarkupString: String
+  contentDescription: LocalizedMarkupString
+  curriculumPeriodIds: [ID!]
+  curriculumPeriods: [CurriculumPeriod!]
+  documentState: String!
+  graded: Boolean!
+  groupId: ID!
+  inclusionApplicationInstruction: LocalizedMarkupString
+  moduleContentApprovalRequired: Boolean!
+  name: LocalizedString
+  organisations: [OrganisationShare!]
+  outcomes: LocalizedMarkupString
+  possibleAttainmentLanguageUrns: [String!]
+  possibleAttainmentLanguages: [Code!]
+  prerequisites: LocalizedMarkupString
+  responsibilityInfos: [ResponsibilityInfo!]
+  searchTags: [String!]
+  studyLevelUrn: String
+  studyLevel: Code
+  targetCredits: CreditRange
+  tweetText: LocalizedString
+  type: String
+  universityOrgIds: [ID!]
+  universityOrgs: [Organisation!]
+  validityPeriod: DatePeriod
+  rule: Rule
+  studyFieldUrns: [String!]
+  studyFields: [Code!]
+  gradeScaleId: ID
+  gradeScale: GradeScale
+  degreeProgrammeTypeUrn: String
+  degreeProgrammeType: Code
+  degreeTitleUrns: [String!]!
+  degreeTitles: [Code!]
+  degreeLanguageUrns: [String!]!
+  degreeLanguages: [Code!]
+  educationClassificationUrns: [String!]!
+  educationClassifications: [Code!]
+  educationLocationUrns: [String!]
+  educationLocations: [Code!]
+  customCodeUrns: [String!]
+  customCodes: [Code!]
+  learningOutcomes: LocalizedMarkupString
+  timingTemplates: [TimingTemplate!]!
+}
+
+type Education {
+  id: ID!
+  attainmentLanguageUrns: [String!]
+  attainmentLanguages: [Code!]
+  code: String
+  codeAsMarkupString: String
+  defaultStudyRightExpirationRulesUrn: String
+  documentState: String!
+  educationTypeUrn: String!
+  educationType: Code
+  specialisationStudiesClassificationUrn: String
+  educationLocationUrn: String
+  educationLocation: Code
+  groupId: ID!
+  name: LocalizedString
+  organisations: [CourseUnitRealisationOrganisation!]
+  outcomes: LocalizedMarkupString
+  responsibilityInfos: [ResponsibilityInfo!]
+  rule: Rule
+  structure: EducationStructure!
+  studyFieldUrns: [String!]
+  studyFields: [Code!]
+  universityOrgIds: [ID!]
+  universityOrgs: [Organisation!]
+  validityPeriod: DatePeriod
+}
+
+type EducationChildOption {
+  localId: ID!
+  moduleGroupId: ID!
+  acceptanceType: String!
+  degreeTitleUrn: String
+  degreeTitle: Code
+  educationClassificationUrn: String
+  educationClassification: Code
+}
+
+type EducationOption {
+  localId: ID!
+  moduleGroupId: ID!
+  moduleGroup: ModuleGroup!
+  childOptions: [EducationChildOption!]!
+  acceptanceType: String!
+  childNamingUrn: String!
+  childNaming: Code
+  degreeTitleUrn: String
+  degreeTitle: Code
+  educationClassificationUrn: String
+  educationClassification: Code
+}
+
+type EducationPhase {
+  name: LocalizedString
+  options: [EducationOption!]!
+}
+
+type EducationStructure {
+  phase1: EducationPhase!
+  phase2: EducationPhase
+  learningOpportunities: [LearningOpportunity!]!
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  NONE
+  INACTIVE
+}
+
+type Enrolment {
+  id: ID!
+  personId: ID!
+  personInfo: PersonInfo!
+  person: PrivatePerson!
+  privatePersonBasicInfo: PrivatePersonBasicInfo!
+  courseUnitRealisationId: ID
+  courseUnitRealisation: CourseUnitRealisation
+  courseUnitId: ID
+  courseUnit: CourseUnit
+  assessmentItemId: ID
+  assessmentItem: AssessmentItem
+  studyRightId: ID
+  studyRight: StudyRight
+  status: String
+  state: String
+  processingState: String
+  studySubGroups: [EnrolmentStudySubGroup!]
+  confirmedStudySubGroupIds: [ID!]
+  tentativeStudySubGroupIds: [ID!]
+  isInCalendar: Boolean
+  enrolmentDateTime: String
+  selectionCriteria: String
+  enrolmentQuestionnaireAnswers: EnrolmentQuestionnaireAnswers
+}
+
+type EnrolmentCalculationConfig {
+  manualConfirmation: Boolean!
+  maxSelected: Int
+  orderingPersonRules: [PersonRule!]
+  requirementPersonRules: [PersonRule!]
+  selectedUsersQuotas: [EnrolmentSelectedUsersQuota!]
+}
+
+# EnrolmentConstraints can be used to define to which CourseUnitRealisations the student may enroll.
+type EnrolmentConstraint {
+  assessmentItemId: ID!
+  enrolmentCount: Int
+  numberOfEnrolments: Int
+  allowedCourseUnitRealisationIds: [ID!]
+  allowedCourseUnitRealisations: [CourseUnitRealisation!]
+  overrideEnrolmentPeriodForCURIds: [ID!]!
+}
+
+type EnrolmentQuestion {
+  localId: ID!
+  required: Boolean!
+  questionType: String
+  question: LocalizedMarkupString
+  selections: [EnrolmentQuestionSelect!]
+}
+
+type EnrolmentQuestionAnswer {
+  questionId: ID!
+  answerText: String
+  answerTextAsMarkupString: String
+  selections: [String!]
+  # The values in the selections field can be URNs. If they are, this field will contain the resolved Code values.
+  selectionsAsCodes: [Code!]
+}
+
+type EnrolmentQuestionnaire {
+  courseUnitRealisationId: ID!
+  enrolmentQuestions: [EnrolmentQuestion!]
+  documentState: String
+}
+
+type EnrolmentQuestionnaireAnswers {
+  enrolmentId: ID!
+  courseUnitRealisationId: ID
+  studentId: ID!
+  documentState: String
+  answers: [EnrolmentQuestionAnswer!]
+}
+
+type EnrolmentQuestionSelect {
+  value: String!
+  option: LocalizedString!
+}
+
+type EnrolmentSelectedUsersQuota {
+  studyType: String!
+  size: Int
+}
+
+type EnrolmentStudySubGroup {
+  studySubGroupId: ID!
+  enrolmentStudySubGroupPriority: String
+  isInCalendar: Boolean!
+}
+
+type EnrolmentWithStudyEvents {
+  enrolment: Enrolment!
+  studyEvents: [StudyEvent!]
+}
+
+type EventOverride {
+  eventDate: String!
+  irregularLocationIds: [ID!]
+  irregularLocations: [Location!]
+  irregularTeacherIds: [ID!]
+  irregularTeachers: [PublicPerson!]
+  notice: LocalizedString
+  noticeAsMarkupString: LocalizedMarkupString
+}
+
+type ExportIdResult {
+  greatestOrdinal: Float
+  hasMore: Boolean
+  ids: [ID!]
+}
+
+type ExportResult {
+  greatestOrdinal: Float!
+  hasMore: Boolean!
+  ids: [String!]
+}
+
+type Grade {
+  name: LocalizedString!
+  passed: Boolean!
+  localId: ID!
+  abbreviation: LocalizedString
+  numericCorrespondence: Float
+}
+
+type GradeAverage {
+  gradeScaleId: ID!
+  totalIncludedCredits: Float!
+  value: Float
+  method: String!
+}
+
+type GradeCount {
+  gradeId: String!
+  gradeCount: Float!
+}
+
+type GradeCountFull {
+  gradeId: String!
+  gradeCount: Float!
+  grade: Grade!
+}
+
+type GradeDistribution {
+  assessmentItemId: String!
+  assessmentItem: AssessmentItem!
+  gradeScaleId: String!
+  gradeScale: GradeScale!
+  gradeCounts: [GradeCount!]!
+  gradeCountsWithGrades: [GradeCountFull!]!
+}
+
+type GradeScale {
+  name: LocalizedString!
+  abbreviation: LocalizedString!
+  id: ID!
+  grades: [Grade!]!
+}
+
+type Graduation {
+  personId: ID!
+  person: PrivatePerson
+  degreeProgrammeAttainmentId: ID!
+  degreeProgrammeAttainment: Attainment
+  documentState: String!
+  studyRightId: ID!
+  studyRight: StudyRight
+  graduationDate: String!
+  signatories: [Signatory!]
+  printLanguageUrns: [String!]
+  printLanguages: [Code!]
+  degreeDeliveryMethod: String!
+  deliveryAddress: Address
+  misregistration: Boolean!
+  joinsAlumniAssociation: Boolean
+}
+
+type Grant {
+  id: ID!
+  amount: Float
+  cancelled: Boolean!
+  cancelledById: ID
+  cancelledBy: PrivatePerson
+  cancelledDate: String
+  cancellationReason: String
+  documentState: String!
+  grantedById: ID
+  grantedBy: Organisation
+  grantedDate: String
+  grantTypeUrn: String
+  grantType: Code
+  personId: ID!
+  person: PrivatePerson
+  registeredById: ID
+  registeredBy: PrivatePerson
+  registrationDate: String
+  studyRightId: ID
+  studyRight: StudyRight
+  studyTermLocator: StudyTermLocator
+  studyTerm: StudyTerm
+}
+
+type InternationalContractualDegree {
+  localId: ID!
+  internationalContractualDegreeAgreementId: ID!
+  attainableDegrees: [AttainableDegree!]!
+  internationalContractualDegreeAgreement: InternationalContractualDegreeAgreement
+}
+
+type InternationalContractualDegreeAgreement {
+  id: ID!
+  type: String!
+  name: LocalizedString!
+  defaultInternationalInstitutionUrns: [String!]
+  defaultInternationalInstitutions: [Code!]
+  diplomaDescriptionBegin: LocalizedString!
+  diplomaDescriptionEnd: LocalizedString!
+  diplomaSupplementAdministeringInstitutions: String
+}
+
+type LearningEnvironment {
+  language: String
+  languageAsMarkupString: String
+  name: String
+  nameAsMarkupString: String
+  primary: Boolean
+  url: String
+  urlAsMarkupString: String
+}
+
+type LearningOpportunity {
+  localId: String!
+  name: LocalizedString!
+  allowedPaths: [SelectionPath!]!
+  admissionTargetIds: [String!]
+  phase1EducationClassificationUrn: String
+  phase2EducationClassificationUrn: String
+  phase1EducationClassification: Code
+  phase2EducationClassification: Code
+}
+
+type Link {
+  label: LocalizedString
+  url: LocalizedString
+}
+
+type Literature {
+  type: String!
+  url: String
+  urlAsMarkupString: String
+  name: String
+  nameAsMarkupString: String
+}
+
+type LocalId {
+  localId: ID!
+}
+
+type LocalizedMarkupString {
+  fi: String
+  en: String
+  sv: String
+}
+
+type LocalizedString {
+  fi: String
+  en: String
+  sv: String
+  fiAsMarkupString: String
+  enAsMarkupString: String
+  svAsMarkupString: String
+}
+
+type Location {
+  building: Building
+  buildingId: ID
+  capacity: Int
+  documentState: String!
+  id: ID!
+  name: LocalizedString
+  universityOrgIds: [ID!]
+  universityOrgs: [Organisation!]
+}
+
+# A collection of exams (course unit realisations) organised at the same time in one or more locations.
+type MassExamSession {
+  id: ID!
+  documentState: String!
+  name: LocalizedString!
+  startTime: String!
+  duration: String!
+  responsibilityInfos: [ResponsibilityInfo!]
+  organisations: OrganisationShare!
+  publishedById: ID!
+  publishedOn: String!
+  locationIds: [ID!]
+  enrolmentPeriod: DatePeriod
+  enrolmentAdditionalCancellationEnd: String
+  enrolmentRequirements: [PersonRule!]
+  manualConfirmation: Boolean!
+  universityOrgIds: [ID!]!
+  universityOrgs: [Organisation!]!
+  courseUnitRealisations: [CourseUnitRealisation!]
+  enrolments: [Enrolment!]
+}
+
+type MobilityPeriod {
+  id: ID!
+  documentState: String!
+  studyRightId: ID!
+  personId: ID!
+  activityPeriod: DatePeriod
+  mobilityDirection: String!
+  countryUrn: String
+  countryCode: CountryCode
+  countryCodeCanonized: CountryCode
+  mobilityTypeUrn: String
+  phase: String
+  studyRight: StudyRight
+  mobilityProgramUrn: String
+  mobilityStudyRightTypeUrn: String
+  virtualExchange: Boolean
+}
+
+type Module {
+  id: ID!
+  abbreviation: String
+  abbreviationAsMarkupString: String
+  additionalInfo: LocalizedMarkupString
+  approvalState: String
+  code: String
+  codeAsMarkupString: String
+  contentDescription: LocalizedMarkupString
+  curriculumPeriodIds: [ID!]
+  curriculumPeriods: [CurriculumPeriod!]
+  customCodeUrns: [String!]
+  degreeProgrammeTypeUrn: String
+  degreeProgrammeType: Code
+  educationLocationUrns: [String!]
+  educationLocations: [Code!]
+  documentState: String!
+  gradeScaleId: ID
+  gradeScale: GradeScale
+  graded: Boolean
+  groupId: ID!
+  inclusionApplicationInstruction: LocalizedMarkupString
+  moduleContentApprovalRequired: Boolean!
+  name: LocalizedString
+  organisations: [OrganisationShare!]
+  outcomes: LocalizedMarkupString
+  possibleAttainmentLanguageUrns: [String!]
+  possibleAttainmentLanguages: [Code!]
+  prerequisites: LocalizedMarkupString
+  responsibilityInfos: [ResponsibilityInfo!]
+  rule: Rule
+  searchTags: [String!]
+  studyFieldUrns: [String!]
+  studyFields: [Code!]
+  studyLevelUrn: String
+  studyLevel: Code
+  targetCredits: CreditRange
+  tweetText: LocalizedString
+  type: String
+  universityOrgIds: [ID!]
+  universityOrgs: [Organisation!]
+  validityPeriod: DatePeriod
+}
+
+type ModuleGroup {
+  groupId: ID!
+  modules: [Module!]!
+  moduleIds: [String!]!
+  targetCredits: CreditRange
+}
+
+type ModuleTiming {
+  module(curriculumPeriodId: String!, universityOrgId: String!): Module
+  moduleGroupId: ID!
+  plannedPeriodsAsStrings: [String!]!
+  plannedPeriods: [StudyPeriodLocator!]!
+}
+
+# Shopping cart for Open University purchases. Includes OpenUniversityCartItems that are purchased or to be purchased.
+type OpenUniversityCart {
+  id: ID!
+  documentState: String!
+  state: String!
+  studentId: ID!
+  studentName: String!
+  studentEmail: String!
+  buyerName: String!
+  buyerEmail: String!
+  priceTotal: String!
+  vatTotal: String!
+  vatPercent: Float!
+  activationCode: String!
+  activationCodeValidUntil: String!
+  items: [OpenUniversityCartItem!]!
+}
+
+# Single item in OpenUniversityCart
+type OpenUniversityCartItem {
+  localId: String!
+  state: String!
+  openUniversityProductId: ID!
+  openUniversityProduct: OpenUniversityProduct!
+  price: String!
+}
+
+# Product that is sold through open university. Gives the purchaser a right to enroll to specific course unit realisations.
+type OpenUniversityProduct {
+  id: ID!
+  documentState: String!
+  name: LocalizedString!
+  description: LocalizedString
+  price: String!
+  credits: Float!
+  publishedOn: String
+  salesPeriod: DateTimePeriod
+  validityPeriod: DatePeriod
+  educationId: ID!
+  organisationId: ID!
+  courseUnitId: ID!
+  completionMethodId: ID!
+  enrolmentConstraints: [EnrolmentConstraint!]
+  education: Education
+  organisation: Organisation
+  courseUnit: CourseUnit
+}
+
+type Organisation {
+  id: ID!
+  code: String
+  codeAsMarkupString: String
+  abbreviation: LocalizedString
+  name: LocalizedString
+  predecessorIds: [ID!]
+  predecessors: [Organisation!]
+  parentId: ID
+  parent: Organisation
+  universityOrgId: ID!
+  universityOrg: Organisation
+  educationalInstitution: Code
+  educationalInstitutionUrn: String
+  documentState: String
+}
+
+type OrganisationShare {
+  educationalInstitutionUrn: String
+  educationalInstitution: Code
+  organisationId: ID
+  organisation: Organisation
+  roleUrn: String!
+  share: Float!
+}
+
+# Payment category information from KORI. Descripts the payment type.
+type PaymentCategory {
+  id: ID!
+  universityOrgId: String!
+  code: String!
+  description: LocalizedString
+  isStudentUnionMembershipFee: Boolean!
+  isHealthCareFee: Boolean!
+}
+
+type PersonalizedPhase {
+  childNamingUrn: String
+  childNaming: Code
+}
+
+type PersonalizedSelectionPath {
+  phase1: PersonalizedPhase
+  phase2: PersonalizedPhase
+}
+
+type PersonGroup {
+  type: String!
+  name: LocalizedString!
+  description: LocalizedString
+  updateType: String
+  membershipUpdateTime: String
+  membershipCheckTime: String
+  responsibilityInfos: [ResponsibilityInfo!]
+}
+
+# Person information from ORI. Contains basic information and requires less privileges than PrivatePerson.
+type PersonInfo {
+  callName: String
+  callNameAsMarkupString: String
+  firstNames: String
+  firstNamesAsMarkupString: String
+  id: ID!
+  lastName: String
+  lastNameAsMarkupString: String
+  studentNumber: String
+  studentNumberAsMarkupString: String
+  primaryEmail: String
+  primaryEmailAsMarkupString: String
+}
+
+type PersonRule {
+  type: String!
+  educationIds: [ID!]
+  educations: [Education!]
+  degreeProgramTypeUrn: String
+  degreeProgramType: Code
+  creditRange: CreditRange
+  personGroupIds: [ID!]
+  personGroups: [PersonGroup!]
+  courseUnitRealisationIds: [ID!]
+  courseUnitRealisations: [CourseUnitRealisation!]
+}
+
+type PersonWithAttainmentAcceptorType {
+  text: LocalizedString
+  title: LocalizedString
+  personId: String
+  person: PublicPerson
+  roleUrn: String!
+  roleCode: Code!
+}
+
+type Prerequisite {
+  type: String!
+  courseUnitGroupId: ID
+  moduleGroupId: ID
+  courseUnits(universityOrgId: ID!): [CourseUnit!]
+  modules(universityOrgId: ID!): [Module!]
+}
+
+type PrerequisiteGroup {
+  prerequisites: [Prerequisite!]
+}
+
+# Private person from ORI. Contains more information than PersonInfo and requires additional privileges.
+type PrivatePerson {
+  attainments(
+    studyRightId: ID = null
+    includeDrafts: Boolean = false
+  ): [Attainment!]
+  attainmentsGradeNumericalAverage(studyRightId: ID = null): Float
+  id: ID!
+  userName: String
+  userNameAsMarkupString: String
+  studentNumber: String
+  studentNumberAsMarkupString: String
+  firstNames: String
+  firstNamesAsMarkupString: String
+  callName: String
+  callNameAsMarkupString: String
+  lastName: String
+  lastNameAsMarkupString: String
+  genderUrn: String
+  citizenshipUrns: [String!]
+  citizenships: [CountryCode!]
+  citizenshipsCanonized: [CountryCode!]
+  dateOfBirth: String
+  dead: Boolean
+  eduPersonPrincipalName: String
+  eduPersonPrincipalNameAsMarkupString: String
+  employeeNumber: String
+  employeeNumberAsMarkupString: String
+  employeeStatus: EmployeeStatus
+  grants: [Grant!]
+  motherTongueUrn: String
+  motherTongueCanonizedUrn: String
+  motherTongue: Code
+  municipalityUrn: String
+  municipalityCanonizedUrn: String
+  oppijaID: String
+  personalIdentityCode: String
+  phoneNumber: String
+  phoneNumberAsMarkupString: String
+  preferredLanguageUrn: String
+  preferredLanguage: Code
+  primaryAddress: Address
+  primaryEmail: String
+  primaryEmailAsMarkupString: String
+  schoolEducationLanguageUrn: String
+  schoolEducationLanguage: Code
+  secondaryAddress: Address
+  secondaryEmail: String
+  secondaryEmailAsMarkupString: String
+  studentStatus: StudentStatus
+  studyRights(state: String): [StudyRight!]
+  theses: [Thesis!]
+  studyStartDate: String
+  universityTermRegistrations(
+    universityOrgId: ID!
+  ): [UniversityTermRegistration!]
+  enrolments(activityStatus: String, state: [String!]): [Enrolment!]
+  studyEventsInCalendar(
+    endDate: String = null
+    startDate: String = null
+  ): [EnrolmentWithStudyEvents!]
+  attainedQualifications: [AttainedQualification!]
+  documentState: String
+  studyRightPrimalityChain: StudyRightPrimalityChain
+  identityConfirmed: Boolean
+}
+
+# Private person basic info from ORI. The minimal set of personal data that is shown for example for teachers.
+type PrivatePersonBasicInfo {
+  id: ID!
+  studentNumber: String
+  studentNumberAsMarkupString: String
+  dateOfBirth: String
+  firstNames: String
+  firstNamesAsMarkupString: String
+  callName: String
+  callNameAsMarkupString: String
+  lastName: String
+  lastNameAsMarkupString: String
+  phoneNumber: String
+  phoneNumberAsMarkupString: String
+  primaryEmail: String
+  primaryEmailAsMarkupString: String
+  secondaryEmail: String
+  secondaryEmailAsMarkupString: String
+  genderUrn: String
+  citizenshipUrns: [String!]
+  citizenships: [CountryCode!]
+  motherTongueUrn: String
+  motherTongue: Code
+  preferredLanguageUrn: String
+  preferredLanguage: Code
+  oppijaID: ID
+  isPhoneNumberClassified: Boolean
+  isSecondaryEmailClassified: Boolean
+}
+
+type PublicPerson {
+  id: ID!
+  emailAddress: String
+  emailAddressAsMarkupString: String
+  firstName: String
+  firstNameAsMarkupString: String
+  lastName: String
+  lastNameAsMarkupString: String
+  universityOrgIds: [ID!]
+  titles: [LocalizedString!]
+  universityOrgs: [Organisation!]
+}
+
+type Qualification {
+  id: ID!
+  type: String!
+  name: LocalizedString!
+  code: String!
+  codeAsMarkupString: String!
+  qualificationUrn: String
+  competencyUrn: String
+  requirementCollections: [RequirementCollection!]
+  includeCompetencies: Boolean
+  diplomaAppendix: LocalizedString
+  instructions: LocalizedString
+  state: String!
+  publishedOn: String!
+  customQualificationTypeUrn: String
+}
+
+type Query {
+  assessment_item_ids_by_ordinal(limit: Int!, since: Float!): ExportResult!
+  attained_qualification(id: ID!): AttainedQualification!
+  attained_qualifications(ids: [ID!]!): [AttainedQualification!]!
+  attained_qualification_ids_by_ordinal(
+    limit: Int!
+    since: Float!
+  ): ExportResult!
+  attainment(id: ID!): Attainment!
+  attainments(ids: [ID!]!): [Attainment!]!
+  attainment_ids_by_ordinal(limit: Int!, since: Float!): ExportResult!
+  code(urn: String!): Code!
+  codes(urns: [String!]!): [Code!]!
+  course_unit_realisations(ids: [ID!]!): [CourseUnitRealisation!]!
+  authenticated_course_unit_realisation_search(
+    sort: String
+    limit: Float
+    start: Float
+    codeUrns: [String!]
+    responsiblePersonIds: [ID!]
+    orgIds: [ID!]
+    universityOrgIds: [ID!]
+    activityPeriods: [DatePeriodInput!]
+    documentStates: [String!]
+    flowStates: [String!]
+    fullTextQuery: String
+  ): [CourseUnitRealisation!]!
+  course_unit_realisation(id: ID!): CourseUnitRealisation!
+  course_unit_realisations_by_assessment_item(
+    activityStatus: String
+    flowStates: String
+    assessmentItemId: ID!
+  ): [CourseUnitRealisation!]!
+  course_unit_realisations_by_mass_exam_session(
+    massExamSessionId: ID!
+  ): [CourseUnitRealisation!]!
+  course_unit(id: ID): CourseUnit!
+  course_units(ids: [ID!]!): [CourseUnit!]!
+  course_unit_search(
+    resultSort: String
+    resultLimit: Int
+    resultStart: Int
+    returnAllGroupVersions: Boolean
+    validity: String
+    codeUrns: [String!]
+    codeQuery: String
+    fullTextQuery: String
+    orgIds: [ID!]
+    universityOrgIds: [ID!]
+    responsiblePersonIds: [ID!]
+    curriculumPeriodIds: [ID!]
+    courseUnitRealisationActivityStatus: String
+    courseUnitRealisationActivityPeriods: [DatePeriodInput!]
+  ): [CourseUnit!]!
+  authenticated_course_unit_search(
+    documentStates: [String!]
+    resultSort: String
+    resultLimit: Int
+    resultStart: Int
+    returnAllGroupVersions: Boolean
+    validity: String
+    codeUrns: [String!]
+    codeQuery: String
+    fullTextQuery: String
+    orgIds: [ID!]
+    universityOrgIds: [ID!]
+    responsiblePersonIds: [ID!]
+    curriculumPeriodIds: [ID!]
+    courseUnitRealisationActivityStatus: String
+    courseUnitRealisationActivityPeriods: [DatePeriodInput!]
+  ): [CourseUnit!]!
+  course_units_by_group_id(
+    documentStates: [String!]
+    curriculumPeriodId: ID
+    universityId: ID!
+    groupIds: [ID!]!
+  ): [CourseUnit!]!
+  course_units_by_assessment_item(assessmentItemId: ID!): [CourseUnit!]!
+  course_unit_ids_by_ordinal(limit: Int!, since: Float!): ExportResult!
+  curriculum_period(date: String!, universityOrgId: ID!): CurriculumPeriod!
+  curriculumPeriods(ids: [ID!]!): [CurriculumPeriod!]!
+  degreeProgramme(degreeProgrammeId: ID!): DegreeProgramme!
+  degree_programme_search(
+    sort: String
+    limit: Float
+    start: Float
+    codeUrns: [String!]
+    orgIds: [ID!]
+    universityOrgIds: [ID!]
+    validity: String
+    curriculumPeriodIds: [ID!]
+    fullTextQuery: String
+  ): [DegreeProgramme!]!
+  authenticated_degree_programme_search(
+    sort: String
+    limit: Float
+    start: Float
+    codeUrns: [String!]
+    documentStates: [String!]
+    orgIds: [ID!]
+    universityOrgIds: [ID!]
+    validity: String
+    curriculumPeriodIds: [ID!]
+    fullTextQuery: String
+  ): [DegreeProgramme!]!
+  educations(ids: [ID!]!): [Education!]!
+  education(id: ID!): Education!
+  education_search(
+    resultSort: String
+    resultLimit: Int
+    resultStart: Int
+    educationTypeUrns: [String!]
+    fullTextQuery: String
+    universityOrgIds: [ID!]
+    responsibleOrganisationIds: [ID!]
+    validityDates: [DatePeriodInput!]
+  ): [Education!]!
+  authenticated_education_search(
+    documentStates: [String!]
+    resultSort: String
+    resultLimit: Int
+    resultStart: Int
+    educationTypeUrns: [String!]
+    fullTextQuery: String
+    universityOrgIds: [ID!]
+    responsibleOrganisationIds: [ID!]
+    validityDates: [DatePeriodInput!]
+  ): [Education!]!
+  education_ids_by_ordinal(limit: Int!, since: Float!): ExportResult!
+  enrolments_by_mass_exam_session(massExamSessionId: ID!): [Enrolment!]!
+  grade_scales: [GradeScale!]!
+  graduation(id: ID!): Graduation!
+  grants_by_person_id(personId: ID!): [Grant!]!
+  grants_by_study_right_id(studyRightId: ID!): [Grant!]!
+  find_study_right_ids_of_grants_changed_since_ordinal(
+    limit: Int!
+    since: Float!
+  ): ExportResult!
+  internationalContractualDegreeAgreement(
+    id: ID!
+  ): InternationalContractualDegreeAgreement!
+  mass_exam_session(id: ID!): MassExamSession!
+  mobility_periods(ids: [ID!]!): [MobilityPeriod!]!
+  mobility_period_ids_by_ordinal(limit: Int!, since: Float!): ExportResult!
+  module(id: ID!): Module!
+  modules(
+    documentStates: [String!]
+    preferByState: Boolean
+    curriculumPeriodId: ID!
+    universityOrgId: ID!
+    groupIds: [ID!]!
+  ): [Module!]!
+  modules_by_ids(ids: [ID!]!): [Module!]!
+  module_ids_by_ordinal(limit: Int!, since: Float!): ExportResult!
+  modules_by_group_id(
+    documentStates: [String!]
+    curriculumPeriodId: ID
+    universityId: ID!
+    groupIds: [ID!]!
+  ): [Module!]!
+  open_university_cart(id: ID!): OpenUniversityCart!
+  open_university_product(id: ID!): OpenUniversityProduct!
+  organisation(id: ID!): Organisation!
+  organisations(ids: [ID!]!): [Organisation!]!
+  organisation_ids_by_ordinal(limit: Int!, since: Float!): ExportResult!
+  payment_category(categoryId: ID!): PaymentCategory!
+  private_person(id: ID!): PrivatePerson!
+  private_persons(ids: [String!]!): [PrivatePerson!]!
+  students(
+    studyRightMinorSelections: [String!]
+    studyRightSelectedChildOptions: [String!]
+    studyRightSelectedOptions: [String!]
+    nonAttendingTermRegistrations: [String!]
+    attendingTermRegistrations: [String!]
+    validityPeriod: [String!]
+    studyRightStates: [String!]
+    studyRightExpirationRulesUrns: [String!]
+    learningOpportunities: [String!]
+    educationIds: [String!]
+    studyRightOrganisationIds: [String!]
+    citizenshipUrns: [String!]
+    municipalityUrns: [String!]
+    dead: Boolean
+    preferredLanguageUrns: [String!]
+    schoolEducationLanguageUrns: [String!]
+    motherTongueUrns: [String!]
+    genderUrn: String
+    studentNumber: String
+    ids: [String!]
+  ): [PrivatePerson!]!
+  employees(
+    employeeSearchString: String
+    employeeNumber: String
+    ids: [String!]
+  ): [PrivatePerson!]!
+  student_ids_by_ordinal(limit: Int!, since: Float!): ExportResult!
+  private_person_by_edu_person_principal_name(id: ID!): PrivatePerson!
+  private_person_by_student_number(id: ID!): PrivatePerson!
+  private_person_by_employee_number(id: ID!): PrivatePerson!
+  private_person_by_oppija_id(id: ID!): PrivatePerson!
+  private_person_by_personal_identity_code(id: ID!): PrivatePerson!
+  public_persons(ids: [ID!]!): [PublicPerson!]!
+  public_person(id: ID!): PublicPerson!
+  student_payments(studentId: ID!): [StudentPayment!]!
+  student_payments_of_term(
+    termIndex: Float!
+    year: Float!
+    studentId: ID!
+  ): [StudentPayment!]!
+  find_students_whose_payments_have_changed_since_ordinal(
+    limit: Int!
+    since: Float!
+  ): ExportResult!
+  reference_ids_by_student_ids(studentIds: [String!]!): StudentReferenceData!
+  study_event(id: ID!): StudyEvent!
+  studyModule(studyModuleId: ID!): StudyModule!
+  study_module_search(
+    sort: String
+    limit: Int
+    start: Int
+    validity: String
+    codeUrns: [String!]
+    fullTextQuery: String
+    orgIds: [ID!]
+    universityOrgIds: [ID!]
+    curriculumPeriodIds: [ID!]
+  ): [StudyModule!]!
+  authenticated_study_module_search(
+    documentStates: [String!]
+    sort: String
+    limit: Int
+    start: Int
+    validity: String
+    codeUrns: [String!]
+    fullTextQuery: String
+    orgIds: [ID!]
+    universityOrgIds: [ID!]
+    curriculumPeriodIds: [ID!]
+  ): [StudyModule!]!
+  study_right_primality_chain_for_person(id: ID!): StudyRightPrimalityChain!
+  study_right_primality_chains_for_persons(
+    ids: [ID!]!
+  ): [StudyRightPrimalityChain!]!
+  find_students_whose_primalities_have_changed_since_ordinal(
+    limit: Int!
+    since: Float!
+  ): ExportResult!
+  study_right(id: ID!): StudyRight!
+  study_rights(ids: [ID!]!): [StudyRight!]!
+  study_right_snapshot_ids_by_ordinal(limit: Int!, since: Float!): ExportResult!
+  study_right_current_ids_by_ordinal(
+    limit: Int!
+    since: Float!
+  ): ExportIdResult!
+  study_right_student_ids_by_ordinal(
+    limit: Int!
+    since: Float!
+  ): ExportIdResult!
+  study_right_snapshot(
+    snapshotDateTime: String!
+    studyRightId: String!
+  ): StudyRight!
+  study_right_snapshots(studyRightId: String!): [StudyRight!]!
+  term_registration_study_right_ids_by_ordinal(
+    limit: Int!
+    since: Float!
+  ): ExportResult!
+  study_right_term_registrations(
+    studyRightIds: [ID!]!
+  ): [StudyRightTermRegistrations!]!
+  study_term(organisationId: ID!, termIndex: Int!, year: Int!): StudyTerm!
+  term_registrations(studyRightIds: [ID!]!): [TermRegistration!]!
+  tuition_fee_obligation_periods_for_study_right(
+    studyRightId: ID!
+  ): [TuitionFeeObligationPeriod!]!
+  find_study_rights_whose_tuition_fee_obligation_periods_have_changed_since_ordinal(
+    limit: Int!
+    since: Float!
+  ): ExportResult!
+}
+
+type Range {
+  min: Int
+  max: Int
+}
+
+type RequirementCollection {
+  degreeProgrammeGroupIds: [ID!]
+  studyModuleGroupIds: [ID!]
+  courseUnitGroupIds: [ID!]
+  description: String
+  descriptionAsMarkupString: String
+  state: String!
+}
+
+type ResponsibilityInfo {
+  personId: ID
+  person: PublicPerson
+  roleUrn: String
+  role: Code
+  text: LocalizedString
+  validityPeriod: DatePeriod
+}
+
+type Rule {
+  type: String!
+  allRules: [Rule!]
+  rule: Rule
+    @deprecated(
+      reason: "Single rule and rules are copied to the allRules array"
+    )
+  rules: [Rule!]
+    @deprecated(
+      reason: "Single rule and rules are copied to the allRules array"
+    )
+  credits: CreditRange
+  require: Range
+  courseUnitGroupId: ID
+  courseUnitGroup(universityOrgId: ID!): [CourseUnit!]
+  courseUnit(
+    documentStates: [String!]
+    preferByState: Boolean
+    curriculumPeriodId: ID!
+    universityOrgId: ID!
+  ): CourseUnit
+  moduleGroupId: ID
+  moduleGroup(universityOrgId: ID): [Module!]
+  module(
+    documentStates: [String!]
+    preferByState: Boolean
+    curriculumPeriodId: ID!
+    universityOrgId: ID!
+  ): Module
+}
+
+type SelectionPath {
+  educationPhase1GroupId: ID
+  educationPhase1ChildGroupId: ID
+  educationPhase2GroupId: ID
+  educationPhase2ChildGroupId: ID
+  educationPhase1: Module
+  educationPhase1ModuleGroup: ModuleGroup
+  educationPhase1Child: Module
+  educationPhase1ChildModuleGroup: ModuleGroup
+  educationPhase2: Module
+  educationPhase2ModuleGroup: ModuleGroup
+  educationPhase2Child: Module
+  educationPhase2ChildModuleGroup: ModuleGroup
+  universityOrgId: ID
+}
+
+type Signatory {
+  personId: ID!
+  person: PublicPerson
+  title: LocalizedString!
+}
+
+type StudentPayment {
+  id: ID!
+  studentId: ID!
+  source: String!
+  registeredBy: String
+  paymentAmount: Float!
+  invalidated: Boolean!
+  paymentDate: String
+  registrationDate: String!
+  paymentCategoryId: String
+  paymentCategory: PaymentCategory
+  invalidationRationale: String
+  studyTerm: StudyTermLocator
+  documentState: String!
+  type: StudentPaymentType!
+}
+
+enum StudentPaymentType {
+  OILI_PAYMENT
+  TUITION_FEE_PAYMENT
+}
+
+# Used by SISU-VIRTA to collect ids belonging to students
+type StudentReferenceData {
+  attainmentIds: [String!]!
+  attainedQualificationIds: [String!]!
+  mobilityPeriodIds: [String!]!
+  studyRightIds: [String!]!
+  studentIds: [String!]!
+}
+
+enum StudentStatus {
+  ACTIVE
+  NONE
+}
+
+type StudyEvent {
+  cancellations: [String!]
+  documentState: String!
+  duration: String
+  events: [StudyEventRealisation!]
+  exceptions: [String!]
+  id: ID!
+  locationIds: [ID!]
+  locations: [Location!]
+  name: LocalizedString
+  overrides: [EventOverride!]
+  primaryCourseUnitRealisationId: ID!
+  recursEvery: String
+  recursUntil: String
+  startTime: String
+  universityOrgIds: [ID!]
+  universityOrgs: [Organisation!]
+}
+
+type StudyEventRealisation {
+  cancelled: Boolean!
+  duration: String
+  end: String
+  excluded: Boolean!
+  start: String
+}
+
+type StudyGroupSet {
+  localId: ID!
+  name: LocalizedString
+  studySubGroups: [StudySubGroup!]
+  subGroupRange: Range
+}
+
+type StudyModule {
+  id: ID!
+  abbreviation: String
+  abbreviationAsMarkupString: String
+  additionalInfo: LocalizedMarkupString
+  approvalState: String
+  code: String
+  codeAsMarkupString: String
+  contentDescription: LocalizedMarkupString
+  contentFilter: ContentFilter
+  curriculumPeriodIds: [ID!]
+  curriculumPeriods: [CurriculumPeriod!]
+  customCodeUrns: [String!]
+  customCodes: [Code!]
+  documentState: String!
+  graded: Boolean!
+  gradeScaleId: ID
+  gradeScale: GradeScale
+  groupId: ID!
+  inclusionApplicationInstruction: LocalizedMarkupString
+  minorStudyRightAcceptanceTypeUrn: String
+  minorStudyRightAcceptanceType: Code
+  minorStudyRightApplicationInstructions: LocalizedMarkupString
+  moduleContentApprovalRequired: Boolean!
+  name: LocalizedString
+  organisations: [OrganisationShare!]
+  outcomes: LocalizedMarkupString
+  possibleAttainmentLanguageUrns: [String!]
+  possibleAttainmentLanguages: [Code!]
+  prerequisites: LocalizedMarkupString
+  responsibilityInfos: [ResponsibilityInfo!]
+  rule: Rule
+  searchTags: [String!]
+  studyFieldUrns: [String!]
+  studyFields: [Code!]
+  studyLevelUrn: String
+  studyLevel: Code
+  studyRightSelectionTypeUrn: String
+  studyRightSelectionType: Code
+  substitutions: LocalizedMarkupString
+  targetCredits: CreditRange
+  type: String
+  tweetText: LocalizedString
+  universityOrgIds: [ID!]
+  universityOrgs: [Organisation!]
+  validityPeriod: DatePeriod
+}
+
+type StudyPeriod {
+  name: LocalizedString!
+  valid: DatePeriod!
+  size: Int!
+  visibleByDefault: Boolean!
+  includedInTargetCreditsCalculation: Boolean!
+}
+
+type StudyPeriodLocator {
+  organisationId: ID
+  year: Int
+  termIndex: Int
+  studyTerm: StudyTerm
+  periodIndex: Int
+  studyPeriod: StudyPeriod
+  objectString: String
+}
+
+type StudyPeriodTemplateLocator {
+  organisationId: ID
+  firstYear: Int
+  termIndex: Int
+  studyTerm: StudyTerm
+  periodIndex: Int
+  studyPeriod: StudyPeriod
+}
+
+type StudyRight {
+  id: ID!
+  acceptedSelectionPath: SelectionPath
+  requestedSelectionPath: SelectionPath!
+  decreeOnUniversityDegreesUrn: String
+  decreeOnUniversityDegrees: Code
+  degreeRegulations: String
+  degreeRegulationsAsMarkupString: String
+  documentState: String!
+  educationId: ID
+  education: Education
+  grantDate: String
+  grants: [Grant!]
+  learningOpportunityId: ID
+  organisationId: ID
+  organisation: Organisation
+  phase1MinorSelections: [StudyRightMinorSelection!]
+  phase2MinorSelections: [StudyRightMinorSelection!]
+  courseUnitSelections: [StudyRightCourseUnitSelection!]
+  snapshotDateTime: String
+  snapshots: [StudyRight!]
+  state: String!
+  studentId: ID!
+  studyRightExpirationRulesUrn: String
+  studyRightGraduation: StudyRightGraduation
+  studyStartDate: String
+  termRegistrations: [TermRegistration!]
+  transferOutDate: String
+  transferOutUniversityUrn: String
+  studyRightTransfer: StudyRightTransfer
+  valid: DatePeriod
+  studyRightPrimalities: [StudyRightPrimality!]
+  studyFieldUrn: String
+  studyField: Code
+  phase1EducationClassificationUrn: String
+  phase1EducationClassification: Code
+  phase1EducationClassificationLocked: Boolean
+  phase2EducationClassificationUrn: String
+  phase2EducationClassification: Code
+  phase2EducationClassificationLocked: Boolean
+  phase1StudyRightClassificationUrns: [String!]
+  phase2StudyRightClassificationUrns: [String!]
+  phase1StudyRightClassifications: [Code!]
+  phase2StudyRightClassifications: [Code!]
+  fundingSourceUrn: String
+  fundingSource: Code
+  phase1QualificationUrns: [String!]
+  phase1Qualifications: [Code!]
+  phase2QualificationUrns: [String!]
+  phase2Qualifications: [Code!]
+  phase1EducationLocationUrn: String
+  phase1EducationLocation: Code
+  phase1EducationLocationCanonizedUrn: String
+  phase2EducationLocationUrn: String
+  phase2EducationLocation: Code
+  phase2EducationLocationCanonizedUrn: String
+  admissionTypeUrn: String
+  admissionType: Code
+  phase1InternationalContractualDegree: InternationalContractualDegree
+  phase2InternationalContractualDegree: InternationalContractualDegree
+  tuitionFeeObligationPeriods: [TuitionFeeObligationPeriod!]
+  personalizedSelectionPath: PersonalizedSelectionPath
+}
+
+type StudyRightCourseUnitSelection {
+  courseUnitGroupId: ID
+  validityPeriod: DatePeriod
+  selectionType: String!
+}
+
+type StudyRightGraduation {
+  phase1GraduationDate: String!
+  phase2GraduationDate: String
+}
+
+type StudyRightMinorSelection {
+  moduleGroupId: ID
+  acceptorPersonId: ID
+  validityPeriod: DatePeriod
+  acceptanceDate: String
+  selectionState: String!
+  selectionType: String!
+}
+
+type StudyRightPrimality {
+  studentId: ID!
+  studyRightId: ID!
+  startDate: String!
+  endDate: String
+  documentState: String!
+}
+
+type StudyRightPrimalityChain {
+  studentId: ID!
+  studyRightPrimalities: [StudyRightPrimality!]
+}
+
+type StudyRightTermRegistrations {
+  documentState: String!
+  studyRightId: ID!
+  studentId: ID!
+  termRegistrations: [TermRegistration!]!
+  studyRight: StudyRight
+}
+
+type StudyRightTransfer {
+  originalStartDate: String!
+  originalUniversityUrn: String
+  usedTerms: Int
+  usedAbsenceTerms: Int
+  usedStatutoryAbsenceTerms: Int
+  transferComments: String
+}
+
+type StudySubGroup {
+  cancelled: Boolean!
+  documentState: String!
+  id: ID!
+  name: LocalizedString!
+  size: Int
+  studyEventIds: [ID!]
+  studyEvents: [StudyEvent!]
+  teacherIds: [ID!]
+  teachers: [PublicPerson!]
+}
+
+type StudyTerm {
+  name: LocalizedString!
+  studyPeriods: [StudyPeriod!]!
+  valid: DatePeriod!
+}
+
+type StudyTermLocator {
+  studyYearStartYear: Int!
+  termIndex: Int!
+}
+
+type Substitution {
+  courseUnitGroups: [CourseUnitSubstitution!]
+}
+
+type TermRegistration {
+  localId: ID!
+  grants: [Grant!]
+  studyRightId: ID!
+  studyRight: StudyRight!
+  registrationDate: String
+  statutoryAbsence: Boolean!
+  statutoryAbsenceChangedBy: String
+  statutoryAbsenceDate: String
+  studyTermLocator: StudyTermLocator!
+  studyTerm: StudyTerm
+  termRegistrationType: String!
+  payments: [StudentPayment!]!
+  tuitionFeePaymentState: TuitionFeePaymentState
+}
+
+type Thesis {
+  id: ID!
+  personId: String!
+  person: PrivatePerson!
+  attainmentId: String
+  attainment: Attainment
+  title: LocalizedString
+  subject: LocalizedString
+  thesisTypeUrn: String!
+  thesisType: Code!
+  responsibilityInfos: [PersonWithAttainmentAcceptorType!]!
+  organisations: [OrganisationShare!]
+  courseUnitId: String!
+  courseUnit: CourseUnit!
+  courseUnitGroupId: ID!
+  state: String!
+  publicInspectionDate: String
+}
+
+type TimingTemplate {
+  courseUnitTimings: [CourseUnitTiming!]!
+  id: ID!
+  module: Module!
+  moduleId: ID!
+  moduleTimings: [ModuleTiming!]!
+  name: LocalizedString!
+  studyYear: Int!
+  universityOrgId: ID!
+}
+
+type TuitionFeeObligationPeriod {
+  id: ID!
+  studyRightId: ID!
+  valid: DatePeriod!
+  tuitionFee: Float!
+  studyRight: StudyRight
+  exempt: Boolean!
+  additionalInfo: LocalizedString
+}
+
+enum TuitionFeePaymentState {
+  PAID
+  OUTSTANDING
+}
+
+type UniversityTermRegistration {
+  studyTermLocator: StudyTermLocator!
+  studyTerm: StudyTerm!
+  termRegistrationType: String!
+  universityOrgId: String!
+}
+
+type YearRange {
+  start: Int
+  end: Int
+}
+
