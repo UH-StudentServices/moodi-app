@@ -21,18 +21,30 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.helsinki.moodi.integration.sisu.SisuCourseUnitRealisation;
 import fi.helsinki.moodi.integration.sisu.SisuPerson;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
+import graphql.ExecutionInput;
+import graphql.ParseAndValidate;
+import graphql.ParseAndValidateResult;
+import graphql.schema.GraphQLSchema;
+import graphql.schema.idl.RuntimeWiring;
+import graphql.schema.idl.SchemaGenerator;
+import graphql.schema.idl.SchemaParser;
+import graphql.schema.idl.TypeDefinitionRegistry;
+import graphql.validation.ValidationError;
 import io.aexp.nodes.graphql.Argument;
 import io.aexp.nodes.graphql.Arguments;
 import io.aexp.nodes.graphql.GraphQLRequestEntity;
 import io.aexp.nodes.graphql.internal.DefaultObjectMapperFactory;
 import org.mockserver.client.MockServerClient;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import static org.junit.Assert.fail;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -41,8 +53,14 @@ public class MockSisuGraphQLServer {
     private static final String API_KEY_HEADER_NAME = "X-Api-Key";
     private static final String API_KEY = "test-apikey";
 
+    private final GraphQLSchema graphQLSchema;
+
     public MockSisuGraphQLServer(MockServerClient client) {
         this.client = client;
+
+        File sisuSchema = new File("src/test/resources/graphql/sisu.graphql");
+        TypeDefinitionRegistry typeDef = new SchemaParser().parse(sisuSchema);
+        graphQLSchema = new SchemaGenerator().makeExecutableSchema(typeDef, RuntimeWiring.newRuntimeWiring().build());
     }
 
     public void reset() {
@@ -92,7 +110,10 @@ public class MockSisuGraphQLServer {
                 .scalars(LocalDate.class, LocalDateTime.class)
                 .build();
 
-            SisuServerRequest sisuServerRequest = new SisuServerRequest(requestEntity.getRequest(), requestEntity.getVariables());
+            String query = requestEntity.getRequest();
+            assertQueryIsValid(query);
+
+            SisuServerRequest sisuServerRequest = new SisuServerRequest(query, requestEntity.getVariables());
 
             DefaultObjectMapperFactory defaultObjectMapperFactory = new DefaultObjectMapperFactory();
             ObjectMapper mapper = defaultObjectMapperFactory.newSerializerMapper();
@@ -100,6 +121,16 @@ public class MockSisuGraphQLServer {
             return mapper.writeValueAsString(sisuServerRequest);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void assertQueryIsValid(String query) {
+        ParseAndValidateResult result = ParseAndValidate.parseAndValidate(graphQLSchema, new ExecutionInput.Builder().query(query).build());
+        List<ValidationError> errors = result.getValidationErrors();
+
+        if (!errors.isEmpty()) {
+            String errorsParsed = errors.stream().map(e -> e.getErrorType() + ", " + e.getMessage()).collect(Collectors.joining("; "));
+            fail("Failed query validation. Details: " + errorsParsed);
         }
     }
 }
