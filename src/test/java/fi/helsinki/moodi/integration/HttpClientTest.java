@@ -117,7 +117,7 @@ public class HttpClientTest {
         }
 
         long took = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS);
-        assertTrue(took > 100 && took < 300);
+        assertTrue(took >= 100 && took < 400);
     }
 
     private void callOodi(String id) {
