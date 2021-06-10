@@ -40,7 +40,7 @@ public enum SisuLocale {
     }
 
     public static SisuLocale byUrnOrDefaultToFi(String languageUrn) {
-        String localeString = languageUrn.substring(languageUrn.lastIndexOf(':') + 1);
+        String localeString = languageUrn != null ? languageUrn.substring(languageUrn.lastIndexOf(':') + 1) : null;
         return byCodeOrDefaultToFi(localeString);
     }
 
