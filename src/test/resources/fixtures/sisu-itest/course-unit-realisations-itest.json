@@ -32,7 +32,7 @@
       "responsibilityInfos": [
         {{#teachers}}
         {
-          "roleUrn": "urn:code:course-unit-realisation-responsibility-info-type:responsible-teacher",
+          "roleUrn": "{{ roleUrn }}",
           "personId": "{{ personId }}"
         }{{#iterHasNext}},{{/iterHasNext}}
         {{/teachers}}
