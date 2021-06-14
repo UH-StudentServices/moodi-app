@@ -17,6 +17,9 @@
 
 package fi.helsinki.moodi;
 
+import java.util.Arrays;
+import java.util.List;
+
 public final class Constants {
 
     public static final String LANG_FI = "fi";
@@ -24,7 +27,12 @@ public final class Constants {
     public static final String LANG_EN = "en";
     public static final String LANG_DEFAULT = LANG_FI;
     public static final String ACTIVE = "ACTIVE";
-    public static final String RESPONSIBLE = "urn:code:organisation-role:responsible-organisation";
+    public static final String RESPONSIBLE_ORGANISATION = "urn:code:organisation-role:responsible-organisation";
+    public static final String CUR_RESP_TYPE = "urn:code:course-unit-realisation-responsibility-info-type:";
+    public static final String RESPONSIBLE_TEACHER = CUR_RESP_TYPE + "responsible-teacher";
+    public static final String TEACHER = CUR_RESP_TYPE + "teacher";
+    public static final String ADMINISTRATIVE_PERSON = CUR_RESP_TYPE + "administrative-person";
+    public static List<String> TEACHER_TYPES = Arrays.asList(RESPONSIBLE_TEACHER, TEACHER, ADMINISTRATIVE_PERSON);
 
     private Constants() {}
 }

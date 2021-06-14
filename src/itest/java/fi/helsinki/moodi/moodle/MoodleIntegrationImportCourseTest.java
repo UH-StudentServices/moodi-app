@@ -19,17 +19,15 @@ package fi.helsinki.moodi.moodle;
 
 import fi.helsinki.moodi.integration.moodle.MoodleFullCourse;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
-
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class MoodleIntegrationImportCourseTest extends AbstractMoodleIntegrationTest {
     @Test
@@ -39,25 +37,27 @@ public class MoodleIntegrationImportCourseTest extends AbstractMoodleIntegration
         expectCourseRealisationsWithUsers(
             sisuCourseId,
             newArrayList(studentUser, studentUserNotInMoodle),
-            singletonList(teacherUser));
+            newArrayList(teacherUser, adminUser));
 
         long moodleCourseId = importCourse(sisuCourseId);
 
         List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
-
-        assertEquals(2, moodleUserEnrollmentsList.size());
+        assertEquals(3, moodleUserEnrollmentsList.size());
 
         MoodleUserEnrollments studentEnrollment = findEnrollmentsByUsername(moodleUserEnrollmentsList, STUDENT_USERNAME);
-
         assertEquals(2, studentEnrollment.roles.size());
         assertTrue(studentEnrollment.hasRole(mapperService.getMoodiRoleId()));
         assertTrue(studentEnrollment.hasRole(mapperService.getStudentRoleId()));
 
         MoodleUserEnrollments teacherEnrollment = findEnrollmentsByUsername(moodleUserEnrollmentsList, TEACHER_USERNAME);
-
         assertEquals(2, teacherEnrollment.roles.size());
         assertTrue(teacherEnrollment.hasRole(mapperService.getMoodiRoleId()));
         assertTrue(teacherEnrollment.hasRole(mapperService.getTeacherRoleId()));
+
+        MoodleUserEnrollments adminEnrollment = findEnrollmentsByUsername(moodleUserEnrollmentsList, ADMIN_USERNAME);
+        assertEquals(2, adminEnrollment.roles.size());
+        assertTrue(adminEnrollment.hasRole(mapperService.getMoodiRoleId()));
+        assertTrue(adminEnrollment.hasRole(mapperService.getTeacherRoleId()));
 
         List<MoodleFullCourse> moodleCourses = moodleClient.getCourses(Arrays.asList(moodleCourseId));
 
