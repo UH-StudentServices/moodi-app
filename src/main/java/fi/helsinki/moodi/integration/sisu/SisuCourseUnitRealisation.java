@@ -28,7 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static fi.helsinki.moodi.Constants.RESPONSIBLE;
+import static fi.helsinki.moodi.Constants.RESPONSIBLE_ORGANISATION;
+import static fi.helsinki.moodi.Constants.TEACHER_TYPES;
 
 @GraphQLProperty(name = "course_unit_realisation", arguments = {
     @GraphQLArgument(name = "id", type = "String")
@@ -90,7 +91,7 @@ public class SisuCourseUnitRealisation {
 
     private String getMainOrganisationId() {
         return organisations.stream()
-                .filter(o -> RESPONSIBLE.equals(o.roleUrn) && o.share > 0.5)
+                .filter(o -> RESPONSIBLE_ORGANISATION.equals(o.roleUrn) && o.share > 0.5)
                 .findFirst()
                 .map(o -> o.organisation.id)
                 .orElse(null);
@@ -98,8 +99,7 @@ public class SisuCourseUnitRealisation {
 
     public List<String> teacherSisuIds() {
         return responsibilityInfos.stream()
-            // Accept both responsible teacher and teacher.
-            .filter(r -> r.roleUrn != null && r.roleUrn.contains("teacher"))
+            .filter(r -> TEACHER_TYPES.contains(r.roleUrn))
             .map(r -> r.personId).collect(Collectors.toList());
     }
 
