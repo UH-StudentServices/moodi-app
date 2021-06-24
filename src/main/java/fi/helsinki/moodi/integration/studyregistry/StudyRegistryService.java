@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -50,7 +51,8 @@ public class StudyRegistryService {
 
         List<SisuCourseUnitRealisation> sisuCurs = sisuClient.getCourseUnitRealisations(idsByIsOodiId.get(false));
 
-        List<String> uniquePersonIds = sisuCurs.stream().flatMap(cur -> cur.teacherSisuIds().stream()).distinct().collect(Collectors.toList());
+        List<String> uniquePersonIds = sisuCurs.stream().flatMap(cur -> cur.teacherSisuIds().stream())
+                .filter(Objects::nonNull).distinct().collect(Collectors.toList());
 
         // Diverging from existing pattern here:
         // Getting all teacher user names immediately, as opposed to getting them one by one in EnrollmentExecutor,
