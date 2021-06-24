@@ -113,8 +113,6 @@ public abstract class AbstractMoodleIntegrationTest {
     protected final StudentUser studentUserNotInMoodle = new StudentUser(STUDENT_NOT_IN_MOODLE_USERNAME, "012345678", true);
     protected final TeacherUser teacherUser = new TeacherUser(TEACHER_USERNAME, "hy-hlo-teacher-1");
     protected final StudentUser teacherInStudentRole = new StudentUser(TEACHER_USERNAME, "011911609", true);
-    protected final TeacherUser adminUser = new TeacherUser(ADMIN_USERNAME, "hy-hlo-admin-1",
-            "urn:code:course-unit-realisation-responsibility-info-type:administrative-person");
 
     @Before
     public void emptyCoursesAndClearCaches() {
@@ -175,12 +173,6 @@ public abstract class AbstractMoodleIntegrationTest {
         public TeacherUser(String username, String personId) {
             super(username);
             this.personId = personId;
-        }
-
-        public TeacherUser(String username, String personId, String roleUrn) {
-            super(username);
-            this.personId = personId;
-            this.roleUrn = roleUrn;
         }
     }
 
