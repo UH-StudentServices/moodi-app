@@ -37,12 +37,12 @@ public class MoodleIntegrationImportCourseTest extends AbstractMoodleIntegration
         expectCourseRealisationsWithUsers(
             sisuCourseId,
             newArrayList(studentUser, studentUserNotInMoodle),
-            newArrayList(teacherUser, adminUser));
+            newArrayList(teacherUser));
 
         long moodleCourseId = importCourse(sisuCourseId);
 
         List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
-        assertEquals(3, moodleUserEnrollmentsList.size());
+        assertEquals(2, moodleUserEnrollmentsList.size());
 
         MoodleUserEnrollments studentEnrollment = findEnrollmentsByUsername(moodleUserEnrollmentsList, STUDENT_USERNAME);
         assertEquals(2, studentEnrollment.roles.size());
@@ -53,11 +53,6 @@ public class MoodleIntegrationImportCourseTest extends AbstractMoodleIntegration
         assertEquals(2, teacherEnrollment.roles.size());
         assertTrue(teacherEnrollment.hasRole(mapperService.getMoodiRoleId()));
         assertTrue(teacherEnrollment.hasRole(mapperService.getTeacherRoleId()));
-
-        MoodleUserEnrollments adminEnrollment = findEnrollmentsByUsername(moodleUserEnrollmentsList, ADMIN_USERNAME);
-        assertEquals(2, adminEnrollment.roles.size());
-        assertTrue(adminEnrollment.hasRole(mapperService.getMoodiRoleId()));
-        assertTrue(adminEnrollment.hasRole(mapperService.getTeacherRoleId()));
 
         List<MoodleFullCourse> moodleCourses = moodleClient.getCourses(Arrays.asList(moodleCourseId));
 
