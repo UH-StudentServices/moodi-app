@@ -180,6 +180,7 @@ public class HealthCheckTest extends AbstractMoodiIntegrationTest {
         SynchronizationJobRun ret = new SynchronizationJobRun();
         ret.completed = completed;
         ret.status = status;
+        ret.message = status.toString();
         return Optional.of(ret);
     }
 }
