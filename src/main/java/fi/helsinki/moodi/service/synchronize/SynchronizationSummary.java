@@ -18,6 +18,7 @@
 package fi.helsinki.moodi.service.synchronize;
 
 import com.google.common.base.Stopwatch;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -32,15 +33,17 @@ public final class SynchronizationSummary {
     private final SynchronizationType type;
     private final List<SynchronizationItem> items;
     private final Stopwatch stopwatch;
+    private final Exception exception;
 
-    public SynchronizationSummary(SynchronizationType type, List<SynchronizationItem> items, Stopwatch stopwatch) {
+    public SynchronizationSummary(SynchronizationType type, List<SynchronizationItem> items, Stopwatch stopwatch, Exception exception) {
         this.type = type;
         this.items = items;
         this.stopwatch = stopwatch;
+        this.exception = exception;
     }
 
     public SynchronizationStatus getStatus() {
-        return (getItemCount() == getSuccessfulItemsCount()) ? COMPLETED_SUCCESS : COMPLETED_FAILURE;
+        return (exception == null && getItemCount() == getSuccessfulItemsCount()) ? COMPLETED_SUCCESS : COMPLETED_FAILURE;
     }
 
     public SynchronizationType getType() {
@@ -64,7 +67,12 @@ public final class SynchronizationSummary {
     }
 
     public String getMessage() {
-        return getStatus().name();
+        String ret = getStatus().name();
+        if (exception != null) {
+            // DB column is varchar 2000, but we might have non-ascii characters in our message, so we truncate it to 1000 characters.
+            ret += " : " + StringUtils.substring(exception.getMessage(), 0, 1000);
+        }
+        return ret;
     }
 
     public List<SynchronizationItem> getItems() {
