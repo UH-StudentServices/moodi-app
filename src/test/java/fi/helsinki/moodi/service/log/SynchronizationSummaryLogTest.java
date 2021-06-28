@@ -83,7 +83,10 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
 
         List<SynchronizationItem> synchronizationItems = newArrayList(completedItem);
 
-        SynchronizationSummary summary = new SynchronizationSummary(synchronizationType, synchronizationItems, Stopwatch.createUnstarted());
+        SynchronizationSummary summary = new SynchronizationSummary(synchronizationType, synchronizationItems, Stopwatch.createUnstarted(),
+                new RuntimeException("Voi minnuu!"));
+
+        assertEquals("COMPLETED_FAILURE : Voi minnuu!", summary.getMessage());
 
         SynchronizationSummaryLog synchronizationSummaryLog = new SynchronizationSummaryLog(summary);
 

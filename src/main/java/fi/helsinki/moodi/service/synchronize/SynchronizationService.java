@@ -82,6 +82,7 @@ public class SynchronizationService {
         final long jobId  = begin(type);
         final List<SynchronizationItem> processedItems = new ArrayList<>();
         SynchronizationSummary summary;
+        Exception exception = null;
         try {
             logger.info("Synchronization of type {} started with jobId {}", type, jobId);
 
@@ -94,11 +95,12 @@ public class SynchronizationService {
             processedItems.addAll(processItems(enrichedItems));
         } catch (Exception e) {
             logger.error("Exception in SynchronizationService", e);
+            exception = e;
         } finally {
-            summary = complete(type, jobId, stopwatch, processedItems);
+            summary = complete(type, jobId, stopwatch, processedItems, exception);
         }
 
-        logger.info("Synchronization with jobId {} completed in {}", jobId, stopwatch.toString());
+        logger.info("Synchronization with jobId {} completed in {}", jobId, stopwatch);
 
         applyNotifiers(processedItems);
 
@@ -139,9 +141,9 @@ public class SynchronizationService {
     }
 
     private SynchronizationSummary complete(
-            final SynchronizationType type, final long jobId, final Stopwatch stopwatch, final List<SynchronizationItem> items) {
+            final SynchronizationType type, final long jobId, final Stopwatch stopwatch, final List<SynchronizationItem> items, Exception exception) {
 
-        final SynchronizationSummary summary = new SynchronizationSummary(type, items, stopwatch.stop());
+        final SynchronizationSummary summary = new SynchronizationSummary(type, items, stopwatch.stop(), exception);
         synchronizationJobRunService.complete(jobId, summary.getStatus(), summary.getMessage());
         return summary;
     }
