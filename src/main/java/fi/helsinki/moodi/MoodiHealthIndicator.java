@@ -63,7 +63,7 @@ public class MoodiHealthIndicator implements HealthIndicator {
                         return indicateError(String.format("No sync job completed in %d hours. Latest job completed at %s UTC",
                             MAX_HOURS_SINCE_COMPLETED_SYNC, latest.completed));
                     } else if (latest.status != SynchronizationStatus.COMPLETED_SUCCESS) {
-                        return indicateError("Status of the last sync job is not COMPLETED_SUCCESS, but " + latest.status);
+                        return indicateError(String.format("Status of the last sync job is not COMPLETED_SUCCESS, but %s", latest.message));
                     }
                 } else {
                     return indicateError("No sync jobs in the DB.");
