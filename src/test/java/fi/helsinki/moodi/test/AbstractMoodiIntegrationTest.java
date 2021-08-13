@@ -400,7 +400,8 @@ public abstract class AbstractMoodiIntegrationTest {
                     endsWith("&courses%5B0%5D%5Bcategoryid%5D=" + categoryId +
                         "&courses%5B0%5D%5Bsummary%5D=" + description + "&courses%5B0%5D%5Bvisible%5D=0" +
                         "&courses%5B0%5D%5Bstartdate%5D=1564952400&courses%5B0%5D%5Benddate%5D=1575496800" + // End date plus one month
-                        "&courses%5B0%5D%5Bcourseformatoptions%5D%5B0%5D%5Bname%5D=numsections&courses%5B0%5D%5Bcourseformatoptions%5D%5B0%5D%5Bvalue%5D=7"))))
+                        "&courses%5B0%5D%5Bcourseformatoptions%5D%5B0%5D%5B" +
+                        "name%5D=numsections&courses%5B0%5D%5Bcourseformatoptions%5D%5B0%5D%5Bvalue%5D=7"))))
             .andRespond(withSuccess("[{\"id\":\"" + moodleCourseIdToReturn + "\", \"shortname\":\"shortie\"}]", MediaType.APPLICATION_JSON));
     }
 
