@@ -49,8 +49,7 @@ public class Course {
     public String realisationId;
 
     @Column(name = "moodle_id")
-    @NotNull
-    public long moodleId;
+    public Long moodleId;
 
     @Column(name = "created")
     @NotNull

@@ -40,7 +40,7 @@ public class FullSynchronizationCourseLoader implements CourseLoader {
 
     @Override
     public List<Course> load() {
-        return courseService.findAllCompleted();
+        return courseService.findAllCompletedWithMoodleId();
     }
 
     @Override

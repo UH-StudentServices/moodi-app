@@ -25,15 +25,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.text.Normalizer;
+
 @Component
 public class MoodleCourseBuilder {
 
     public static final String MOODLE_COURSE_ID_OODI_PREFIX = "oodi_";
     public static final String MOODLE_COURSE_ID_SISU_PREFIX = "sisu_";
     public static final int DEFAULT_NUMBER_OF_SECTIONS = 7;
+    public static final int MAX_SHORTNAME_LENGTH = 14;
 
     @Value("${test.MoodleCourseBuilder.courseVisibility:false}")
     private boolean courseVisibility = false;
+
+    @Value("${test.MoodleCourseBuilder.overrideShortname:false}")
+    private boolean overrideShortname = false;
 
     private final MapperService mapperService;
 
@@ -42,20 +48,27 @@ public class MoodleCourseBuilder {
         this.mapperService = mapperService;
     }
 
-    private String getShortName(String realisationName, String realisationId) {
-        String shortId = realisationId.length() < 23 ?
-            realisationId :
-            StringUtils.left(realisationId, 6) + "-...-" + StringUtils.right(realisationId, 12);
-        return StringUtils.substring(realisationName, 0, 8) + " " + shortId;
+    private String getShortName(String realisationName, Long dbCourseId) {
+        if (overrideShortname) {
+            // DB IDs in integration tests are the same for each run, so we must override them to something unique
+            // to avoid shortName collisions in dev Moodle.
+            dbCourseId = System.currentTimeMillis();
+        }
+        String uniqueSuffix = "-" + Long.toString(dbCourseId, Character.MAX_RADIX).toUpperCase();
+        // Transform to ASCII.
+        String cleanName = Normalizer.normalize(realisationName, Normalizer.Form.NFKD).replaceAll("[^\\x00-\\x7F]", "");
+        // Adjust name length according to unique identifier length.
+        return StringUtils.substring(cleanName, 0, MAX_SHORTNAME_LENGTH - uniqueSuffix.length())
+                + uniqueSuffix;
     }
 
-    public MoodleCourse buildMoodleCourse(StudyRegistryCourseUnitRealisation cur) {
+    public MoodleCourse buildMoodleCourse(StudyRegistryCourseUnitRealisation cur, Long dbCourseId) {
         return new MoodleCourse(
             (cur.origin == StudyRegistryCourseUnitRealisation.Origin.OODI ?
                 MOODLE_COURSE_ID_OODI_PREFIX :
                 MOODLE_COURSE_ID_SISU_PREFIX) + cur.realisationId,
             cur.realisationName,
-            getShortName(cur.realisationName, cur.realisationId),
+            getShortName(cur.realisationName, dbCourseId),
             mapperService.getMoodleCategoryByOrganisationId(cur.mainOrganisationId),
             cur.description,
             courseVisibility,
