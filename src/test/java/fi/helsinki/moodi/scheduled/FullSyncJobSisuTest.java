@@ -138,7 +138,7 @@ public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
 
     // Initialize course repository with test courses.
     private void coursesInDb(Course...courses) {
-        when(courseRepository.findByImportStatusInAndRemovedFalse(anyList())).thenReturn(Arrays.asList(courses));
+        when(courseRepository.findByImportStatusInAndRemovedFalseAndMoodleIdNotNull(anyList())).thenReturn(Arrays.asList(courses));
     }
 
     private Course getCourse(String id, long moodleId) {
