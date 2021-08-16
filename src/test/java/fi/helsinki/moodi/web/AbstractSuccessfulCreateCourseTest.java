@@ -53,7 +53,7 @@ public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIn
         mockSisuGraphQLServer.expectPersonsRequest(Arrays.asList("hy-hlo-4"), "/sisu/persons.json");
     }
 
-    private void setUpMoodleResponses(String curId, String description, String moodleCourseIdPrefix, boolean allUsersFound, String categoryId) {
+    protected void setUpMoodleResponses(String curId, String description, String moodleCourseIdPrefix, boolean allUsersFound, String categoryId) {
         expectCreateCourseRequestToMoodle(curId, moodleCourseIdPrefix, description, MOODLE_COURSE_ID, categoryId);
 
         expectGetUserRequestToMoodle(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA);

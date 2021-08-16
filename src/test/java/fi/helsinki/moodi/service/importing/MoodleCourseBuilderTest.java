@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 import static com.google.common.collect.Lists.newArrayList;
 import static fi.helsinki.moodi.Constants.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
 
@@ -74,12 +75,12 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
             LANG_SV,
             LANG_EN);
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation.toStudyRegistryCourseUnitRealisation());
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation.toStudyRegistryCourseUnitRealisation(), 1L);
 
         assertEquals(REALISATION_NAME_FI, moodleCourse.fullName);
         assertEquals(MoodleCourseBuilder.MOODLE_COURSE_ID_OODI_PREFIX + REALISATION_ID, moodleCourse.idNumber);
         assertEquals(MOODLE_DEFAULT_CATEGORY_ID, moodleCourse.categoryId);
-        assertEquals("Kurssin  " + REALISATION_ID, moodleCourse.shortName);
+        assertEquals("Kurssin nimi-1", moodleCourse.shortName);
         assertEquals(String.join(" ", DESCRIPTION_1_FI, DESCRIPTION_2_FI, DESCRIPTION_3_FI), moodleCourse.summary);
     }
 
@@ -88,11 +89,11 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         SisuCourseUnitRealisation cur = getSisuCur();
         expectSisuOrganisationExportRequest();
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation());
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation(), 1L);
 
         assertEquals(REALISATION_NAME_SV, moodleCourse.fullName);
         assertEquals("sisu_hy-cur-1", moodleCourse.idNumber);
-        assertEquals("Kurs nam hy-cur-1", moodleCourse.shortName);
+        assertEquals("Kurs namn-1", moodleCourse.shortName);
         assertEquals("korrekt url på svenska", moodleCourse.summary);
         assertEquals(LocalDate.of(2019, 8, 5), moodleCourse.startTime);
         assertEquals(LocalDate.of(2019, 12, 5), moodleCourse.endTime);
@@ -100,14 +101,33 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
     }
 
     @Test
-    public void thatShortNameIsShort() {
+    public void thatShortNameIsShortAndHasNoSpecialCharacters() {
         SisuCourseUnitRealisation cur = getSisuCur();
         cur.id = "hy-opt-cur-2021-e34bb357-2f08-4a15-a652-6034b9988be2";
-        cur.name.sv = "Contemporary European History";
+        cur.name.sv = "Cöntémporary European History";
         expectSisuOrganisationExportRequest();
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation());
-        assertEquals("Contempo hy-opt-...-6034b9988be2", moodleCourse.shortName);
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation(), 1000000L);
+        assertEquals("Contempor-LFLS", moodleCourse.shortName);
+        assertEquals(MoodleCourseBuilder.MAX_SHORTNAME_LENGTH, moodleCourse.shortName.length());
+    }
+
+    @Test
+    public void thatShortNamesDoNotCollide() {
+        SisuCourseUnitRealisation cur1 = getSisuCur();
+        cur1.id = "hy-opt-cur-2021-3129be1f-6110-4b2f-b2e2-9251fe44007b";
+        cur1.name.sv = "Oikeuslääketiede syksy L5, C+D 3 op";
+
+        SisuCourseUnitRealisation cur2 = getSisuCur();
+        cur2.id = "hy-opt-cur-2122-3129be1f-6110-4b2f-b2e2-9251fe44007b";
+        cur2.name.sv = "Oikeuslääketiede, ryhmä C+D, Luento-opetus 3 op";
+
+        expectSisuOrganisationExportRequest();
+
+        MoodleCourse moodleCourse1 = moodleCourseBuilder.buildMoodleCourse(cur1.toStudyRegistryCourseUnitRealisation(), 1L);
+        MoodleCourse moodleCourse2 = moodleCourseBuilder.buildMoodleCourse(cur2.toStudyRegistryCourseUnitRealisation(), 2L);
+
+        assertNotEquals(moodleCourse1.shortName, moodleCourse2.shortName);
     }
 
     @Test
@@ -117,11 +137,11 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         cur.activityPeriod = null;
         cur.organisations = new ArrayList<>();
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation());
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation(), 10000000L);
 
         assertEquals(REALISATION_NAME_FI, moodleCourse.fullName);
         assertEquals("sisu_hy-cur-1", moodleCourse.idNumber);
-        assertEquals("Kurssin  hy-cur-1", moodleCourse.shortName);
+        assertEquals("Kurssin -5YC1S", moodleCourse.shortName);
         assertEquals("urli suomeksi", moodleCourse.summary);
         assertEquals(LocalDate.now(), moodleCourse.startTime);
         assertEquals(LocalDate.now().plusYears(1), moodleCourse.endTime);
@@ -157,7 +177,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
             LANG_FI,
             LANG_EN);
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation.toStudyRegistryCourseUnitRealisation());
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation.toStudyRegistryCourseUnitRealisation(), 1L);
 
         assertEquals(REALISATION_NAME_SV, moodleCourse.fullName);
         assertEquals(String.join(" ", DESCRIPTION_1_SV, DESCRIPTION_2_SV, DESCRIPTION_3_SV), moodleCourse.summary);
@@ -170,7 +190,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
             LANG_SV,
             LANG_FI);
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation.toStudyRegistryCourseUnitRealisation());
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation.toStudyRegistryCourseUnitRealisation(), 1L);
 
         assertEquals(REALISATION_NAME_EN, moodleCourse.fullName);
         assertEquals(String.join(" ", DESCRIPTION_1_EN, DESCRIPTION_2_EN, DESCRIPTION_3_EN), moodleCourse.summary);
@@ -185,7 +205,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         oodiCourseUnitRealisation.startDate = "2019-08-04T21:00:00.000Z";
         oodiCourseUnitRealisation.endDate = "2019-08-04T21:00:00.000Z";
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation.toStudyRegistryCourseUnitRealisation());
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation.toStudyRegistryCourseUnitRealisation(), 1L);
 
         assertEquals(LocalDate.of(2019, 8, 5), moodleCourse.startTime);
         assertEquals(LocalDate.of(2019, 9, 5), moodleCourse.endTime);
@@ -200,7 +220,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         oodiCourseUnitRealisation.startDate = "";
         oodiCourseUnitRealisation.endDate = null;
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation.toStudyRegistryCourseUnitRealisation());
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(oodiCourseUnitRealisation.toStudyRegistryCourseUnitRealisation(), 1L);
 
         assertEquals(LocalDate.now(), moodleCourse.startTime);
         assertEquals(LocalDate.now().plusYears(1), moodleCourse.endTime);

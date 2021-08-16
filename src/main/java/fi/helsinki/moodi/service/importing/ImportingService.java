@@ -73,8 +73,16 @@ public class ImportingService {
 
         final Optional<Course> existingCourse = courseService.findByRealisationId(sisuRealisationId);
 
+        Course dbCourse;
+        // Check for moodleId. If the course exists in the DB without moodleId, go ahead with the import without inserting the course to DB.
         if (existingCourse.isPresent()) {
-            throw new CourseAlreadyCreatedException(sisuRealisationId);
+            dbCourse = existingCourse.get();
+            if (dbCourse.moodleId != null) {
+                throw new CourseAlreadyCreatedException(sisuRealisationId);
+            }
+        } else {
+            // Save the course in the DB with moodleId NULL.
+            dbCourse = courseService.createCourse(sisuRealisationId, null);
         }
 
         final StudyRegistryCourseUnitRealisation courseUnitRealisation =
@@ -83,14 +91,17 @@ public class ImportingService {
                             String.format("Study registry course not found with realisation id %s (%s)",
                                 sisuRealisationId, request.realisationId)));
 
-        final MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(courseUnitRealisation);
+        // Use the DB Course.id for generating the shortname.
+        final MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(courseUnitRealisation, dbCourse.id);
+
         final long moodleCourseId = moodleService.createCourse(moodleCourse);
 
-        Course savedCourse = courseService.createCourse(sisuRealisationId, moodleCourseId);
+        // Update the course in DB with the newly created moodleId
+        dbCourse = courseService.updateMoodleId(sisuRealisationId, moodleCourseId);
 
-        enrollmentExecutor.processEnrollments(savedCourse, courseUnitRealisation, moodleCourseId);
+        enrollmentExecutor.processEnrollments(dbCourse, courseUnitRealisation, moodleCourseId);
 
-        loggingService.logCourseImport(savedCourse);
+        loggingService.logCourseImport(dbCourse);
 
         return Result.success(new ImportCourseResponse(moodleCourseId));
     }
@@ -101,12 +112,13 @@ public class ImportingService {
             : realisationId;
     }
 
-    public CourseDto getCourse(String realisationId) {
+    public CourseDto getImportedCourse(String realisationId) {
         Optional<Course> course = courseService.findByRealisationId(realisationId);
         if (!course.isPresent() && isOodiId(realisationId)) {
             course = courseService.findByRealisationId(sisuRealisationId(realisationId));
         }
         return course
+            .filter(c -> c.moodleId != null)
             .map(courseConverter::toDto)
             .orElseThrow(() -> new CourseNotFoundException(realisationId));
     }
