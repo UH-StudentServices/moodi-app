@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static fi.helsinki.moodi.exception.NotFoundException.notFoundException;
 import static fi.helsinki.moodi.service.course.Course.ImportStatus.*;
 
 @Service
@@ -53,17 +54,26 @@ public class CourseService {
         return courseRepository.findByRealisationId(realisationId);
     }
 
-    public List<Course> findAllCompleted() {
-        return courseRepository.findByImportStatusInAndRemovedFalse(newArrayList(COMPLETED, COMPLETED_FAILED));
+    public List<Course> findAllCompletedWithMoodleId() {
+        return courseRepository.findByImportStatusInAndRemovedFalseAndMoodleIdNotNull(newArrayList(COMPLETED, COMPLETED_FAILED));
     }
 
-    public Course createCourse(final String realisationId, final long moodleCourseId) {
+    public Course createCourse(final String realisationId, final Long moodleCourseId) {
         final Course course = new Course();
         course.created = timeService.getCurrentUTCDateTime();
         course.moodleId = moodleCourseId;
         course.realisationId = realisationId;
         course.importStatus = IN_PROGRESS;
         return saveCourse(course);
+    }
+
+    public Course updateMoodleId(final String realisationId, final long moodleId) {
+        Course dbCourse = findByRealisationId(realisationId).orElseThrow(notFoundException(
+                String.format("Study registry course not found with realisation id %s",
+                        realisationId)));
+
+        dbCourse.moodleId = moodleId;
+        return saveCourse(dbCourse);
     }
 
     public Course completeCourseImport(String realisationId, boolean success) {
@@ -77,8 +87,8 @@ public class CourseService {
         return saveCourse(course);
     }
 
-    public List<Course> findCompletedByRealisationIds(List<String> realisationIds) {
-        return courseRepository.findByImportStatusInAndRealisationIdIn(newArrayList(COMPLETED, COMPLETED_FAILED), realisationIds);
+    public List<Course> findCompletedWithMoodleIdByRealisationIds(List<String> realisationIds) {
+        return courseRepository.findByImportStatusInAndRealisationIdInAndMoodleIdNotNull(newArrayList(COMPLETED, COMPLETED_FAILED), realisationIds);
     }
 
     public void cleanImportStatuses() {

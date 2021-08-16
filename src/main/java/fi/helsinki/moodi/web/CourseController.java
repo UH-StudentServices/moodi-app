@@ -60,7 +60,7 @@ public class CourseController {
     public ResponseEntity<CourseDto> getCourse(
         @PathVariable("realisationId") String realisationId) {
 
-        return response(importingService.getCourse(realisationId));
+        return response(importingService.getImportedCourse(realisationId));
     }
 
     private <D, E> ResponseEntity<Result<D, E>> response(Result<D, E> result) {

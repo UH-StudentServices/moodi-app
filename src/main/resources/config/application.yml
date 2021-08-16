@@ -18,7 +18,7 @@ httpClient:
   # Defines the socket timeout (SO_TIMEOUT) in milliseconds,
   # which is the timeout for waiting for data  or, put differently,
   # a maximum period inactivity between two consecutive data packets).
-  socketTimeout: 30000
+  socketTimeout: 60000
 
 oodi.enrollmentApprovedStatusCodes: 2, 3, 7, 8
 

@@ -38,6 +38,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Implementation for incremental synchronization.
+ * DO NOT USE, has not been modified to support Sisu.
  */
 @Component
 public class IncrementalSynchronizationCourseLoader implements CourseLoader {
@@ -77,7 +78,7 @@ public class IncrementalSynchronizationCourseLoader implements CourseLoader {
                 .map(o -> "" + o.courseUnitRealisationId)
                 .collect(Collectors.toList());
 
-        return courseService.findCompletedByRealisationIds(realisationIds);
+        return courseService.findCompletedWithMoodleIdByRealisationIds(realisationIds);
     }
 
     @Override
