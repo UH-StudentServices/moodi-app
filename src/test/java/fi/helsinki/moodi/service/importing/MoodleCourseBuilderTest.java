@@ -108,7 +108,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         expectSisuOrganisationExportRequest();
 
         MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation(), 1000000L);
-        assertEquals("Contempor-LFLS", moodleCourse.shortName);
+        assertEquals("Contemporary Europea-LFLS", moodleCourse.shortName);
         assertEquals(MoodleCourseBuilder.MAX_SHORTNAME_LENGTH, moodleCourse.shortName.length());
     }
 
@@ -141,7 +141,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
 
         assertEquals(REALISATION_NAME_FI, moodleCourse.fullName);
         assertEquals("sisu_hy-cur-1", moodleCourse.idNumber);
-        assertEquals("Kurssin -5YC1S", moodleCourse.shortName);
+        assertEquals("Kurssin nimi-5YC1S", moodleCourse.shortName);
         assertEquals("urli suomeksi", moodleCourse.summary);
         assertEquals(LocalDate.now(), moodleCourse.startTime);
         assertEquals(LocalDate.now().plusYears(1), moodleCourse.endTime);
