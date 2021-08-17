@@ -33,7 +33,7 @@ public class MoodleCourseBuilder {
     public static final String MOODLE_COURSE_ID_OODI_PREFIX = "oodi_";
     public static final String MOODLE_COURSE_ID_SISU_PREFIX = "sisu_";
     public static final int DEFAULT_NUMBER_OF_SECTIONS = 7;
-    public static final int MAX_SHORTNAME_LENGTH = 14;
+    public static final int MAX_SHORTNAME_LENGTH = 25;
 
     @Value("${test.MoodleCourseBuilder.courseVisibility:false}")
     private boolean courseVisibility = false;
