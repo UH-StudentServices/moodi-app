@@ -52,13 +52,13 @@ public class SisuCourseEnricherTest extends AbstractMoodiIntegrationTest  {
     }
 
     @Test
-    public void thatSynchronizationItemIsSetToNotPublicStatusWhenCourseIsNotPublic() {
+    public void thatUnPublishedCourseGetsEnriched() {
         setUpMockSisuAndPrefetchCourses();
-        SynchronizationItem synchronizationItem = createFullSynchronizationItem("hy-CUR-archived");
+        SynchronizationItem synchronizationItem = createFullSynchronizationItem("hy-CUR-unpublished");
 
         SynchronizationItem enrichedItem = sisuCourseEnricher.doEnrich(synchronizationItem);
 
-        assertStatus(enrichedItem, EnrichmentStatus.COURSE_NOT_PUBLIC, false);
+        assertStatus(enrichedItem, EnrichmentStatus.IN_PROGESS, true);
     }
 
     @Test

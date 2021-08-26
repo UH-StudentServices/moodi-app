@@ -65,10 +65,6 @@ public class SisuCourseEnricher extends AbstractEnricher {
             return item.completeEnrichmentPhase(
                 EnrichmentStatus.ERROR,
                 String.format("Course not found from Sisu with id %s", course.realisationId));
-        } else if (!cur.published) {
-            return item.completeEnrichmentPhase(
-                EnrichmentStatus.COURSE_NOT_PUBLIC,
-                String.format("Course with id %s is not public in Sisu", course.realisationId));
         } else if (endedMoreThanYearAgo(cur)) {
             return item.completeEnrichmentPhase(
                 EnrichmentStatus.COURSE_ENDED,
