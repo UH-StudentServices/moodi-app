@@ -84,6 +84,46 @@
             "language": "fi"
           }
         ]
+      },
+      {
+        "name": {
+          "fi": "Julkaisematon 5",
+          "sv": "Kurs 5",
+          "en": "Unpublished 5"
+        },
+        "teachingLanguageUrn": "urn:code:language:fi",
+        "id": "hy-CUR-unpublished",
+        "activityPeriod": {
+          "startDate": "2039-08-05",
+          "endDate": "2039-11-05"
+        },
+        "flowState": "DRAFT",
+        "responsibilityInfos": [
+          {
+            "roleUrn": "urn:code:course-unit-realisation-responsibility-info-type:responsible-teacher",
+            "personId": "hy-hlo-4"
+          },
+          {
+            "roleUrn": "urn:code:course-unit-realisation-responsibility-info-type:someone-else",
+            "personId": "hy-hlo-not-a-teacher"
+          }
+        ],
+        "enrolments": [
+          {
+            "state": "ENROLLED",
+            "person": {
+              "eduPersonPrincipalName": "niina4@helsinki.fi"
+            }
+          }
+        ],
+        "learningEnvironments": [
+          {
+            "name": "Kurssisivu",
+            "url": "https://courses.helsinki.fi/fi/OODI-FLOW/136394381",
+            "primary": true,
+            "language": "fi"
+          }
+        ]
       }
     ]
   }
