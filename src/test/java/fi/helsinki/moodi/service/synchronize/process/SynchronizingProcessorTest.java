@@ -156,7 +156,6 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
         synchronizingProcessor.doProcess(item);
     }
 
-
     @Test
     public void thatUserIsNotEnrolledWithOnlyMoodiRoleIfNotApproved() {
         SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID)

@@ -52,7 +52,6 @@ public class ImportingService {
     private final LoggingService loggingService;
     private final SisuClient sisuClient;
 
-
     @Autowired
     public ImportingService(
         MoodleService moodleService,

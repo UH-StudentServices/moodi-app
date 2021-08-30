@@ -34,8 +34,12 @@ public final class ImportCourseRequest {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ImportCourseRequest that = (ImportCourseRequest) o;
         return Objects.equals(realisationId, that.realisationId) && Objects.equals(creatorSisuId, that.creatorSisuId);
     }

@@ -30,7 +30,7 @@ public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIn
     protected static final String SISU_COURSE_REALISATION_ID = "hy-CUR-123";
     protected static final String EXPECTED_SISU_DESCRIPTION_TO_MOODLE = "https%3A%2F%2Fcourses.helsinki.fi%2Ffi%2FOODI-FLOW%2F136394381";
 
-protected void expectEnrollmentsWithAddedMoodiRoles(List<MoodleEnrollment> moodleEnrollments) {
+    protected void expectEnrollmentsWithAddedMoodiRoles(List<MoodleEnrollment> moodleEnrollments) {
         expectEnrollmentRequestToMoodle(moodleEnrollments.stream()
             .flatMap(enrollment -> Stream.of(enrollment,
                 new MoodleEnrollment(getMoodiRoleId(), enrollment.moodleUserId, enrollment.moodleCourseId))).toArray(MoodleEnrollment[]::new));
@@ -63,7 +63,8 @@ protected void expectEnrollmentsWithAddedMoodiRoles(List<MoodleEnrollment> moodl
                 "/sisu/persons-not-found.json");
     }
 
-    protected void setUpMoodleResponses(String curId, String description, String moodleCourseIdPrefix, boolean allUsersFound, String categoryId, String creatorSisuId) {
+    protected void setUpMoodleResponses(String curId, String description, String moodleCourseIdPrefix,
+                                        boolean allUsersFound, String categoryId, String creatorSisuId) {
         expectCreateCourseRequestToMoodle(curId, moodleCourseIdPrefix, description, MOODLE_COURSE_ID, categoryId);
 
         expectGetUserRequestToMoodle(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA);
