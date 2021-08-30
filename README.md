@@ -37,7 +37,8 @@ when new features are added.
 ```
 
 ### Running Moodi-Moodle integration tests
-This is normally done in Jenkins, but if you want to test something locally, you need to go via an ssh tunnel.
+This is normally done in Jenkins, but if you want to test something locally, you need to go through 
+an ssh tunnel via moodi-dev, because the Moodle API has an IP restriction in place.
 
 Into /etc/hosts: 
 ```
