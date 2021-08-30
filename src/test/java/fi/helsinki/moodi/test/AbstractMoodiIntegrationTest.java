@@ -332,6 +332,7 @@ public abstract class AbstractMoodiIntegrationTest {
     protected final ResultActions makeCreateCourseRequest(final String realisationId) throws Exception {
         return makeCreateCourseRequest(realisationId, null);
     }
+
     protected final ResultActions makeCreateCourseRequest(final String realisationId, final String creatorSisuId) throws Exception {
         ImportCourseRequest importCourseRequest = new ImportCourseRequest();
         importCourseRequest.realisationId = realisationId;
