@@ -85,7 +85,7 @@ public class EnrollmentExecutor {
 
             final List<EnrollmentWarning> enrollmentWarnings = newArrayList();
 
-            final List<Enrollment> enrollments = createEnrollments(courseUnitRealisation);
+            final List<Enrollment> enrollments = createEnrollments(courseUnitRealisation, course.creatorUsername);
 
             final List<Enrollment> approvedEnrollments = filterApprovedEnrollments(enrollments, enrollmentWarnings);
             final List<Enrollment> enrollmentsWithUsernames = enrichEnrollmentsWithUsernames(approvedEnrollments);
@@ -133,7 +133,7 @@ public class EnrollmentExecutor {
         return enrollment;
     }
 
-    private List<Enrollment> createEnrollments(final StudyRegistryCourseUnitRealisation cur) {
+    private List<Enrollment> createEnrollments(final StudyRegistryCourseUnitRealisation cur, final String creatorUsername) {
         final List<Enrollment> enrollments = newArrayList();
 
         enrollments.addAll(cur.students.stream()
@@ -146,6 +146,10 @@ public class EnrollmentExecutor {
         enrollments.addAll(cur.teachers.stream()
             .map(s -> Enrollment.forTeacher(s.employeeNumber, s.userName))
             .collect(toList()));
+
+        if (creatorUsername != null) {
+            enrollments.add(Enrollment.forCreator(creatorUsername));
+        }
 
         return enrollments;
     }

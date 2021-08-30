@@ -35,10 +35,12 @@ import io.aexp.nodes.graphql.Arguments;
 import io.aexp.nodes.graphql.GraphQLRequestEntity;
 import io.aexp.nodes.graphql.internal.DefaultObjectMapperFactory;
 import org.mockserver.client.MockServerClient;
+import org.mockserver.model.HttpRequest;
 
 import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +56,7 @@ public class MockSisuGraphQLServer {
     private static final String API_KEY = "test-apikey";
 
     private final GraphQLSchema graphQLSchema;
+    private List<HttpRequest> expectedRequests = new ArrayList<>();
 
     public MockSisuGraphQLServer(MockServerClient client) {
         this.client = client;
@@ -65,6 +68,7 @@ public class MockSisuGraphQLServer {
 
     public void reset() {
         client.reset();
+        expectedRequests.clear();
     }
 
     public void expectCourseUnitRealisationsRequest(List<String> curIds, String responseFile, Map<String, ?> variables) {
@@ -85,19 +89,28 @@ public class MockSisuGraphQLServer {
         expectPersonsRequest(personIds, responseFile, new HashMap<>());
     }
 
+    public void verify() {
+        if (!expectedRequests.isEmpty()) {
+            client.verify(expectedRequests.toArray(new HttpRequest[0]));
+        }
+    }
+
     private <T> void expectGraphqlRequest(String responseFile, final Map<String, ?> responseVariables,
                                           Class<T> requestClass, Arguments... requestArguments) {
+        HttpRequest request = request()
+            .withMethod("POST")
+            .withPath("/graphql")
+            .withHeader(API_KEY_HEADER_NAME, API_KEY)
+            .withBody(requestBodyMatcher(requestClass, requestArguments));
+
         client
-            .when(
-                request()
-                    .withMethod("POST")
-                    .withPath("/graphql")
-                    .withHeader(API_KEY_HEADER_NAME, API_KEY)
-                    .withBody(requestBodyMatcher(requestClass, requestArguments)))
+            .when(request)
             .respond(
                 response()
                     .withStatusCode(200)
                     .withBody(Fixtures.asString(responseFile, responseVariables)));
+
+        expectedRequests.add(request);
     }
 
     private <T> String requestBodyMatcher(Class<T> requestClass, Arguments... arguments) {

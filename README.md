@@ -40,14 +40,13 @@ when new features are added.
 This is normally done in Jenkins, but if you want to test something locally, you need to go through 
 an ssh tunnel via moodi-dev, because the Moodle API has an IP restriction in place.
 
-Into /etc/hosts: 
-```
-127.0.0.1       moodi-2-moodle-20.student.helsinki.fi 
-```
-
 Open an ssh tunnel to call the Moodle API:
 ```
 ssh moodi-dev -L 1444:moodi-2-moodle-20.student.helsinki.fi:443
+```
+Into /etc/hosts:
+```
+127.0.0.1       moodi-2-moodle-20.student.helsinki.fi 
 ```
 
 Then run the tests

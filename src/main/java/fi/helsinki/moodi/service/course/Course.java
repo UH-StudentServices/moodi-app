@@ -48,6 +48,9 @@ public class Course {
     @NotNull
     public String realisationId;
 
+    @Column(name = "creator_username")
+    public String creatorUsername;
+
     @Column(name = "moodle_id")
     public Long moodleId;
 

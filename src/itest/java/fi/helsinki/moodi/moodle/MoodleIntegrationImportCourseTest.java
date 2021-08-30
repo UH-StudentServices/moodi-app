@@ -27,32 +27,27 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class MoodleIntegrationImportCourseTest extends AbstractMoodleIntegrationTest {
     @Test
     public void testMoodleIntegrationWhenImportingCourse() {
         String sisuCourseId = getSisuCourseId();
 
+        expectCreator(creatorUser);
+
         expectCourseRealisationsWithUsers(
             sisuCourseId,
             newArrayList(studentUser, studentUserNotInMoodle),
             newArrayList(teacherUser));
 
-        long moodleCourseId = importCourse(sisuCourseId);
+        long moodleCourseId = importCourse(sisuCourseId, creatorUser.personId);
 
         List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
-        assertEquals(2, moodleUserEnrollmentsList.size());
+        assertEquals(3, moodleUserEnrollmentsList.size());
 
-        MoodleUserEnrollments studentEnrollment = findEnrollmentsByUsername(moodleUserEnrollmentsList, STUDENT_USERNAME);
-        assertEquals(2, studentEnrollment.roles.size());
-        assertTrue(studentEnrollment.hasRole(mapperService.getMoodiRoleId()));
-        assertTrue(studentEnrollment.hasRole(mapperService.getStudentRoleId()));
-
-        MoodleUserEnrollments teacherEnrollment = findEnrollmentsByUsername(moodleUserEnrollmentsList, TEACHER_USERNAME);
-        assertEquals(2, teacherEnrollment.roles.size());
-        assertTrue(teacherEnrollment.hasRole(mapperService.getMoodiRoleId()));
-        assertTrue(teacherEnrollment.hasRole(mapperService.getTeacherRoleId()));
+        assertStudentEnrollment(STUDENT_USERNAME, moodleUserEnrollmentsList);
+        assertTeacherEnrollment(TEACHER_USERNAME, moodleUserEnrollmentsList);
+        assertTeacherEnrollment(CREATOR_USERNAME, moodleUserEnrollmentsList);
 
         List<MoodleFullCourse> moodleCourses = moodleClient.getCourses(Arrays.asList(moodleCourseId));
 

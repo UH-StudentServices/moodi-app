@@ -25,7 +25,6 @@ import fi.helsinki.moodi.integration.moodle.MoodleCourseData;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.integration.moodle.MoodleRole;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
-import fi.helsinki.moodi.service.course.CourseRepository;
 import fi.helsinki.moodi.service.importing.ImportCourseRequest;
 import fi.helsinki.moodi.service.synchronize.enrich.SisuCourseEnricher;
 import fi.helsinki.moodi.service.util.MapperService;
@@ -87,6 +86,7 @@ public abstract class AbstractMoodiIntegrationTest {
     protected static final long MOODLE_USER_NIINA2 = 8L;
     protected static final long MOODLE_USER_NOT_ENROLLED = 9L;
     protected static final long MOODLE_USER_NOT_IN_STUDY_REGISTRY = 10L;
+    protected static final long MOODLE_USER_CREATOR = 11L;
 
     protected static final String MOODLE_USERNAME_NIINA = "niina@helsinki.fi";
     protected static final String MOODLE_USERNAME_JUKKA = "jukka@helsinki.fi";
@@ -98,6 +98,10 @@ public abstract class AbstractMoodiIntegrationTest {
     protected static final String MOODLE_USERNAME_NIINA2 = "niina2@helsinki.fi";
     protected static final String MOODLE_USERNAME_NOT_ENROLLED = "ei-mukana-kurssilla@helsinki.fi";
     protected static final String MOODLE_USERNAME_NOT_IN_STUDY_REGISTRY = "ei-sisussa@helsinki.fi";
+    protected static final String MOODLE_USERNAME_CREATOR = "creator@helsinki.fi";
+
+    protected static final String CREATOR_SISU_ID = "hy-hlo-creator";
+    protected static final String PERSON_NOT_FOUND = "hy-hlo-not-found";
 
     private static final String MOODLE_EMPTY_LIST_RESPONSE = "[]";
     protected static final String MOODLE_ERROR_RESPONSE =
@@ -150,9 +154,6 @@ public abstract class AbstractMoodiIntegrationTest {
 
     @Autowired
     private CacheManager cacheManager;
-
-    @Autowired
-    private CourseRepository courseRepository;
 
     protected MockMvc mockMvc;
 
@@ -223,6 +224,15 @@ public abstract class AbstractMoodiIntegrationTest {
         moodleReadOnlyMockServer = MockRestServiceServer.createServer(moodleReadOnlyRestTemplate);
         iamMockServer = MockRestServiceServer.createServer(iamRestTemplate);
         mockSisuGraphQLServer = new MockSisuGraphQLServer(mockServerClient);
+    }
+
+    @After
+    public void verifyMockServers() {
+        studyRegistryMockServer.verify();
+        moodleMockServer.verify();
+        moodleReadOnlyMockServer.verify();
+        iamMockServer.verify();
+        mockSisuGraphQLServer.verify();
     }
 
     public static String toJson(Object object) {
@@ -320,8 +330,12 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     protected final ResultActions makeCreateCourseRequest(final String realisationId) throws Exception {
+        return makeCreateCourseRequest(realisationId, null);
+    }
+    protected final ResultActions makeCreateCourseRequest(final String realisationId, final String creatorSisuId) throws Exception {
         ImportCourseRequest importCourseRequest = new ImportCourseRequest();
         importCourseRequest.realisationId = realisationId;
+        importCourseRequest.creatorSisuId = creatorSisuId;
 
         return mockMvc.perform(
             post("/api/v1/courses")
@@ -495,13 +509,5 @@ public abstract class AbstractMoodiIntegrationTest {
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @After
-    public void verifyMockServers() {
-        studyRegistryMockServer.verify();
-        moodleMockServer.verify();
-        moodleReadOnlyMockServer.verify();
-        iamMockServer.verify();
     }
 }
