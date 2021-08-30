@@ -254,12 +254,18 @@ public class SynchronizingProcessor extends AbstractProcessor {
         Stream<UserSynchronizationItem> teacherItemStream = course.teachers
             .stream()
             .map(UserSynchronizationItem::new);
+        Stream<UserSynchronizationItem> creatorItemStream = Stream.empty();
+        if (item.getCourse().creatorUsername != null) {
+            StudyRegistryTeacher creator = new StudyRegistryTeacher();
+            creator.userName = item.getCourse().creatorUsername;
+            creatorItemStream = Stream.of(new UserSynchronizationItem(creator));
+        }
 
-        Map<Boolean, List<UserSynchronizationItem>> userSynchronizationItemsByCompletedStatus = Stream
-            .concat(studentItemStream, teacherItemStream)
-            .map(i -> i.withMoodleCourseId(item.getCourse().moodleId))
-            .map(this::enrichWithMoodleUser)
-            .collect(Collectors.groupingBy(UserSynchronizationItem::isCompleted));
+        Map<Boolean, List<UserSynchronizationItem>> userSynchronizationItemsByCompletedStatus =
+            Stream.concat(creatorItemStream, Stream.concat(studentItemStream, teacherItemStream))
+                .map(i -> i.withMoodleCourseId(item.getCourse().moodleId))
+                .map(this::enrichWithMoodleUser)
+                .collect(Collectors.groupingBy(UserSynchronizationItem::isCompleted));
 
         List<UserSynchronizationItem> completedItems = userSynchronizationItemsByCompletedStatus.getOrDefault(true, newArrayList());
         List<UserSynchronizationItem> unCompletedItems = userSynchronizationItemsByCompletedStatus.getOrDefault(false, newArrayList());

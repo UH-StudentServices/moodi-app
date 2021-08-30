@@ -35,18 +35,20 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
         String sisuCourseId = getSisuCourseId();
 
         expectCourseRealisationsWithUsers(sisuCourseId, singletonList(studentUser), singletonList(teacherUser));
+        expectCreator(creatorUser);
 
-        long moodleCourseId = importCourse(sisuCourseId);
+        long moodleCourseId = importCourse(sisuCourseId, creatorUser.personId);
 
         resetAndExpectCourseRealisationsWithUsers(sisuCourseId, singletonList(studentUser), singletonList(teacherUser));
         synchronizationService.synchronize(SynchronizationType.FULL);
 
         List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
 
-        assertEquals(2, moodleUserEnrollmentsList.size());
+        assertEquals(3, moodleUserEnrollmentsList.size());
 
         assertStudentEnrollment(STUDENT_USERNAME, moodleUserEnrollmentsList);
         assertTeacherEnrollment(TEACHER_USERNAME, moodleUserEnrollmentsList);
+        assertTeacherEnrollment(CREATOR_USERNAME, moodleUserEnrollmentsList);
     }
 
     @Test

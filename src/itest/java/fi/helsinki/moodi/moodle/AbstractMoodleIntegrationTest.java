@@ -30,6 +30,7 @@ import fi.helsinki.moodi.service.util.MapperService;
 import fi.helsinki.moodi.test.MockSisuGraphQLServer;
 import fi.helsinki.moodi.test.TestConfig;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
@@ -106,13 +107,15 @@ public abstract class AbstractMoodleIntegrationTest {
     protected static final String STUDENT_USERNAME = "doo_2@helsinki.fi";
     protected static final String STUDENT_NOT_IN_MOODLE_USERNAME = "username_of_student_not_in_moodle";
     protected static final String TEACHER_USERNAME = "doo_1@helsinki.fi";
-    protected static final String ADMIN_USERNAME = "doo_3@helsinki.fi";
+    protected static final String CREATOR_USERNAME = "doo_7@helsinki.fi";
 
     protected final StudentUser studentUser = new StudentUser(STUDENT_USERNAME, "014010293", true);
     protected final TeacherUser studentUserInTeacherRole = new TeacherUser(STUDENT_USERNAME, "hy-hlo-student-1");
     protected final StudentUser studentUserNotInMoodle = new StudentUser(STUDENT_NOT_IN_MOODLE_USERNAME, "012345678", true);
     protected final TeacherUser teacherUser = new TeacherUser(TEACHER_USERNAME, "hy-hlo-teacher-1");
     protected final StudentUser teacherInStudentRole = new StudentUser(TEACHER_USERNAME, "011911609", true);
+
+    protected final TeacherUser creatorUser = new TeacherUser(CREATOR_USERNAME, "hy-hlo-creator-1");
 
     @Before
     public void emptyCoursesAndClearCaches() {
@@ -128,13 +131,24 @@ public abstract class AbstractMoodleIntegrationTest {
         expectSisuOrganisationsRequest();
     }
 
+    @After
+    public void verifyMockServers() {
+        studyRegistryMockServer.verify();
+        mockSisuGraphQLServer.verify();
+    }
+
     protected String getSisuCourseId() {
         return "hy-CUR-" + abs(new Random().nextInt());
     }
 
     protected long importCourse(String courseId) {
+        return importCourse(courseId, null);
+    }
+
+    protected long importCourse(String courseId, String creatorId) {
         ImportCourseRequest importCourseRequest = new ImportCourseRequest();
         importCourseRequest.realisationId = courseId;
+        importCourseRequest.creatorSisuId = creatorId;
 
         return importingService.importCourse(importCourseRequest).data
             .map(c -> c.moodleCourseId).orElseThrow(() -> new RuntimeException("Course import failed"));
@@ -200,12 +214,21 @@ public abstract class AbstractMoodleIntegrationTest {
                 .put("teachers", teachers).build());
     }
 
+    protected void expectCreator(TeacherUser creator) {
+        mockSisuGraphQLServer.expectPersonsRequest(Arrays.asList(creator.personId),
+            "/sisu-itest/persons-itest.json",
+            new ImmutableMap.Builder<String, List<TeacherUser>>()
+                .put("teachers", Arrays.asList(creator)).build());
+    }
+
     protected void expectCourseRealisationsWithUsers(String courseId, List<StudentUser> students, List<TeacherUser> teachers) {
         mockSisuGraphQLServer.expectCourseUnitRealisationsRequest(Arrays.asList(courseId),
             "/sisu-itest/course-unit-realisations-itest.json",
             curVariables(courseId, students, teachers));
 
-        expectTeachers(teachers);
+        if (!teachers.isEmpty()) {
+            expectTeachers(teachers);
+        }
     }
 
     protected void expectSisuOrganisationsRequest() {

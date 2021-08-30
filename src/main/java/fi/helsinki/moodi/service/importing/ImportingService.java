@@ -21,6 +21,7 @@ import fi.helsinki.moodi.exception.CourseAlreadyCreatedException;
 import fi.helsinki.moodi.exception.CourseNotFoundException;
 import fi.helsinki.moodi.integration.moodle.MoodleCourse;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
+import fi.helsinki.moodi.integration.sisu.SisuClient;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryService;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
 import fi.helsinki.moodi.service.Result;
@@ -32,6 +33,7 @@ import fi.helsinki.moodi.service.log.LoggingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import static fi.helsinki.moodi.exception.NotFoundException.notFoundException;
@@ -48,6 +50,8 @@ public class ImportingService {
     private final MoodleCourseBuilder moodleCourseBuilder;
     private final EnrollmentExecutor enrollmentExecutor;
     private final LoggingService loggingService;
+    private final SisuClient sisuClient;
+
 
     @Autowired
     public ImportingService(
@@ -57,7 +61,8 @@ public class ImportingService {
         CourseConverter courseConverter,
         MoodleCourseBuilder moodleCourseBuilder,
         EnrollmentExecutor enrollmentExecutor,
-        LoggingService loggingService) {
+        LoggingService loggingService,
+        SisuClient sisuClient) {
 
         this.moodleService = moodleService;
         this.courseService = courseService;
@@ -66,6 +71,7 @@ public class ImportingService {
         this.moodleCourseBuilder = moodleCourseBuilder;
         this.enrollmentExecutor = enrollmentExecutor;
         this.loggingService = loggingService;
+        this.sisuClient = sisuClient;
     }
 
     public Result<ImportCourseResponse, String> importCourse(final ImportCourseRequest request) {
@@ -82,7 +88,7 @@ public class ImportingService {
             }
         } else {
             // Save the course in the DB with moodleId NULL.
-            dbCourse = courseService.createCourse(sisuRealisationId, null);
+            dbCourse = courseService.createCourse(sisuRealisationId, null, getUserNameOrThrow(request.creatorSisuId));
         }
 
         final StudyRegistryCourseUnitRealisation courseUnitRealisation =
@@ -99,11 +105,21 @@ public class ImportingService {
         // Update the course in DB with the newly created moodleId
         dbCourse = courseService.updateMoodleId(sisuRealisationId, moodleCourseId);
 
+        // If this fails, the course gets created in Moodle without users, and sync will later try and put them in place.
         enrollmentExecutor.processEnrollments(dbCourse, courseUnitRealisation, moodleCourseId);
 
         loggingService.logCourseImport(dbCourse);
 
         return Result.success(new ImportCourseResponse(moodleCourseId));
+    }
+
+    private String getUserNameOrThrow(String creatorSisuId) {
+        return creatorSisuId != null ?
+            sisuClient.getPersons(Arrays.asList(creatorSisuId)).stream()
+                .findFirst()
+                .orElseThrow(notFoundException(String.format("Sisu person not found with id %s", creatorSisuId)))
+                .eduPersonPrincipalName :
+            null;
     }
 
     // Does a straightforward conversion, which only works for Oodi native courses, not ones that are created in Optime.

@@ -24,6 +24,8 @@ public final class ImportCourseRequest {
     @NotNull
     public String realisationId;
 
+    public String creatorSisuId;
+
     public ImportCourseRequest() {}
 
     public ImportCourseRequest(String i) {
@@ -32,18 +34,14 @@ public final class ImportCourseRequest {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         ImportCourseRequest that = (ImportCourseRequest) o;
-        return Objects.equals(realisationId, that.realisationId);
+        return Objects.equals(realisationId, that.realisationId) && Objects.equals(creatorSisuId, that.creatorSisuId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(realisationId);
+        return Objects.hash(realisationId, creatorSisuId);
     }
 }
