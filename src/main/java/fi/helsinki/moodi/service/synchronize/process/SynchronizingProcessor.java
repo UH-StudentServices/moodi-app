@@ -248,18 +248,25 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
         final StudyRegistryCourseUnitRealisation course = item.getStudyRegistryCourse().get();
 
-        Stream<UserSynchronizationItem> studentItemStream = course.students
-            .stream()
-            .map(UserSynchronizationItem::new);
-        Stream<UserSynchronizationItem> teacherItemStream = course.teachers
-            .stream()
-            .map(UserSynchronizationItem::new);
+        List<UserSynchronizationItem> personItems = new ArrayList<>();
 
-        Map<Boolean, List<UserSynchronizationItem>> userSynchronizationItemsByCompletedStatus = Stream
-            .concat(studentItemStream, teacherItemStream)
-            .map(i -> i.withMoodleCourseId(item.getCourse().moodleId))
-            .map(this::enrichWithMoodleUser)
-            .collect(Collectors.groupingBy(UserSynchronizationItem::isCompleted));
+        personItems.addAll(course.students
+            .stream()
+            .map(UserSynchronizationItem::new).collect(Collectors.toList()));
+        personItems.addAll(course.teachers
+            .stream()
+            .map(UserSynchronizationItem::new).collect(Collectors.toList()));
+        if (item.getCourse().creatorUsername != null) {
+            StudyRegistryTeacher creator = new StudyRegistryTeacher();
+            creator.userName = item.getCourse().creatorUsername;
+            personItems.add(new UserSynchronizationItem(creator));
+        }
+
+        Map<Boolean, List<UserSynchronizationItem>> userSynchronizationItemsByCompletedStatus =
+            personItems.stream()
+                .map(i -> i.withMoodleCourseId(item.getCourse().moodleId))
+                .map(this::enrichWithMoodleUser)
+                .collect(Collectors.groupingBy(UserSynchronizationItem::isCompleted));
 
         List<UserSynchronizationItem> completedItems = userSynchronizationItemsByCompletedStatus.getOrDefault(true, newArrayList());
         List<UserSynchronizationItem> unCompletedItems = userSynchronizationItemsByCompletedStatus.getOrDefault(false, newArrayList());

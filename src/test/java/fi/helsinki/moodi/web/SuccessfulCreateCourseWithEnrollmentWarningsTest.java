@@ -27,7 +27,7 @@ public class SuccessfulCreateCourseWithEnrollmentWarningsTest extends AbstractSu
 
     @Before
     public void setUp() {
-        setUpMockServerResponsesForSisuCourse123(false);
+        setUpMockServerResponsesForSisuCourse123(false, null);
     }
 
     @Test

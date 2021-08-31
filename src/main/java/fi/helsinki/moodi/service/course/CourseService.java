@@ -58,12 +58,13 @@ public class CourseService {
         return courseRepository.findByImportStatusInAndRemovedFalseAndMoodleIdNotNull(newArrayList(COMPLETED, COMPLETED_FAILED));
     }
 
-    public Course createCourse(final String realisationId, final Long moodleCourseId) {
+    public Course createCourse(final String realisationId, final Long moodleCourseId, final String creatorUsername) {
         final Course course = new Course();
         course.created = timeService.getCurrentUTCDateTime();
         course.moodleId = moodleCourseId;
         course.realisationId = realisationId;
         course.importStatus = IN_PROGRESS;
+        course.creatorUsername = creatorUsername;
         return saveCourse(course);
     }
 

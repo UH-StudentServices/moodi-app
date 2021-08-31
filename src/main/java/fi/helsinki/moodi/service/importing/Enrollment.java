@@ -48,6 +48,10 @@ public final class Enrollment {
         return new Enrollment(ROLE_TEACHER, Optional.ofNullable(employeeNumber), Optional.empty(), userName, Optional.empty(), true);
     }
 
+    public static Enrollment forCreator(final String creatorUsername) {
+        return new Enrollment(ROLE_TEACHER, Optional.empty(), Optional.empty(), creatorUsername, Optional.empty(), true);
+    }
+
     private Enrollment(String role, Optional<String> employeeNumber, Optional<String> studentNumber, String userName,
                        Optional<Long> moodleId, boolean approved) {
         this.role = role;
