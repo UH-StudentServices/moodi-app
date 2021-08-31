@@ -117,7 +117,7 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
     }
 
     @Test
-    public void thatImportingWithCeatorSisuIdWorks() throws Exception {
+    public void thatImportingWithCreatorSisuIdWorks() throws Exception {
         setUpMockServerResponsesForSisuCourse123(true, CREATOR_SISU_ID);
 
         makeCreateCourseRequest(SISU_COURSE_REALISATION_ID, CREATOR_SISU_ID)
@@ -126,13 +126,13 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
     }
 
     @Test
-    public void thatImportingWithNotFoundCeatorSisuIdThrowsException() throws Exception {
-        setUpGetCreatorCall(PERSON_NOT_FOUND);
+    public void thatImportingWithNotFoundCreatorSisuIdThrowsException() throws Exception {
+        setUpGetCreatorCall(PERSON_NOT_FOUND_ID);
 
-        makeCreateCourseRequest(SISU_COURSE_REALISATION_ID, PERSON_NOT_FOUND)
+        makeCreateCourseRequest(SISU_COURSE_REALISATION_ID, PERSON_NOT_FOUND_ID)
             .andExpect(status().isNotFound())
             .andExpect(jsonPath("$.error")
-                .value(String.format(PERSON_NOT_FOUND_MESSAGE, PERSON_NOT_FOUND)));
+                .value(String.format(PERSON_NOT_FOUND_MESSAGE, PERSON_NOT_FOUND_ID)));
     }
 }
 

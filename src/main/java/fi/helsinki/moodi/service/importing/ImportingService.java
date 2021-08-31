@@ -22,8 +22,8 @@ import fi.helsinki.moodi.exception.CourseNotFoundException;
 import fi.helsinki.moodi.integration.moodle.MoodleCourse;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
 import fi.helsinki.moodi.integration.sisu.SisuClient;
-import fi.helsinki.moodi.integration.studyregistry.StudyRegistryService;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryService;
 import fi.helsinki.moodi.service.Result;
 import fi.helsinki.moodi.service.converter.CourseConverter;
 import fi.helsinki.moodi.service.course.Course;
@@ -33,7 +33,7 @@ import fi.helsinki.moodi.service.log.LoggingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
 import static fi.helsinki.moodi.exception.NotFoundException.notFoundException;
@@ -114,7 +114,7 @@ public class ImportingService {
 
     private String getUserNameOrThrow(String creatorSisuId) {
         return creatorSisuId != null ?
-            sisuClient.getPersons(Arrays.asList(creatorSisuId)).stream()
+            sisuClient.getPersons(Collections.singletonList(creatorSisuId)).stream()
                 .findFirst()
                 .orElseThrow(notFoundException(String.format("Sisu person not found with id %s", creatorSisuId)))
                 .eduPersonPrincipalName :
