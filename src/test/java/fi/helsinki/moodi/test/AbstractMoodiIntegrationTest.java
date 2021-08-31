@@ -101,7 +101,7 @@ public abstract class AbstractMoodiIntegrationTest {
     protected static final String MOODLE_USERNAME_CREATOR = "creator@helsinki.fi";
 
     protected static final String CREATOR_SISU_ID = "hy-hlo-creator";
-    protected static final String PERSON_NOT_FOUND = "hy-hlo-not-found";
+    protected static final String PERSON_NOT_FOUND_ID = "hy-hlo-not-found";
 
     private static final String MOODLE_EMPTY_LIST_RESPONSE = "[]";
     protected static final String MOODLE_ERROR_RESPONSE =

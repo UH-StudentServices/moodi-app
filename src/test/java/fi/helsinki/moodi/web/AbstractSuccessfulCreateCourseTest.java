@@ -89,7 +89,7 @@ public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIn
             expectedEnrollments.add(2, new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_MAKE, MOODLE_COURSE_ID));
         }
         if (creatorSisuId != null) {
-            expectedEnrollments.add(expectedEnrollments.size(), new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_CREATOR, MOODLE_COURSE_ID));
+            expectedEnrollments.add(new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_CREATOR, MOODLE_COURSE_ID));
         }
         expectEnrollmentsWithAddedMoodiRoles(expectedEnrollments);
     }

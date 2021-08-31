@@ -248,21 +248,22 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
         final StudyRegistryCourseUnitRealisation course = item.getStudyRegistryCourse().get();
 
-        Stream<UserSynchronizationItem> studentItemStream = course.students
+        List<UserSynchronizationItem> personItems = new ArrayList<>();
+
+        personItems.addAll(course.students
             .stream()
-            .map(UserSynchronizationItem::new);
-        Stream<UserSynchronizationItem> teacherItemStream = course.teachers
+            .map(UserSynchronizationItem::new).collect(Collectors.toList()));
+        personItems.addAll(course.teachers
             .stream()
-            .map(UserSynchronizationItem::new);
-        Stream<UserSynchronizationItem> creatorItemStream = Stream.empty();
+            .map(UserSynchronizationItem::new).collect(Collectors.toList()));
         if (item.getCourse().creatorUsername != null) {
             StudyRegistryTeacher creator = new StudyRegistryTeacher();
             creator.userName = item.getCourse().creatorUsername;
-            creatorItemStream = Stream.of(new UserSynchronizationItem(creator));
+            personItems.add(new UserSynchronizationItem(creator));
         }
 
         Map<Boolean, List<UserSynchronizationItem>> userSynchronizationItemsByCompletedStatus =
-            Stream.concat(creatorItemStream, Stream.concat(studentItemStream, teacherItemStream))
+            personItems.stream()
                 .map(i -> i.withMoodleCourseId(item.getCourse().moodleId))
                 .map(this::enrichWithMoodleUser)
                 .collect(Collectors.groupingBy(UserSynchronizationItem::isCompleted));
