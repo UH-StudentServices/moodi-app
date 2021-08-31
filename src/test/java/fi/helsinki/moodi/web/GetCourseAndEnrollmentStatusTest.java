@@ -30,7 +30,7 @@ public class GetCourseAndEnrollmentStatusTest extends AbstractSuccessfulCreateCo
 
     @Before
     public void setUp() {
-        setUpMockServerResponsesForSisuCourse123(true);
+        setUpMockServerResponsesForSisuCourse123(true, null);
     }
 
     @Test

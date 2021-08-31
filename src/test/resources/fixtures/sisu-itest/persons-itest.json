@@ -4,7 +4,7 @@
       {{#teachers}}
       {
         "id": "{{ personId }}",
-        "studentNumber": "{{ personId }}",
+        "studentNumber": null,
         "firstNames": "Herra",
         "lastName": "Opettaja",
         "employeeNumber": "aivansama",

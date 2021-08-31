@@ -38,10 +38,11 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
     private ImportingService importingService;
 
     private static String COURSE_NOT_FOUND_MESSAGE = "Study registry course not found with realisation id %s (%s)";
+    private static String PERSON_NOT_FOUND_MESSAGE = "Sisu person not found with id %s";
 
     @Test
     public void successfulCreateCourseBySisuIDReturnsCorrectResponse() throws Exception {
-        setUpMockServerResponsesForSisuCourse123(true);
+        setUpMockServerResponsesForSisuCourse123(true, null);
 
         makeCreateCourseRequest(SISU_COURSE_REALISATION_ID)
             .andExpect(status().isOk())
@@ -50,7 +51,7 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
 
     @Test
     public void successfulCreateCourseByOodiNativeIDUsesSisuAndReturnsCorrectResponse() throws Exception {
-        setUpMockServerResponsesForSisuCourse123(true);
+        setUpMockServerResponsesForSisuCourse123(true, null);
 
         makeCreateCourseRequest("123")
             .andExpect(status().isOk())
@@ -81,7 +82,7 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
     @Test
     public void thatIfFirstImportFailsTheSecondImportCanSucceed() throws Exception {
         // Set up first try to get a server error from Moodle.
-        setUpSisuResponsesFor123();
+        setUpSisuResponsesFor123(null);
         expectSisuOrganisationExportRequest();
 
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
@@ -92,8 +93,8 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
             .andRespond(withServerError());
 
         // Set up second try to succeed. Sisu organisation call is not made, as it is cached.
-        setUpSisuResponsesFor123();
-        setUpMoodleResponses(SISU_COURSE_REALISATION_ID, EXPECTED_SISU_DESCRIPTION_TO_MOODLE, "sisu_", true, "9");
+        setUpSisuResponsesFor123(null);
+        setUpMoodleResponses(SISU_COURSE_REALISATION_ID, EXPECTED_SISU_DESCRIPTION_TO_MOODLE, "sisu_", true, "9", null);
 
         // First try.
         makeCreateCourseRequest(SISU_COURSE_REALISATION_ID)
@@ -113,6 +114,25 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
             .andExpect(jsonPath("$.data.moodleCourseId").value(toIntExact(MOODLE_COURSE_ID)));
 
         assertEquals("COMPLETED", importingService.getImportedCourse(SISU_COURSE_REALISATION_ID).importStatus);
+    }
+
+    @Test
+    public void thatImportingWithCreatorSisuIdWorks() throws Exception {
+        setUpMockServerResponsesForSisuCourse123(true, CREATOR_SISU_ID);
+
+        makeCreateCourseRequest(SISU_COURSE_REALISATION_ID, CREATOR_SISU_ID)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.moodleCourseId").value(toIntExact(MOODLE_COURSE_ID)));
+    }
+
+    @Test
+    public void thatImportingWithNotFoundCreatorSisuIdThrowsException() throws Exception {
+        setUpGetCreatorCall(PERSON_NOT_FOUND_ID);
+
+        makeCreateCourseRequest(SISU_COURSE_REALISATION_ID, PERSON_NOT_FOUND_ID)
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.error")
+                .value(String.format(PERSON_NOT_FOUND_MESSAGE, PERSON_NOT_FOUND_ID)));
     }
 }
 

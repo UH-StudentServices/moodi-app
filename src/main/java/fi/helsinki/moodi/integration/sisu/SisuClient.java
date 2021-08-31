@@ -79,7 +79,9 @@ public class SisuClient {
         for (List batchIds : splitToBatches(ids)) {
             Arguments idArgument = new Arguments("private_persons", new Argument<>("ids", batchIds));
             SisuPerson.SisuPersonWrapper result = queryWithArguments(SisuPerson.SisuPersonWrapper.class, idArgument);
-            ret.addAll(result.private_persons);
+            if (result != null) {
+                ret.addAll(result.private_persons);
+            }
         }
         return ret;
     }
@@ -187,6 +189,7 @@ public class SisuClient {
     private boolean isOne404(GraphQLResponseEntity responseEntity) {
         return responseEntity.getErrors() != null &&
             responseEntity.getErrors().length == 1 &&
-            "404: Not Found".equals(responseEntity.getErrors()[0].getMessage());
+            responseEntity.getErrors()[0].getMessage() != null &&
+            responseEntity.getErrors()[0].getMessage().contains("404: Not Found");
     }
 }

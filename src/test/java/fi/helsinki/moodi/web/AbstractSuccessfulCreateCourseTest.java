@@ -36,10 +36,10 @@ public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIn
                 new MoodleEnrollment(getMoodiRoleId(), enrollment.moodleUserId, enrollment.moodleCourseId))).toArray(MoodleEnrollment[]::new));
     }
 
-    protected void setUpMockServerResponsesForSisuCourse123(boolean allUsersFound) {
-        setUpSisuResponsesFor123();
+    protected void setUpMockServerResponsesForSisuCourse123(boolean allUsersFound, String creatorSisuId) {
+        setUpSisuResponsesFor123(creatorSisuId);
         expectSisuOrganisationExportRequest();
-        setUpMoodleResponses(SISU_COURSE_REALISATION_ID, EXPECTED_SISU_DESCRIPTION_TO_MOODLE, "sisu_", allUsersFound, "9");
+        setUpMoodleResponses(SISU_COURSE_REALISATION_ID, EXPECTED_SISU_DESCRIPTION_TO_MOODLE, "sisu_", allUsersFound, "9", creatorSisuId);
     }
 
     protected void setUpSisuResponseCourse123NotFound() {
@@ -47,13 +47,24 @@ public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIn
                 "/sisu/course-unit-realisation-not-found.json");
     }
 
-    protected void setUpSisuResponsesFor123() {
+    protected void setUpSisuResponsesFor123(String creatorSisuId) {
+        if (creatorSisuId != null) {
+            setUpGetCreatorCall(creatorSisuId);
+        }
         mockSisuGraphQLServer.expectCourseUnitRealisationsRequest(Arrays.asList(SISU_COURSE_REALISATION_ID),
                 "/sisu/course-unit-realisation.json");
         mockSisuGraphQLServer.expectPersonsRequest(Arrays.asList("hy-hlo-4"), "/sisu/persons.json");
     }
 
-    protected void setUpMoodleResponses(String curId, String description, String moodleCourseIdPrefix, boolean allUsersFound, String categoryId) {
+    protected void setUpGetCreatorCall(String creatorSisuId) {
+        mockSisuGraphQLServer.expectPersonsRequest(Arrays.asList(creatorSisuId),
+            CREATOR_SISU_ID.equals(creatorSisuId) ?
+                "/sisu/persons-hy-hlo-creator.json" :
+                "/sisu/persons-not-found.json");
+    }
+
+    protected void setUpMoodleResponses(String curId, String description, String moodleCourseIdPrefix,
+                                        boolean allUsersFound, String categoryId, String creatorSisuId) {
         expectCreateCourseRequestToMoodle(curId, moodleCourseIdPrefix, description, MOODLE_COURSE_ID, categoryId);
 
         expectGetUserRequestToMoodle(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA);
@@ -64,20 +75,22 @@ public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIn
             expectGetUserRequestToMoodleUserNotFound(MOODLE_USERNAME_MAKE);
         }
         expectGetUserRequestToMoodle(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE);
+        if (creatorSisuId != null) {
+            expectGetUserRequestToMoodle(MOODLE_USERNAME_CREATOR, MOODLE_USER_CREATOR);
+        }
+
+        List<MoodleEnrollment> expectedEnrollments = Lists.newArrayList(
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_JUKKA, MOODLE_COURSE_ID),
+            new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID)
+        );
 
         if (allUsersFound) {
-            expectEnrollmentsWithAddedMoodiRoles(Lists.newArrayList(
-                new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID),
-                new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_JUKKA, MOODLE_COURSE_ID),
-                new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_MAKE, MOODLE_COURSE_ID),
-                new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID)
-            ));
-        } else {
-            expectEnrollmentsWithAddedMoodiRoles(Lists.newArrayList(
-                new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID),
-                new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_JUKKA, MOODLE_COURSE_ID),
-                new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID)
-            ));
+            expectedEnrollments.add(2, new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_MAKE, MOODLE_COURSE_ID));
         }
+        if (creatorSisuId != null) {
+            expectedEnrollments.add(new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_CREATOR, MOODLE_COURSE_ID));
+        }
+        expectEnrollmentsWithAddedMoodiRoles(expectedEnrollments);
     }
 }
