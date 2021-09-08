@@ -86,7 +86,7 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
         SynchronizationSummary summary = new SynchronizationSummary(synchronizationType, synchronizationItems, Stopwatch.createUnstarted(),
                 new RuntimeException("Voi minnuu!"));
 
-        assertEquals("COMPLETED_FAILURE : Voi minnuu!", summary.getMessage());
+        assertEquals("COMPLETED_FAILURE with 1/1 failures : Voi minnuu!", summary.getMessage());
 
         SynchronizationSummaryLog synchronizationSummaryLog = new SynchronizationSummaryLog(summary);
 
@@ -114,23 +114,8 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
         List<UserSyncronizationItemLogEntry> successfullUserEntries = synchronizationItemLogEntryResults.get(UserSynchronizationItemStatus.SUCCESS);
         List<UserSyncronizationItemLogEntry> failedUserEntries = synchronizationItemLogEntryResults.get(UserSynchronizationItemStatus.ERROR);
 
-        assertEquals(1, successfullUserEntries.size());
+        assertNull(successfullUserEntries); // Leave out all the successful entries to have less noise in the log.
         assertEquals(1, failedUserEntries.size());
-
-        UserSyncronizationItemLogEntry successfulEntry = successfullUserEntries.get(0);
-
-        assertTrue(successfulEntry.status.equals(UserSynchronizationItemStatus.SUCCESS));
-        assertTrue(successfulEntry.moodleUserId.equals(STUDENT_MOODLE_USER_ID));
-        assertEquals(STUDENT_NUMBER, successfulEntry.student.studentNumber);
-        assertTrue(successfulEntry.student.isEnrolled);
-        assertNull(successfulEntry.teacher);
-        assertSingleAction(
-            successfulEntry.actions,
-            UserSynchronizationActionStatus.SUCCESS,
-            UserSynchronizationActionType.REMOVE_ROLES,
-            newArrayList(STUDENT_ROLE_ID));
-        assertEquals(STUDENT_MOODLE_USERNAME, successfulEntry.moodleUsername);
-        assertEquals(singletonList(STUDENT_ROLE_ID), successfulEntry.moodleRoleIds);
 
         UserSyncronizationItemLogEntry failedEntry = failedUserEntries.get(0);
         assertTrue(failedEntry.status.equals(UserSynchronizationItemStatus.ERROR));
@@ -158,7 +143,6 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
         assertEquals(expectedActionType, action.actionType);
         assertEquals(action.roles.size(), expectedRoles.size());
         assertTrue(action.roles.containsAll(expectedRoles));
-
     }
 
     private SynchronizationItem getSynchronizationItem(SynchronizationType synchronizationType) {

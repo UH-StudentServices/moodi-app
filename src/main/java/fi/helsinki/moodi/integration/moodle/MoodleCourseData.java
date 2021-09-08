@@ -20,7 +20,6 @@ package fi.helsinki.moodi.integration.moodle;
 public final class MoodleCourseData {
 
     public long id;
-    public String shortname;
 
     public MoodleCourseData() {}
 
