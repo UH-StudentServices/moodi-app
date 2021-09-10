@@ -152,8 +152,7 @@ public final class SynchronizationItem {
     }
 
     public SynchronizationItem completeProcessingPhase() {
-
-        final boolean newSuccess = userSynchronizationItems.stream().allMatch(UserSynchronizationItem::isSuccess);
+        final boolean newSuccess = userSynchronizationItems.stream().allMatch(i -> i.isSuccess() || i.isMoodleUserNotFound());
 
         final String newMessage = (newSuccess) ? SUCCESS_MESSAGE : ENROLLMENT_FAILURES_MESSAGE;
 

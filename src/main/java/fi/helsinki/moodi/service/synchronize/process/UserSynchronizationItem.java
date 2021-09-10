@@ -107,6 +107,10 @@ public class UserSynchronizationItem {
         return UserSynchronizationItemStatus.SUCCESS.equals(status);
     }
 
+    public boolean isMoodleUserNotFound() {
+        return UserSynchronizationItemStatus.MOODLE_USER_NOT_FOUND.equals(status);
+    }
+
     public List<UserSynchronizationAction> getActions() {
         return actions;
     }

@@ -33,7 +33,7 @@ import java.util.Optional;
 
 @Component
 public class MoodiHealthIndicator implements HealthIndicator {
-    private static final int MAX_HOURS_SINCE_COMPLETED_SYNC = 3;
+    private static final int MAX_HOURS_SINCE_COMPLETED_SYNC = 4;
     private static final int MIN_MINUTES_SINCE_ERROR = 30;
     private Error reportedError;
 
@@ -49,7 +49,7 @@ public class MoodiHealthIndicator implements HealthIndicator {
     }
 
     // Return DOWN, if
-    // - a sync job has not completed SUCCESSFULLY within 3 hours.
+    // - a sync job has not completed SUCCESSFULLY within 4 hours.
     // - an important API action has failed within 30 minutes, and has not succeeded since.
     @Override
     public Health health() {
@@ -63,7 +63,7 @@ public class MoodiHealthIndicator implements HealthIndicator {
                         return indicateError(String.format("No sync job completed in %d hours. Latest job completed at %s UTC",
                             MAX_HOURS_SINCE_COMPLETED_SYNC, latest.completed));
                     } else if (latest.status != SynchronizationStatus.COMPLETED_SUCCESS) {
-                        return indicateError(String.format("Status of the last sync job is not COMPLETED_SUCCESS, but %s", latest.message));
+                        return indicateError(String.format("The last sync job failed: %s", latest.message));
                     }
                 } else {
                     return indicateError("No sync jobs in the DB.");

@@ -134,7 +134,7 @@ public class SynchronizationService {
     }
 
     /**
-     * Process items, that is perform the actual synchronization.
+     * Perform the actual synchronization.
      */
     private List<SynchronizationItem> processItems(final List<SynchronizationItem> items) {
         return processorService.process(items);

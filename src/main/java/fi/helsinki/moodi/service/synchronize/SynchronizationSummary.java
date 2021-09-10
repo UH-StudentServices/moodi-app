@@ -67,7 +67,7 @@ public final class SynchronizationSummary {
     }
 
     public String getMessage() {
-        String ret = getStatus().name();
+        String ret = String.format("%s with %d/%d failures", getStatus().name(), getFailedItemsCount(), getItemCount());
         if (exception != null) {
             // DB column is varchar 2000, but we might have non-ascii characters in our message, so we truncate it to 1000 characters.
             ret += " : " + StringUtils.substring(exception.getMessage(), 0, 1000);
