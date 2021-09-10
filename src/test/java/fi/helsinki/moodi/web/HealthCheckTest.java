@@ -115,18 +115,18 @@ public class HealthCheckTest extends AbstractMoodiIntegrationTest {
             .andExpect(status().is5xxServerError())
             .andExpect(jsonPath("$.status").value("DOWN"))
             .andExpect(jsonPath("$.details.moodi.details.error")
-                .value("Status of the last sync job is not COMPLETED_SUCCESS, but COMPLETED_FAILURE"));
+                .value("The last sync job failed: COMPLETED_FAILURE"));
     }
 
     @Test
-    public void thatReturnsErrorWhenNoJobCompletedInThreeHours() throws Exception {
-        LocalDateTime fourHoursAgo = setupJobRunHoursAgo(4);
+    public void thatReturnsErrorWhenNoJobCompletedInFourHours() throws Exception {
+        LocalDateTime fiveHoursAgo = setupJobRunHoursAgo(5);
 
         mockMvc.perform(get("/health"))
             .andExpect(status().is5xxServerError())
             .andExpect(jsonPath("$.status").value("DOWN"))
             .andExpect(jsonPath("$.details.moodi.details.error")
-                .value(String.format("No sync job completed in 3 hours. Latest job completed at %s UTC", fourHoursAgo)));
+                .value(String.format("No sync job completed in 4 hours. Latest job completed at %s UTC", fiveHoursAgo)));
     }
 
     @Test

@@ -75,7 +75,7 @@ public class SynchronizationSummaryLog {
                 item.getProcessingStatus(),
                 new UserEnrollmentsLogEntry(
                     getEnrollmentDetailsSummary(userSyncronizationItemLogEntries),
-                    getEnrollmentResults(userSyncronizationItemLogEntries)),
+                    getFailedEnrollmentResults(userSyncronizationItemLogEntries)),
                 item.getEnrichmentMessage(),
                 item.getProcessingMessage()
             );
@@ -89,9 +89,9 @@ public class SynchronizationSummaryLog {
         return items.stream().collect(Collectors.groupingBy(item -> item.status, Collectors.counting()));
     }
 
-    private static Map<UserSynchronizationItemStatus, List<UserSyncronizationItemLogEntry>> getEnrollmentResults(
+    private static Map<UserSynchronizationItemStatus, List<UserSyncronizationItemLogEntry>> getFailedEnrollmentResults(
         List<UserSyncronizationItemLogEntry> items) {
-        return items.stream().collect(Collectors.groupingBy(item -> item.status));
+        return items.stream().filter(i -> i.status != UserSynchronizationItemStatus.SUCCESS).collect(Collectors.groupingBy(item -> item.status));
     }
 
     public static class SynchronizationSymmaryLogRoot {
