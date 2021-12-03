@@ -17,7 +17,6 @@
 
 package fi.helsinki.moodi.service.synchronize.loader;
 
-import fi.helsinki.moodi.integration.oodi.OodiClient;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
@@ -32,7 +31,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -49,19 +47,16 @@ public class IncrementalSynchronizationCourseLoader implements CourseLoader {
     private final CourseService courseService;
     private final SynchronizationJobRunService synchronizationJobRunService;
     private final TimeService timeService;
-    private final OodiClient oodiClient;
 
     @Autowired
     public IncrementalSynchronizationCourseLoader(
             CourseService courseService,
             SynchronizationJobRunService synchronizationJobRunService,
-            TimeService timeService,
-            OodiClient oodiClient) {
+            TimeService timeService) {
 
         this.courseService = courseService;
         this.synchronizationJobRunService = synchronizationJobRunService;
         this.timeService = timeService;
-        this.oodiClient = oodiClient;
     }
 
     @Override
@@ -73,10 +68,9 @@ public class IncrementalSynchronizationCourseLoader implements CourseLoader {
 
         logger.debug("Last successful synchronization run at {}", FORMATTER.format(afterDate));
 
-        final List<String> realisationIds = oodiClient.getCourseChanges(afterDate)
-                .stream()
-                .map(o -> "" + o.courseUnitRealisationId)
-                .collect(Collectors.toList());
+        // Here we would call the Sisu export API to get changed courses.
+        // We would also need to get changed/new enrollments and match those to the course ID we have in DB.
+        final List<String> realisationIds = null;
 
         return courseService.findCompletedWithMoodleIdByRealisationIds(realisationIds);
     }

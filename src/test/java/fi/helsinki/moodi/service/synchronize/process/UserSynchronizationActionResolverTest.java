@@ -52,7 +52,7 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
     private UserSynchronizationActionResolver userSynchronizationActionResolver;
 
     @Test
-    public void thatAddEnrollmentActionIsResolvedForApprovedStudent() {
+    public void thatAddEnrollmentActionIsResolvedForEnrolledStudent() {
         UserSynchronizationItem item = getStudentUserSynchronizationItem(true);
 
         userSynchronizationActionResolver.enrichWithActions(item);
@@ -61,7 +61,7 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
     }
 
     @Test
-    public void thatNoAddEnrollmentActionForMoodiRoleIsResolvedForUnApprovedStudent() {
+    public void thatNoAddEnrollmentActionForMoodiRoleIsResolvedForNonEnrolledStudent() {
         UserSynchronizationItem item = getStudentUserSynchronizationItem(false);
 
         userSynchronizationActionResolver.enrichWithActions(item);
@@ -89,7 +89,7 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
     }
 
     @Test
-    public void thatSuspendEnrollmentActionIsResolvedIfAlreadyInDefaultRoleAndNotApproved() {
+    public void thatSuspendEnrollmentActionIsResolvedIfAlreadyInDefaultRoleAndNotEnrolled() {
         UserSynchronizationItem item = getStudentUserSynchronizationItem(false);
         item.withMoodleUserEnrollments(getMoodleUserEnrollments(newArrayList(SYNCED_ROLE), MOODLE_COURSE_ID));
 
@@ -179,7 +179,7 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
             moodleRole.roleId = role;
             return moodleRole;
         }).collect(Collectors.toList());
-        moodleUserEnrollments.enrolledCourses = Arrays.stream(moodleCourseIds).map(id -> new MoodleCourseData(id)
+        moodleUserEnrollments.enrolledCourses = Arrays.stream(moodleCourseIds).map(MoodleCourseData::new
             ).collect(Collectors.toList());
         return moodleUserEnrollments;
     }
@@ -204,8 +204,8 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
         return actions.stream().filter(a -> actionType.equals(a.getActionType())).findFirst().orElse(null);
     }
 
-    private UserSynchronizationItem getStudentUserSynchronizationItem(boolean approved) {
-        UserSynchronizationItem item = new UserSynchronizationItem(getStudent(approved));
+    private UserSynchronizationItem getStudentUserSynchronizationItem(boolean enrolled) {
+        UserSynchronizationItem item = new UserSynchronizationItem(getStudent(enrolled));
         item.withMoodleUser(getMoodleUser());
         item.withMoodleCourseId(MOODLE_COURSE_ID);
         return item;
@@ -217,9 +217,9 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
         return item;
     }
 
-    private StudyRegistryStudent getStudent(boolean approved) {
+    private StudyRegistryStudent getStudent(boolean enrolled) {
         StudyRegistryStudent student = new StudyRegistryStudent();
-        student.isEnrolled = approved;
+        student.isEnrolled = enrolled;
         return student;
     }
 

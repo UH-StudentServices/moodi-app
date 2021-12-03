@@ -22,8 +22,6 @@ import com.google.common.collect.Sets;
 import fi.helsinki.moodi.integration.moodle.MoodleRole;
 import fi.helsinki.moodi.integration.moodle.MoodleUser;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
-import fi.helsinki.moodi.integration.oodi.OodiStudent;
-import fi.helsinki.moodi.integration.oodi.OodiTeacher;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryStudent;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryTeacher;
 import fi.helsinki.moodi.service.course.Course;
@@ -118,8 +116,8 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
         assertEquals(1, failedUserEntries.size());
 
         UserSyncronizationItemLogEntry failedEntry = failedUserEntries.get(0);
-        assertTrue(failedEntry.status.equals(UserSynchronizationItemStatus.ERROR));
-        assertTrue(failedEntry.moodleUserId.equals(TEACHER_MOODLE_USER_ID));
+        assertEquals(UserSynchronizationItemStatus.ERROR, failedEntry.status);
+        assertEquals(TEACHER_MOODLE_USER_ID, (long) failedEntry.moodleUserId);
         assertNull(failedEntry.student);
         assertEquals(TEACHER_ID, failedEntry.teacher.employeeNumber);
         assertSingleAction(
@@ -204,17 +202,14 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
     }
 
     private StudyRegistryStudent getStudent() {
-        OodiStudent student = new OodiStudent();
+        StudyRegistryStudent student = new StudyRegistryStudent();
         student.studentNumber = STUDENT_NUMBER;
-        student.approved = true;
-        student.automaticEnabled = false;
-        student.enrollmentStatusCode = ENROLLMENT_STATUS_CODE;
-        return student.toStudyRegistryStudent();
+        return student;
     }
 
     private StudyRegistryTeacher getTeacher() {
-        OodiTeacher teacher = new OodiTeacher();
+        StudyRegistryTeacher teacher = new StudyRegistryTeacher();
         teacher.employeeNumber = TEACHER_ID;
-        return teacher.toStudyRegistryTeacher();
+        return teacher;
     }
 }

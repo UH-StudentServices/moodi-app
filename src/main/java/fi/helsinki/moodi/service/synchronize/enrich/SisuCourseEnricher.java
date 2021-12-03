@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -47,8 +48,7 @@ public class SisuCourseEnricher extends AbstractEnricher {
     }
 
     public void prefetchCourses(List<String> curIds) {
-        List<String> uniqueSisuIds = new LinkedHashSet<>(curIds).stream()
-            .filter(id -> !StudyRegistryService.isOodiId(id)).collect(Collectors.toList());
+        List<String> uniqueSisuIds = new ArrayList<>(new LinkedHashSet<>(curIds));
         prefetchedCursById = studyRegistryService.getSisuCourseUnitRealisations(uniqueSisuIds).stream()
             .collect(Collectors.toMap(c -> c.realisationId, c -> c));
     }
@@ -56,9 +56,6 @@ public class SisuCourseEnricher extends AbstractEnricher {
     @Override
     protected SynchronizationItem doEnrich(SynchronizationItem item) {
         final Course course = item.getCourse();
-        if (StudyRegistryService.isOodiId(course.realisationId)) {
-            return item;
-        }
         final StudyRegistryCourseUnitRealisation cur = prefetchedCursById.get(course.realisationId);
 
         if (cur == null) {

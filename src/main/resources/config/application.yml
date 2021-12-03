@@ -20,8 +20,6 @@ httpClient:
   # a maximum period inactivity between two consecutive data packets).
   socketTimeout: 60000
 
-oodi.enrollmentApprovedStatusCodes: 2, 3, 7, 8
-
 mapper.moodle.defaultCategory: 17
 # Some Moodle categories are overridden for the prod environment.
 mapper:

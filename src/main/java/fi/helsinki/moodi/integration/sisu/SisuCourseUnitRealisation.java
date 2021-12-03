@@ -49,7 +49,6 @@ public class SisuCourseUnitRealisation {
     public StudyRegistryCourseUnitRealisation toStudyRegistryCourseUnitRealisation() {
         StudyRegistryCourseUnitRealisation ret = new StudyRegistryCourseUnitRealisation();
         SisuLocale teachingLanguageCode = SisuLocale.byUrnOrDefaultToFi(teachingLanguageUrn);
-        ret.origin = StudyRegistryCourseUnitRealisation.Origin.SISU;
         ret.realisationId = id;
         ret.realisationName = name.getForLocaleOrDefault(teachingLanguageCode);
         ret.students = enrolments.stream().map(e -> e.person.toStudyRegistryStudent(e.isEnrolled())).collect(Collectors.toList());

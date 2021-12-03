@@ -19,10 +19,8 @@ package fi.helsinki.moodi.scheduled;
 
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synclock.SyncLockService;
-import fi.helsinki.moodi.service.synchronize.notify.LockedSynchronizationItemMessageBuilder;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.MailSender;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.Assert.assertFalse;
@@ -37,12 +35,6 @@ public class SynchronizationActionThresholdLimitTest extends AbstractSynchroniza
 
     @Autowired
     private SyncLockService syncLockService;
-
-    @Autowired
-    private MailSender mailSender;
-
-    @Autowired
-    private LockedSynchronizationItemMessageBuilder lockedSynchronizationItemMessageBuilder;
 
     @Test
     public void thatSuspendEnrollmentActionIsLimitedByThreshold() {
