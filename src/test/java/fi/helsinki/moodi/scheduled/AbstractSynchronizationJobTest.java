@@ -44,14 +44,6 @@ import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
 import static org.junit.Assert.*;
 
 public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegrationTest {
-/*    protected static final String REALISATION_ID = "hy-cur-12345";
-    protected static final int MOODLE_COURSE_ID = 54321;
-    protected static final int SOME_OTHER_MOODLE_COURSE_ID = 999;
-    protected static final int STUDENT_USER_MOODLE_ID = 555;
-    protected static final int TEACHER_USER_MOODLE_ID = 3434;
-    protected static final String STUDENT_USERNAME = "niina@helsinki.fi";
-    protected static final String TEACHER_USERNAME = "hraopettaja@helsinki.fi";*/
-
     @Autowired
     protected CourseService courseService;
 
@@ -110,7 +102,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
 
         expectGetEnrollmentsRequestToMoodle(
             MOODLE_COURSE_ID_IN_DB,
-            getEnrollmentsResponse(MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA ,
+            getEnrollmentsResponse(MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA,
                 MOODLE_COURSE_ID_IN_DB, mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId()));
 
         expectFindUsersRequestsToMoodle();
@@ -141,7 +133,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
 
         expectGetEnrollmentsRequestToMoodle(
             MOODLE_COURSE_ID_IN_DB,
-            getEnrollmentsResponse(MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA ,
+            getEnrollmentsResponse(MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA,
                 MOODLE_COURSE_ID_IN_DB, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
 
         expectFindUsersRequestsToMoodle();

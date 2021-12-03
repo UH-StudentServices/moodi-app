@@ -121,7 +121,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
         expectGetEnrollmentsRequestToMoodle(
             MOODLE_COURSE_ID_IN_DB,
-            getEnrollmentsResponse(MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA ,
+            getEnrollmentsResponse(MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA,
                 MOODLE_COURSE_ID_IN_DB, mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId()));
 
         expectFindUsersRequestsToMoodle();
@@ -142,7 +142,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
         expectGetEnrollmentsRequestToMoodle(
             MOODLE_COURSE_ID_IN_DB,
-            getEnrollmentsResponse(MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA ,
+            getEnrollmentsResponse(MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA,
                 MOODLE_COURSE_ID_IN_DB, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
 
         expectFindUsersRequestsToMoodle();
@@ -167,7 +167,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         // ...but only has the sync role in Moodle.
         expectGetEnrollmentsRequestToMoodle(
             MOODLE_COURSE_ID_IN_DB,
-            getEnrollmentsResponse(MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA , MOODLE_COURSE_ID_IN_DB, mapperService.getMoodiRoleId()));
+            getEnrollmentsResponse(MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA, MOODLE_COURSE_ID_IN_DB, mapperService.getMoodiRoleId()));
 
         expectFindUsersRequestsToMoodle();
 
@@ -190,7 +190,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
         expectGetEnrollmentsRequestToMoodle(
             MOODLE_COURSE_ID_IN_DB,
-            getEnrollmentsResponse(MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA ,
+            getEnrollmentsResponse(MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA,
                 SOME_OTHER_MOODLE_COURSE_ID, mapperService.getMoodiRoleId()));
 
         expectFindUsersRequestsToMoodle();
@@ -229,7 +229,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
             new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_JUKKA, MOODLE_COURSE_ID_IN_DB),
             new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_ID_JUKKA, MOODLE_COURSE_ID_IN_DB),
 
-            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_MAKE , MOODLE_COURSE_ID_IN_DB),
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_MAKE, MOODLE_COURSE_ID_IN_DB),
             new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_ID_MAKE, MOODLE_COURSE_ID_IN_DB),
 
             new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_TEACH_ONE, MOODLE_COURSE_ID_IN_DB),
