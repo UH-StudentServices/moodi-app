@@ -13,10 +13,6 @@ spring:
 integration:
   moodle:
     baseUrl: https://moodle.helsinki.fi
-  oodi.url: https://esbmt1.it.helsinki.fi/secure/doo-oodi/v1/productiondb
-  iam:
-    url: https://esb-api.it.helsinki.fi
-    apiKey: ${iamApiKey}
   sisu:
     baseUrl: https://gw.api.helsinki.fi/secure/sisu
     apiKey: ${apiGatewayApiKey}

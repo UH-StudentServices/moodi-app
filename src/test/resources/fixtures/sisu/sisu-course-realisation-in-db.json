@@ -1,0 +1,60 @@
+{
+  "data": {
+    "course_unit_realisations": [{
+      "name": {
+        "fi": "Lapsuus ja yhteiskunta",
+        "sv": "För att testa",
+        "en": "For testing"
+      },
+      "teachingLanguageUrn": "urn:code:language:fi",
+      "id": "hy-cur-in-db",
+      "activityPeriod": {
+        "startDate": "2019-11-05",
+        "endDate": "{{ endDate }}"
+      },
+      "organisations": [
+        {
+          "roleUrn": "urn:code:organisation-role:responsible-organisation",
+          "share": 1,
+          "organisation": {
+            "id" : "hy-org-116712512",
+            "code" : "500-K001",
+            "parentId" : "hy-org-1000000911",
+            "name" : {
+              "en" : "Bachelor's Programme in Mathematical Sciences",
+              "fi" : "Matemaattisten tieteiden kandiohjelma",
+              "sv" : "Kandidatprogrammet i matematiska vetenskaper"
+            }
+          }
+        }
+      ],
+      "flowState": "PUBLISHED",
+      "responsibilityInfos": [
+        {
+          "roleUrn": "urn:code:course-unit-realisation-responsibility-info-type:responsible-teacher",
+          "personId": "hy-hlo-4"
+        },
+        {
+          "roleUrn": "urn:code:course-unit-realisation-responsibility-info-type:someone-else",
+          "personId": "hy-hlo-not-a-teacher"
+        }
+      ],
+      "enrolments": [
+        {
+          "state": "{{ enrollmentState }}",
+          "person": {
+            "eduPersonPrincipalName": "niina@helsinki.fi"
+          }
+        }
+      ],
+      "learningEnvironments": [
+        {
+          "name": "Kurssisivu",
+          "url": "https://courses.helsinki.fi/fi/OODI-FLOW/136394381",
+          "primary": true,
+          "language": "fi"
+        }
+      ]
+    }]
+  }
+}

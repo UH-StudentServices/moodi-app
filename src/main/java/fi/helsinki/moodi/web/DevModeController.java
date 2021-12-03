@@ -19,7 +19,6 @@ package fi.helsinki.moodi.web;
 
 import fi.helsinki.moodi.config.DevMode;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
-import fi.helsinki.moodi.service.iam.IAMService;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationService;
@@ -55,7 +54,6 @@ public class DevModeController {
 
     private final Environment environment;
     private final StudyRegistryService studyRegistryService;
-    private final IAMService iamService;
     private final MoodleService moodleService;
     private final SynchronizationService synchronizationService;
 
@@ -63,13 +61,11 @@ public class DevModeController {
     public DevModeController(
         StudyRegistryService studyRegistryService,
         Environment environment,
-        IAMService iamService,
         MoodleService moodleService,
         SynchronizationService synchronizationService) {
 
         this.studyRegistryService = studyRegistryService;
         this.environment = environment;
-        this.iamService = iamService;
         this.moodleService = moodleService;
         this.synchronizationService = synchronizationService;
 
@@ -138,7 +134,7 @@ public class DevModeController {
 
     @RequestMapping(value = "/api/v1/study-registry-course/{realisationId}/users", method = RequestMethod.GET)
     @ResponseBody
-    public List<MoodleUser> getOodiCourseUsers(@PathVariable("realisationId") String realisationId) {
+    public List<MoodleUser> getCourseUsers(@PathVariable("realisationId") String realisationId) {
         final StudyRegistryCourseUnitRealisation realisation = getStudyRegistryCourse(realisationId);
 
         final List<MoodleUser> students = realisation.students.stream()
@@ -190,7 +186,7 @@ public class DevModeController {
     @RequestMapping(value = "/api/v1/users", method = RequestMethod.POST)
     @ResponseBody
     public MoodleUser createMoodleUser(@RequestBody final CreateUserRequest request) {
-        final String email = UUID.randomUUID().toString() + ".mooditest@helsinki.fi";
+        final String email = UUID.randomUUID() + ".mooditest@helsinki.fi";
 
         long moodleId = moodleService.createUser(request.username, request.firstName, request.lastName,
                 email, UUID.randomUUID().toString(), request.idNumber);

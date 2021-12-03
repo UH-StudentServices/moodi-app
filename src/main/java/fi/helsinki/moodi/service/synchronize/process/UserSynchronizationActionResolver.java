@@ -75,8 +75,8 @@ public class UserSynchronizationActionResolver {
         return null;
     }
 
-    private List<UserSynchronizationAction> createEnrollmentActions(Long moodleUserId, Set<Long> currentRolesInOodi) {
-        return addAction(moodleUserId, currentRolesInOodi, UserSynchronizationActionType.ADD_ENROLLMENT, newArrayList());
+    private List<UserSynchronizationAction> createEnrollmentActions(Long moodleUserId, Set<Long> currentRolesInSisu) {
+        return addAction(moodleUserId, currentRolesInSisu, UserSynchronizationActionType.ADD_ENROLLMENT, newArrayList());
     }
 
     private List<UserSynchronizationAction> createRoleChangeAndSuspendActions(Long moodleUserId,

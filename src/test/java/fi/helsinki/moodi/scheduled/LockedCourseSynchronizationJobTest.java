@@ -31,6 +31,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 
+import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
 import static org.junit.Assert.*;
 
 @TestPropertySource(properties = {
@@ -54,6 +55,7 @@ public class LockedCourseSynchronizationJobTest extends AbstractSynchronizationJ
 
     @Test
     public void thatSynchronizationSkipsLockedCourse() {
+        setupCourseUnitRealisationResponse(getFutureDateString(), true);
         SynchronizationSummary summary = synchronizationService.synchronize(SynchronizationType.FULL);
 
         SynchronizationItem item = summary.getItems().get(0);
@@ -73,17 +75,17 @@ public class LockedCourseSynchronizationJobTest extends AbstractSynchronizationJ
     @Test
     public void thatLockedCourseIsUnlockedWhenUnlockSynchronizationIsTriggeredAndThresholdsAreExceeded() {
         expectEnrollmentRequestToMoodleWithResponse(EMPTY_RESPONSE,
-            new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID));
+            new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB));
 
-        expectSuspendRequestToMoodle(new MoodleEnrollment(getMoodiRoleId(), STUDENT_USER_MOODLE_ID, MOODLE_COURSE_ID));
+        expectSuspendRequestToMoodle(new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID_IN_DB));
 
         expectAssignRolesToMoodleWithResponse(
             EMPTY_RESPONSE,
             false,
             new MoodleEnrollment(getStudentRoleId(),
-                STUDENT_USER_MOODLE_ID,
-                MOODLE_COURSE_ID)
+                MOODLE_USER_ID_NIINA,
+                MOODLE_COURSE_ID_IN_DB)
         );
 
         Course course = getTestCourse();
@@ -98,7 +100,7 @@ public class LockedCourseSynchronizationJobTest extends AbstractSynchronizationJ
     }
 
     private Course getTestCourse() {
-        return courseService.findByRealisationId(REALISATION_ID).get();
+        return courseService.findByRealisationId(SISU_REALISATION_IN_DB_ID).get();
     }
 
 }

@@ -1,7 +1,0 @@
-{
-  "status": 200,
-  "data": {
-    "course_id": 1234,
-    "deleted" : "true"
-  }
-}

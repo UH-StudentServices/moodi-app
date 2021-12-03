@@ -30,8 +30,6 @@ import java.text.Normalizer;
 @Component
 public class MoodleCourseBuilder {
 
-    public static final String MOODLE_COURSE_ID_OODI_PREFIX = "oodi_";
-    public static final String MOODLE_COURSE_ID_SISU_PREFIX = "sisu_";
     public static final int DEFAULT_NUMBER_OF_SECTIONS = 7;
     public static final int MAX_SHORTNAME_LENGTH = 25;
 
@@ -63,10 +61,7 @@ public class MoodleCourseBuilder {
     }
 
     public MoodleCourse buildMoodleCourse(StudyRegistryCourseUnitRealisation cur, Long dbCourseId) {
-        return new MoodleCourse(
-            (cur.origin == StudyRegistryCourseUnitRealisation.Origin.OODI ?
-                MOODLE_COURSE_ID_OODI_PREFIX :
-                MOODLE_COURSE_ID_SISU_PREFIX) + cur.realisationId,
+        return new MoodleCourse(cur.realisationId,
             cur.realisationName,
             getShortName(cur.realisationName, dbCourseId),
             mapperService.getMoodleCategoryByOrganisationId(cur.mainOrganisationId),

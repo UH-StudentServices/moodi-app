@@ -19,6 +19,7 @@ package fi.helsinki.moodi.scheduled;
 
 import com.google.common.collect.ImmutableMap;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
+import fi.helsinki.moodi.integration.sisu.SisuEnrolment;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
@@ -32,35 +33,24 @@ import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem.UserSynchronizationItemStatus;
 import fi.helsinki.moodi.service.util.MapperService;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
-import fi.helsinki.moodi.test.fixtures.Fixtures;
 import org.mockito.Mockito;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.mail.MailSender;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
 import static org.junit.Assert.*;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegrationTest {
-
-    private static final Logger logger = LoggerFactory.getLogger(AbstractMoodiIntegrationTest.class);
-
-    protected static final String REALISATION_ID = "12345";
+/*    protected static final String REALISATION_ID = "hy-cur-12345";
     protected static final int MOODLE_COURSE_ID = 54321;
     protected static final int SOME_OTHER_MOODLE_COURSE_ID = 999;
     protected static final int STUDENT_USER_MOODLE_ID = 555;
     protected static final int TEACHER_USER_MOODLE_ID = 3434;
-    protected static final String STUDENT_NUMBER = "010342729";
-    protected static final String EMPLOYEE_NUMBER = "110588";
-    protected static final String EMPLOYEE_NUMBER_WITH_PREFIX = 9 + EMPLOYEE_NUMBER;
-    protected static final String STUDENT_USERNAME = "niina";
-    protected static final String TEACHER_USERNAME = "jukkapalmu";
-    protected static final String USERNAME_SUFFIX = "@helsinki.fi";
+    protected static final String STUDENT_USERNAME = "niina@helsinki.fi";
+    protected static final String TEACHER_USERNAME = "hraopettaja@helsinki.fi";*/
 
     @Autowired
     protected CourseService courseService;
@@ -86,40 +76,32 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
     @Autowired
     private LockedSynchronizationItemMessageBuilder lockedSynchronizationItemMessageBuilder;
 
-    protected void setUpMockServerResponses(String endDate, boolean approved) {
+    protected void setUpMockServerResponses(String endDate, boolean enrolled) {
         setupMoodleGetCourseResponse();
-        setupOodiCourseUnitRealisationResponse(endDate, approved, false, APPROVED_ENROLLMENT_STATUS_CODE);
+        setupCourseUnitRealisationResponse(endDate, enrolled);
     }
 
-    protected void setupOodiCourseUnitRealisationResponse(String endDate,
-                                                          boolean approved,
-                                                          boolean automaticEnabled,
-                                                          int enrollmentStatusCode) {
-        expectGetCourseUsersRequestToOodi(
-            REALISATION_ID,
-            withSuccess(Fixtures.asString(
-                    "/oodi/parameterized-course-realisation.json",
+    protected void setupCourseUnitRealisationResponse(String endDate,
+                                                      boolean enrolled) {
+        mockSisuGraphQLServer.expectCourseUnitRealisationsRequest(
+            Arrays.asList(SISU_REALISATION_IN_DB_ID),
+            "/sisu/sisu-course-realisation-in-db.json",
                     new ImmutableMap.Builder()
-                        .put("studentnumber", STUDENT_NUMBER)
-                        .put("employeeNumber", EMPLOYEE_NUMBER)
                         .put("endDate", endDate)
-                        .put("deleted", false)
-                        .put("approved", approved)
-                        .put("automaticEnabled", automaticEnabled)
-                        .put("enrollmentStatusCode", enrollmentStatusCode)
-                        .build()),
-                MediaType.APPLICATION_JSON));
+                        .put("enrollmentState", enrolled ? SisuEnrolment.EnrolmentState.ENROLLED : SisuEnrolment.EnrolmentState.PROCESSING)
+                        .build());
+        mockSisuGraphQLServer.expectPersonsRequest(Arrays.asList("hy-hlo-4"), "/sisu/persons.json");
     }
 
-    protected void setupOodiCourseUnitRealisationResponse(String responseJson) {
-        expectGetCourseUsersRequestToOodi(
-            REALISATION_ID,
-            withSuccess(Fixtures.asString(
-                responseJson,
-                new ImmutableMap.Builder()
-                    .put("endDate", getFutureDateString())
-                    .build()),
-                MediaType.APPLICATION_JSON));
+    protected void setupCourseUnitRealisationResponseMultiplePeople() {
+        mockSisuGraphQLServer.expectCourseUnitRealisationsRequest(
+            Arrays.asList(SISU_REALISATION_IN_DB_ID),
+            "/sisu/sisu-course-realisation-in-db-multiple-people.json",
+            new ImmutableMap.Builder()
+                .put("endDate", getFutureDateString())
+                .build()
+        );
+        mockSisuGraphQLServer.expectPersonsRequest(Arrays.asList("hy-hlo-1", "hy-hlo-2"), "/sisu/persons-many-1.json");
     }
 
     protected void testSynchronizationSummary(SynchronizationType synchronizationType, String moodleResponse, boolean expectErrors) {
@@ -127,18 +109,18 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
         setUpMockServerResponses(endDateInFuture, true);
 
         expectGetEnrollmentsRequestToMoodle(
-            MOODLE_COURSE_ID,
-            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, STUDENT_USERNAME + USERNAME_SUFFIX,
-                MOODLE_COURSE_ID, mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId()));
+            MOODLE_COURSE_ID_IN_DB,
+            getEnrollmentsResponse(MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA ,
+                MOODLE_COURSE_ID_IN_DB, mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId()));
 
-        expectFindUsersRequestsToIAMAndMoodle();
+        expectFindUsersRequestsToMoodle();
 
         expectEnrollmentRequestToMoodleWithResponse(moodleResponse,
-            new MoodleEnrollment(getTeacherRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID),
-            new MoodleEnrollment(getMoodiRoleId(), TEACHER_USER_MOODLE_ID, MOODLE_COURSE_ID));
+            new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB));
 
-        expectAssignRolesToMoodleWithResponse(moodleResponse, true, new MoodleEnrollment(getStudentRoleId(), STUDENT_USER_MOODLE_ID,
-            MOODLE_COURSE_ID));
+        expectAssignRolesToMoodleWithResponse(moodleResponse, true, new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_NIINA,
+            MOODLE_COURSE_ID_IN_DB));
 
         SynchronizationSummary summary = synchronizationService.synchronize(synchronizationType);
 
@@ -158,11 +140,11 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
         setUpMockServerResponses(getFutureDateString(), false);
 
         expectGetEnrollmentsRequestToMoodle(
-            MOODLE_COURSE_ID,
-            getEnrollmentsResponse(STUDENT_USER_MOODLE_ID, STUDENT_USERNAME + USERNAME_SUFFIX,
-                MOODLE_COURSE_ID, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
+            MOODLE_COURSE_ID_IN_DB,
+            getEnrollmentsResponse(MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA ,
+                MOODLE_COURSE_ID_IN_DB, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
 
-        expectFindUsersRequestsToIAMAndMoodle();
+        expectFindUsersRequestsToMoodle();
 
         SynchronizationSummary summary = synchronizationService.synchronize(synchronizationType);
 
@@ -190,23 +172,21 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
         assertTrue(syncLockService.isLocked(course));
     }
 
-    protected void expectFindUsersRequestsToIAMAndMoodle() {
-        expectFindStudentRequestToIAMAndMoodle(STUDENT_NUMBER, STUDENT_USERNAME, STUDENT_USER_MOODLE_ID);
-        expectFindTeacherRequestToIAMAndMoodle(EMPLOYEE_NUMBER_WITH_PREFIX, TEACHER_USERNAME, TEACHER_USER_MOODLE_ID);
+    protected void expectFindUsersRequestsToMoodle() {
+        expectFindStudentRequestToMoodle(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA);
+        expectFindTeacherRequestToMoodle(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE);
     }
 
-    protected void expectFindStudentRequestToIAMAndMoodle(String studentNumber, String username, int moodleId) {
-        expectFindStudentRequestToIAM(studentNumber, username);
-        expectGetUserRequestToMoodle(username + USERNAME_SUFFIX, moodleId);
+    protected void expectFindStudentRequestToMoodle(String username, long moodleId) {
+        expectGetUserRequestToMoodle(username, moodleId);
     }
 
-    protected void expectFindTeacherRequestToIAMAndMoodle(String employeeNumber, String username, int moodleId) {
-        expectFindEmployeeRequestToIAM(employeeNumber, username);
-        expectGetUserRequestToMoodle(username + USERNAME_SUFFIX, moodleId);
+    protected void expectFindTeacherRequestToMoodle(String username, long moodleId) {
+        expectGetUserRequestToMoodle(username, moodleId);
     }
 
     protected Course findCourse() {
-        return courseService.findByRealisationId(REALISATION_ID).get();
+        return courseService.findByRealisationId(SISU_REALISATION_IN_DB_ID).get();
     }
 
     protected void assertImportStatus(Course.ImportStatus expectedImportStatus) {

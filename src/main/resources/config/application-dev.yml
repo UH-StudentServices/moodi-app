@@ -13,8 +13,6 @@ spring:
 integration:
   moodle:
     baseUrl: https://moodi-2-moodle-20.student.helsinki.fi/moodlecurrent
-  oodi.url: https://esbmt2.it.helsinki.fi/secure/doo-oodi/dev/testdb
-  iam.mock: true
   sisu:
     baseUrl: https://gw-api-test.it.helsinki.fi/secure/sisu
     apiKey: ${apiGatewayApiKey}

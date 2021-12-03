@@ -41,10 +41,10 @@ import static org.mockito.Mockito.when;
 @TestPropertySource(properties = "SisuGraphQLClient.batchsize=2")
 public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
 
-    private static final int MOODLE_COURSE_ID_1 = 54321;
-    private static final int MOODLE_COURSE_ID_2 = 54322;
-    private static final int MOODLE_COURSE_ID_ENDED = 54323;
-    private static final int MOODLE_COURSE_ID_ARCHIVED = 54324;
+    private static final int MOODLE_COURSE_ID_1 = 654321;
+    private static final int MOODLE_COURSE_ID_2 = 654322;
+    private static final int MOODLE_COURSE_ID_ENDED = 654323;
+    private static final int MOODLE_COURSE_ID_ARCHIVED = 654324;
 
     @Autowired
     private FullSynchronizationJob job;
@@ -78,7 +78,7 @@ public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
         // other one does not get returned from Sisu at all, as someone has totally removed the whole enrollment from Sisu.
         expectGetEnrollmentsRequestToMoodle(
             MOODLE_COURSE_ID_1,
-            getMoodleUserEnrollments((int) MOODLE_USER_NOT_ENROLLED, MOODLE_USERNAME_NOT_ENROLLED, MOODLE_COURSE_ID_1,
+            getMoodleUserEnrollments((int) MOODLE_USER_NOT_ENROLLED_IN_SISU, MOODLE_USERNAME_NOT_ENROLLED_IN_SISU, MOODLE_COURSE_ID_1,
                 mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()),
             getMoodleUserEnrollments((int) MOODLE_USER_NOT_IN_STUDY_REGISTRY, MOODLE_USERNAME_NOT_IN_STUDY_REGISTRY, MOODLE_COURSE_ID_1,
                 mapperService.getStudentRoleId(), mapperService.getMoodiRoleId())
@@ -90,7 +90,7 @@ public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
         expectGetUserRequestToMoodle(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA);
         expectGetUserRequestToMoodle(MOODLE_USERNAME_JUKKA, MOODLE_USER_ID_JUKKA);
         expectGetUserRequestToMoodle(MOODLE_USERNAME_MAKE, MOODLE_USER_ID_MAKE);
-        expectGetUserRequestToMoodle(MOODLE_USERNAME_NOT_ENROLLED, MOODLE_USER_NOT_ENROLLED);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_NOT_ENROLLED_IN_SISU, MOODLE_USER_NOT_ENROLLED_IN_SISU);
         expectGetUserRequestToMoodle(MOODLE_USERNAME_ONE, MOODLE_USER_TEACH_ONE);
 
         // Course two student and teachers are fetched from Moodle.
@@ -116,10 +116,10 @@ public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
         // The existing students gets suspended and student role removed, because no longer enrolled or found in Sisu.
         expectSuspendRequestToMoodle(
             new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_NOT_IN_STUDY_REGISTRY, MOODLE_COURSE_ID_1),
-            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_NOT_ENROLLED, MOODLE_COURSE_ID_1));
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_NOT_ENROLLED_IN_SISU, MOODLE_COURSE_ID_1));
         expectAssignRolesToMoodle(false,
             new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_NOT_IN_STUDY_REGISTRY, MOODLE_COURSE_ID_1),
-            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_NOT_ENROLLED, MOODLE_COURSE_ID_1));
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_NOT_ENROLLED_IN_SISU, MOODLE_COURSE_ID_1));
 
         // Course two student and teachers are enrolled.
         expectEnrollmentRequestToMoodle(
