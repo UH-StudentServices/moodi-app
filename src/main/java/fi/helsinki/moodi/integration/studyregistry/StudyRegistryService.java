@@ -30,11 +30,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.partitioningBy;
-
 @Service
 public class StudyRegistryService {
-    public static final String SISU_OODI_COURSE_PREFIX = "hy-CUR-";
     private final SisuClient sisuClient;
 
     @Autowired
@@ -47,9 +44,7 @@ public class StudyRegistryService {
     }
 
     public List<StudyRegistryCourseUnitRealisation> getSisuCourseUnitRealisations(final List<String> realisationIds) {
-        Map<Boolean, List<String>> idsByIsOodiId = realisationIds.stream().collect(partitioningBy(StudyRegistryService::isOodiId));
-
-        List<SisuCourseUnitRealisation> sisuCurs = sisuClient.getCourseUnitRealisations(idsByIsOodiId.get(false));
+        List<SisuCourseUnitRealisation> sisuCurs = sisuClient.getCourseUnitRealisations(realisationIds);
 
         List<String> uniquePersonIds = sisuCurs.stream().flatMap(cur -> cur.teacherSisuIds().stream())
                 .filter(Objects::nonNull).distinct().collect(Collectors.toList());
@@ -63,9 +58,5 @@ public class StudyRegistryService {
 
         return sisuCurs.stream()
             .map(cur -> cur.toStudyRegistryCourseUnitRealisation(teachersById)).collect(Collectors.toList());
-    }
-
-    public static boolean isOodiId(final String realisationId) {
-        return realisationId != null && realisationId.matches("\\d+");
     }
 }

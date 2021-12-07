@@ -20,12 +20,11 @@ package fi.helsinki.moodi.test.util;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import static fi.helsinki.moodi.util.DateFormat.OODI_UTC_DATE_FORMAT;
-
 public class DateUtil {
+    public static final String UTC_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
     public static String formatDate(LocalDateTime localDateTime) {
-        return localDateTime.format(DateTimeFormatter.ofPattern(OODI_UTC_DATE_FORMAT));
+        return localDateTime.format(DateTimeFormatter.ofPattern(UTC_DATE_FORMAT));
     }
 
     public static String getFutureDateString() {
@@ -37,6 +36,6 @@ public class DateUtil {
     }
 
     public static String getOverYearAgoPastDateString() {
-        return formatDate(LocalDateTime.now().minusDays(1).minusYears(1));
+        return formatDate(LocalDateTime.now().minusDays(1).minusMonths(1).minusYears(1));
     }
 }

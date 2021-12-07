@@ -37,8 +37,6 @@ import java.util.Collections;
 import java.util.Optional;
 
 import static fi.helsinki.moodi.exception.NotFoundException.notFoundException;
-import static fi.helsinki.moodi.integration.studyregistry.StudyRegistryService.SISU_OODI_COURSE_PREFIX;
-import static fi.helsinki.moodi.integration.studyregistry.StudyRegistryService.isOodiId;
 
 @Service
 public class ImportingService {
@@ -74,27 +72,25 @@ public class ImportingService {
     }
 
     public Result<ImportCourseResponse, String> importCourse(final ImportCourseRequest request) {
-        final String sisuRealisationId = sisuRealisationId(request.realisationId);
-
-        final Optional<Course> existingCourse = courseService.findByRealisationId(sisuRealisationId);
+        final Optional<Course> existingCourse = courseService.findByRealisationId(request.realisationId);
 
         Course dbCourse;
         // Check for moodleId. If the course exists in the DB without moodleId, go ahead with the import without inserting the course to DB.
         if (existingCourse.isPresent()) {
             dbCourse = existingCourse.get();
             if (dbCourse.moodleId != null) {
-                throw new CourseAlreadyCreatedException(sisuRealisationId);
+                throw new CourseAlreadyCreatedException(request.realisationId);
             }
         } else {
             // Save the course in the DB with moodleId NULL.
-            dbCourse = courseService.createCourse(sisuRealisationId, null, getUserNameOrThrow(request.creatorSisuId));
+            dbCourse = courseService.createCourse(request.realisationId, null, getUserNameOrThrow(request.creatorSisuId));
         }
 
         final StudyRegistryCourseUnitRealisation courseUnitRealisation =
-                studyRegistryService.getSisuCourseUnitRealisation(sisuRealisationId)
+                studyRegistryService.getSisuCourseUnitRealisation(request.realisationId)
                         .orElseThrow(notFoundException(
                             String.format("Study registry course not found with realisation id %s (%s)",
-                                sisuRealisationId, request.realisationId)));
+                                request.realisationId, request.realisationId)));
 
         // Use the DB Course.id for generating the shortname.
         final MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(courseUnitRealisation, dbCourse.id);
@@ -102,7 +98,7 @@ public class ImportingService {
         final long moodleCourseId = moodleService.createCourse(moodleCourse);
 
         // Update the course in DB with the newly created moodleId
-        dbCourse = courseService.updateMoodleId(sisuRealisationId, moodleCourseId);
+        dbCourse = courseService.updateMoodleId(request.realisationId, moodleCourseId);
 
         // If this fails, the course gets created in Moodle without users, and sync will later try and put them in place.
         enrollmentExecutor.processEnrollments(dbCourse, courseUnitRealisation, moodleCourseId);
@@ -121,17 +117,8 @@ public class ImportingService {
             null;
     }
 
-    // Does a straightforward conversion, which only works for Oodi native courses, not ones that are created in Optime.
-    private String sisuRealisationId(String realisationId) {
-        return isOodiId(realisationId) ? SISU_OODI_COURSE_PREFIX + realisationId
-            : realisationId;
-    }
-
     public CourseDto getImportedCourse(String realisationId) {
         Optional<Course> course = courseService.findByRealisationId(realisationId);
-        if (!course.isPresent() && isOodiId(realisationId)) {
-            course = courseService.findByRealisationId(sisuRealisationId(realisationId));
-        }
         return course
             .filter(c -> c.moodleId != null)
             .map(courseConverter::toDto)

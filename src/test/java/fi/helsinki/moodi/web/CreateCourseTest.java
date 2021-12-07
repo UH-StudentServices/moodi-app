@@ -44,39 +44,19 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
     public void successfulCreateCourseBySisuIDReturnsCorrectResponse() throws Exception {
         setUpMockServerResponsesForSisuCourse123(true, null);
 
-        makeCreateCourseRequest(SISU_COURSE_REALISATION_ID)
+        makeCreateCourseRequest(SISU_REALISATION_NOT_IN_DB_ID)
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.moodleCourseId").value(toIntExact(MOODLE_COURSE_ID)));
-    }
-
-    @Test
-    public void successfulCreateCourseByOodiNativeIDUsesSisuAndReturnsCorrectResponse() throws Exception {
-        setUpMockServerResponsesForSisuCourse123(true, null);
-
-        makeCreateCourseRequest("123")
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.moodleCourseId").value(toIntExact(MOODLE_COURSE_ID)));
+            .andExpect(jsonPath("$.data.moodleCourseId").value(toIntExact(MOODLE_COURSE_ID_NOT_IN_DB)));
     }
 
     @Test
     public void thatImportFailsIfCourseNotFoundInSisu() throws Exception {
         setUpSisuResponseCourse123NotFound();
 
-        makeCreateCourseRequest(SISU_COURSE_REALISATION_ID)
+        makeCreateCourseRequest(SISU_REALISATION_NOT_IN_DB_ID)
             .andExpect(status().isNotFound())
             .andExpect(jsonPath("$.error")
-                .value(String.format(COURSE_NOT_FOUND_MESSAGE, SISU_COURSE_REALISATION_ID, SISU_COURSE_REALISATION_ID)));
-    }
-
-    @Test
-    public void thatImportFailsIfCourseNotFoundInSisuWithOptimeNativeID() throws Exception {
-        setUpSisuResponseCourse123NotFound();
-        String oodiCourseFromOptime = "123";
-
-        makeCreateCourseRequest(oodiCourseFromOptime)
-            .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.error")
-                .value(String.format(COURSE_NOT_FOUND_MESSAGE, SISU_COURSE_REALISATION_ID, oodiCourseFromOptime)));
+                .value(String.format(COURSE_NOT_FOUND_MESSAGE, SISU_REALISATION_NOT_IN_DB_ID, SISU_REALISATION_NOT_IN_DB_ID)));
     }
 
     @Test
@@ -94,42 +74,42 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
 
         // Set up second try to succeed. Sisu organisation call is not made, as it is cached.
         setUpSisuResponsesFor123(null);
-        setUpMoodleResponses(SISU_COURSE_REALISATION_ID, EXPECTED_SISU_DESCRIPTION_TO_MOODLE, "sisu_", true, "9", null);
+        setUpMoodleResponses(SISU_REALISATION_NOT_IN_DB_ID, EXPECTED_SISU_DESCRIPTION_TO_MOODLE, true, "9", null);
 
         // First try.
-        makeCreateCourseRequest(SISU_COURSE_REALISATION_ID)
+        makeCreateCourseRequest(SISU_REALISATION_NOT_IN_DB_ID)
             // Why return client error when Moodle is broken? I don't know, but not touching that right now.
             .andExpect(status().is4xxClientError());
 
         try {
-            importingService.getImportedCourse(SISU_COURSE_REALISATION_ID);
+            importingService.getImportedCourse(SISU_REALISATION_NOT_IN_DB_ID);
             fail("Getting a course not in Moodle should have failed.");
         } catch (CourseNotFoundException e) {
             // Good.
         }
 
         // Second try.
-        makeCreateCourseRequest(SISU_COURSE_REALISATION_ID)
+        makeCreateCourseRequest(SISU_REALISATION_NOT_IN_DB_ID)
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.moodleCourseId").value(toIntExact(MOODLE_COURSE_ID)));
+            .andExpect(jsonPath("$.data.moodleCourseId").value(toIntExact(MOODLE_COURSE_ID_NOT_IN_DB)));
 
-        assertEquals("COMPLETED", importingService.getImportedCourse(SISU_COURSE_REALISATION_ID).importStatus);
+        assertEquals("COMPLETED", importingService.getImportedCourse(SISU_REALISATION_NOT_IN_DB_ID).importStatus);
     }
 
     @Test
     public void thatImportingWithCreatorSisuIdWorks() throws Exception {
         setUpMockServerResponsesForSisuCourse123(true, CREATOR_SISU_ID);
 
-        makeCreateCourseRequest(SISU_COURSE_REALISATION_ID, CREATOR_SISU_ID)
+        makeCreateCourseRequest(SISU_REALISATION_NOT_IN_DB_ID, CREATOR_SISU_ID)
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.moodleCourseId").value(toIntExact(MOODLE_COURSE_ID)));
+            .andExpect(jsonPath("$.data.moodleCourseId").value(toIntExact(MOODLE_COURSE_ID_NOT_IN_DB)));
     }
 
     @Test
     public void thatImportingWithNotFoundCreatorSisuIdThrowsException() throws Exception {
         setUpGetCreatorCall(PERSON_NOT_FOUND_ID);
 
-        makeCreateCourseRequest(SISU_COURSE_REALISATION_ID, PERSON_NOT_FOUND_ID)
+        makeCreateCourseRequest(SISU_REALISATION_NOT_IN_DB_ID, PERSON_NOT_FOUND_ID)
             .andExpect(status().isNotFound())
             .andExpect(jsonPath("$.error")
                 .value(String.format(PERSON_NOT_FOUND_MESSAGE, PERSON_NOT_FOUND_ID)));

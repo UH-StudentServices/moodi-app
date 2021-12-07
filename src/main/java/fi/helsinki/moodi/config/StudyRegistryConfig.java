@@ -20,7 +20,6 @@ package fi.helsinki.moodi.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.helsinki.moodi.integration.http.LoggingInterceptor;
 import fi.helsinki.moodi.integration.http.RequestTimingInterceptor;
-import fi.helsinki.moodi.integration.oodi.OodiClient;
 import fi.helsinki.moodi.integration.sisu.SisuClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.ssl.SSLContextBuilder;
@@ -53,12 +52,7 @@ public class StudyRegistryConfig {
     @Autowired
     private Environment environment;
 
-    @Bean
-    public OodiClient oodiClient(RestTemplate studyRegistryRestTemplate) {
-        return new OodiClient(environment.getProperty("integration.oodi.url"), studyRegistryRestTemplate);
-    }
-
-    private KeyStore oodiKeyStore(String keystoreLocation, char[] keystorePassword) throws Exception {
+    private KeyStore keyStore(String keystoreLocation, char[] keystorePassword) throws Exception {
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
         FileSystemResource keystoreFile = new FileSystemResource(
                 new File(keystoreLocation));
@@ -89,7 +83,7 @@ public class StudyRegistryConfig {
 
         try {
             return SSLContextBuilder.create()
-                    .loadKeyMaterial(oodiKeyStore(keystoreLocation, keystorePasswordCharArray), keystorePasswordCharArray).build();
+                    .loadKeyMaterial(keyStore(keystoreLocation, keystorePasswordCharArray), keystorePasswordCharArray).build();
         } catch (Exception e) {
             throw new RuntimeException("Failed to load client keystore " + keystoreLocation, e);
         }

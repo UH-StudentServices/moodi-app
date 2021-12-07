@@ -34,20 +34,11 @@ public class GetCourseAndEnrollmentStatusTest extends AbstractSuccessfulCreateCo
     }
 
     @Test
-    public void successfulCreateCourseReturnsCorrectResponseAlsoWithOodiNativeId() throws Exception {
-        makeCreateCourseRequest(SISU_COURSE_REALISATION_ID);
+    public void successfulCreateCourseReturnsCorrectResponse() throws Exception {
+        makeCreateCourseRequest(SISU_REALISATION_NOT_IN_DB_ID);
 
         mockMvc.perform(
-            get("/api/v1/courses/" + SISU_COURSE_REALISATION_ID)
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("client-id", "testclient")
-                .header("client-token", "xxx123"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.url").value(getMoodleBaseUrl() + "/course/view.php?id=988888"))
-            .andExpect(jsonPath("$.importStatus").value(COMPLETED.toString()));
-
-        mockMvc.perform(
-            get("/api/v1/courses/123")
+            get("/api/v1/courses/" + SISU_REALISATION_NOT_IN_DB_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("client-id", "testclient")
                 .header("client-token", "xxx123"))

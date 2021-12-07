@@ -23,11 +23,9 @@ import fi.helsinki.moodi.integration.moodle.MoodleService;
 import fi.helsinki.moodi.integration.moodle.MoodleUser;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
-import fi.helsinki.moodi.integration.studyregistry.StudyRegistryStudent;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryTeacher;
 import fi.helsinki.moodi.service.batch.BatchProcessor;
 import fi.helsinki.moodi.service.course.CourseService;
-import fi.helsinki.moodi.service.iam.IAMService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.synclock.SyncLockService;
 import fi.helsinki.moodi.service.util.MapperService;
@@ -49,7 +47,6 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem.UserSynchronizationItemStatus.*;
-import static org.springframework.util.CollectionUtils.isEmpty;
 
 /**
  * Processor implementation that synchronizes courses.
@@ -64,7 +61,6 @@ public class SynchronizingProcessor extends AbstractProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(SynchronizingProcessor.class);
 
-    private final IAMService iamService;
     private final MapperService mapperService;
     private final MoodleService moodleService;
     private final CourseService courseService;
@@ -74,8 +70,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
     private final BatchProcessor<UserSynchronizationAction> batchProcessor;
 
     @Autowired
-    public SynchronizingProcessor(IAMService iamService,
-                                  MapperService mapperService,
+    public SynchronizingProcessor(MapperService mapperService,
                                   MoodleService moodleService,
                                   CourseService courseService,
                                   SynchronizationThreshold synchronizationThreshold,
@@ -83,7 +78,6 @@ public class SynchronizingProcessor extends AbstractProcessor {
                                   UserSynchronizationActionResolver synchronizationActionResolver,
                                   BatchProcessor batchProcessor) {
         super(Action.SYNCHRONIZE);
-        this.iamService = iamService;
         this.mapperService = mapperService;
         this.moodleService = moodleService;
         this.courseService = courseService;
@@ -303,48 +297,21 @@ public class SynchronizingProcessor extends AbstractProcessor {
     private UserSynchronizationItem enrichWithMoodleUser(UserSynchronizationItem item) {
         List<String> usernames = new ArrayList<>();
         if (item.getStudent() != null) {
-            if (item.getStudent().userName == null) {
-                usernames = getUsernameList(item.getStudent());
-                item.getStudent().userName = isEmpty(usernames) ? null : usernames.get(0);
-            } else {
-                usernames.add(item.getStudent().userName);
-            }
+            usernames.add(item.getStudent().userName);
         }
         if (item.getTeacher() != null) {
-            if (item.getTeacher().userName == null) {
-                usernames = getUsernameList(item.getTeacher());
-                item.getTeacher().userName = isEmpty(usernames) ? null : usernames.get(0);
-            } else {
-                usernames.add(item.getTeacher().userName);
-            }
+            usernames.add(item.getTeacher().userName);
         }
 
         if (usernames.isEmpty()) {
-            // https://jira.it.helsinki.fi/browse/MOODI-126
-            // Username not found in IAM is no longer considered an error. Should not happen at all with Sisu courses.
+            // Some users do not have a username, and thus cannot be synced to Moodle.
+            // This is not considered an error.
             return item.withStatus(SUCCESS);
         }
-        List<String> finalUsernames = usernames;
         return getMoodleUser(usernames).map(item::withMoodleUser).orElseGet(() ->  {
-            logger.warn("User not found from Moodle with usernames " + finalUsernames);
+            logger.warn("User not found from Moodle with usernames " + usernames);
             return item.withStatus(MOODLE_USER_NOT_FOUND);
         });
-    }
-
-    private List<String> getUsernameList(StudyRegistryStudent student) {
-        List<String> ret = iamService.getStudentUserNameList(student.studentNumber);
-        if (ret.isEmpty()) {
-            logger.warn("User not found from IAM with student number " + student.studentNumber);
-        }
-        return ret;
-    }
-
-    private List<String> getUsernameList(StudyRegistryTeacher teacher) {
-        List<String> ret = iamService.getTeacherUserNameList(teacher.employeeNumber);
-        if (ret.isEmpty()) {
-            logger.warn("User not found from IAM with employee number " + teacher.employeeNumber);
-        }
-        return ret;
     }
 
     private Optional<MoodleUser> getMoodleUser(final List<String> usernameList) {

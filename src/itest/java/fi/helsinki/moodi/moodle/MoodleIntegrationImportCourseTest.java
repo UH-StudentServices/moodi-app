@@ -60,7 +60,7 @@ public class MoodleIntegrationImportCourseTest extends AbstractMoodleIntegration
         // The unique shortname suffix for integration tests is derived from the current time and
         // will stay the same length until the year ~2055.
         assertThat(mfc.shortName).startsWith("Lapsuus ja yhtei-");
-        assertThat(mfc.idNumber).isEqualTo("sisu_" + sisuCourseId);
+        assertThat(mfc.idNumber).isEqualTo(sisuCourseId);
         assertThat(mfc.lang).isEmpty();
         assertThat(mfc.summary).isEqualTo("https://courses.helsinki.fi/fi/OODI-FLOW/136394381");
         assertThat(mfc.categoryId).isEqualTo(9);
