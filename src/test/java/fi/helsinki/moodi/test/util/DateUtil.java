@@ -20,9 +20,8 @@ package fi.helsinki.moodi.test.util;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import static fi.helsinki.moodi.util.DateFormat.UTC_DATE_FORMAT;
-
 public class DateUtil {
+    public static final String UTC_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
     public static String formatDate(LocalDateTime localDateTime) {
         return localDateTime.format(DateTimeFormatter.ofPattern(UTC_DATE_FORMAT));
