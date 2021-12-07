@@ -163,20 +163,21 @@ public abstract class AbstractMoodleIntegrationTest {
 
     protected static class StudentUser extends IntegrationTestUser {
         public String studentNumber;
-        public boolean approved;
+        public boolean enrolled;
 
-        public StudentUser(String username, String studentNumber, boolean approved) {
+        public StudentUser(String username, String studentNumber, boolean enrolled) {
             super(username);
             this.studentNumber = studentNumber;
-            this.approved = approved;
+            this.enrolled = enrolled;
         }
 
-        public StudentUser setApproved(boolean newApproved) {
-            return new StudentUser(this.username, this.studentNumber, newApproved);
+        public StudentUser setEnrolled(boolean enrolled) {
+            return new StudentUser(this.username, this.studentNumber, enrolled);
         }
 
+        // Referred to by course-unit-realisations-itest.json
         public String getState() {
-            return this.approved ? "ENROLLED" : "REJECTED";
+            return this.enrolled ? "ENROLLED" : "REJECTED";
         }
     }
 

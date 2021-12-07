@@ -46,8 +46,8 @@ public class MoodleIntegrationSynchronizeVisibleCourseTest extends AbstractMoodl
         assertUserCourseVisibility(true, STUDENT_USERNAME, moodleCourseId, moodleUserEnrollmentsList);
         assertTeacherEnrollment(TEACHER_USERNAME, moodleUserEnrollmentsList);
 
-        // Now set the student as non-approved, and run the sync
-        resetAndExpectCourseRealisationsWithUsers(sisuCourseId, singletonList(studentUser.setApproved(false)), singletonList(teacherUser));
+        // Now set the student as non-enrolled, and run the sync
+        resetAndExpectCourseRealisationsWithUsers(sisuCourseId, singletonList(studentUser.setEnrolled(false)), singletonList(teacherUser));
         synchronizationService.synchronize(SynchronizationType.FULL);
 
         moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);

@@ -15,8 +15,6 @@ integration:
   moodle:
     baseUrl: https://moodi-2-moodle-20.student.helsinki.fi/moodlecurrent
     wstoken: xxxx1234
-  oodi.url: https://esbmt2.it.helsinki.fi/doo-oodi/dev/testdb
-  iam.url: https://esbmt2.it.helsinki.fi
   sisu:
     baseUrl: http://localhost:9876
     apiKey: test-apikey

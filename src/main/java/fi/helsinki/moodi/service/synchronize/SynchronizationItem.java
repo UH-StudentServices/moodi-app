@@ -102,9 +102,9 @@ public final class SynchronizationItem {
         return moodleEnrollments;
     }
 
-    public SynchronizationItem setStudyRegistryCourse(final Optional<StudyRegistryCourseUnitRealisation> newOodiCourse) {
+    public SynchronizationItem setStudyRegistryCourse(final Optional<StudyRegistryCourseUnitRealisation> newCourse) {
         return new SynchronizationItem(course, synchronizationType, success, enrichmentMessage,
-            processingMessage, newOodiCourse, moodleCourse, moodleEnrollments,
+            processingMessage, newCourse, moodleCourse, moodleEnrollments,
             userSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
     }
 

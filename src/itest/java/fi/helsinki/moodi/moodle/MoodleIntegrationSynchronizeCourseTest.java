@@ -195,7 +195,7 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
 
         assertHybridEnrollment(TEACHER_USERNAME, moodleUserEnrollmentsList);
 
-        resetAndExpectCourseRealisationsWithUsers(sisuCourseId, singletonList(teacherInStudentRole.setApproved(false)), singletonList(teacherUser));
+        resetAndExpectCourseRealisationsWithUsers(sisuCourseId, singletonList(teacherInStudentRole.setEnrolled(false)), singletonList(teacherUser));
         synchronizationService.synchronize(SynchronizationType.FULL);
 
         moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);

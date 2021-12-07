@@ -19,9 +19,7 @@ package fi.helsinki.moodi.integration;
 
 import com.google.common.base.Stopwatch;
 import fi.helsinki.moodi.Application;
-import fi.helsinki.moodi.integration.iam.IAMClient;
 import fi.helsinki.moodi.integration.moodle.MoodleClient;
-import fi.helsinki.moodi.integration.oodi.OodiClient;
 import fi.helsinki.moodi.integration.sisu.SisuClient;
 import fi.helsinki.moodi.test.TestConfig;
 import org.junit.Rule;
@@ -29,7 +27,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
-import org.mockserver.model.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -48,10 +45,7 @@ import static org.mockserver.model.HttpResponse.response;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(
     properties = {
-        "integration.oodi.url=http://localhost:9876",
         "integration.moodle.baseUrl=http://localhost:9876",
-        "integration.iam.url=http://localhost:9876",
-        "integration.iam.apiKey=abloy",
         "integration.sisu.baseUrl=http://localhost:9876",
         "httpClient.connectTimeout=100",
         "httpClient.socketTimeout=100"
@@ -64,21 +58,10 @@ public class HttpClientTest {
     private MockServerClient mockServerClient;
 
     @Autowired
-    private OodiClient oodiClient;
-
-    @Autowired
     private SisuClient sisuClient;
 
     @Autowired
     private MoodleClient moodleClient;
-
-    @Autowired
-    private IAMClient iamClient;
-
-    @Test
-    public void thatOodiClientDoesNotHang() {
-        testTimeout(this::callOodi);
-    }
 
     @Test
     public void thatSisuClientDoesNotHang() {
@@ -88,18 +71,6 @@ public class HttpClientTest {
     @Test
     public void thatMoodleClientDoesNotHang() {
         testTimeout(this::callMoodle);
-    }
-
-    @Test
-    public void thatIAMClientDoesNotHang() {
-        testTimeout(this::callIAM);
-    }
-
-    @Test
-    public void thatIAMClientPassesApiKey() {
-        mockServerClient.when(request().withHeader("Apikey", "abloy"))
-                .respond(response().withBody("[]").withContentType(MediaType.JSON_UTF_8));
-        iamClient.getStudentUserNameList("1");
     }
 
     private void testTimeout(Consumer<String> f) {
@@ -120,20 +91,12 @@ public class HttpClientTest {
         assertTrue(took >= 100 && took < 400);
     }
 
-    private void callOodi(String id) {
-        oodiClient.getCourseUnitRealisation(id);
-    }
-
     private void callSisu(String id) {
         sisuClient.getCourseUnitRealisations(Arrays.asList(id));
     }
 
     private void callMoodle(String id) {
         moodleClient.getEnrolledUsers(1);
-    }
-
-    private void callIAM(String sn) {
-        iamClient.getStudentUserNameList(sn);
     }
 
     public void takeLongToRespond(int seconds) {

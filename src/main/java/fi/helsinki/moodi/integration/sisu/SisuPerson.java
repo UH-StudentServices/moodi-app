@@ -31,6 +31,10 @@ public class SisuPerson {
     public String studentNumber;
     public String lastName;
     public String firstNames;
+    /**
+     * This may be null, for example for Open university Students that have never activated their
+     * University of Helsinki user accounts. In that case, they would not be found by student number from IAM either.
+     */
     public String eduPersonPrincipalName;
     public String employeeNumber;
 

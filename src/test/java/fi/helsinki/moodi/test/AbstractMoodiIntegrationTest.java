@@ -44,7 +44,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.test.web.client.ResponseCreator;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -75,7 +74,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
   Flyway does that: see test/resources/db/migration
  */
 public abstract class AbstractMoodiIntegrationTest {
-    protected static final long MOODLE_COURSE_ID = 988888L;
+    protected static final String SISU_REALISATION_IN_DB_ID = "hy-cur-in-db";
+    protected static final String SISU_REALISATION_NOT_IN_DB_ID = "hy-cur-not-in-db";
+    protected static final long MOODLE_COURSE_ID_IN_DB = 54321L;
+    protected static final long MOODLE_COURSE_ID_NOT_IN_DB = 988888L;
+    protected static final long SOME_OTHER_MOODLE_COURSE_ID = 999L;
     protected static final long MOODLE_USER_ID_NIINA = 1L;
     protected static final long MOODLE_USER_ID_JUKKA = 2L;
     protected static final long MOODLE_USER_ID_MAKE = 3L;
@@ -84,7 +87,7 @@ public abstract class AbstractMoodiIntegrationTest {
     protected static final long MOODLE_USER_TEACH_TWO = 6L;
     protected static final long MOODLE_USER_TEACH_THREE = 7L;
     protected static final long MOODLE_USER_NIINA2 = 8L;
-    protected static final long MOODLE_USER_NOT_ENROLLED = 9L;
+    protected static final long MOODLE_USER_NOT_ENROLLED_IN_SISU = 9L;
     protected static final long MOODLE_USER_NOT_IN_STUDY_REGISTRY = 10L;
     protected static final long MOODLE_USER_CREATOR = 11L;
 
@@ -96,7 +99,7 @@ public abstract class AbstractMoodiIntegrationTest {
     protected static final String MOODLE_USERNAME_TWO = "two@helsinki.fi";
     protected static final String MOODLE_USERNAME_THREE = "three@helsinki.fi";
     protected static final String MOODLE_USERNAME_NIINA2 = "niina2@helsinki.fi";
-    protected static final String MOODLE_USERNAME_NOT_ENROLLED = "ei-mukana-kurssilla@helsinki.fi";
+    protected static final String MOODLE_USERNAME_NOT_ENROLLED_IN_SISU = "ei-mukana-kurssilla@helsinki.fi";
     protected static final String MOODLE_USERNAME_NOT_IN_STUDY_REGISTRY = "ei-sisussa@helsinki.fi";
     protected static final String MOODLE_USERNAME_CREATOR = "creator@helsinki.fi";
 
@@ -108,20 +111,9 @@ public abstract class AbstractMoodiIntegrationTest {
         "{\"exception\":\"webservice_access_exception\",\"errorcode\":\"accessexception\",\"message\":\"P\\u00e4\\u00e4syn hallinnan poikkeus\"}";
     protected static final String MOODLE_NULL_OK_RESPONSE = "null";
 
-    protected static final String OODI_ERROR_RESPONSE = "{\"exception\": {\"message\": \"Something went wrong\"}, \"status\": 500}";
-    protected static final String OODI_NULL_DATA_RESPONSE = "{\"data\": null, \"status\": 200}";
-    protected static final String OODI_EMPTY_RESPONSE = "{\"data\": { \"students\": [], \"teachers\": [] }, \"status\": 200}";
-
     protected static final List<String> SISU_COURSE_REALISATION_IDS = Arrays.asList("hy-CUR-1", "hy-CUR-2", "hy-CUR-ended", "hy-CUR-archived");
-    private static final List<String> OODI_COURSE_REALISATION_IDS = Arrays.asList("111", "222", "333");
-    private static final List<String> ALL_CUR_IDS = Stream.concat(SISU_COURSE_REALISATION_IDS.stream(), OODI_COURSE_REALISATION_IDS.stream())
-        .distinct()
-        .collect(Collectors.toList());
 
     protected static final String EMPTY_RESPONSE = "";
-
-    protected static final int APPROVED_ENROLLMENT_STATUS_CODE = 3;
-    protected static final int NON_APPROVED_ENROLLMENT_STATUS_CODE = 10;
 
     private static final ObjectMapper testObjectMapper = new ObjectMapper();
 
@@ -136,9 +128,6 @@ public abstract class AbstractMoodiIntegrationTest {
 
     @Autowired
     protected RestTemplate moodleReadOnlyRestTemplate;
-
-    @Autowired
-    protected RestTemplate iamRestTemplate;
 
     @Autowired
     private Flyway flyway;
@@ -165,15 +154,10 @@ public abstract class AbstractMoodiIntegrationTest {
     protected MockRestServiceServer studyRegistryMockServer;
     protected MockRestServiceServer moodleMockServer;
     protected MockRestServiceServer moodleReadOnlyMockServer;
-    protected MockRestServiceServer iamMockServer;
     protected MockSisuGraphQLServer mockSisuGraphQLServer;
 
     protected String getMoodleBaseUrl() {
         return environment.getProperty("integration.moodle.baseUrl");
-    }
-
-    protected String getOodiUrl() {
-        return environment.getProperty("integration.oodi.url");
     }
 
     protected String getSisuUrl() {
@@ -182,14 +166,6 @@ public abstract class AbstractMoodiIntegrationTest {
 
     protected String getMoodleRestUrl() {
         return environment.getProperty("integration.moodle.baseUrl") + "/webservice/rest/server.php";
-    }
-
-    protected String getOodiCourseUnitRealisationRequestUrl(final String realisationId) {
-        return String.format("%s/courseunitrealisations/%s?include_deleted=true&include_approved_status=true", getOodiUrl(), realisationId);
-    }
-
-    protected String getOodiCourseUsersRequestUrl(final String realisationId) {
-        return String.format("%s/courseunitrealisations/%s/users?include_deleted=true&include_approved_status=true", getOodiUrl(), realisationId);
     }
 
     protected long getStudentRoleId() {
@@ -222,7 +198,6 @@ public abstract class AbstractMoodiIntegrationTest {
         studyRegistryMockServer = MockRestServiceServer.createServer(studyRegistryRestTemplate);
         moodleMockServer = MockRestServiceServer.createServer(moodleRestTemplate);
         moodleReadOnlyMockServer = MockRestServiceServer.createServer(moodleReadOnlyRestTemplate);
-        iamMockServer = MockRestServiceServer.createServer(iamRestTemplate);
         mockSisuGraphQLServer = new MockSisuGraphQLServer(mockServerClient);
     }
 
@@ -231,7 +206,6 @@ public abstract class AbstractMoodiIntegrationTest {
         studyRegistryMockServer.verify();
         moodleMockServer.verify();
         moodleReadOnlyMockServer.verify();
-        iamMockServer.verify();
         mockSisuGraphQLServer.verify();
     }
 
@@ -346,29 +320,6 @@ public abstract class AbstractMoodiIntegrationTest {
                 .content(toJson(importCourseRequest)));
     }
 
-    protected final void expectFindStudentRequestToIAM(final String studentNumber, final String username) {
-        final String response = "[{\"username\":\"" + username + "\",\"studentNumber\":\"" + studentNumber + "\"}]";
-        expectFindStudentRequestToIAMWithResponse(studentNumber, response);
-    }
-
-    protected final void expectFindStudentRequestToIAMAndRespondWithEmptyResult(final String studentNumber) {
-        final String response = "[]";
-        expectFindStudentRequestToIAMWithResponse(studentNumber, response);
-    }
-
-    protected final void expectFindEmployeeRequestToIAM(final String employeeNumber, final String username) {
-        final String response = "[{\"username\":\"" + username + "\",\"personnelNumber\":\"" + employeeNumber + "\"}]";
-        iamMockServer.expect(requestTo("https://esbmt2.it.helsinki.fi/iam/findEmployee/" + employeeNumber))
-            .andExpect(method(HttpMethod.GET))
-            .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
-    }
-
-    private final void expectFindStudentRequestToIAMWithResponse(final String studentNumber, final String response) {
-        iamMockServer.expect(requestTo("https://esbmt2.it.helsinki.fi/iam/findStudent/" + studentNumber))
-            .andExpect(method(HttpMethod.GET))
-            .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
-    }
-
     protected final void expectGetUserRequestToMoodleUserNotFound(final String username) {
         expectGetUserRequestToMoodleWithResponse(username, MOODLE_EMPTY_LIST_RESPONSE);
     }
@@ -392,14 +343,7 @@ public abstract class AbstractMoodiIntegrationTest {
             .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
     }
 
-    protected final void expectGetCourseUsersRequestToOodi(final String realisationId, final ResponseCreator responseCreator) {
-        final String url = getOodiCourseUsersRequestUrl(realisationId);
-        studyRegistryMockServer.expect(requestTo(url))
-            .andExpect(method(HttpMethod.GET))
-            .andRespond(responseCreator);
-    }
-
-    protected final void expectCreateCourseRequestToMoodle(final String realisationId, final String moodleCourseIdPrefix,
+    protected final void expectCreateCourseRequestToMoodle(final String realisationId,
                                                            final String description, final long moodleCourseIdToReturn,
                                                            final String categoryId) {
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
@@ -409,7 +353,7 @@ public abstract class AbstractMoodiIntegrationTest {
                 allOf(
                     startsWith(
                         "wstoken=xxxx1234&wsfunction=core_course_create_courses&moodlewsrestformat=json&courses%5B0%5D%5Bidnumber%5D="
-                            + moodleCourseIdPrefix + realisationId +
+                            + realisationId +
                             "&courses%5B0%5D%5Bfullname%5D=Lapsuus+ja+yhteiskunta&courses%5B0%5D%5Bshortname%5D=Lapsuus+ja"),
                     // The actual short name unique suffix is too difficult to check here, so we leave it out.
                     endsWith("&courses%5B0%5D%5Bcategoryid%5D=" + categoryId +
@@ -420,7 +364,7 @@ public abstract class AbstractMoodiIntegrationTest {
             .andRespond(withSuccess("[{\"id\":\"" + moodleCourseIdToReturn + "\", \"shortname\":\"shortie\"}]", MediaType.APPLICATION_JSON));
     }
 
-    protected void setupMoodleGetCourseResponse(int moodleId) {
+    protected void setupMoodleGetCourseResponse(long moodleId) {
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
@@ -432,19 +376,19 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     protected void setupMoodleGetCourseResponse() {
-        setupMoodleGetCourseResponse(54321);
+        setupMoodleGetCourseResponse(MOODLE_COURSE_ID_IN_DB);
     }
 
     protected final MoodleUserEnrollments getMoodleUserEnrollments(int moodleUserId, String userName, int enrolledCourseId, long...roleIds) {
         MoodleUserEnrollments ret = new MoodleUserEnrollments();
-        ret.id = Long.valueOf(moodleUserId);
+        ret.id = (long) moodleUserId;
         ret.username = userName;
         ret.enrolledCourses = Arrays.asList(new MoodleCourseData(enrolledCourseId));
-        ret.roles = Arrays.stream(roleIds).mapToObj(rid -> new MoodleRole(rid)).collect(Collectors.toList());
+        ret.roles = Arrays.stream(roleIds).mapToObj(MoodleRole::new).collect(Collectors.toList());
         return ret;
     }
 
-    protected String getEnrollmentsResponse(int moodleUserId, String userName, int enrolledCourseId, long...roleIds) {
+    protected String getEnrollmentsResponse(long moodleUserId, String userName, long enrolledCourseId, long...roleIds) {
         long[] enrolledCourseIds = new long[] { enrolledCourseId };
         String ret = String.format(
             "[{ \"id\" : \"%s\", \"username\" : \"%s\", \"roles\" : [%s], \"enrolledcourses\" : [%s]}]",
@@ -465,15 +409,15 @@ public abstract class AbstractMoodiIntegrationTest {
             "";
     }
 
-    protected final void expectGetEnrollmentsRequestToMoodle(final int courseId) {
+    protected final void expectGetEnrollmentsRequestToMoodle(final long courseId) {
         expectGetEnrollmentsRequestToMoodle(courseId, "[]");
     }
 
-    protected final void expectGetEnrollmentsRequestToMoodle(final int courseId, MoodleUserEnrollments... responseEnrollments) {
+    protected final void expectGetEnrollmentsRequestToMoodle(final long courseId, MoodleUserEnrollments... responseEnrollments) {
         expectGetEnrollmentsRequestToMoodle(courseId, toJson(responseEnrollments));
     }
 
-    protected final void expectGetEnrollmentsRequestToMoodle(final int courseId, final String response) {
+    protected final void expectGetEnrollmentsRequestToMoodle(final long courseId, final String response) {
         final String payload = "wstoken=xxxx1234&wsfunction=core_enrol_get_enrolled_users&moodlewsrestformat=json&courseid=" + courseId;
 
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
@@ -494,8 +438,7 @@ public abstract class AbstractMoodiIntegrationTest {
         mockSisuGraphQLServer.expectPersonsRequest(Arrays.asList("hy-hlo-2.1", "hy-hlo-3"), "/sisu/persons-many-2.json");
         mockSisuGraphQLServer.expectPersonsRequest(Arrays.asList("hy-hlo-4"), "/sisu/persons.json");
 
-        // Include Oodi course IDs, that should be ignored.
-        sisuCourseEnricher.prefetchCourses(ALL_CUR_IDS);
+        sisuCourseEnricher.prefetchCourses(SISU_COURSE_REALISATION_IDS);
     }
 
     protected void expectSisuOrganisationExportRequest() {

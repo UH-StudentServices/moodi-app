@@ -1,20 +1,19 @@
 Moodi
 ================
 
-Moodi is an integration application that automates course creation and user enrollment to Moodle based on master data from Oodi and IAM.
+Moodi is an integration application that automates course creation and user enrollment to Moodle based on master data from Sisu.
 
 Integrations
 ================
 
-- Oodi (Master data source for courses and course students and teachers)
-- Moodle (Target for modification operations by Moodi. Course spaces are created and users are enrolled via Moodle api by Moodi application)
-- IAM (Used for mapping student and employee numbers that Moodi gets from Oodi to usernames. Usernames can then be mapped to Moodle user accounts)
+- Sisu (Master data source for courses and course students and teachers)
+- Moodle (Target for modification operations by Moodi. Course spaces are created and users are 
+enrolled via Moodle api by Moodi application)
 
 Environments
 ================
 
 Currently Moodi has 3 environments: local, dev, and prod. Integrations are mapped for each environment in corresponding application-<env>.yml. 
-Currently only IAM has a mock implementation that is used in local and dev environments.
 
 Requirements
 ---------------

@@ -28,8 +28,6 @@ import static com.google.common.collect.Lists.newArrayList;
 public class StudyRegistryCourseUnitRealisation {
     public String realisationId;
 
-    public Origin origin;
-
     public LocalDate endDate;
 
     public LocalDate startDate;
@@ -50,9 +48,4 @@ public class StudyRegistryCourseUnitRealisation {
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
-
-    public enum Origin {
-        SISU, OODI
-    }
-
 }

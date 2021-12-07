@@ -32,8 +32,8 @@ public class SuccessfulCreateCourseWithEnrollmentWarningsTest extends AbstractSu
 
     @Test
     public void successfulCreateCourseReturnsCorrectResponse() throws Exception {
-        makeCreateCourseRequest(SISU_COURSE_REALISATION_ID)
+        makeCreateCourseRequest(SISU_REALISATION_NOT_IN_DB_ID)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.moodleCourseId").value(MOODLE_COURSE_ID));
+                .andExpect(jsonPath("$.data.moodleCourseId").value(MOODLE_COURSE_ID_NOT_IN_DB));
     }
 }

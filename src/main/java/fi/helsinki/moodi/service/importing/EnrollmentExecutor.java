@@ -24,7 +24,6 @@ import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealis
 import fi.helsinki.moodi.service.batch.BatchProcessor;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
-import fi.helsinki.moodi.service.iam.IAMService;
 import fi.helsinki.moodi.service.log.LoggingService;
 import fi.helsinki.moodi.service.util.MapperService;
 import org.slf4j.Logger;
@@ -51,7 +50,6 @@ public class EnrollmentExecutor {
     private static final Logger logger = getLogger(EnrollmentExecutor.class);
 
     private final MoodleService moodleService;
-    private final IAMService iamService;
     private final MapperService mapperService;
     private final CourseService courseService;
     private final LoggingService loggingService;
@@ -60,13 +58,11 @@ public class EnrollmentExecutor {
     @Autowired
     public EnrollmentExecutor(
         MoodleService moodleService,
-        IAMService iamService,
         MapperService mapperService,
         CourseService courseService,
         LoggingService loggingService,
         BatchProcessor batchProcessor) {
         this.moodleService = moodleService;
-        this.iamService = iamService;
         this.mapperService = mapperService;
         this.courseService = courseService;
         this.loggingService = loggingService;
@@ -88,8 +84,7 @@ public class EnrollmentExecutor {
             final List<Enrollment> enrollments = createEnrollments(courseUnitRealisation, course.creatorUsername);
 
             final List<Enrollment> approvedEnrollments = filterApprovedEnrollments(enrollments, enrollmentWarnings);
-            final List<Enrollment> enrollmentsWithUsernames = enrichEnrollmentsWithUsernames(approvedEnrollments);
-            final List<Enrollment> enrollmentsWithMoodleIds = enrichEnrollmentsWithMoodleIds(enrollmentsWithUsernames);
+            final List<Enrollment> enrollmentsWithMoodleIds = enrichEnrollmentsWithMoodleIds(approvedEnrollments);
 
             batchProcessor.process(
                 enrollmentsWithMoodleIds,
@@ -115,22 +110,6 @@ public class EnrollmentExecutor {
                 });
 
         return enrollments;
-    }
-
-    private List<Enrollment> enrichEnrollmentsWithUsernames(final List<Enrollment> enrollments) {
-        return enrollments.stream()
-                .map(this::enrichEnrollmentWithUsername)
-                .collect(toList());
-    }
-
-    private Enrollment enrichEnrollmentWithUsername(final Enrollment enrollment) {
-        if (enrollment.usernameList == null || enrollment.usernameList.isEmpty()) {
-            enrollment.usernameList = Enrollment.ROLE_TEACHER.equals(enrollment.role) ?
-                iamService.getTeacherUserNameList(enrollment.employeeNumber.get()) :
-                iamService.getStudentUserNameList(enrollment.studentNumber.get());
-        }
-
-        return enrollment;
     }
 
     private List<Enrollment> createEnrollments(final StudyRegistryCourseUnitRealisation cur, final String creatorUsername) {
@@ -176,7 +155,7 @@ public class EnrollmentExecutor {
             final List<EnrollmentWarning> enrollmentWarnings) {
 
         return filterEnrollmentsAndCreateWarnings(
-                enrollments, enrollmentWarnings, this::isUsernamePresent, EnrollmentWarning::userNotFoundFromIAM);
+                enrollments, enrollmentWarnings, this::isUsernamePresent, EnrollmentWarning::userWithoutUsername);
     }
 
     private List<Enrollment> filterOutEnrollmentsWithoutMoodleIds(
