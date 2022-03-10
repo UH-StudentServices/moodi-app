@@ -39,6 +39,9 @@ import static org.junit.Assert.assertEquals;
 
 public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
 
+    // add random 0-1000 millisecond delay to some moodle/sisu mock calls
+    private boolean DELAYED = true;
+
     @Autowired
     private EnricherService enricherService;
 
@@ -50,8 +53,13 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
         }
         prepareSisuPrefetchMock(items);
         prepareMoodleMocks(items);
+        // enrichers are run in this order and each item completes the whole sequence before taking the next item:
+        // LockStatusEnricher 0
+        // SisuCourseEnricher 1
+        // MoodleCourseEnricher 2
+        // MoodleEnrollmentsEnricher 3
+        // CompletingEnricher 4
         List<SynchronizationItem> enrichedItems = enricherService.enrich(items);
-
         enrichedItems.forEach(item ->
             assertStatus(item, EnrichmentStatus.SUCCESS, true)
         );
@@ -66,8 +74,8 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
 
     private void prepareMoodleMocks(List<SynchronizationItem> items) {
         items.forEach(item -> {
-            setupMoodleGetCourseResponse(item.getCourse().moodleId, true);
-            expectGetEnrollmentsRequestToMoodle(item.getCourse().moodleId, Fixtures.asString("/moodle/get-enrolled-users.json"), true);
+            setupMoodleGetCourseResponse(item.getCourse().moodleId, DELAYED);
+            expectGetEnrollmentsRequestToMoodle(item.getCourse().moodleId, Fixtures.asString("/moodle/get-enrolled-users.json"), DELAYED);
         });
     }
 
@@ -79,7 +87,7 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
                 .build())
         ).collect(Collectors.joining(", "));
         String response = "{\"data\": {\"course_unit_realisations\": [" + curs + "] } }";
-        mockSisuGraphQLServer.expectCourseUnitRealisationsRequestFromString(curIds, response);
+        mockSisuGraphQLServer.expectCourseUnitRealisationsRequestFromString(curIds, response, DELAYED);
         mockSisuGraphQLServer.expectPersonsRequest(singletonList("hy-hlo-1"), "/sisu/persons.json");
         sisuCourseEnricher.prefetchCourses(curIds);
     }
