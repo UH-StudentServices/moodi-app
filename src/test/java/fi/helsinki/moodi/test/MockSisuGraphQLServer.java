@@ -35,6 +35,7 @@ import io.aexp.nodes.graphql.Arguments;
 import io.aexp.nodes.graphql.GraphQLRequestEntity;
 import io.aexp.nodes.graphql.internal.DefaultObjectMapperFactory;
 import org.mockserver.client.MockServerClient;
+import org.mockserver.model.Delay;
 import org.mockserver.model.HttpRequest;
 
 import java.io.File;
@@ -44,6 +45,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.fail;
@@ -73,16 +75,23 @@ public class MockSisuGraphQLServer {
 
     public void expectCourseUnitRealisationsRequest(List<String> curIds, String responseFile, Map<String, ?> variables) {
         Arguments arguments = new Arguments("course_unit_realisations", new Argument<>("ids", curIds));
-        expectGraphqlRequest(responseFile, variables, SisuCourseUnitRealisation.SisuCURWrapper.class, arguments);
+        String responseString = Fixtures.asString(responseFile, variables);
+        expectGraphqlRequest(responseString, SisuCourseUnitRealisation.SisuCURWrapper.class, arguments);
     }
 
     public void expectCourseUnitRealisationsRequest(List<String> curIds, String responseFile) {
         expectCourseUnitRealisationsRequest(curIds, responseFile, new HashMap<>());
     }
 
+    public void expectCourseUnitRealisationsRequestFromString(List<String> curIds, String responseString) {
+        Arguments arguments = new Arguments("course_unit_realisations", new Argument<>("ids", curIds));
+        expectGraphqlRequestWithDelay(responseString, SisuCourseUnitRealisation.SisuCURWrapper.class, arguments);
+    }
+
     public void expectPersonsRequest(List<String> personIds, String responseFile, Map<String, ?> variables) {
         Arguments arguments = new Arguments("private_persons", new Argument<>("ids", personIds));
-        expectGraphqlRequest(responseFile, variables, SisuPerson.SisuPersonWrapper.class, arguments);
+        String responseString = Fixtures.asString(responseFile, variables);
+        expectGraphqlRequest(responseString, SisuPerson.SisuPersonWrapper.class, arguments);
     }
 
     public void expectPersonsRequest(List<String> personIds, String responseFile) {
@@ -95,8 +104,7 @@ public class MockSisuGraphQLServer {
         }
     }
 
-    private <T> void expectGraphqlRequest(String responseFile, final Map<String, ?> responseVariables,
-                                          Class<T> requestClass, Arguments... requestArguments) {
+    private <T> void expectGraphqlRequest(String responseString, Class<T> requestClass, Arguments... requestArguments) {
         HttpRequest request = request()
             .withMethod("POST")
             .withPath("/graphql")
@@ -108,7 +116,24 @@ public class MockSisuGraphQLServer {
             .respond(
                 response()
                     .withStatusCode(200)
-                    .withBody(Fixtures.asString(responseFile, responseVariables)));
+                    .withBody(responseString));
+        expectedRequests.add(request);
+    }
+
+    private <T> void expectGraphqlRequestWithDelay(String responseString, Class<T> requestClass, Arguments... requestArguments) {
+        HttpRequest request = request()
+            .withMethod("POST")
+            .withPath("/graphql")
+            .withHeader(API_KEY_HEADER_NAME, API_KEY)
+            .withBody(requestBodyMatcher(requestClass, requestArguments));
+
+        client
+            .when(request)
+            .respond(
+                response()
+                    .withStatusCode(200)
+                    .withBody(responseString)
+                    .withDelay(Delay.milliseconds(ThreadLocalRandom.current().nextInt(1001))));
 
         expectedRequests.add(request);
     }

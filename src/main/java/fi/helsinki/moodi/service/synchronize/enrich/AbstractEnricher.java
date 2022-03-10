@@ -30,7 +30,7 @@ abstract class AbstractEnricher implements Enricher {
 
     @Override
     public final SynchronizationItem enrich(final SynchronizationItem item) {
-        if (item.getEnrichmentStatus() != EnrichmentStatus.IN_PROGESS) {
+        if (item.getEnrichmentStatus() != EnrichmentStatus.IN_PROGRESS) {
             getLogger().debug("Item enrichment already completed, just return it");
             return item;
         } else {

@@ -38,7 +38,7 @@ public class MoodleService {
     }
 
     public Optional<MoodleUser> getUser(final List<String> username) {
-        if (username != null && username.size() > 0) {
+        if (username != null && !username.isEmpty()) {
             return Optional.ofNullable(moodleClient.getUser(username));
         } else {
             return Optional.empty();

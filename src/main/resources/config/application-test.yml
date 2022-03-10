@@ -25,5 +25,14 @@ synchronize.INCREMENTAL.enabled: false
 logging:
   retain-logs: PT30M
   file-logging-path: /tmp/log/moodi-import-sync-log
+  level:
+    root: info
 
+    org:
+      mockserver: error
+    fi:
+      helsinki:
+        moodi:
+          test:
+            templates: info
 mailNotification.to: nonexistingemailaddress@helsinki.fi
