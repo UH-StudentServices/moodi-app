@@ -38,7 +38,7 @@ public class SisuCourseEnricherTest extends AbstractMoodiIntegrationTest  {
 
         SynchronizationItem enrichedItem = sisuCourseEnricher.doEnrich(synchronizationItem);
 
-        assertStatus(enrichedItem, EnrichmentStatus.IN_PROGESS, true);
+        assertStatus(enrichedItem, EnrichmentStatus.IN_PROGRESS, true);
     }
 
     @Test
@@ -58,7 +58,7 @@ public class SisuCourseEnricherTest extends AbstractMoodiIntegrationTest  {
 
         SynchronizationItem enrichedItem = sisuCourseEnricher.doEnrich(synchronizationItem);
 
-        assertStatus(enrichedItem, EnrichmentStatus.IN_PROGESS, true);
+        assertStatus(enrichedItem, EnrichmentStatus.IN_PROGRESS, true);
     }
 
     @Test

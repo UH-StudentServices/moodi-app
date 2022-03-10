@@ -52,7 +52,7 @@ public final class SynchronizationItem {
     private final boolean removed;
 
     public SynchronizationItem(Course course, SynchronizationType synchronizationType) {
-        this(course, synchronizationType, false, null, null, empty(), empty(), empty(), newArrayList(), EnrichmentStatus.IN_PROGESS,
+        this(course, synchronizationType, false, null, null, empty(), empty(), empty(), newArrayList(), EnrichmentStatus.IN_PROGRESS,
             ProcessingStatus.IN_PROGRESS, false, false);
     }
 
