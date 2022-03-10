@@ -83,9 +83,13 @@ public class MockSisuGraphQLServer {
         expectCourseUnitRealisationsRequest(curIds, responseFile, new HashMap<>());
     }
 
-    public void expectCourseUnitRealisationsRequestFromString(List<String> curIds, String responseString) {
+    public void expectCourseUnitRealisationsRequestFromString(List<String> curIds, String responseString, boolean delayed) {
         Arguments arguments = new Arguments("course_unit_realisations", new Argument<>("ids", curIds));
-        expectGraphqlRequestWithDelay(responseString, SisuCourseUnitRealisation.SisuCURWrapper.class, arguments);
+        if (delayed) {
+            expectGraphqlRequestWithDelay(responseString, SisuCourseUnitRealisation.SisuCURWrapper.class, arguments);
+        } else {
+            expectGraphqlRequest(responseString, SisuCourseUnitRealisation.SisuCURWrapper.class, arguments);
+        }
     }
 
     public void expectPersonsRequest(List<String> personIds, String responseFile, Map<String, ?> variables) {
