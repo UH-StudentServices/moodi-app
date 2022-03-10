@@ -19,24 +19,45 @@ package fi.helsinki.moodi.service.synchronize.enrich;
 
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class EnricherService {
 
-    private final EnrichExecutor enrichExecutor;
+    private final List<Enricher> enrichers;
 
     @Autowired
-    public EnricherService(EnrichExecutor enrichExecutor) {
-        this.enrichExecutor = enrichExecutor;
+    public EnricherService(List<Enricher> enrichers) {
+        this.enrichers = enrichers;
+        enrichers.sort(Comparator.comparingInt(Ordered::getOrder));
     }
 
     public List<SynchronizationItem> enrich(final List<SynchronizationItem> items) {
         return items.stream()
-            .map(enrichExecutor::enrichItem)
+            .map(this::enrichItem)
             .collect(Collectors.toList());
+    }
+
+    private SynchronizationItem enrichItem(final SynchronizationItem item) {
+        return applyEnricher(item, 0);
+    }
+
+    private SynchronizationItem applyEnricher(final SynchronizationItem item, final int index) {
+        if (index < enrichers.size()) {
+            SynchronizationItem enrichedItem;
+            try {
+                enrichedItem = enrichers.get(index).enrich(item);
+            } catch (Exception e) {
+                throw new EnrichException("Error enriching synchronization item", e);
+            }
+            return applyEnricher(enrichedItem, index + 1);
+        } else {
+            return item;
+        }
     }
 }
