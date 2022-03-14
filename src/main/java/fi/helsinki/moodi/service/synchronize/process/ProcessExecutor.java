@@ -28,6 +28,10 @@ public class ProcessExecutor {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public SynchronizationItem processItem(SynchronizationItem item, Processor processor) {
-        return processor.process(item);
+        try {
+            return processor.process(item);
+        } catch (Exception e) {
+            throw new ProcessException("Error processing item " + item.toString(), e);
+        }
     }
 }
