@@ -115,8 +115,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
             .filter(item -> !item.isCompleted())
             .map(synchronizationActionResolver::enrichWithActions)
             .flatMap(item -> item.getActions().stream())
-            .collect(Collectors.groupingBy(item -> item.getActionType()));
-
+            .collect(Collectors.groupingBy(UserSynchronizationAction::getActionType));
         checkThresholdLimits(userSynchronizationActionMap, parentItem);
 
         for (UserSynchronizationActionType actionType : UserSynchronizationActionType.values()) {

@@ -21,10 +21,11 @@ import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class EnricherService {
@@ -37,13 +38,8 @@ public class EnricherService {
         enrichers.sort(Comparator.comparingInt(Ordered::getOrder));
     }
 
-    public List<SynchronizationItem> enrich(final List<SynchronizationItem> items) {
-        return items.stream()
-            .map(this::enrichItem)
-            .collect(Collectors.toList());
-    }
-
-    private SynchronizationItem enrichItem(final SynchronizationItem item) {
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
+    public SynchronizationItem enrichItem(final SynchronizationItem item) {
         return applyEnricher(item, 0);
     }
 
