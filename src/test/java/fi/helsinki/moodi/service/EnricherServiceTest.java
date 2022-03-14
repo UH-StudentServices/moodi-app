@@ -59,7 +59,10 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
         // MoodleCourseEnricher 2
         // MoodleEnrollmentsEnricher 3
         // CompletingEnricher 4
-        List<SynchronizationItem> enrichedItems = enricherService.enrich(items);
+        List<SynchronizationItem> enrichedItems = items.stream()
+            .map(enricherService::enrichItem)
+            .collect(Collectors.toList());
+
         enrichedItems.forEach(item ->
             assertStatus(item, EnrichmentStatus.SUCCESS, true)
         );
