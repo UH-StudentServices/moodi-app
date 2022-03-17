@@ -38,7 +38,6 @@ public class EnricherService {
         enrichers.sort(Comparator.comparingInt(Ordered::getOrder));
     }
 
-    @Transactional(propagation=Propagation.REQUIRES_NEW)
     public SynchronizationItem enrichItem(final SynchronizationItem item) {
         return applyEnricher(item, 0);
     }

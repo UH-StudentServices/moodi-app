@@ -30,6 +30,7 @@ import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.dto.CourseDto;
 import fi.helsinki.moodi.service.log.LoggingService;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +38,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 import static fi.helsinki.moodi.exception.NotFoundException.notFoundException;
+import static org.slf4j.LoggerFactory.getLogger;
 
 @Service
 public class ImportingService {
@@ -46,9 +48,10 @@ public class ImportingService {
     private final StudyRegistryService studyRegistryService;
     private final CourseConverter courseConverter;
     private final MoodleCourseBuilder moodleCourseBuilder;
-    private final EnrollmentExecutor enrollmentExecutor;
+    private final EnrollmentService enrollmentExecutor;
     private final LoggingService loggingService;
     private final SisuClient sisuClient;
+    private static final Logger logger = getLogger(ImportingService.class);
 
     @Autowired
     public ImportingService(
@@ -57,7 +60,7 @@ public class ImportingService {
         StudyRegistryService studyRegistryService,
         CourseConverter courseConverter,
         MoodleCourseBuilder moodleCourseBuilder,
-        EnrollmentExecutor enrollmentExecutor,
+        EnrollmentService enrollmentExecutor,
         LoggingService loggingService,
         SisuClient sisuClient) {
 

@@ -28,7 +28,6 @@ import fi.helsinki.moodi.service.log.LoggingService;
 import fi.helsinki.moodi.service.util.MapperService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -43,11 +42,11 @@ import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
-public class EnrollmentExecutor {
+public class EnrollmentService {
 
     private static final int ENROLLMENT_BATCH_MAX_SIZE = 300;
 
-    private static final Logger logger = getLogger(EnrollmentExecutor.class);
+    private static final Logger logger = getLogger(EnrollmentService.class);
 
     private final MoodleService moodleService;
     private final MapperService mapperService;
@@ -56,7 +55,7 @@ public class EnrollmentExecutor {
     private final BatchProcessor<Enrollment> batchProcessor;
 
     @Autowired
-    public EnrollmentExecutor(
+    public EnrollmentService(
         MoodleService moodleService,
         MapperService mapperService,
         CourseService courseService,
@@ -69,13 +68,12 @@ public class EnrollmentExecutor {
         this.batchProcessor = batchProcessor;
     }
 
-    @Async("taskExecutor")
     public void processEnrollments(final Course course,
                                    final StudyRegistryCourseUnitRealisation courseUnitRealisation,
                                    final long moodleCourseId) {
         try {
 
-            logger.info("Enrollment executor started for realisationId {} ", course.realisationId);
+            logger.info("Process enrollments started for realisationId {} ", course.realisationId);
 
             final Stopwatch stopwatch = Stopwatch.createStarted();
 
@@ -95,20 +93,16 @@ public class EnrollmentExecutor {
 
             loggingService.logCourseImportEnrollments(course, enrollmentsWithMoodleIds, enrollmentWarnings);
 
-            logger.info("Enrollment executor for realisationId {} finished in {}", course.realisationId, stopwatch.stop().toString());
+            logger.info("Process enrollments for realisationId {} finished in {}", course.realisationId, stopwatch.stop().toString());
 
         } catch (Exception e) {
             courseService.completeCourseImport(course.realisationId, false);
-            logger.error("Enrollment execution failed for course " + course.realisationId, e);
+            logger.error("Processing enrollments failed for course " + course.realisationId, e);
         }
     }
 
     private List<Enrollment> enrichEnrollmentsWithMoodleIds(final List<Enrollment> enrollments) {
-        enrollments.stream()
-                .forEach(e -> {
-                    e.moodleId = moodleService.getUser(e.usernameList).map(user -> user.id);
-                });
-
+        enrollments.forEach(e -> e.moodleId = moodleService.getUser(e.usernameList).map(user -> user.id));
         return enrollments;
     }
 
@@ -171,7 +165,7 @@ public class EnrollmentExecutor {
     }
 
     private boolean isUsernamePresent(final Enrollment enrollment) {
-        return enrollment.usernameList != null && enrollment.usernameList.size() > 0;
+        return enrollment.usernameList != null && !enrollment.usernameList.isEmpty();
     }
 
     private List<Enrollment> filterEnrollmentsAndCreateWarnings(
