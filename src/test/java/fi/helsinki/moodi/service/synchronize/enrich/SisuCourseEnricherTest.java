@@ -38,7 +38,7 @@ public class SisuCourseEnricherTest extends AbstractMoodiIntegrationTest  {
 
         SynchronizationItem enrichedItem = sisuCourseEnricher.doEnrich(synchronizationItem);
 
-        assertStatus(enrichedItem, EnrichmentStatus.IN_PROGESS, true);
+        assertStatus(enrichedItem, EnrichmentStatus.IN_PROGRESS, true);
     }
 
     @Test
@@ -58,7 +58,7 @@ public class SisuCourseEnricherTest extends AbstractMoodiIntegrationTest  {
 
         SynchronizationItem enrichedItem = sisuCourseEnricher.doEnrich(synchronizationItem);
 
-        assertStatus(enrichedItem, EnrichmentStatus.IN_PROGESS, true);
+        assertStatus(enrichedItem, EnrichmentStatus.IN_PROGRESS, true);
     }
 
     @Test
@@ -72,9 +72,9 @@ public class SisuCourseEnricherTest extends AbstractMoodiIntegrationTest  {
     }
 
     private void assertStatus(SynchronizationItem item, EnrichmentStatus expectedStatus, boolean expectedCurPresent) {
-        Optional<StudyRegistryCourseUnitRealisation> cur = item.getStudyRegistryCourse();
+        StudyRegistryCourseUnitRealisation cur = item.getStudyRegistryCourse();
 
-        assertEquals(expectedCurPresent, cur.isPresent());
+        assertEquals(expectedCurPresent, cur != null);
         assertEquals(expectedStatus, item.getEnrichmentStatus());
     }
 

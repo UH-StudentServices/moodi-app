@@ -71,15 +71,14 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
 
         SynchronizationItem item = getSynchronizationItem(synchronizationType);
 
-        SynchronizationItem itemWithUserItems = item.setUserSynchronizationItems(newArrayList(
+        item.setUserSynchronizationItems(newArrayList(
             getSuccessfulStudentUserSynchronizationItem(),
             getFailedTeacherUserStudentUserSynchronizationItem()));
 
-        SynchronizationItem completedItem = itemWithUserItems
-            .completeEnrichmentPhase(EnrichmentStatus.SUCCESS, ENRICHMENT_SUCCESSFUL_MESSAGE)
-            .completeProcessingPhase();
+        item.completeEnrichmentPhase(EnrichmentStatus.SUCCESS, ENRICHMENT_SUCCESSFUL_MESSAGE);
+        item.completeProcessingPhase();
 
-        List<SynchronizationItem> synchronizationItems = newArrayList(completedItem);
+        List<SynchronizationItem> synchronizationItems = newArrayList(item);
 
         SynchronizationSummary summary = new SynchronizationSummary(synchronizationType, synchronizationItems, Stopwatch.createUnstarted(),
                 new RuntimeException("Voi minnuu!"));
