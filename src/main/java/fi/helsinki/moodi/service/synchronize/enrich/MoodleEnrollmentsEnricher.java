@@ -46,7 +46,8 @@ public class MoodleEnrollmentsEnricher extends AbstractEnricher {
     protected SynchronizationItem doEnrich(final SynchronizationItem item) {
         final Course course = item.getCourse();
         final List<MoodleUserEnrollments> moodleEnrollments = moodleService.getEnrolledUsers(course.moodleId);
-        return item.setMoodleEnrollments(Optional.of(moodleEnrollments));
+        item.setMoodleEnrollments(moodleEnrollments);
+        return item;
     }
 
     @Override

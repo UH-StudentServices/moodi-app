@@ -48,12 +48,13 @@ public class MoodleCourseEnricher extends AbstractEnricher {
         final List<MoodleFullCourse> courses = moodleService.getCourses(Lists.newArrayList(course.moodleId));
 
         if (courses.isEmpty()) {
-            return item.completeEnrichmentPhase(
-                    EnrichmentStatus.MOODLE_COURSE_NOT_FOUND,
-                    "Course not found from Moodle with id " + course.moodleId);
+            item.completeEnrichmentPhase(
+                EnrichmentStatus.MOODLE_COURSE_NOT_FOUND,
+                "Course not found from Moodle with id " + course.moodleId);
         } else {
-            return item.setMoodleCourse(courses.stream().findFirst());
+            item.setMoodleCourse(courses.stream().findFirst().orElse(null));
         }
+        return item;
     }
 
     @Override

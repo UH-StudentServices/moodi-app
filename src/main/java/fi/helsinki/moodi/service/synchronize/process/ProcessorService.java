@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
 import java.util.function.Function;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -40,20 +39,18 @@ import static java.util.stream.Collectors.toMap;
 public class ProcessorService {
 
     private final Map<Action, Processor> processorsByAction;
-    private final ProcessExecutor processExecutor;
 
     @Autowired
-    public ProcessorService(List<Processor> processors, ProcessExecutor processExecutor) {
+    public ProcessorService(List<Processor> processors) {
         this.processorsByAction = processors.stream()
                 .collect(toMap(Processor::getAction, Function.identity(), (a, b) -> b));
-        this.processExecutor = processExecutor;
     }
 
-    private SynchronizationItem readItem(Future<SynchronizationItem> future) {
+    public SynchronizationItem processItem(SynchronizationItem item, Processor processor) {
         try {
-            return future.get();
+            return processor.process(item);
         } catch (Exception e) {
-            throw new ProcessException("Error reading synchronization items from future", e);
+            throw new ProcessException("Error processing item " + item.toString(), e);
         }
     }
 
@@ -65,8 +62,7 @@ public class ProcessorService {
             final List<SynchronizationItem> itemsToProcess = itemsByAction.getOrDefault(action, Lists.newArrayList());
             final Processor processor = processorsByAction.get(action);
             itemsToProcess.stream()
-                .map(item -> processExecutor.processItem(item, processor))
-                .map(this::readItem)
+                .map(item -> processItem(item, processor))
                 .forEach(processedItems::add);
         }
 

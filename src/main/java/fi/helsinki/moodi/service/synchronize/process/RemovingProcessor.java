@@ -43,7 +43,8 @@ public class RemovingProcessor extends AbstractProcessor {
     @Override
     protected SynchronizationItem doProcess(final SynchronizationItem item) {
         courseService.markAsRemoved(item.getCourse(), item.getEnrichmentStatus().toString());
-        return item.completeProcessingPhase(ProcessingStatus.SUCCESS, "Removed", true);
+        item.completeProcessingPhase(ProcessingStatus.SUCCESS, "Removed", true);
+        return item;
     }
 
     @Override

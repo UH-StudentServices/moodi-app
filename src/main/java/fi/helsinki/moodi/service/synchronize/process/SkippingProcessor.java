@@ -36,7 +36,8 @@ public class SkippingProcessor extends AbstractProcessor {
 
     @Override
     protected SynchronizationItem doProcess(final SynchronizationItem item) {
-        return item.completeProcessingPhase(ProcessingStatus.SKIPPED, "Can't synchronize");
+        item.completeProcessingPhase(ProcessingStatus.SKIPPED, "Can't synchronize");
+        return item;
     }
 
     @Override
