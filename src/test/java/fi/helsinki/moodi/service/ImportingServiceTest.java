@@ -55,7 +55,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 public class ImportingServiceTest extends AbstractMoodiIntegrationTest {
 
     // add random 0-1000 millisecond delay to some moodle/sisu mock calls
-    private boolean DELAYED = true;
+    private boolean DELAYED = false;
 
     private static final String REALISATION_ID = "hy-CUR-1";
     protected static final String CREATOR_SISU_ID = "hy-hlo-creator";

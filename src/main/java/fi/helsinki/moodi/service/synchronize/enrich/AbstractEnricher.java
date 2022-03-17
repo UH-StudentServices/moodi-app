@@ -48,7 +48,8 @@ abstract class AbstractEnricher implements Enricher {
             return doEnrich(item);
         } catch (Exception e) {
             getLogger().error("Error while enriching item", e);
-            return item.completeEnrichmentPhase(EnrichmentStatus.ERROR, e.getMessage());
+            item.completeEnrichmentPhase(EnrichmentStatus.ERROR, e.getMessage());
+            return item;
         }
     }
 

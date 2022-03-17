@@ -26,33 +26,31 @@ import fi.helsinki.moodi.service.synchronize.process.ProcessingStatus;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem;
 
 import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Optional.empty;
 
-public final class SynchronizationItem {
+public class SynchronizationItem {
 
     public static final String SUCCESS_MESSAGE = "Success";
     public static final String ENROLLMENT_FAILURES_MESSAGE = "Some enrollment failures";
 
     private final Course course;
     private final SynchronizationType synchronizationType;
-    private final boolean success;
+    private boolean success;
 
-    private final String enrichmentMessage;
-    private final String processingMessage;
-    private final Optional<StudyRegistryCourseUnitRealisation> studyRegistryCourse;
-    private final Optional<MoodleFullCourse> moodleCourse;
-    private final Optional<List<MoodleUserEnrollments>> moodleEnrollments;
-    private final List<UserSynchronizationItem> userSynchronizationItems;
-    private final EnrichmentStatus enrichmentStatus;
-    private final ProcessingStatus processingStatus;
-    private final boolean unlock;
-    private final boolean removed;
+    private String enrichmentMessage;
+    private String processingMessage;
+    private StudyRegistryCourseUnitRealisation studyRegistryCourse;
+    private MoodleFullCourse moodleCourse;
+    private List<MoodleUserEnrollments> moodleEnrollments;
+    private List<UserSynchronizationItem> userSynchronizationItems;
+    private EnrichmentStatus enrichmentStatus;
+    private ProcessingStatus processingStatus;
+    private boolean unlock;
+    private boolean removed;
 
     public SynchronizationItem(Course course, SynchronizationType synchronizationType) {
-        this(course, synchronizationType, false, null, null, empty(), empty(), empty(), newArrayList(), EnrichmentStatus.IN_PROGRESS,
+        this(course, synchronizationType, false, null, null, null, null, newArrayList(), newArrayList(), EnrichmentStatus.IN_PROGRESS,
             ProcessingStatus.IN_PROGRESS, false, false);
     }
 
@@ -62,9 +60,9 @@ public final class SynchronizationItem {
         boolean success,
         String enrichmentMessage,
         String processingMessage,
-        Optional<StudyRegistryCourseUnitRealisation> studyRegistryCourse,
-        Optional<MoodleFullCourse> moodleCourse,
-        Optional<List<MoodleUserEnrollments>> moodleEnrollments,
+        StudyRegistryCourseUnitRealisation studyRegistryCourse,
+        MoodleFullCourse moodleCourse,
+        List<MoodleUserEnrollments> moodleEnrollments,
         List<UserSynchronizationItem> userSynchronizationItems,
         EnrichmentStatus enrichmentStatus,
         ProcessingStatus processingStatus,
@@ -90,76 +88,61 @@ public final class SynchronizationItem {
         return synchronizationType;
     }
 
-    public Optional<StudyRegistryCourseUnitRealisation> getStudyRegistryCourse() {
+    public StudyRegistryCourseUnitRealisation getStudyRegistryCourse() {
         return studyRegistryCourse;
     }
 
-    public Optional<MoodleFullCourse> getMoodleCourse() {
+    public void setStudyRegistryCourse(StudyRegistryCourseUnitRealisation studyRegistryCourse) {
+        this.studyRegistryCourse = studyRegistryCourse;
+    }
+
+    public MoodleFullCourse getMoodleCourse() {
         return moodleCourse;
     }
 
-    public Optional<List<MoodleUserEnrollments>> getMoodleEnrollments() {
+    public void setMoodleCourse(MoodleFullCourse moodleCourse) {
+        this.moodleCourse = moodleCourse;
+    }
+
+    public List<MoodleUserEnrollments> getMoodleEnrollments() {
         return moodleEnrollments;
     }
 
-    public SynchronizationItem setStudyRegistryCourse(final Optional<StudyRegistryCourseUnitRealisation> newCourse) {
-        return new SynchronizationItem(course, synchronizationType, success, enrichmentMessage,
-            processingMessage, newCourse, moodleCourse, moodleEnrollments,
-            userSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
+    public void setMoodleEnrollments(List<MoodleUserEnrollments> moodleEnrollments) {
+        this.moodleEnrollments = moodleEnrollments;
     }
 
-    public SynchronizationItem setMoodleCourse(final Optional<MoodleFullCourse> newMoodleCourse) {
-        return new SynchronizationItem(course, synchronizationType, success, enrichmentMessage,
-            processingMessage, studyRegistryCourse, newMoodleCourse, moodleEnrollments,
-            userSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
+    public void setUnlock(final boolean unlock) {
+        this.unlock = unlock;
     }
 
-    public SynchronizationItem setMoodleEnrollments(final Optional<List<MoodleUserEnrollments>> newMoodleEnrollments) {
-        return new SynchronizationItem(course, synchronizationType, success, enrichmentMessage,
-            processingMessage, studyRegistryCourse, moodleCourse, newMoodleEnrollments,
-            userSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
+    public void completeEnrichmentPhase(EnrichmentStatus enrichmentStatus, String enrichmentMessage) {
+        this.success = enrichmentStatus == EnrichmentStatus.SUCCESS;
+        this.enrichmentMessage = enrichmentMessage;
+        this.enrichmentStatus = enrichmentStatus;
     }
 
-    public SynchronizationItem setUserSynchronizationItems(final List<UserSynchronizationItem> newUserSynchronizationItems) {
-        return new SynchronizationItem(course, synchronizationType, success, enrichmentMessage,
-            processingMessage, studyRegistryCourse, moodleCourse, moodleEnrollments,
-            newUserSynchronizationItems, enrichmentStatus, processingStatus, unlock, removed);
+    public void completeProcessingPhase(ProcessingStatus processingStatus, String processingMessage) {
+        completeProcessingPhase(processingStatus, processingMessage, false);
     }
 
-    public SynchronizationItem setUnlock(final boolean newUnlock) {
-        return new SynchronizationItem(course, synchronizationType, success, enrichmentMessage,
-            processingMessage, studyRegistryCourse, moodleCourse, moodleEnrollments,
-            userSynchronizationItems, enrichmentStatus, processingStatus, newUnlock, removed);
+    public void completeProcessingPhase(ProcessingStatus processingStatus, String processingMessage,
+                                                        boolean removed) {
+        this.success = processingStatus == ProcessingStatus.SUCCESS;
+        this.processingMessage = processingMessage;
+        this.processingStatus = processingStatus;
+        this.removed = removed;
     }
 
-    public SynchronizationItem completeEnrichmentPhase(final EnrichmentStatus newEnrichmentStatus, final String newMessage) {
-        final boolean newSuccess = newEnrichmentStatus == EnrichmentStatus.SUCCESS;
-        return new SynchronizationItem(course, synchronizationType, newSuccess, newMessage,
-            processingMessage, studyRegistryCourse, moodleCourse, moodleEnrollments,
-            userSynchronizationItems, newEnrichmentStatus, processingStatus, unlock, removed);
-    }
+    public void completeProcessingPhase() {
+        boolean newSuccess = userSynchronizationItems.stream().allMatch(i -> i.isSuccess() || i.isMoodleUserNotFound());
 
-    public SynchronizationItem completeProcessingPhase(final ProcessingStatus newProcessingStatus, final String newMessage) {
-        return completeProcessingPhase(newProcessingStatus, newMessage, false);
-    }
-
-    public SynchronizationItem completeProcessingPhase(final ProcessingStatus newProcessingStatus, final String newMessage,
-                                                       final boolean newRemoved) {
-        final boolean newSuccess = newProcessingStatus == ProcessingStatus.SUCCESS;
-        return new SynchronizationItem(course, synchronizationType, newSuccess, enrichmentMessage,
-            newMessage, studyRegistryCourse, moodleCourse, moodleEnrollments,
-            userSynchronizationItems, enrichmentStatus, newProcessingStatus, unlock, newRemoved);
-    }
-
-    public SynchronizationItem completeProcessingPhase() {
-        final boolean newSuccess = userSynchronizationItems.stream().allMatch(i -> i.isSuccess() || i.isMoodleUserNotFound());
-
-        final String newMessage = (newSuccess) ? SUCCESS_MESSAGE : ENROLLMENT_FAILURES_MESSAGE;
+        final String newProcessingMessage = (newSuccess) ? SUCCESS_MESSAGE : ENROLLMENT_FAILURES_MESSAGE;
 
         final ProcessingStatus newProcessingStatus =
             (newSuccess) ? ProcessingStatus.SUCCESS : ProcessingStatus.ENROLLMENT_FAILURES;
 
-        return completeProcessingPhase(newProcessingStatus, newMessage);
+        completeProcessingPhase(newProcessingStatus, newProcessingMessage);
     }
 
     public Course getCourse() {
@@ -198,4 +181,7 @@ public final class SynchronizationItem {
         return userSynchronizationItems;
     }
 
+    public void setUserSynchronizationItems(final List<UserSynchronizationItem> userSynchronizationItems) {
+        this.userSynchronizationItems = userSynchronizationItems;
+    }
 }
