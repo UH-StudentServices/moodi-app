@@ -53,7 +53,7 @@ import static org.mockito.Mockito.when;
 public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
 
     // add random 0-1000 millisecond delay to some moodle/sisu mock calls
-    private boolean DELAYED = true;
+    private boolean DELAYED = false;
 
     private static final String STUDENT_MOODLE_USERNAME = "studentUsername";
     private static final String TEACHER_MOODLE_USERNAME = "teacherUsername";
@@ -93,7 +93,7 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
 
         // Prepare mocks for successful processing of item 0
         SynchronizationItem item = items.get(0);
-        items.set(0, item.completeEnrichmentPhase(EnrichmentStatus.SUCCESS, "success"));
+        item.completeEnrichmentPhase(EnrichmentStatus.SUCCESS, "success");
         when(courseRepository.findByRealisationId(item.getCourse().realisationId)).thenReturn(Optional.of(item.getCourse()));
         expectedStatus.put(0, ProcessingStatus.SUCCESS);
         List<Integer> expectedUsers = Arrays.asList(0, 1, 2, 3);
@@ -102,22 +102,22 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
         expectPostEnrollmentsRequestToMoodle(0, false);
 
         // Items 1-6 need no mocks because they will be skipped or successfully deleted.
-        items.set(1, items.get(1).completeEnrichmentPhase(EnrichmentStatus.IN_PROGRESS, "in progress"));
+        items.get(1).completeEnrichmentPhase(EnrichmentStatus.IN_PROGRESS, "in progress");
         expectedStatus.put(1, ProcessingStatus.SKIPPED);
-        items.set(2, items.get(2).completeEnrichmentPhase(EnrichmentStatus.COURSE_ENDED, "course ended"));
+        items.get(2).completeEnrichmentPhase(EnrichmentStatus.COURSE_ENDED, "course ended");
         expectedStatus.put(2, ProcessingStatus.SUCCESS);
-        items.set(3, items.get(3).completeEnrichmentPhase(EnrichmentStatus.COURSE_NOT_PUBLIC, "course not public"));
+        items.get(3).completeEnrichmentPhase(EnrichmentStatus.COURSE_NOT_PUBLIC, "course not public");
         expectedStatus.put(3, ProcessingStatus.SUCCESS);
-        items.set(4, items.get(4).completeEnrichmentPhase(EnrichmentStatus.MOODLE_COURSE_NOT_FOUND, "moodle course not found"));
+        items.get(4).completeEnrichmentPhase(EnrichmentStatus.MOODLE_COURSE_NOT_FOUND, "moodle course not found");
         expectedStatus.put(4, ProcessingStatus.SUCCESS);
-        items.set(5, items.get(5).completeEnrichmentPhase(EnrichmentStatus.ERROR, "error"));
+        items.get(5).completeEnrichmentPhase(EnrichmentStatus.ERROR, "error");
         expectedStatus.put(5, ProcessingStatus.SKIPPED);
-        items.set(6, items.get(6).completeEnrichmentPhase(EnrichmentStatus.LOCKED, "locked"));
+        items.get(6).completeEnrichmentPhase(EnrichmentStatus.LOCKED, "locked");
         expectedStatus.put(6, ProcessingStatus.SKIPPED);
 
         // Prepare mocks for successful processing of item 7
         item = items.get(7);
-        items.set(7, item.completeEnrichmentPhase(EnrichmentStatus.SUCCESS, "success"));
+        item.completeEnrichmentPhase(EnrichmentStatus.SUCCESS, "success");
         when(courseRepository.findByRealisationId(item.getCourse().realisationId)).thenReturn(Optional.of(item.getCourse()));
         expectedStatus.put(7, ProcessingStatus.SUCCESS);
         expectedUsers = Arrays.asList(7, 8, 9, 10);
@@ -127,7 +127,7 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
 
         // Prepare mocks for successful processing of item 8
         item = items.get(8);
-        items.set(8, item.completeEnrichmentPhase(EnrichmentStatus.SUCCESS, "success"));
+        item.completeEnrichmentPhase(EnrichmentStatus.SUCCESS, "success");
         when(courseRepository.findByRealisationId(item.getCourse().realisationId)).thenReturn(Optional.of(item.getCourse()));
         expectedStatus.put(8, ProcessingStatus.SUCCESS);
         // users 8-10 are found cached
@@ -233,9 +233,10 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
         cur.realisationName = "course " + realisationId;
         cur.students = studyRegistryStudents.subList(i, i + 4);
         cur.teachers = studyRegistryTeachers.subList(i, i + 2);
-        item = item.setStudyRegistryCourse(Optional.of(cur));
-        item = item.setMoodleCourse(Optional.of(moodleCourse));
-        return item.setMoodleEnrollments(createExistingMoodleUserEnrollments());
+        item.setStudyRegistryCourse(cur);
+        item.setMoodleCourse(moodleCourse);
+        item.setMoodleEnrollments(createExistingMoodleUserEnrollments());
+        return item;
     }
 
     private MoodleUserEnrollments createStudentEnrollment() {
@@ -252,10 +253,10 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
         return moodleUserEnrollments;
     }
 
-    private Optional<List<MoodleUserEnrollments>> createExistingMoodleUserEnrollments() {
+    private List<MoodleUserEnrollments> createExistingMoodleUserEnrollments() {
         List<MoodleUserEnrollments> enrollments = new ArrayList<>();
         enrollments.add(createStudentEnrollment());
         enrollments.add(createTeacherEnrollment());
-        return Optional.of(enrollments);
+        return enrollments;
     }
 }

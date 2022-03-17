@@ -40,7 +40,7 @@ import static org.junit.Assert.assertEquals;
 public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
 
     // add random 0-1000 millisecond delay to some moodle/sisu mock calls
-    private boolean DELAYED = true;
+    private boolean DELAYED = false;
 
     @Autowired
     private EnricherService enricherService;
@@ -69,9 +69,9 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
     }
 
     private void assertStatus(SynchronizationItem item, EnrichmentStatus expectedStatus, boolean expectedCurPresent) {
-        Optional<StudyRegistryCourseUnitRealisation> cur = item.getStudyRegistryCourse();
+        StudyRegistryCourseUnitRealisation cur = item.getStudyRegistryCourse();
 
-        assertEquals(expectedCurPresent, cur.isPresent());
+        assertEquals(expectedCurPresent, cur != null);
         assertEquals(expectedStatus, item.getEnrichmentStatus());
     }
 

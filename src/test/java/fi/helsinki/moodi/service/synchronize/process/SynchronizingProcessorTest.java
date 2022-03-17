@@ -347,12 +347,11 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             cur.students = newArrayList();
             cur.teachers = newArrayList();
 
-            SynchronizationItem synchronizationItemWithSisuCourse = synchronizationItem.setStudyRegistryCourse(Optional.of(cur));
-            SynchronizationItem synchronizationItemWithMoodleCourse = synchronizationItemWithSisuCourse
-                .setMoodleCourse(Optional.of(createMoodleCourse(moodleCourseId)));
+            synchronizationItem.setStudyRegistryCourse(cur);
+            synchronizationItem.setMoodleCourse(createMoodleCourse(moodleCourseId));
 
             this.courseUnitRealisation = cur;
-            this.synchronizationItem = synchronizationItemWithMoodleCourse;
+            this.synchronizationItem = synchronizationItem;
 
         }
 
@@ -386,7 +385,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
         }
 
         public CourseSynchronizationRequestChain withMoodleEnrollments(List<MoodleUserEnrollments> moodleEnrollments) {
-            this.synchronizationItem = this.synchronizationItem.setMoodleEnrollments(Optional.of(moodleEnrollments));
+            this.synchronizationItem.setMoodleEnrollments(moodleEnrollments);
             return this;
         }
 

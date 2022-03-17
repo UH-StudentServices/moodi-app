@@ -43,12 +43,11 @@ public class LockStatusEnricher extends AbstractEnricher {
         final boolean isLocked = syncLockService.isLocked(item.getCourse());
 
         if (SynchronizationType.UNLOCK.equals(item.getSynchronizationType())) {
-            return item.setUnlock(true);
+            item.setUnlock(true);
         } else if (isLocked) {
-            return item.completeEnrichmentPhase(EnrichmentStatus.LOCKED, "Item locked. Will not synchronize.");
-        } else {
-            return item;
+            item.completeEnrichmentPhase(EnrichmentStatus.LOCKED, "Item locked. Will not synchronize.");
         }
+        return item;
     }
 
     @Override
