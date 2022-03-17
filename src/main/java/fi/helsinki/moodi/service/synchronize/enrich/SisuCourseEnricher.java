@@ -59,16 +59,17 @@ public class SisuCourseEnricher extends AbstractEnricher {
         final StudyRegistryCourseUnitRealisation cur = prefetchedCursById.get(course.realisationId);
 
         if (cur == null) {
-            return item.completeEnrichmentPhase(
+            item.completeEnrichmentPhase(
                 EnrichmentStatus.ERROR,
                 String.format("Course not found from Sisu with id %s", course.realisationId));
         } else if (endedMoreThanYearAgo(cur)) {
-            return item.completeEnrichmentPhase(
+            item.completeEnrichmentPhase(
                 EnrichmentStatus.COURSE_ENDED,
                 String.format("Course with realisation id %s has ended", course.realisationId));
         } else {
-            return item.setStudyRegistryCourse(Optional.of(cur));
+            item.setStudyRegistryCourse(cur);
         }
+        return item;
     }
 
     private boolean endedMoreThanYearAgo(StudyRegistryCourseUnitRealisation cur) {

@@ -30,7 +30,7 @@ abstract class AbstractEnricher implements Enricher {
 
     @Override
     public final SynchronizationItem enrich(final SynchronizationItem item) {
-        if (item.getEnrichmentStatus() != EnrichmentStatus.IN_PROGESS) {
+        if (item.getEnrichmentStatus() != EnrichmentStatus.IN_PROGRESS) {
             getLogger().debug("Item enrichment already completed, just return it");
             return item;
         } else {
@@ -48,7 +48,8 @@ abstract class AbstractEnricher implements Enricher {
             return doEnrich(item);
         } catch (Exception e) {
             getLogger().error("Error while enriching item", e);
-            return item.completeEnrichmentPhase(EnrichmentStatus.ERROR, e.getMessage());
+            item.completeEnrichmentPhase(EnrichmentStatus.ERROR, e.getMessage());
+            return item;
         }
     }
 

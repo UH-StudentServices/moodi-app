@@ -95,10 +95,9 @@ public class SynchronizingProcessor extends AbstractProcessor {
         final List<UserSynchronizationItem> processedItems = synchronizeUsers(item, moodleEnrollmentsById);
 
         completeCourseEnrollments(item);
-
-        return item
-            .setUserSynchronizationItems(processedItems)
-            .completeProcessingPhase();
+        item.setUserSynchronizationItems(processedItems);
+        item.completeProcessingPhase();
+        return item;
     }
 
     private void completeCourseEnrollments(final SynchronizationItem item) {
@@ -115,8 +114,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
             .filter(item -> !item.isCompleted())
             .map(synchronizationActionResolver::enrichWithActions)
             .flatMap(item -> item.getActions().stream())
-            .collect(Collectors.groupingBy(item -> item.getActionType()));
-
+            .collect(Collectors.groupingBy(UserSynchronizationAction::getActionType));
         checkThresholdLimits(userSynchronizationActionMap, parentItem);
 
         for (UserSynchronizationActionType actionType : UserSynchronizationActionType.values()) {
@@ -189,7 +187,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
     private void checkThresholdLimits(Map<UserSynchronizationActionType, List<UserSynchronizationAction>> itemsByAction,
                                       SynchronizationItem parentItem) {
 
-        final StudyRegistryCourseUnitRealisation cur = parentItem.getStudyRegistryCourse().get();
+        final StudyRegistryCourseUnitRealisation cur = parentItem.getStudyRegistryCourse();
         final long studentCount = cur.students.size();
         final long teacherCount = cur.teachers.size();
 
@@ -226,7 +224,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
     }
 
     private Map<Long, MoodleUserEnrollments> groupMoodleEnrollmentsByUserId(final SynchronizationItem item) {
-        final List<MoodleUserEnrollments> enrollments = item.getMoodleEnrollments().get();
+        final List<MoodleUserEnrollments> enrollments = item.getMoodleEnrollments();
         return enrollments.stream().collect(Collectors.toMap(e -> e.id, Function.identity(), (a, b) -> b));
     }
 
@@ -234,13 +232,13 @@ public class SynchronizingProcessor extends AbstractProcessor {
         return action
             .getRoles()
             .stream()
-            .map(role -> new MoodleEnrollment(role, action.getMoodleUserId(), parentItem.getMoodleCourse().get().id));
+            .map(role -> new MoodleEnrollment(role, action.getMoodleUserId(), parentItem.getMoodleCourse().id));
     }
 
     private List<UserSynchronizationItem> createUserSynchronizationItems(final SynchronizationItem item,
                                                                          final Map<Long, MoodleUserEnrollments> moodleEnrollmentsByUserId) {
 
-        final StudyRegistryCourseUnitRealisation course = item.getStudyRegistryCourse().get();
+        final StudyRegistryCourseUnitRealisation course = item.getStudyRegistryCourse();
 
         List<UserSynchronizationItem> personItems = new ArrayList<>();
 

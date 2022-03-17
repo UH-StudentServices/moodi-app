@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -129,14 +130,16 @@ public class SynchronizationService {
     /**
      * Enrich items with data required in synchronization.
      */
-    private List<SynchronizationItem> enrichItems(final List<SynchronizationItem> items) {
-        return enricherService.enrich(items);
+    public List<SynchronizationItem> enrichItems(final List<SynchronizationItem> items) {
+        return items.stream()
+            .map(enricherService::enrichItem)
+            .collect(Collectors.toList());
     }
 
     /**
      * Perform the actual synchronization.
      */
-    private List<SynchronizationItem> processItems(final List<SynchronizationItem> items) {
+    public List<SynchronizationItem> processItems(final List<SynchronizationItem> items) {
         return processorService.process(items);
     }
 
