@@ -25,18 +25,19 @@ synchronize.INCREMENTAL.enabled: false
 logging:
   retain-logs: PT30M
   file-logging-path: /tmp/log/moodi-import-sync-log
-  level:
-    root: info
-
-    org:
-      mockserver: error
-      springframework:
-          transaction: debug
-          orm:
-              jpa: debug
-    fi:
-      helsinki:
-        moodi:
-          test:
-            templates: info
+# Useful logging levels for debugging tests:
+#  level:
+#    root: info
+#
+#    org:
+#      mockserver: error
+#      springframework:
+#          transaction: debug
+#          orm:
+#              jpa: debug
+#    fi:
+#      helsinki:
+#        moodi:
+#          test:
+#            templates: info
 mailNotification.to: nonexistingemailaddress@helsinki.fi
