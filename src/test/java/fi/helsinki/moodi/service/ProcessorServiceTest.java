@@ -41,7 +41,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,8 +96,8 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
         items.set(0, item.completeEnrichmentPhase(EnrichmentStatus.SUCCESS, "success"));
         when(courseRepository.findByRealisationId(item.getCourse().realisationId)).thenReturn(Optional.of(item.getCourse()));
         expectedStatus.put(0, ProcessingStatus.SUCCESS);
-        Integer[] expectedUsers = {0, 1, 2, 3};
-        Integer[] expectedTeachers = {0, 1};
+        List<Integer> expectedUsers = Arrays.asList(0, 1, 2, 3);
+        List<Integer> expectedTeachers = Arrays.asList(0, 1);
         expectGetUserRequestsToMoodle(expectedUsers, expectedTeachers, 0);
         expectPostEnrollmentsRequestToMoodle(0, false);
 
@@ -121,8 +120,8 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
         items.set(7, item.completeEnrichmentPhase(EnrichmentStatus.SUCCESS, "success"));
         when(courseRepository.findByRealisationId(item.getCourse().realisationId)).thenReturn(Optional.of(item.getCourse()));
         expectedStatus.put(7, ProcessingStatus.SUCCESS);
-        expectedUsers = new Integer[]{7, 8, 9, 10};
-        expectedTeachers = new Integer[]{7, 8};
+        expectedUsers = Arrays.asList(7, 8, 9, 10);
+        expectedTeachers = Arrays.asList(7, 8);
         expectGetUserRequestsToMoodle(expectedUsers, expectedTeachers, 7);
         expectPostEnrollmentsRequestToMoodle(7, false);
 
@@ -132,8 +131,8 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
         when(courseRepository.findByRealisationId(item.getCourse().realisationId)).thenReturn(Optional.of(item.getCourse()));
         expectedStatus.put(8, ProcessingStatus.SUCCESS);
         // users 8-10 are found cached
-        expectedUsers = new Integer[]{11};
-        expectedTeachers = new Integer[]{9};
+        expectedUsers = singletonList(11);
+        expectedTeachers = singletonList(9);
         expectGetUserRequestsToMoodle(expectedUsers, expectedTeachers, 8);
         expectPostEnrollmentsRequestToMoodle(8, true);
 
@@ -175,15 +174,13 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
         expectEnrollmentRequestToMoodleWithResponse(EMPTY_RESPONSE, enrollments.toArray(new MoodleEnrollment[0]));
     }
 
-    private void expectGetUserRequestsToMoodle(Integer[] expectedStudents, Integer[] expectedTeachers, int missingId) {
-        List<Integer> studentBaseIds = Arrays.asList(expectedStudents);
-        studentBaseIds.forEach(i -> {
+    private void expectGetUserRequestsToMoodle(List<Integer> expectedStudents, List<Integer> expectedTeachers, int missingId) {
+        expectedStudents.forEach(i -> {
                 StudyRegistryStudent student = studyRegistryStudents.get(i);
                 expectGetUserRequestToMoodle(student.userName, i, DELAYED);
             }
         );
-        List<Integer> teacherBaseIds = Arrays.asList(expectedTeachers);
-        teacherBaseIds.forEach(i -> {
+        expectedTeachers.forEach(i -> {
                 StudyRegistryTeacher teacher = studyRegistryTeachers.get(i);
                 expectGetUserRequestToMoodle(teacher.userName, TEACHER_ID_BASE + i, DELAYED);
             }

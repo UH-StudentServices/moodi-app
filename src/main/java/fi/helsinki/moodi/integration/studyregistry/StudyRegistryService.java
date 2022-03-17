@@ -50,7 +50,7 @@ public class StudyRegistryService {
                 .filter(Objects::nonNull).distinct().collect(Collectors.toList());
 
         // Diverging from existing pattern here:
-        // Getting all teacher user names immediately, as opposed to getting them one by one in EnrollmentExecutor,
+        // Getting all teacher user names immediately, as opposed to getting them one by one in EnrollmentService,
         // because it is simpler and more efficient this way.
         Map<String, StudyRegistryTeacher> teachersById =
             sisuClient.getPersons(uniquePersonIds)

@@ -30,6 +30,10 @@ logging:
 
     org:
       mockserver: error
+      springframework:
+          transaction: debug
+          orm:
+              jpa: debug
     fi:
       helsinki:
         moodi:
