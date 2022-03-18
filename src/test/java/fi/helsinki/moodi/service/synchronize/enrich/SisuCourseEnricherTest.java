@@ -25,8 +25,6 @@ import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import org.junit.Test;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.Optional;
-
 import static org.junit.Assert.assertEquals;
 
 @TestPropertySource(properties = "SisuGraphQLClient.batchsize=2")
