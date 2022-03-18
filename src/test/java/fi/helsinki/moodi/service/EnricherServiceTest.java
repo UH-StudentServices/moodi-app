@@ -31,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
@@ -40,7 +39,7 @@ import static org.junit.Assert.assertEquals;
 public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
 
     // add random 0-1000 millisecond delay to some moodle/sisu mock calls
-    private boolean DELAYED = false;
+    private final boolean delayed = false;
 
     @Autowired
     private EnricherService enricherService;
@@ -77,8 +76,8 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
 
     private void prepareMoodleMocks(List<SynchronizationItem> items) {
         items.forEach(item -> {
-            setupMoodleGetCourseResponse(item.getCourse().moodleId, DELAYED);
-            expectGetEnrollmentsRequestToMoodle(item.getCourse().moodleId, Fixtures.asString("/moodle/get-enrolled-users.json"), DELAYED);
+            setupMoodleGetCourseResponse(item.getCourse().moodleId, delayed);
+            expectGetEnrollmentsRequestToMoodle(item.getCourse().moodleId, Fixtures.asString("/moodle/get-enrolled-users.json"), delayed);
         });
     }
 
@@ -90,7 +89,7 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
                 .build())
         ).collect(Collectors.joining(", "));
         String response = "{\"data\": {\"course_unit_realisations\": [" + curs + "] } }";
-        mockSisuGraphQLServer.expectCourseUnitRealisationsRequestFromString(curIds, response, DELAYED);
+        mockSisuGraphQLServer.expectCourseUnitRealisationsRequestFromString(curIds, response, delayed);
         mockSisuGraphQLServer.expectPersonsRequest(singletonList("hy-hlo-1"), "/sisu/persons.json");
         sisuCourseEnricher.prefetchCourses(curIds);
     }

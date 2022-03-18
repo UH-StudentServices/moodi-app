@@ -33,14 +33,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Collections.singletonList;
-import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -55,7 +52,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 public class ImportingServiceTest extends AbstractMoodiIntegrationTest {
 
     // add random 0-1000 millisecond delay to some moodle/sisu mock calls
-    private boolean DELAYED = false;
+    private final boolean delayed = false;
 
     private static final String REALISATION_ID = "hy-CUR-1";
     protected static final String CREATOR_SISU_ID = "hy-hlo-creator";
@@ -96,11 +93,11 @@ public class ImportingServiceTest extends AbstractMoodiIntegrationTest {
         mockSisuGraphQLServer.expectPersonsRequest(Arrays.asList("hy-hlo-1", "hy-hlo-2", "hy-hlo-2.1"),
             "/sisu/persons-many-1.json");
         expectCreateCourseRequestToMoodle(REALISATION_ID, MOODLE_COURSE_ID);
-        expectGetUserRequestToMoodle(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA, DELAYED);
-        expectGetUserRequestToMoodle(MOODLE_USERNAME_JUKKA, MOODLE_USER_ID_JUKKA, DELAYED);
-        expectGetUserRequestToMoodle(MOODLE_USERNAME_MAKE, MOODLE_USER_ID_MAKE, DELAYED);
-        expectGetUserRequestToMoodle(MOODLE_USERNAME_ONE, MOODLE_USER_TEACH_ONE, DELAYED);
-        expectGetUserRequestToMoodle(MOODLE_USERNAME_CREATOR, MOODLE_USER_CREATOR, DELAYED);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA, delayed);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_JUKKA, MOODLE_USER_ID_JUKKA, delayed);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_MAKE, MOODLE_USER_ID_MAKE, delayed);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_ONE, MOODLE_USER_TEACH_ONE, delayed);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_CREATOR, MOODLE_USER_CREATOR, delayed);
         expectPostEnrollmentsRequestToMoodle();
 
         Result<ImportCourseResponse, String> result = importingService.importCourse(importCourseRequest);
