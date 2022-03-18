@@ -21,9 +21,7 @@ import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 
-import org.springframework.transaction.annotation.Transactional;
 import java.util.Comparator;
 import java.util.List;
 
