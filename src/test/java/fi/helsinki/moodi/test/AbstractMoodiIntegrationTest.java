@@ -55,7 +55,6 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -381,6 +380,7 @@ public abstract class AbstractMoodiIntegrationTest {
     protected void setupMoodleGetCourseResponse(long moodleId) {
         setupMoodleGetCourseResponse(moodleId, false);
     }
+
     protected void setupMoodleGetCourseResponse(long moodleId, boolean delayed) {
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))

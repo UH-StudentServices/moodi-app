@@ -53,7 +53,7 @@ import static org.mockito.Mockito.when;
 public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
 
     // add random 0-1000 millisecond delay to some moodle/sisu mock calls
-    private boolean DELAYED = false;
+    private final boolean delayed = false;
 
     private static final String STUDENT_MOODLE_USERNAME = "studentUsername";
     private static final String TEACHER_MOODLE_USERNAME = "teacherUsername";
@@ -86,7 +86,6 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
         createStudyRegistryTeachers();
 
         List<SynchronizationItem> items = new ArrayList<>();
-        Map<Integer, ProcessingStatus> expectedStatus = new HashMap<>();
         for (int i = 0; i < 9; i++) {
             items.add(createFullSynchronizationItem("hy-CUR-" + i, i));
         }
@@ -95,6 +94,7 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
         SynchronizationItem item = items.get(0);
         item.completeEnrichmentPhase(EnrichmentStatus.SUCCESS, "success");
         when(courseRepository.findByRealisationId(item.getCourse().realisationId)).thenReturn(Optional.of(item.getCourse()));
+        Map<Integer, ProcessingStatus> expectedStatus = new HashMap<>();
         expectedStatus.put(0, ProcessingStatus.SUCCESS);
         List<Integer> expectedUsers = Arrays.asList(0, 1, 2, 3);
         List<Integer> expectedTeachers = Arrays.asList(0, 1);
@@ -136,7 +136,6 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
         expectGetUserRequestsToMoodle(expectedUsers, expectedTeachers, 8);
         expectPostEnrollmentsRequestToMoodle(8, true);
 
-
         // items are grouped by their relevant action and actions are processed in this order:
         // SkippingProcessor Action.SKIP
         // RemovingProcessor Action.REMOVE
@@ -177,15 +176,15 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
     private void expectGetUserRequestsToMoodle(List<Integer> expectedStudents, List<Integer> expectedTeachers, int missingId) {
         expectedStudents.forEach(i -> {
                 StudyRegistryStudent student = studyRegistryStudents.get(i);
-                expectGetUserRequestToMoodle(student.userName, i, DELAYED);
+                expectGetUserRequestToMoodle(student.userName, i, delayed);
             }
         );
         expectedTeachers.forEach(i -> {
                 StudyRegistryTeacher teacher = studyRegistryTeachers.get(i);
-                expectGetUserRequestToMoodle(teacher.userName, TEACHER_ID_BASE + i, DELAYED);
+                expectGetUserRequestToMoodle(teacher.userName, TEACHER_ID_BASE + i, delayed);
             }
         );
-        expectGetUserRequestToMoodle("missing_creator" + missingId + "@test.fi", MISSING_TEACHER_ID_BASE + missingId, DELAYED);
+        expectGetUserRequestToMoodle("missing_creator" + missingId + "@test.fi", MISSING_TEACHER_ID_BASE + missingId, delayed);
     }
 
     private void createStudyRegistryStudents() {
@@ -227,12 +226,12 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
         moodleCourse.idNumber = "" + i;
         moodleCourse.shortName = "mdl" + i;
         moodleCourse.fullName = "moodleCourse" + i;
-        SynchronizationItem item = new SynchronizationItem(course, SynchronizationType.FULL);
         StudyRegistryCourseUnitRealisation cur = new StudyRegistryCourseUnitRealisation();
         cur.realisationId = realisationId;
         cur.realisationName = "course " + realisationId;
         cur.students = studyRegistryStudents.subList(i, i + 4);
         cur.teachers = studyRegistryTeachers.subList(i, i + 2);
+        SynchronizationItem item = new SynchronizationItem(course, SynchronizationType.FULL);
         item.setStudyRegistryCourse(cur);
         item.setMoodleCourse(moodleCourse);
         item.setMoodleEnrollments(createExistingMoodleUserEnrollments());
