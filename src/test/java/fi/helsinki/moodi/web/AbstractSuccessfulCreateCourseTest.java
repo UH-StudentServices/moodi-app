@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 
 public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIntegrationTest {
     protected static final String EXPECTED_SISU_DESCRIPTION_TO_MOODLE = "%3Cp%3Ehttps%3A%2F%2Fcourses.helsinki.fi%2Ffi%2FOODI-FLOW" +
-        "%2F136394381%3C%2Fp%3E%3Cp%3EOpintojaksot+%3C%2Fp%3E%3Cp%3EKurssi%2C+5.8.-5.12.2019%3C%2Fp%3E";
+        "%2F136394381%3C%2Fp%3E%3Cp%3EOpintojaksot+%3C%2Fp%3E%3Cp%3EKurssi%2C+5.8.2019-5.12.2019%3C%2Fp%3E";
 
     protected void expectEnrollmentsWithAddedMoodiRoles(List<MoodleEnrollment> moodleEnrollments) {
         expectEnrollmentRequestToMoodle(moodleEnrollments.stream()
