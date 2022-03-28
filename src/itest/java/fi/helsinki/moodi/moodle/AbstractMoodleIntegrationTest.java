@@ -203,6 +203,7 @@ public abstract class AbstractMoodleIntegrationTest {
         return curVariables(courseId, students, teachers, "urn:code:language:fi");
     }
 
+    @SuppressWarnings("unchecked")
     private Map curVariables(String courseId, List<StudentUser> students, List<TeacherUser> teachers, String teachingLanguage) {
         return new ImmutableMap.Builder()
             .put("courseId", courseId)
