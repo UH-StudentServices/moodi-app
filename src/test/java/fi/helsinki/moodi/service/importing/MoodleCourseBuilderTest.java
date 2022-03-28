@@ -26,7 +26,6 @@ import fi.helsinki.moodi.integration.sisu.SisuLearningEnvironment;
 import fi.helsinki.moodi.integration.sisu.SisuLocalisedValue;
 import fi.helsinki.moodi.integration.sisu.SisuOrganisation;
 import fi.helsinki.moodi.integration.sisu.SisuOrganisationRoleShare;
-import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
