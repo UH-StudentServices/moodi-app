@@ -6,7 +6,7 @@
         "sv": "För att testa",
         "en": "For testing"
       },
-      "teachingLanguageUrn": "urn:code:language:fi",
+      "teachingLanguageUrn": "{{ teachingLanguage }}",
       "id": "{{ courseId }}",
       "activityPeriod": {
         "startDate": "2019-11-05",
@@ -28,6 +28,21 @@
           }
         }
       ],
+      "courseUnits": [
+        {
+          "code": "FOO123"
+        },
+        {
+          "code": "BAR234"
+        }
+      ],
+      "courseUnitRealisationType": {
+        "name": {
+          "fi": "Kurssi",
+          "en": "Course",
+          "sv": "Kurs"
+        }
+      },
       "flowState": "PUBLISHED",
       "responsibilityInfos": [
         {{#teachers}}

@@ -20,10 +20,14 @@ package fi.helsinki.moodi.integration.sisu;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryTeacher;
 import io.aexp.nodes.graphql.annotations.GraphQLArgument;
+import io.aexp.nodes.graphql.annotations.GraphQLIgnore;
 import io.aexp.nodes.graphql.annotations.GraphQLProperty;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,8 +40,19 @@ import static fi.helsinki.moodi.Constants.TEACHER_TYPES;
 })
 public class SisuCourseUnitRealisation {
 
+    @GraphQLIgnore
+    static final Map<SisuLocale, String> courseUnitLocalization = new HashMap<SisuLocale, String>() {{
+        put(SisuLocale.FI, "Opintojaksot");
+        put(SisuLocale.SV, "Studieavsnitten");
+        put(SisuLocale.EN, "Courses");
+    }};
+
+    @GraphQLIgnore
+    static final DateTimeFormatter finnishYearFormat = DateTimeFormatter.ofPattern("d.M.yyyy");
+
     public String id;
     public SisuLocalisedValue name;
+    public SisuCourseUnitRealisationType courseUnitRealisationType;
     public SisuDateRange activityPeriod;
     public String flowState;
     public String teachingLanguageUrn;
@@ -45,6 +60,7 @@ public class SisuCourseUnitRealisation {
     public List<SisuResponsibilityInfo> responsibilityInfos = new ArrayList<>();
     public List<SisuEnrolment> enrolments = new ArrayList<>();
     public List<SisuOrganisationRoleShare> organisations = new ArrayList<>();
+    public List<SisuCourseUnit> courseUnits = new ArrayList<>();
 
     public StudyRegistryCourseUnitRealisation toStudyRegistryCourseUnitRealisation() {
         StudyRegistryCourseUnitRealisation ret = new StudyRegistryCourseUnitRealisation();
@@ -66,11 +82,22 @@ public class SisuCourseUnitRealisation {
 
         // Use the URL of primary learningEnvironment, in language of the course teaching language, or if
         // that language is not found, some other language.
-        ret.description = learningEnvironments.stream()
+        String url = learningEnvironments.stream()
             .filter(le -> le.primary)
             .sorted((le1, le2) -> SisuLocale.byCodeOrDefaultToFi(le1.language).equals(teachingLanguageCode) ? -1 : 1)
             .map(le -> le.url)
             .findFirst().orElse("");
+
+        String courseUnitCodes = courseUnits.stream()
+            .sorted(Comparator.comparing(cu -> cu.code))
+            .map(cu -> cu.code)
+            .collect(Collectors.joining(", "));
+
+        ret.description = "<p>" + url + "</p>" +
+            "<p>" + courseUnitLocalization.get(teachingLanguageCode) + " " + courseUnitCodes + "</p>" +
+            "<p>" + courseUnitRealisationType.name.getForLocaleOrDefault(teachingLanguageCode) + ", " +
+                finnishYearFormat.format(ret.startDate) + "-" + finnishYearFormat.format(ret.endDate) + "</p>";
+
 
         return ret;
     }

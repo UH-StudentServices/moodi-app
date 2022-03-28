@@ -32,6 +32,9 @@ public final class Constants {
     public static final String RESPONSIBLE_TEACHER = CUR_RESP_TYPE + "responsible-teacher";
     public static final String TEACHER = CUR_RESP_TYPE + "teacher";
     public static final List<String> TEACHER_TYPES = Arrays.asList(RESPONSIBLE_TEACHER, TEACHER);
+    public static final String REALISATION_TYPE_FI = "Kurssi";
+    public static final String REALISATION_TYPE_SV = "Kurs";
+    public static final String REALISTION_TYPE_EN = "Course";
 
     private Constants() {}
 }

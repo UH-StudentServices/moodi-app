@@ -18,12 +18,15 @@
 package fi.helsinki.moodi.service.importing;
 
 import fi.helsinki.moodi.integration.moodle.MoodleCourse;
+import fi.helsinki.moodi.integration.sisu.SisuCourseUnit;
 import fi.helsinki.moodi.integration.sisu.SisuCourseUnitRealisation;
+import fi.helsinki.moodi.integration.sisu.SisuCourseUnitRealisationType;
 import fi.helsinki.moodi.integration.sisu.SisuDateRange;
 import fi.helsinki.moodi.integration.sisu.SisuLearningEnvironment;
 import fi.helsinki.moodi.integration.sisu.SisuLocalisedValue;
 import fi.helsinki.moodi.integration.sisu.SisuOrganisation;
 import fi.helsinki.moodi.integration.sisu.SisuOrganisationRoleShare;
+import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +72,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         assertEquals(REALISATION_NAME_SV, moodleCourse.fullName);
         assertEquals("hy-cur-1", moodleCourse.idNumber);
         assertEquals("Kurs namn-1", moodleCourse.shortName);
-        assertEquals("korrekt url på svenska", moodleCourse.summary);
+        assertEquals("<p>korrekt url på svenska</p><p>Studieavsnitten CODE1, CODE2, CODE3</p><p>Kurs, 5.8.-5.12.2019</p>", moodleCourse.summary);
         assertEquals(LocalDate.of(2019, 8, 5), moodleCourse.startTime);
         assertEquals(LocalDate.of(2019, 12, 5), moodleCourse.endTime);
         assertEquals("9", moodleCourse.categoryId);
@@ -85,7 +88,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         assertEquals(REALISATION_NAME_FI, moodleCourse.fullName);
         assertEquals("hy-cur-1", moodleCourse.idNumber);
         assertEquals("Kurssin nimi-1", moodleCourse.shortName);
-        assertEquals("urli suomeksi", moodleCourse.summary);
+        assertEquals("<p>urli suomeksi</p><p>Opintojaksot CODE1, CODE2, CODE3</p><p>Kurssi, 5.8.-5.12.2019</p>", moodleCourse.summary);
         assertEquals(LocalDate.of(2019, 8, 5), moodleCourse.startTime);
         assertEquals(LocalDate.of(2019, 12, 5), moodleCourse.endTime);
         assertEquals("9", moodleCourse.categoryId);
@@ -133,7 +136,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         assertEquals(REALISATION_NAME_FI, moodleCourse.fullName);
         assertEquals("hy-cur-1", moodleCourse.idNumber);
         assertEquals("Kurssin nimi-5YC1S", moodleCourse.shortName);
-        assertEquals("urli suomeksi", moodleCourse.summary);
+        assertEquals("<p>urli suomeksi</p><p>Opintojaksot CODE1, CODE2, CODE3</p><p>Kurssi, 24.3.-24.3.2023</p>", moodleCourse.summary);
         assertEquals(LocalDate.now(), moodleCourse.startTime);
         assertEquals(LocalDate.now().plusYears(1), moodleCourse.endTime);
         assertEquals(MOODLE_DEFAULT_CATEGORY_ID, moodleCourse.categoryId);
@@ -142,6 +145,11 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
     private SisuCourseUnitRealisation getSisuCur(String langCode) {
         SisuCourseUnitRealisation ret = new SisuCourseUnitRealisation();
         ret.id = "hy-cur-1";
+        ret.courseUnits.add(new SisuCourseUnit("CODE1"));
+        ret.courseUnits.add(new SisuCourseUnit("CODE2"));
+        ret.courseUnits.add(new SisuCourseUnit("CODE3"));
+        ret.courseUnitRealisationType = new SisuCourseUnitRealisationType();
+        ret.courseUnitRealisationType.name = new SisuLocalisedValue(REALISATION_TYPE_FI, REALISATION_TYPE_SV, REALISTION_TYPE_EN);
         ret.name = new SisuLocalisedValue(REALISATION_NAME_FI, REALISATION_NAME_SV, REALISATION_NAME_EN);
         ret.activityPeriod = new SisuDateRange(LocalDate.of(2019, 8, 5), LocalDate.of(2019, 11, 5));
         ret.flowState = "PUBLISHED";

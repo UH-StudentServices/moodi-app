@@ -200,11 +200,16 @@ public abstract class AbstractMoodleIntegrationTest {
     }
 
     private Map curVariables(String courseId, List<StudentUser> students, List<TeacherUser> teachers) {
+        return curVariables(courseId, students, teachers, "urn:code:language:fi");
+    }
+
+    private Map curVariables(String courseId, List<StudentUser> students, List<TeacherUser> teachers, String teachingLanguage) {
         return new ImmutableMap.Builder()
             .put("courseId", courseId)
             .put("students", students)
             .put("teachers", teachers)
             .put("endDate", getFutureDateString())
+            .put("teachingLanguage", teachingLanguage)
             .build();
     }
 
