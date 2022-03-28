@@ -39,7 +39,7 @@ public class MoodleIntegrationImportCourseTest extends AbstractMoodleIntegration
             sisuCourseId,
             newArrayList(studentUser, studentUserNotInMoodle),
             newArrayList(teacherUser)
-            );
+        );
 
         long moodleCourseId = importCourse(sisuCourseId, creatorUser.personId);
 
