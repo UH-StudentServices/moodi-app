@@ -41,14 +41,16 @@ import static fi.helsinki.moodi.Constants.TEACHER_TYPES;
 public class SisuCourseUnitRealisation {
 
     @GraphQLIgnore
-    static final Map<SisuLocale, String> courseUnitLocalization = new HashMap<SisuLocale, String>() {{
-        put(SisuLocale.FI, "Opintojaksot");
-        put(SisuLocale.SV, "Studieavsnitten");
-        put(SisuLocale.EN, "Courses");
-    }};
+    static final Map<SisuLocale, String> COURSE_UNIT_LOCALIZATION = new HashMap<SisuLocale, String>() {
+        {
+            put(SisuLocale.FI, "Opintojaksot");
+            put(SisuLocale.SV, "Studieavsnitten");
+            put(SisuLocale.EN, "Courses");
+        }
+    };
 
     @GraphQLIgnore
-    static final DateTimeFormatter finnishYearFormat = DateTimeFormatter.ofPattern("d.M.yyyy");
+    static final DateTimeFormatter FINNISH_DATE_FORMAT = DateTimeFormatter.ofPattern("d.M.yyyy");
 
     public String id;
     public SisuLocalisedValue name;
@@ -72,7 +74,7 @@ public class SisuCourseUnitRealisation {
 
         if (activityPeriod != null) {
             ret.startDate = activityPeriod.startDate != null ? activityPeriod.startDate : LocalDate.now();
-            ret.endDate =  activityPeriod.endDate != null ? activityPeriod.endDate.plusMonths(1) : LocalDate.now().plusMonths(12);
+            ret.endDate = activityPeriod.endDate != null ? activityPeriod.endDate.plusMonths(1) : LocalDate.now().plusMonths(12);
         } else {
             ret.startDate = LocalDate.now();
             ret.endDate = LocalDate.now().plusMonths(12);
@@ -94,10 +96,9 @@ public class SisuCourseUnitRealisation {
             .collect(Collectors.joining(", "));
 
         ret.description = "<p>" + url + "</p>" +
-            "<p>" + courseUnitLocalization.get(teachingLanguageCode) + " " + courseUnitCodes + "</p>" +
+            "<p>" + COURSE_UNIT_LOCALIZATION.get(teachingLanguageCode) + " " + courseUnitCodes + "</p>" +
             "<p>" + courseUnitRealisationType.name.getForLocaleOrDefault(teachingLanguageCode) + ", " +
-                finnishYearFormat.format(ret.startDate) + "-" + finnishYearFormat.format(ret.endDate) + "</p>";
-
+            FINNISH_DATE_FORMAT.format(ret.startDate) + "-" + FINNISH_DATE_FORMAT.format(ret.endDate) + "</p>";
 
         return ret;
     }
@@ -117,10 +118,10 @@ public class SisuCourseUnitRealisation {
 
     private String getMainOrganisationId() {
         return organisations.stream()
-                .filter(o -> RESPONSIBLE_ORGANISATION.equals(o.roleUrn) && o.share > 0.5)
-                .findFirst()
-                .map(o -> o.organisation.id)
-                .orElse(null);
+            .filter(o -> RESPONSIBLE_ORGANISATION.equals(o.roleUrn) && o.share > 0.5)
+            .findFirst()
+            .map(o -> o.organisation.id)
+            .orElse(null);
     }
 
     public List<String> teacherSisuIds() {
