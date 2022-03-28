@@ -7,6 +7,13 @@
           "sv": "Kurs 1",
           "en": "Course 1"
         },
+        "courseUnitRealisationType": {
+          "name": {
+            "fi": "Kurssi",
+            "en": "Course",
+            "sv": "Kurs"
+          }
+        },
         "teachingLanguageUrn": "urn:code:language:fi",
         "id": "hy-CUR-1",
         "activityPeriod": {
@@ -64,6 +71,13 @@
           "fi": "Julkaistu ja meneillään 2",
           "sv": "Kurs 2",
           "en": "Course 2"
+        },
+        "courseUnitRealisationType": {
+          "name": {
+            "fi": "Kurssi",
+            "en": "Course",
+            "sv": "Kurs"
+          }
         },
         "teachingLanguageUrn": "urn:code:language:fi",
         "id": "hy-CUR-2",

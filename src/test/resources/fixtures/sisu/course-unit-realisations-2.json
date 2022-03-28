@@ -7,6 +7,13 @@
           "sv": "Kurs 3",
           "en": "Course 3"
         },
+        "courseUnitRealisationType": {
+          "name": {
+            "fi": "Kurssi",
+            "en": "Course",
+            "sv": "Kurs"
+          }
+        },
         "teachingLanguageUrn": "urn:code:language:fi",
         "id": "hy-CUR-ended",
         "activityPeriod": {
@@ -51,6 +58,13 @@
           "sv": "Kurs 4",
           "en": "Course 4"
         },
+        "courseUnitRealisationType": {
+          "name": {
+            "fi": "Kurssi",
+            "en": "Course",
+            "sv": "Kurs"
+          }
+        },
         "teachingLanguageUrn": "urn:code:language:fi",
         "id": "hy-CUR-archived",
         "activityPeriod": {
@@ -90,6 +104,13 @@
           "fi": "Julkaisematon 5",
           "sv": "Kurs 5",
           "en": "Unpublished 5"
+        },
+        "courseUnitRealisationType": {
+          "name": {
+            "fi": "Kurssi",
+            "en": "Course",
+            "sv": "Kurs"
+          }
         },
         "teachingLanguageUrn": "urn:code:language:fi",
         "id": "hy-CUR-unpublished",

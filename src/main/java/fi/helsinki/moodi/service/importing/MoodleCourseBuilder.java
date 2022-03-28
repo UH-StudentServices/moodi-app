@@ -48,7 +48,7 @@ public class MoodleCourseBuilder {
 
     private String getShortName(String realisationName, Long dbCourseId) {
         if (overrideShortname) {
-            // DB IDs in integration tests are the same for each run, so we must override them to something unique
+            // DB IDs in integration tests are thzxe same for each run, so we must override them to something unique
             // to avoid shortName collisions in dev Moodle.
             dbCourseId = System.currentTimeMillis();
         }
