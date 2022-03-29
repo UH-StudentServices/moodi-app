@@ -63,7 +63,7 @@ public class MoodleIntegrationImportCourseTest extends AbstractMoodleIntegration
         assertThat(mfc.shortName).startsWith("Lapsuus ja yhtei-");
         assertThat(mfc.idNumber).isEqualTo(sisuCourseId);
         assertThat(mfc.lang).isEmpty();
-        assertThat(mfc.summary).startsWith("<p>https://courses.helsinki.fi/fi/OODI-FLOW/136394381</p><p>Opintojaksot FOO123, BAR234</p><p>Kurssi");
+        assertThat(mfc.summary).startsWith("<p>https://courses.helsinki.fi/fi/OODI-FLOW/136394381</p><p>Opintojaksot BAR234, FOO123</p><p>Kurssi");
         assertThat(mfc.categoryId).isEqualTo(9);
     }
 
