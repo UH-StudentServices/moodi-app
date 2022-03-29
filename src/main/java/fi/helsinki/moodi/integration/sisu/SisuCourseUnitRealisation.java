@@ -20,10 +20,14 @@ package fi.helsinki.moodi.integration.sisu;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryTeacher;
 import io.aexp.nodes.graphql.annotations.GraphQLArgument;
+import io.aexp.nodes.graphql.annotations.GraphQLIgnore;
 import io.aexp.nodes.graphql.annotations.GraphQLProperty;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,8 +40,21 @@ import static fi.helsinki.moodi.Constants.TEACHER_TYPES;
 })
 public class SisuCourseUnitRealisation {
 
+    @GraphQLIgnore
+    static final Map<SisuLocale, String> COURSE_UNIT_LOCALIZATION = new HashMap<SisuLocale, String>() {
+        {
+            put(SisuLocale.FI, "Opintojaksot");
+            put(SisuLocale.SV, "Studieavsnitten");
+            put(SisuLocale.EN, "Courses");
+        }
+    };
+
+    @GraphQLIgnore
+    static final DateTimeFormatter FINNISH_DATE_FORMAT = DateTimeFormatter.ofPattern("d.M.yyyy");
+
     public String id;
     public SisuLocalisedValue name;
+    public SisuCourseUnitRealisationType courseUnitRealisationType;
     public SisuDateRange activityPeriod;
     public String flowState;
     public String teachingLanguageUrn;
@@ -45,6 +62,7 @@ public class SisuCourseUnitRealisation {
     public List<SisuResponsibilityInfo> responsibilityInfos = new ArrayList<>();
     public List<SisuEnrolment> enrolments = new ArrayList<>();
     public List<SisuOrganisationRoleShare> organisations = new ArrayList<>();
+    public List<SisuCourseUnit> courseUnits = new ArrayList<>();
 
     public StudyRegistryCourseUnitRealisation toStudyRegistryCourseUnitRealisation() {
         StudyRegistryCourseUnitRealisation ret = new StudyRegistryCourseUnitRealisation();
@@ -56,7 +74,7 @@ public class SisuCourseUnitRealisation {
 
         if (activityPeriod != null) {
             ret.startDate = activityPeriod.startDate != null ? activityPeriod.startDate : LocalDate.now();
-            ret.endDate =  activityPeriod.endDate != null ? activityPeriod.endDate.plusMonths(1) : LocalDate.now().plusMonths(12);
+            ret.endDate = activityPeriod.endDate != null ? activityPeriod.endDate.plusMonths(1) : LocalDate.now().plusMonths(12);
         } else {
             ret.startDate = LocalDate.now();
             ret.endDate = LocalDate.now().plusMonths(12);
@@ -66,11 +84,21 @@ public class SisuCourseUnitRealisation {
 
         // Use the URL of primary learningEnvironment, in language of the course teaching language, or if
         // that language is not found, some other language.
-        ret.description = learningEnvironments.stream()
+        String url = learningEnvironments.stream()
             .filter(le -> le.primary)
             .sorted((le1, le2) -> SisuLocale.byCodeOrDefaultToFi(le1.language).equals(teachingLanguageCode) ? -1 : 1)
             .map(le -> le.url)
             .findFirst().orElse("");
+
+        String courseUnitCodes = courseUnits.stream()
+            .sorted(Comparator.comparing(cu -> cu.code))
+            .map(cu -> cu.code)
+            .collect(Collectors.joining(", "));
+
+        ret.description = "<p>" + url + "</p>" +
+            "<p>" + COURSE_UNIT_LOCALIZATION.get(teachingLanguageCode) + " " + courseUnitCodes + "</p>" +
+            "<p>" + courseUnitRealisationType.name.getForLocaleOrDefault(teachingLanguageCode) + ", " +
+            FINNISH_DATE_FORMAT.format(ret.startDate) + "-" + FINNISH_DATE_FORMAT.format(ret.endDate) + "</p>";
 
         return ret;
     }
@@ -90,10 +118,10 @@ public class SisuCourseUnitRealisation {
 
     private String getMainOrganisationId() {
         return organisations.stream()
-                .filter(o -> RESPONSIBLE_ORGANISATION.equals(o.roleUrn) && o.share > 0.5)
-                .findFirst()
-                .map(o -> o.organisation.id)
-                .orElse(null);
+            .filter(o -> RESPONSIBLE_ORGANISATION.equals(o.roleUrn) && o.share > 0.5)
+            .findFirst()
+            .map(o -> o.organisation.id)
+            .orElse(null);
     }
 
     public List<String> teacherSisuIds() {

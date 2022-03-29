@@ -6,6 +6,13 @@
         "sv": "För att testa",
         "en": "For testing"
       },
+      "courseUnitRealisationType": {
+        "name": {
+          "fi": "Kurssi",
+          "en": "Course",
+          "sv": "Kurs"
+        }
+      },
       "teachingLanguageUrn": "urn:code:language:fi",
       "id": "hy-cur-in-db",
       "activityPeriod": {

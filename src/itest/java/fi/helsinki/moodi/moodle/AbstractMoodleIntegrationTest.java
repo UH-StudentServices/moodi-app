@@ -200,11 +200,17 @@ public abstract class AbstractMoodleIntegrationTest {
     }
 
     private Map curVariables(String courseId, List<StudentUser> students, List<TeacherUser> teachers) {
+        return curVariables(courseId, students, teachers, "urn:code:language:fi");
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map curVariables(String courseId, List<StudentUser> students, List<TeacherUser> teachers, String teachingLanguage) {
         return new ImmutableMap.Builder()
             .put("courseId", courseId)
             .put("students", students)
             .put("teachers", teachers)
             .put("endDate", getFutureDateString())
+            .put("teachingLanguage", teachingLanguage)
             .build();
     }
 
@@ -225,6 +231,7 @@ public abstract class AbstractMoodleIntegrationTest {
     protected void expectCourseRealisationsWithUsers(String courseId, List<StudentUser> students, List<TeacherUser> teachers) {
         mockSisuGraphQLServer.expectCourseUnitRealisationsRequest(Arrays.asList(courseId),
             "/sisu-itest/course-unit-realisations-itest.json",
+
             curVariables(courseId, students, teachers));
 
         if (!teachers.isEmpty()) {
