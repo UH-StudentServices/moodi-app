@@ -231,6 +231,7 @@ public abstract class AbstractMoodleIntegrationTest {
     protected void expectCourseRealisationsWithUsers(String courseId, List<StudentUser> students, List<TeacherUser> teachers) {
         mockSisuGraphQLServer.expectCourseUnitRealisationsRequest(Arrays.asList(courseId),
             "/sisu-itest/course-unit-realisations-itest.json",
+
             curVariables(courseId, students, teachers));
 
         if (!teachers.isEmpty()) {
