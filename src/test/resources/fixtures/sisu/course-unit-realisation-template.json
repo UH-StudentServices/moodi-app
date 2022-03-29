@@ -5,6 +5,13 @@
     "en": "Course {{ id }}"
   },
   "teachingLanguageUrn": "urn:code:language:fi",
+  "courseUnitRealisationType": {
+    "name": {
+      "fi": "Kurssi",
+      "en": "Course",
+      "sv": "Kurs"
+    }
+  },
   "id": "hy-CUR-{{ id }}",
   "activityPeriod": {
     "startDate": "2019-08-05",

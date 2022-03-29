@@ -350,6 +350,7 @@ public abstract class AbstractMoodiIntegrationTest {
                     try {
                         Thread.sleep(ThreadLocalRandom.current().nextInt(1001));
                     } catch (InterruptedException ignored) {
+                        ;
                     }
                 }
                 return withSuccess(response, MediaType.APPLICATION_JSON).createResponse(request);
@@ -390,6 +391,7 @@ public abstract class AbstractMoodiIntegrationTest {
                     try {
                         Thread.sleep(ThreadLocalRandom.current().nextInt(1001));
                     } catch (InterruptedException ignored) {
+                        ;
                     }
                 }
                 return withSuccess(Fixtures.asString("/moodle/get-courses-parameterized.json",
@@ -458,6 +460,7 @@ public abstract class AbstractMoodiIntegrationTest {
                     try {
                         Thread.sleep(ThreadLocalRandom.current().nextInt(1001));
                     } catch (InterruptedException ignored) {
+                        ;
                     }
                 }
                 return withSuccess(response, MediaType.APPLICATION_JSON).createResponse(request);

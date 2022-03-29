@@ -57,10 +57,10 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
 
     private static final String STUDENT_MOODLE_USERNAME = "studentUsername";
     private static final String TEACHER_MOODLE_USERNAME = "teacherUsername";
-    private static final MoodleRole studentRole = new MoodleRole();
-    private static final MoodleRole teacherRole = new MoodleRole();
-    private static final List<StudyRegistryStudent> studyRegistryStudents = new ArrayList<>();
-    private static final List<StudyRegistryTeacher> studyRegistryTeachers = new ArrayList<>();
+    private static final MoodleRole STUDENT_ROLE = new MoodleRole();
+    private static final MoodleRole TEACHER_ROLE = new MoodleRole();
+    private static final List<StudyRegistryStudent> STUDY_REGISTRY_STUDENTS = new ArrayList<>();
+    private static final List<StudyRegistryTeacher> STUDY_REGISTRY_TEACHERS = new ArrayList<>();
     private static final long STUDENT_ROLE_ID = 5;
     private static final long TEACHER_ROLE_ID = 3;
     private static final long SYNCED_ROLE_ID = 10;
@@ -80,8 +80,8 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
 
     @Test
     public void thatProcessorsAreRanForEachItem() {
-        studentRole.roleId = STUDENT_ROLE_ID;
-        teacherRole.roleId = TEACHER_ROLE_ID;
+        STUDENT_ROLE.roleId = STUDENT_ROLE_ID;
+        TEACHER_ROLE.roleId = TEACHER_ROLE_ID;
         createStudyRegistryStudents();
         createStudyRegistryTeachers();
 
@@ -175,12 +175,12 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
 
     private void expectGetUserRequestsToMoodle(List<Integer> expectedStudents, List<Integer> expectedTeachers, int missingId) {
         expectedStudents.forEach(i -> {
-                StudyRegistryStudent student = studyRegistryStudents.get(i);
+                StudyRegistryStudent student = STUDY_REGISTRY_STUDENTS.get(i);
                 expectGetUserRequestToMoodle(student.userName, i, delayed);
             }
         );
         expectedTeachers.forEach(i -> {
-                StudyRegistryTeacher teacher = studyRegistryTeachers.get(i);
+                StudyRegistryTeacher teacher = STUDY_REGISTRY_TEACHERS.get(i);
                 expectGetUserRequestToMoodle(teacher.userName, TEACHER_ID_BASE + i, delayed);
             }
         );
@@ -188,7 +188,7 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
     }
 
     private void createStudyRegistryStudents() {
-        studyRegistryStudents.clear();
+        STUDY_REGISTRY_STUDENTS.clear();
         for (int i = 0; i < 15; i++) {
             StudyRegistryStudent student = new StudyRegistryStudent();
             student.studentNumber = "123000" + i;
@@ -196,19 +196,19 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
             student.firstNames = "firstname" + i;
             student.lastName = "lastname" + i;
             student.isEnrolled = true;
-            studyRegistryStudents.add(student); // core_user_get_users_by_field
+            STUDY_REGISTRY_STUDENTS.add(student); // core_user_get_users_by_field
         }
     }
 
     private void createStudyRegistryTeachers() {
-        studyRegistryTeachers.clear();
+        STUDY_REGISTRY_TEACHERS.clear();
         for (int i = 0; i < 15; i++) {
             StudyRegistryTeacher teacher = new StudyRegistryTeacher();
             teacher.employeeNumber = "E500" + i;
             teacher.userName = "teacher" + i + "@test.fi";
             teacher.firstNames = "firstname" + i;
             teacher.lastName = "lastname" + i;
-            studyRegistryTeachers.add(teacher);
+            STUDY_REGISTRY_TEACHERS.add(teacher);
         }
     }
 
@@ -229,8 +229,8 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
         StudyRegistryCourseUnitRealisation cur = new StudyRegistryCourseUnitRealisation();
         cur.realisationId = realisationId;
         cur.realisationName = "course " + realisationId;
-        cur.students = studyRegistryStudents.subList(i, i + 4);
-        cur.teachers = studyRegistryTeachers.subList(i, i + 2);
+        cur.students = STUDY_REGISTRY_STUDENTS.subList(i, i + 4);
+        cur.teachers = STUDY_REGISTRY_TEACHERS.subList(i, i + 2);
         SynchronizationItem item = new SynchronizationItem(course, SynchronizationType.FULL);
         item.setStudyRegistryCourse(cur);
         item.setMoodleCourse(moodleCourse);
@@ -241,14 +241,14 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
     private MoodleUserEnrollments createStudentEnrollment() {
         MoodleUserEnrollments moodleUserEnrollments = new MoodleUserEnrollments();
         moodleUserEnrollments.username = STUDENT_MOODLE_USERNAME;
-        moodleUserEnrollments.roles = singletonList(studentRole);
+        moodleUserEnrollments.roles = singletonList(STUDENT_ROLE);
         return moodleUserEnrollments;
     }
 
     private MoodleUserEnrollments createTeacherEnrollment() {
         MoodleUserEnrollments moodleUserEnrollments = new MoodleUserEnrollments();
         moodleUserEnrollments.username = TEACHER_MOODLE_USERNAME;
-        moodleUserEnrollments.roles = singletonList(teacherRole);
+        moodleUserEnrollments.roles = singletonList(TEACHER_ROLE);
         return moodleUserEnrollments;
     }
 
