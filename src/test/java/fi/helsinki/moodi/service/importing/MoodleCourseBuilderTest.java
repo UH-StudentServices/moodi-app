@@ -72,7 +72,13 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         assertEquals(REALISATION_NAME_SV, moodleCourse.fullName);
         assertEquals("hy-cur-1", moodleCourse.idNumber);
         assertEquals("Kurs namn-1", moodleCourse.shortName);
-        assertEquals("<p>korrekt url på svenska</p><p>Studieavsnitten CODE1, CODE2, CODE3</p><p>Kurs, 5.8.2019-5.12.2019</p>", moodleCourse.summary);
+        assertEquals("<p><span class=\"fi\" class=\"multilang\"><a href=\"urli suomeksi\">urli suomeksi</a></span>" +
+            "<span class=\"en\" class=\"multilang\"><a href=\"urli suomeksi\">urli suomeksi</a></span>" +
+            "<span class=\"sv\" class=\"multilang\"><a href=\"fel url på svenska\">fel url på svenska</a></span></p>" +
+            "<p><span class=\"fi\" class=\"multilang\">Opintojaksot</span><span class=\"en\" class=\"multilang\">Courses</span>" +
+            "<span class=\"sv\" class=\"multilang\">Studieavsnitten</span>, CODE1, CODE2, CODE3</p><p>" +
+            "<span class=\"fi\" class=\"multilang\">Kurssi</span><span class=\"en\" class=\"multilang\">Course</span>" +
+            "<span class=\"sv\" class=\"multilang\">Kurs</span>, 5.8.2019-5.12.2019</p>", moodleCourse.summary);
         assertEquals(LocalDate.of(2019, 8, 5), moodleCourse.startTime);
         assertEquals(LocalDate.of(2019, 12, 5), moodleCourse.endTime);
         assertEquals("9", moodleCourse.categoryId);
@@ -88,7 +94,13 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         assertEquals(REALISATION_NAME_FI, moodleCourse.fullName);
         assertEquals("hy-cur-1", moodleCourse.idNumber);
         assertEquals("Kurssin nimi-1", moodleCourse.shortName);
-        assertEquals("<p>urli suomeksi</p><p>Opintojaksot CODE1, CODE2, CODE3</p><p>Kurssi, 5.8.2019-5.12.2019</p>", moodleCourse.summary);
+        assertEquals("<p><span class=\"fi\" class=\"multilang\"><a href=\"urli suomeksi\">urli suomeksi</a></span>" +
+            "<span class=\"en\" class=\"multilang\"><a href=\"urli suomeksi\">urli suomeksi</a></span>" +
+            "<span class=\"sv\" class=\"multilang\"><a href=\"fel url på svenska\">fel url på svenska</a></span></p>" +
+            "<p><span class=\"fi\" class=\"multilang\">Opintojaksot</span><span class=\"en\" class=\"multilang\">Courses</span>" +
+            "<span class=\"sv\" class=\"multilang\">Studieavsnitten</span>, CODE1, CODE2, CODE3</p><p>" +
+            "<span class=\"fi\" class=\"multilang\">Kurssi</span><span class=\"en\" class=\"multilang\">Course</span>" +
+            "<span class=\"sv\" class=\"multilang\">Kurs</span>, 5.8.2019-5.12.2019</p>", moodleCourse.summary);
         assertEquals(LocalDate.of(2019, 8, 5), moodleCourse.startTime);
         assertEquals(LocalDate.of(2019, 12, 5), moodleCourse.endTime);
         assertEquals("9", moodleCourse.categoryId);
@@ -136,7 +148,13 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         assertEquals(REALISATION_NAME_FI, moodleCourse.fullName);
         assertEquals("hy-cur-1", moodleCourse.idNumber);
         assertEquals("Kurssin nimi-5YC1S", moodleCourse.shortName);
-        assertTrue(moodleCourse.summary.startsWith("<p>urli suomeksi</p><p>Opintojaksot CODE1, CODE2, CODE3</p><p>Kurssi, "));
+        assertTrue(moodleCourse.summary.startsWith("<p><span class=\"fi\" class=\"multilang\"><a href=\"urli suomeksi\">urli suomeksi</a></span>" +
+            "<span class=\"en\" class=\"multilang\"><a href=\"urli suomeksi\">urli suomeksi</a></span>" +
+            "<span class=\"sv\" class=\"multilang\"><a href=\"fel url på svenska\">fel url på svenska</a></span></p>" +
+            "<p><span class=\"fi\" class=\"multilang\">Opintojaksot</span><span class=\"en\" class=\"multilang\">Courses</span>" +
+            "<span class=\"sv\" class=\"multilang\">Studieavsnitten</span>, CODE1, CODE2, CODE3</p><p>" +
+            "<span class=\"fi\" class=\"multilang\">Kurssi</span><span class=\"en\" class=\"multilang\">Course</span>" +
+            "<span class=\"sv\" class=\"multilang\">Kurs</span>, "));
         assertEquals(LocalDate.now(), moodleCourse.startTime);
         assertEquals(LocalDate.now().plusYears(1), moodleCourse.endTime);
         assertEquals(MOODLE_DEFAULT_CATEGORY_ID, moodleCourse.categoryId);

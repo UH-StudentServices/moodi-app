@@ -82,23 +82,28 @@ public class SisuCourseUnitRealisation {
 
         ret.mainOrganisationId = getMainOrganisationId();
 
-        // Use the URL of primary learningEnvironment, in language of the course teaching language, or if
-        // that language is not found, some other language.
-        String url = learningEnvironments.stream()
-            .filter(le -> le.primary)
-            .sorted((le1, le2) -> SisuLocale.byCodeOrDefaultToFi(le1.language).equals(teachingLanguageCode) ? -1 : 1)
-            .map(le -> le.url)
-            .findFirst().orElse("");
+        String defaultLocalizedUrl = getLearningEnvironmentUrl(learningEnvironments, SisuLocale.FI, "");
+
+        String localizedUrls = getLocalizedSpan(SisuLocale.FI, getLearningEnvironmentUrl(learningEnvironments, SisuLocale.FI, defaultLocalizedUrl))
+            + getLocalizedSpan(SisuLocale.EN, getLearningEnvironmentUrl(learningEnvironments, SisuLocale.EN, defaultLocalizedUrl))
+            + getLocalizedSpan(SisuLocale.SV, getLearningEnvironmentUrl(learningEnvironments, SisuLocale.SV, defaultLocalizedUrl));
+
+        String localizedCUNames = getLocalizedSpan(SisuLocale.FI, COURSE_UNIT_LOCALIZATION.get(SisuLocale.FI))
+            + getLocalizedSpan(SisuLocale.EN, COURSE_UNIT_LOCALIZATION.get(SisuLocale.EN))
+            + getLocalizedSpan(SisuLocale.SV, COURSE_UNIT_LOCALIZATION.get(SisuLocale.SV));
 
         String courseUnitCodes = courseUnits.stream()
             .sorted(Comparator.comparing(cu -> cu.code))
             .map(cu -> cu.code)
             .collect(Collectors.joining(", "));
 
-        ret.description = "<p>" + url + "</p>" +
-            "<p>" + COURSE_UNIT_LOCALIZATION.get(teachingLanguageCode) + " " + courseUnitCodes + "</p>" +
-            "<p>" + courseUnitRealisationType.name.getForLocaleOrDefault(teachingLanguageCode) + ", " +
-            FINNISH_DATE_FORMAT.format(ret.startDate) + "-" + FINNISH_DATE_FORMAT.format(ret.endDate) + "</p>";
+        String localizedCUTypes = getLocalizedSpan(SisuLocale.FI, courseUnitRealisationType.name.getForLocaleOrDefault(SisuLocale.FI))
+            + getLocalizedSpan(SisuLocale.EN, courseUnitRealisationType.name.getForLocaleOrDefault(SisuLocale.EN))
+            + getLocalizedSpan(SisuLocale.SV, courseUnitRealisationType.name.getForLocaleOrDefault(SisuLocale.SV));
+
+        ret.description = "<p>" + localizedUrls + "</p>"
+            + "<p>" + localizedCUNames + ", " + courseUnitCodes + "</p>"
+            + "<p>" + localizedCUTypes + ", " + FINNISH_DATE_FORMAT.format(ret.startDate) + "-" + FINNISH_DATE_FORMAT.format(ret.endDate) + "</p>";
 
         return ret;
     }
@@ -114,6 +119,22 @@ public class SisuCourseUnitRealisation {
         });
 
         return ret;
+    }
+
+    private String getLearningEnvironmentUrl(List<SisuLearningEnvironment> learningEnvironments, SisuLocale sisuLocale, String defaultUrl) {
+        SisuLearningEnvironment le = learningEnvironments.stream()
+            .filter(x -> SisuLocale.byCodeOrDefaultToFi(x.language).equals(sisuLocale))
+            .findFirst().orElse(null);
+        if (le == null) {
+            return defaultUrl;
+        }
+        return le.url == null ? defaultUrl : "<a href=\"" + le.url + "\">" + le.url + "</a>";
+    }
+
+    private String getLocalizedSpan(SisuLocale locale, String text) {
+        String languageSpanStart = "<span class=\"%lang%\" class=\"multilang\">";
+        String languageSpanEnd = "</span>";
+        return languageSpanStart.replace("%lang%", locale.toString().toLowerCase()) + text + languageSpanEnd;
     }
 
     private String getMainOrganisationId() {
