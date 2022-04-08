@@ -132,7 +132,7 @@ public class SisuCourseUnitRealisation {
     }
 
     private String getLocalizedSpan(SisuLocale locale, String text) {
-        String languageSpanStart = "<span class=\"%lang%\" class=\"multilang\">";
+        String languageSpanStart = "<span lang=\"%lang%\" class=\"multilang\">";
         String languageSpanEnd = "</span>";
         return languageSpanStart.replace("%lang%", locale.toString().toLowerCase()) + text + languageSpanEnd;
     }
