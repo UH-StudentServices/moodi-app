@@ -76,7 +76,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
             "<span lang=\"en\" class=\"multilang\"><a href=\"urli suomeksi\">urli suomeksi</a></span>" +
             "<span lang=\"sv\" class=\"multilang\"><a href=\"fel url på svenska\">fel url på svenska</a></span></p>" +
             "<p><span lang=\"fi\" class=\"multilang\">Opintojaksot</span><span lang=\"en\" class=\"multilang\">Courses</span>" +
-            "<span lang=\"sv\" class=\"multilang\">Studieavsnitten</span>, CODE1, CODE2, CODE3</p><p>" +
+            "<span lang=\"sv\" class=\"multilang\">Studieavsnitten</span> CODE1, CODE2, CODE3</p><p>" +
             "<span lang=\"fi\" class=\"multilang\">Kurssi</span><span lang=\"en\" class=\"multilang\">Course</span>" +
             "<span lang=\"sv\" class=\"multilang\">Kurs</span>, 5.8.2019-5.12.2019</p>", moodleCourse.summary);
         assertEquals(LocalDate.of(2019, 8, 5), moodleCourse.startTime);
@@ -98,7 +98,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
             "<span lang=\"en\" class=\"multilang\"><a href=\"urli suomeksi\">urli suomeksi</a></span>" +
             "<span lang=\"sv\" class=\"multilang\"><a href=\"fel url på svenska\">fel url på svenska</a></span></p>" +
             "<p><span lang=\"fi\" class=\"multilang\">Opintojaksot</span><span lang=\"en\" class=\"multilang\">Courses</span>" +
-            "<span lang=\"sv\" class=\"multilang\">Studieavsnitten</span>, CODE1, CODE2, CODE3</p><p>" +
+            "<span lang=\"sv\" class=\"multilang\">Studieavsnitten</span> CODE1, CODE2, CODE3</p><p>" +
             "<span lang=\"fi\" class=\"multilang\">Kurssi</span><span lang=\"en\" class=\"multilang\">Course</span>" +
             "<span lang=\"sv\" class=\"multilang\">Kurs</span>, 5.8.2019-5.12.2019</p>", moodleCourse.summary);
         assertEquals(LocalDate.of(2019, 8, 5), moodleCourse.startTime);
@@ -152,7 +152,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
             "<span lang=\"en\" class=\"multilang\"><a href=\"urli suomeksi\">urli suomeksi</a></span>" +
             "<span lang=\"sv\" class=\"multilang\"><a href=\"fel url på svenska\">fel url på svenska</a></span></p>" +
             "<p><span lang=\"fi\" class=\"multilang\">Opintojaksot</span><span lang=\"en\" class=\"multilang\">Courses</span>" +
-            "<span lang=\"sv\" class=\"multilang\">Studieavsnitten</span>, CODE1, CODE2, CODE3</p><p>" +
+            "<span lang=\"sv\" class=\"multilang\">Studieavsnitten</span> CODE1, CODE2, CODE3</p><p>" +
             "<span lang=\"fi\" class=\"multilang\">Kurssi</span><span lang=\"en\" class=\"multilang\">Course</span>" +
             "<span lang=\"sv\" class=\"multilang\">Kurs</span>, "));
         assertEquals(LocalDate.now(), moodleCourse.startTime);
