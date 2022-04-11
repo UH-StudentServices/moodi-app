@@ -33,7 +33,7 @@ public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIn
         "%3D%22multilang%22%3E%3Ca+href%3D%22https%3A%2F%2Fcourses.helsinki.fi%2Fsv%2FOODI-FLOW%2F136394381%22%3Ehttps%3A%2F%2Fcourses.helsinki.fi" +
         "%2Fsv%2FOODI-FLOW%2F136394381%3C%2Fa%3E%3C%2Fspan%3E%3C%2Fp%3E%3Cp%3E%3Cspan+lang%3D%22fi%22+class%3D%22multilang%22%3EOpintojaksot%3C%2F" +
         "span%3E%3Cspan+lang%3D%22en%22+class%3D%22multilang%22%3ECourses%3C%2Fspan%3E%3Cspan+lang%3D%22sv%22+class%3D%22multilang%22%3E" +
-        "Studieavsnitten%3C%2Fspan%3E%2C+%3C%2Fp%3E%3Cp%3E%3Cspan+lang%3D%22fi%22+class%3D%22multilang%22%3EKurssi%3C%2Fspan%3E%3Cspan+lang%3D" +
+        "Studieavsnitten%3C%2Fspan%3E+%3C%2Fp%3E%3Cp%3E%3Cspan+lang%3D%22fi%22+class%3D%22multilang%22%3EKurssi%3C%2Fspan%3E%3Cspan+lang%3D" +
         "%22en%22+class%3D%22multilang%22%3ECourse%3C%2Fspan%3E%3Cspan+lang%3D%22sv%22+class%3D%22multilang%22%3EKurs%3C%2Fspan%3E%2C+5.8.2019" +
         "-5.12.2019%3C%2Fp%3E";
 

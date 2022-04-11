@@ -70,7 +70,7 @@ public class MoodleIntegrationImportCourseTest extends AbstractMoodleIntegration
             "https://courses.helsinki.fi/sv/OODI-FLOW/136394381</a></span></p><p><span lang=\"fi\" class=\"multilang\">Opintojaksot</span><span " +
             "lang=\"en\" class=\"multilang\">Courses</span><span lang=\"sv\" class=\"multilang\">Studieavsnitten</span>" +
             ", BAR234, FOO123</p><p><span lang=\"fi\" class=\"multilang\">Kurssi</span><span lang=\"en\" class=\"multilang\">Course</span>" +
-            "<span lang=\"sv\" class=\"multilang\">Kurs</span>,");
+            "<span lang=\"sv\" class=\"multilang\">Kurs</span>");
         assertThat(mfc.categoryId).isEqualTo(9);
     }
 

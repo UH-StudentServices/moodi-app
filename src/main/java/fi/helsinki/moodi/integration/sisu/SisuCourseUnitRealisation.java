@@ -102,7 +102,7 @@ public class SisuCourseUnitRealisation {
             + getLocalizedSpan(SisuLocale.SV, courseUnitRealisationType.name.getForLocaleOrDefault(SisuLocale.SV));
 
         ret.description = "<p>" + localizedUrls + "</p>"
-            + "<p>" + localizedCUNames + ", " + courseUnitCodes + "</p>"
+            + "<p>" + localizedCUNames + " " + courseUnitCodes + "</p>"
             + "<p>" + localizedCUTypes + ", " + FINNISH_DATE_FORMAT.format(ret.startDate) + "-" + FINNISH_DATE_FORMAT.format(ret.endDate) + "</p>";
 
         return ret;
