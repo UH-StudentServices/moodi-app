@@ -124,10 +124,10 @@ public class HealthCheckTest extends AbstractMoodiIntegrationTest {
         LocalDateTime fiveHoursAgo = setupJobRunHoursAgo(5);
 
         ResultActions foo = mockMvc.perform(get("/health"));
-            foo.andExpect(status().is5xxServerError())
+        foo.andExpect(status().is5xxServerError())
             .andExpect(jsonPath("$.status").value("DOWN"))
             .andExpect(jsonPath("$.components.moodi.details.error")
-                .value(String.format("No sync job completed in 4 hours. Latest job completed at %s UTC", fiveHoursAgo)));
+            .value(String.format("No sync job completed in 4 hours. Latest job completed at %s UTC", fiveHoursAgo)));
     }
 
     @Test

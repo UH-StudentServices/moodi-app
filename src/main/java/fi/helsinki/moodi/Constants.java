@@ -36,5 +36,6 @@ public final class Constants {
     public static final String REALISATION_TYPE_SV = "Kurs";
     public static final String REALISTION_TYPE_EN = "Course";
 
-    private Constants() {}
+    private Constants() {
+    }
 }

@@ -27,7 +27,8 @@ public class SisuDateRange {
     public LocalDate startDate;
     public LocalDate endDate;
 
-    public SisuDateRange() {}
+    public SisuDateRange() {
+    }
 
     public SisuDateRange(LocalDate startDate, LocalDate endDate) {
         this.startDate = startDate;

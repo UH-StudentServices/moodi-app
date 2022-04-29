@@ -23,7 +23,8 @@ public class SisuLearningEnvironment {
     public boolean primary;
     public String language;
 
-    public SisuLearningEnvironment() {}
+    public SisuLearningEnvironment() {
+    }
 
     public SisuLearningEnvironment(String url, String lang, boolean primary) {
         this.url = url;
