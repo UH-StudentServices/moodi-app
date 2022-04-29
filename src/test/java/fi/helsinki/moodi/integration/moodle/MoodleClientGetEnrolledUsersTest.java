@@ -48,7 +48,7 @@ public class MoodleClientGetEnrolledUsersTest extends AbstractMoodiIntegrationTe
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_enrol_get_enrolled_users&moodlewsrestformat=json&courseid=1234"))
-                .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
+                .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
                 .andRespond(withSuccess(Fixtures.asString("/moodle/get-enrolled-users.json"), MediaType.APPLICATION_JSON));
 
         final List<MoodleUserEnrollments> users = moodleClient.getEnrolledUsers(1234);
