@@ -66,7 +66,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 @ActiveProfiles("test")
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(
-    properties = { "server.port:0", "test.MoodleCourseBuilder.overrideShortname:true" },
+    properties = { "server.port:0", "test.MoodleCourseBuilder.overrideShortname:true", "spring.main.allow-bean-definition-overriding=true" },
     classes = { Application.class, TestConfig.class })
 public abstract class AbstractMoodleIntegrationTest {
 

@@ -48,7 +48,8 @@ import static org.mockserver.model.HttpResponse.response;
         "integration.moodle.baseUrl=http://localhost:9876",
         "integration.sisu.baseUrl=http://localhost:9876",
         "httpClient.connectTimeout=100",
-        "httpClient.socketTimeout=100"
+        "httpClient.socketTimeout=100",
+        "spring.main.allow-bean-definition-overriding=true"
     },
     classes = { Application.class, TestConfig.class })
 public class HttpClientTest {

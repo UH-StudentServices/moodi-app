@@ -46,7 +46,7 @@ public class MoodleClientCreateCourseTest extends AbstractMoodiIntegrationTest {
                     "&courses%5B0%5D%5Bstartdate%5D=1564952400&courses%5B0%5D%5Benddate%5D=1572904800" +
                     "&courses%5B0%5D%5Bcourseformatoptions%5D%5B0%5D%5Bname%5D=numsections" +
                     "&courses%5B0%5D%5Bcourseformatoptions%5D%5B0%5D%5Bvalue%5D=7"))
-                .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
+                .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
                 .andRespond(withSuccess(Fixtures.asString("/moodle/create-course-shortname-already-in-use.json"), MediaType.APPLICATION_JSON));
 
         final MoodleCourse course =

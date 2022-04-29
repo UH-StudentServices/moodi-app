@@ -32,6 +32,7 @@ import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -114,7 +115,7 @@ public class HealthCheckTest extends AbstractMoodiIntegrationTest {
         mockMvc.perform(get("/health"))
             .andExpect(status().is5xxServerError())
             .andExpect(jsonPath("$.status").value("DOWN"))
-            .andExpect(jsonPath("$.details.moodi.details.error")
+            .andExpect(jsonPath("$.components.moodi.details.error")
                 .value("The last sync job failed: COMPLETED_FAILURE"));
     }
 
@@ -122,10 +123,10 @@ public class HealthCheckTest extends AbstractMoodiIntegrationTest {
     public void thatReturnsErrorWhenNoJobCompletedInFourHours() throws Exception {
         LocalDateTime fiveHoursAgo = setupJobRunHoursAgo(5);
 
-        mockMvc.perform(get("/health"))
-            .andExpect(status().is5xxServerError())
+        ResultActions foo = mockMvc.perform(get("/health"));
+            foo.andExpect(status().is5xxServerError())
             .andExpect(jsonPath("$.status").value("DOWN"))
-            .andExpect(jsonPath("$.details.moodi.details.error")
+            .andExpect(jsonPath("$.components.moodi.details.error")
                 .value(String.format("No sync job completed in 4 hours. Latest job completed at %s UTC", fiveHoursAgo)));
     }
 
@@ -137,7 +138,7 @@ public class HealthCheckTest extends AbstractMoodiIntegrationTest {
         mockMvc.perform(get("/health"))
             .andExpect(status().is5xxServerError())
             .andExpect(jsonPath("$.status").value("DOWN"))
-            .andExpect(jsonPath("$.details.moodi.details.error").value("No sync jobs in the DB."));
+            .andExpect(jsonPath("$.components.moodi.details.error").value("No sync jobs in the DB."));
     }
 
     @Test
@@ -152,8 +153,8 @@ public class HealthCheckTest extends AbstractMoodiIntegrationTest {
             .andDo(print())
             .andExpect(status().is5xxServerError())
             .andExpect(jsonPath("$.status").value("DOWN"))
-            .andExpect(jsonPath("$.details.moodi.details.error").value("java.lang.NullPointerException: " + EXCEPTION_MESSAGE))
-            .andExpect(jsonPath("$.details.moodi.details.stack").hasJsonPath());
+            .andExpect(jsonPath("$.components.moodi.details.error").value("java.lang.NullPointerException: " + EXCEPTION_MESSAGE))
+            .andExpect(jsonPath("$.components.moodi.details.stack").hasJsonPath());
     }
 
     private LocalDateTime setupJobRunHoursAgo(int hours) {

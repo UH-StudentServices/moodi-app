@@ -137,7 +137,7 @@ public class ImportingServiceTest extends AbstractMoodiIntegrationTest {
     private void expectCreateCourseRequestToMoodle(final String realisationId, final long moodleCourseIdToReturn) {
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
             .andExpect(content().string(startsWith(
                         "wstoken=xxxx1234&wsfunction=core_course_create_courses&moodlewsrestformat=json&courses%5B0%5D%5Bidnumber%5D="
                         + realisationId + "&courses")))

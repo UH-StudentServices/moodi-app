@@ -37,7 +37,7 @@ import java.time.LocalDateTime;
 public class SynchronizationJobRun {
 
     @Id
-    @SequenceGenerator(name = "synchronization_job_run_id_seq_generator", sequenceName = "synchronization_job_run_id_seq")
+    @SequenceGenerator(name = "synchronization_job_run_id_seq_generator", sequenceName = "synchronization_job_run_id_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "synchronization_job_run_id_seq_generator")
     public Long id;
 

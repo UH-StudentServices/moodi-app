@@ -24,7 +24,6 @@ sourceSets {
     itest {
         compileClasspath += main.output + test.output
         runtimeClasspath += main.output + test.output
-
         java.srcDir file('src/itest/java')
     }
 
@@ -34,8 +33,9 @@ sourceSets {
 }
 
 task itest(type: Test) {
-    testClassesDir = sourceSets.itest.output.classesDir
-    classpath = sourceSets.itest.runtimeClasspath
+    doFirst {
+        systemProperty "spring.profiles.active", "test"
+    }
 
     if (project.hasProperty('moodle_ws_token')) {
         systemProperty 'integration.moodle.wstoken', moodle_ws_token

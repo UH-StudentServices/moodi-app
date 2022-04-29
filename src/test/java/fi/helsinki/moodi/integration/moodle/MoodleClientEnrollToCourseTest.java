@@ -41,7 +41,7 @@ public class MoodleClientEnrollToCourseTest extends AbstractMoodiIntegrationTest
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(content().string("wstoken=xxxx1234&wsfunction=enrol_manual_enrol_users&moodlewsrestformat=json" +
                     "&enrolments%5B0%5D%5Bcourseid%5D=12345&enrolments%5B0%5D%5Broleid%5D=9&enrolments%5B0%5D%5Buserid%5D=3"))
-                .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
+                .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
                 .andRespond(withSuccess(Fixtures.asString("/moodle/enrol-user-no-permissions.json"), MediaType.APPLICATION_JSON));
 
         try {
