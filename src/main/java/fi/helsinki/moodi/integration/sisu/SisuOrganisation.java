@@ -34,7 +34,8 @@ public class SisuOrganisation {
     public String status;
     public String documentState;
 
-    public SisuOrganisation() {}
+    public SisuOrganisation() {
+    }
 
     public SisuOrganisation(String id) {
         this.id = id;

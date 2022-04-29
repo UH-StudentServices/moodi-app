@@ -47,8 +47,9 @@ wrapper {
 }
 
 checkstyle {
-    configDirectory = rootProject.file('gradle-build/checkstyle')
     toolVersion = '8.29'
+    configDirectory = rootProject.file('gradle-build/checkstyle')
+    configProperties 'checkstyle.header.file': file('gradle-build/checkstyle/required-header.txt');
 }
 
 if(hasProperty("opintoni_artifactory_base_url")) {

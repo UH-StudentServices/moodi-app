@@ -16,14 +16,14 @@
  */
 
 configurations {
-    itestCompile.extendsFrom testCompile
-    itestRuntime.extendsFrom testRuntime
+    itestImplementation.extendsFrom testImplementation
+    itestRuntimeOnly.extendsFrom testRuntimeOnly
 }
 
 sourceSets {
     itest {
-        compileClasspath += main.output + test.output
-        runtimeClasspath += main.output + test.output
+        compileClasspath += sourceSets.main.output + sourceSets.test.output
+        runtimeClasspath += sourceSets.main.output + sourceSets.test.output
         java.srcDir file('src/itest/java')
     }
 
@@ -33,9 +33,13 @@ sourceSets {
 }
 
 task itest(type: Test) {
+//    useJUnitPlatform()
     doFirst {
         systemProperty "spring.profiles.active", "test"
     }
+
+    testClassesDirs = sourceSets.itest.output.classesDirs
+    classpath = sourceSets.itest.runtimeClasspath
 
     if (project.hasProperty('moodle_ws_token')) {
         systemProperty 'integration.moodle.wstoken', moodle_ws_token
