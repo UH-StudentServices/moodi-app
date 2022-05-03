@@ -33,7 +33,7 @@ sourceSets {
 }
 
 task itest(type: Test) {
-//    useJUnitPlatform()
+    maxHeapSize = "4G"
     doFirst {
         systemProperty "spring.profiles.active", "test"
     }
