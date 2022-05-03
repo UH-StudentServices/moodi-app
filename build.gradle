@@ -125,7 +125,3 @@ sonarqube {
         property "sonar.projectName", "moodi-app"
     }
 }
-
-repositories {
-    mavenCentral()
-}
