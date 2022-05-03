@@ -26,7 +26,8 @@ public final class ImportCourseRequest {
 
     public String creatorSisuId;
 
-    public ImportCourseRequest() {}
+    public ImportCourseRequest() {
+    }
 
     public ImportCourseRequest(String i) {
         this.realisationId = i;

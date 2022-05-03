@@ -19,11 +19,13 @@
 // Deployment
 //
 
-task storeDeployInformationToFile << {
-    def props = new Properties()
-    file("gradle.properties").withInputStream { stream -> props.load(stream) }
+task storeDeployInformationToFile {
+    doLast {
+        def props = new Properties()
+        file("gradle.properties").withInputStream { stream -> props.load(stream) }
 
-    def deployProps = [VERSION: props["version"]]
-    def content = deployProps.collect { key, value -> "$key=$value" }.join('\n')
-    file("ci-deploy.properties").write(content)
+        def deployProps = [VERSION: props["version"]]
+        def content = deployProps.collect { key, value -> "$key=$value" }.join('\n')
+        file("ci-deploy.properties").write(content)
+    }
 }

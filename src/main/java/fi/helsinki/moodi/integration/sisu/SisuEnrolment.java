@@ -22,7 +22,8 @@ public class SisuEnrolment {
     public EnrolmentState state;
     public SisuPerson person;
 
-    public SisuEnrolment() {}
+    public SisuEnrolment() {
+    }
 
     public SisuEnrolment(EnrolmentState state, SisuPerson person) {
         this.state = state;

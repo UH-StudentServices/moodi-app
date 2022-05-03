@@ -38,7 +38,8 @@ public class SisuPerson {
     public String eduPersonPrincipalName;
     public String employeeNumber;
 
-    public SisuPerson() {}
+    public SisuPerson() {
+    }
 
     public SisuPerson(String studentNumber, String firstNames, String lastName) {
         this.studentNumber = studentNumber;

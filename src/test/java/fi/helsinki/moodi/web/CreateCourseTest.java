@@ -69,7 +69,7 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
             .andExpect(method(HttpMethod.POST))
             .andExpect(content().string(startsWith(
                 "wstoken=xxxx1234&wsfunction=core_course_create_courses")))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
             .andRespond(withServerError());
 
         // Set up second try to succeed. Sisu organisation call is not made, as it is cached.

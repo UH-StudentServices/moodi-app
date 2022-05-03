@@ -40,7 +40,7 @@ public class Course {
     }
 
     @Id
-    @SequenceGenerator(name = "course_id_seq_generator", sequenceName = "course_id_seq")
+    @SequenceGenerator(name = "course_id_seq_generator", sequenceName = "course_id_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "course_id_seq_generator")
     public Long id;
 

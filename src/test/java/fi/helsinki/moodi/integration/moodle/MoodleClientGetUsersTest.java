@@ -42,7 +42,7 @@ public class MoodleClientGetUsersTest extends AbstractMoodiIntegrationTest {
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_user_get_users_by_field&moodlewsrestformat=json" +
                     "&field=username&values%5B0%5D=integraatio"))
-                .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
+                .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
                 .andRespond(withSuccess(Fixtures.asString("/moodle/get-users-one-username.json"), MediaType.APPLICATION_JSON));
 
         final MoodleUser user = moodleClient.getUser(Arrays.asList("integraatio"));
@@ -57,7 +57,7 @@ public class MoodleClientGetUsersTest extends AbstractMoodiIntegrationTest {
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_user_get_users_by_field&moodlewsrestformat=json" +
                     "&field=username&values%5B0%5D=first&values%5B1%5D=second"))
-                .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
+                .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
                 .andRespond(withSuccess(Fixtures.asString("/moodle/get-users-second-username.json"), MediaType.APPLICATION_JSON));
 
         final MoodleUser user = moodleClient.getUser(Arrays.asList("first", "second"));

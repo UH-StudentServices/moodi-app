@@ -29,7 +29,7 @@ import java.time.LocalDateTime;
 public class SyncLock {
 
     @Id
-    @SequenceGenerator(name = "sync_lock_id_seq_generator", sequenceName = "sync_lock_id_seq")
+    @SequenceGenerator(name = "sync_lock_id_seq_generator", sequenceName = "sync_lock_id_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sync_lock_id_seq_generator")
     public Long id;
 
