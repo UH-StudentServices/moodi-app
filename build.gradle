@@ -54,9 +54,10 @@ checkstyle {
 
 if(hasProperty("opintoni_artifactory_base_url")) {
     repositories {
-//        maven {
-//            url "${opintoni_artifactory_base_url}/remote-repos/"
-//        }
+        maven {
+            url "${opintoni_artifactory_base_url}/remote-repos/"
+            allowInsecureProtocol(true)
+        }
         mavenLocal()
         maven { url 'https://jitpack.io' }
         mavenCentral()
