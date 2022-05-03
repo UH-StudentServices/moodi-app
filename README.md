@@ -100,6 +100,7 @@ Credentials are: user/password
 
 # Database
 
+
 ## Servers
 The server environments use Postgres 9.4.
 
