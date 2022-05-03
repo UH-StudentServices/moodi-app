@@ -21,7 +21,8 @@ public final class MoodleCourseData {
 
     public long id;
 
-    public MoodleCourseData() {}
+    public MoodleCourseData() {
+    }
 
     public MoodleCourseData(long id) {
         this.id = id;

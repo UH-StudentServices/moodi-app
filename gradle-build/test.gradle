@@ -16,6 +16,7 @@
  */
 
 test {
+    maxHeapSize = "4G"
     testLogging.showStandardStreams = true
     testLogging.exceptionFormat = 'full'
     doFirst {
@@ -24,6 +25,7 @@ test {
 }
 
 task test_psql(type: Test) {
+    maxHeapSize = "4G"
     doFirst {
         systemProperty "spring.profiles.active", "test,test_psql"
     }

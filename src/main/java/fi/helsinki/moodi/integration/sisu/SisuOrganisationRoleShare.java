@@ -22,7 +22,8 @@ public class SisuOrganisationRoleShare {
     public double share;
     public SisuOrganisation organisation;
 
-    public SisuOrganisationRoleShare() {}
+    public SisuOrganisationRoleShare() {
+    }
 
     public SisuOrganisationRoleShare(String roleUrn, double share, SisuOrganisation organisation) {
         this.roleUrn = roleUrn;

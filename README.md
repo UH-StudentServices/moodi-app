@@ -59,7 +59,7 @@ read MOODLE_WS_TOKEN
 #### Prerequisites
 Open an ssh tunnel to call Sisu through the test API GW and the Moodle API:
 ```
-ssh moodi-dev -L 1443:gw-api-test.it.helsinki.fi:443 -L 1444:moodi-2-moodle-20.student.helsinki.fi:443
+ssh  moodi-1.student.helsinki.fi -L 1443:gw-api-test.it.helsinki.fi:443 -L 1444:moodi-2-moodle-20.student.helsinki.fi:443
 ```
 
 The file ~/moodi/moodi.properties needs to exist:
@@ -99,6 +99,7 @@ Credentials are: user/password
 - Remove the keystore password and Moodle token from ~/moodi/moodi.properties
 
 # Database
+
 
 ## Servers
 The server environments use Postgres 9.4.

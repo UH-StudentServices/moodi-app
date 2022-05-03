@@ -67,7 +67,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(
-    properties = { "server.port:0" },
+    properties = { "server.port:0", "spring.main.allow-bean-definition-overriding=true" },
     classes = { Application.class, TestConfig.class })
 
 /*
@@ -249,7 +249,7 @@ public abstract class AbstractMoodiIntegrationTest {
 
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
             .andExpect(content().string(payload))
             .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
     }
@@ -343,7 +343,7 @@ public abstract class AbstractMoodiIntegrationTest {
             + urlEncode(username);
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
             .andExpect(content().string(payload))
             .andRespond(request -> {
                 if (delayed) {
@@ -362,7 +362,7 @@ public abstract class AbstractMoodiIntegrationTest {
                                                            final String categoryId) {
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
             .andExpect(content().string(
                 allOf(
                     startsWith(
@@ -385,7 +385,7 @@ public abstract class AbstractMoodiIntegrationTest {
     protected void setupMoodleGetCourseResponse(long moodleId, boolean delayed) {
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
             .andRespond(request -> {
                 if (delayed) {
                     try {
@@ -453,7 +453,7 @@ public abstract class AbstractMoodiIntegrationTest {
 
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
             .andExpect(content().string(payload))
             .andRespond(request -> {
                 if (delayed) {

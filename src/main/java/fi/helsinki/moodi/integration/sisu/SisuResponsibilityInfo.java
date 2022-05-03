@@ -22,7 +22,8 @@ public class SisuResponsibilityInfo {
     // We have a PublicPerson here, so employeeId or EPPN are not available
     public String personId;
 
-    public SisuResponsibilityInfo() {}
+    public SisuResponsibilityInfo() {
+    }
 
     public SisuResponsibilityInfo(String roleUrn, String teacherPersonId) {
         this.roleUrn = roleUrn;
