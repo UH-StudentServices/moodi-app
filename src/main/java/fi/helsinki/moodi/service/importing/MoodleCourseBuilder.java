@@ -62,7 +62,7 @@ public class MoodleCourseBuilder {
 
     public MoodleCourse buildMoodleCourse(StudyRegistryCourseUnitRealisation cur, Long dbCourseId) {
         return new MoodleCourse(cur.realisationId,
-            cur.realisationName,
+            Normalizer.normalize(cur.realisationName, Normalizer.Form.NFKD).replaceAll("[^\\x00-\\x7F]", ""),
             getShortName(cur.teachingLanguageRealisationName, dbCourseId),
             mapperService.getMoodleCategoryByOrganisationId(cur.mainOrganisationId),
             cur.description,
