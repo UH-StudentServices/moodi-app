@@ -41,7 +41,7 @@ import static fi.helsinki.moodi.Constants.TEACHER_TYPES;
 public class SisuCourseUnitRealisation {
 
     @GraphQLIgnore
-    static final Map<SisuLocale, String> COURSE_UNIT_LOCALIZATION = new HashMap<>() {
+    static final Map<SisuLocale, String> COURSE_UNIT_LOCALIZATION = new HashMap<SisuLocale, String>() {
         {
             put(SisuLocale.FI, "Opintojaksot");
             put(SisuLocale.SV, "Studieavsnitten");
