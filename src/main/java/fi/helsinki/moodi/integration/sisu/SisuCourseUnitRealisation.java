@@ -41,7 +41,7 @@ import static fi.helsinki.moodi.Constants.TEACHER_TYPES;
 public class SisuCourseUnitRealisation {
 
     @GraphQLIgnore
-    static final Map<SisuLocale, String> COURSE_UNIT_LOCALIZATION = new HashMap<SisuLocale, String>() {
+    static final Map<SisuLocale, String> COURSE_UNIT_LOCALIZATION = new HashMap<>() {
         {
             put(SisuLocale.FI, "Opintojaksot");
             put(SisuLocale.SV, "Studieavsnitten");
@@ -68,7 +68,10 @@ public class SisuCourseUnitRealisation {
         StudyRegistryCourseUnitRealisation ret = new StudyRegistryCourseUnitRealisation();
         SisuLocale teachingLanguageCode = SisuLocale.byUrnOrDefaultToFi(teachingLanguageUrn);
         ret.realisationId = id;
-        ret.realisationName = name.getForLocaleOrDefault(teachingLanguageCode);
+        ret.realisationName = "<p>" + getLocalizedSpan(SisuLocale.FI, name.getForLocale(SisuLocale.FI))
+            + getLocalizedSpan(SisuLocale.EN, name.getForLocale(SisuLocale.EN))
+            + getLocalizedSpan(SisuLocale.SV, name.getForLocale(SisuLocale.SV)) + "</p>";
+        ret.teachingLanguageRealisationName = name.getForLocaleOrDefault(teachingLanguageCode);
         ret.students = enrolments.stream().map(e -> e.person.toStudyRegistryStudent(e.isEnrolled())).collect(Collectors.toList());
         ret.published = "PUBLISHED".equals(flowState);
 
