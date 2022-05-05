@@ -69,9 +69,9 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
 
         MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation(), 1L);
 
-        assertEquals("<p>" + generateMultiLangSpan("fi", REALISATION_NAME_FI)
+        assertEquals(generateMultiLangSpan("fi", REALISATION_NAME_FI)
                 + generateMultiLangSpan("en", REALISATION_NAME_EN)
-                + generateMultiLangSpan("sv", REALISATION_NAME_SV) + "</p>", moodleCourse.fullName);
+                + generateMultiLangSpan("sv", REALISATION_NAME_SV), moodleCourse.fullName);
         assertEquals("hy-cur-1", moodleCourse.idNumber);
         assertEquals("Kurs namn-1", moodleCourse.shortName);
         assertEquals("<p><span lang=\"fi\" class=\"multilang\"><a href=\"urli suomeksi\">urli suomeksi</a></span>" +
@@ -93,9 +93,9 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
 
         MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation(), 1L);
 
-        assertEquals("<p>" + generateMultiLangSpan("fi", REALISATION_NAME_FI)
+        assertEquals(generateMultiLangSpan("fi", REALISATION_NAME_FI)
             + generateMultiLangSpan("en", REALISATION_NAME_EN)
-            + generateMultiLangSpan("sv", REALISATION_NAME_SV) + "</p>", moodleCourse.fullName);
+            + generateMultiLangSpan("sv", REALISATION_NAME_SV), moodleCourse.fullName);
         assertEquals("hy-cur-1", moodleCourse.idNumber);
         assertEquals("Kurssin nimi-1", moodleCourse.shortName);
         assertEquals("<p><span lang=\"fi\" class=\"multilang\"><a href=\"urli suomeksi\">urli suomeksi</a></span>" +
@@ -149,9 +149,9 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
 
         MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation(), 10000000L);
 
-        assertEquals("<p>" + generateMultiLangSpan("fi", REALISATION_NAME_FI)
+        assertEquals(generateMultiLangSpan("fi", REALISATION_NAME_FI)
             + generateMultiLangSpan("en", REALISATION_NAME_EN)
-            + generateMultiLangSpan("sv", REALISATION_NAME_SV) + "</p>", moodleCourse.fullName);
+            + generateMultiLangSpan("sv", REALISATION_NAME_SV), moodleCourse.fullName);
         assertEquals("hy-cur-1", moodleCourse.idNumber);
         assertEquals("Kurssin nimi-5YC1S", moodleCourse.shortName);
         assertTrue(moodleCourse.summary.startsWith("<p><span lang=\"fi\" class=\"multilang\"><a href=\"urli suomeksi\">urli suomeksi</a></span>" +

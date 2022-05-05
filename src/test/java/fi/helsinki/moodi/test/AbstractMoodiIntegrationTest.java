@@ -369,9 +369,9 @@ public abstract class AbstractMoodiIntegrationTest {
                         "wstoken=xxxx1234&wsfunction=core_course_create_courses&moodlewsrestformat=json&courses%5B0%5D%5Bidnumber%5D="
                             + realisationId +
                             "&courses%5B0%5D%5Bfullname%5D=" +
-                            "%3Cp%3E%3Cspan+lang%3D%22fi%22+class%3D%22multilang%22%3ELapsuus+ja+yhteiskunta%3C%2Fspan%3E" +
+                            "%3Cspan+lang%3D%22fi%22+class%3D%22multilang%22%3ELapsuus+ja+yhteiskunta%3C%2Fspan%3E" +
                             "%3Cspan+lang%3D%22en%22+class%3D%22multilang%22%3EFor+testing%3C%2Fspan%3E" +
-                            "%3Cspan+lang%3D%22sv%22+class%3D%22multilang%22%3EF%EF%BF%BDr+att+testa%3C%2Fspan%3E%3C%2Fp%3E" +
+                            "%3Cspan+lang%3D%22sv%22+class%3D%22multilang%22%3EF%EF%BF%BDr+att+testa%3C%2Fspan%3E" +
                             "&courses%5B0%5D%5Bshortname%5D=Lapsuus+ja"),
                     // The actual short name unique suffix is too difficult to check here, so we leave it out.
                     endsWith("&courses%5B0%5D%5Bcategoryid%5D=" + categoryId +
