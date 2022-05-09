@@ -62,6 +62,10 @@ public class MoodleService {
         return moodleClient.getEnrolledUsers(courseId);
     }
 
+    public List<List<MoodleUserEnrollments>> getEnrolledUsers(final List<Long> courseIds) {
+        return moodleClient.getEnrolledUsersForCourses(courseIds);
+    }
+
     public void addRoles(final List<MoodleEnrollment> moodleEnrollments) {
         moodleClient.addRoles(moodleEnrollments);
     }

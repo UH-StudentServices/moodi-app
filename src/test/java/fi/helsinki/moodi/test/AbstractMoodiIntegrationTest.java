@@ -26,7 +26,7 @@ import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.integration.moodle.MoodleRole;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.service.importing.ImportCourseRequest;
-import fi.helsinki.moodi.service.synchronize.enrich.SisuCourseEnricher;
+import fi.helsinki.moodi.service.synchronize.enrich.EnricherService;
 import fi.helsinki.moodi.service.util.MapperService;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
 import org.flywaydb.core.Flyway;
@@ -140,7 +140,7 @@ public abstract class AbstractMoodiIntegrationTest {
     private MapperService mapperService;
 
     @Autowired
-    protected SisuCourseEnricher sisuCourseEnricher;
+    protected EnricherService enricherService;
 
     @Autowired
     private CacheManager cacheManager;
@@ -478,7 +478,7 @@ public abstract class AbstractMoodiIntegrationTest {
         mockSisuGraphQLServer.expectPersonsRequest(Arrays.asList("hy-hlo-2.1", "hy-hlo-3"), "/sisu/persons-many-2.json");
         mockSisuGraphQLServer.expectPersonsRequest(Arrays.asList("hy-hlo-4"), "/sisu/persons.json");
 
-        sisuCourseEnricher.prefetchCourses(SISU_COURSE_REALISATION_IDS);
+        enricherService.prefetchSisuCourses(SISU_COURSE_REALISATION_IDS);
     }
 
     protected void expectSisuOrganisationExportRequest() {

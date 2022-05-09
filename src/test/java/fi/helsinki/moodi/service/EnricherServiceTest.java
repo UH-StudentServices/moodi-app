@@ -91,7 +91,7 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
         String response = "{\"data\": {\"course_unit_realisations\": [" + curs + "] } }";
         mockSisuGraphQLServer.expectCourseUnitRealisationsRequestFromString(curIds, response, delayed);
         mockSisuGraphQLServer.expectPersonsRequest(singletonList("hy-hlo-1"), "/sisu/persons.json");
-        sisuCourseEnricher.prefetchCourses(curIds);
+        enricherService.prefetchSisuCourses(curIds);
     }
 
     private SynchronizationItem createFullSynchronizationItem(String realisationId, int moodleId) {

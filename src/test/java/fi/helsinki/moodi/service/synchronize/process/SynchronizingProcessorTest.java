@@ -115,7 +115,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             )
             .getSynchronizationItem();
 
-        synchronizingProcessor.doProcess(item);
+        synchronizingProcessor.doSynchronize(item);
     }
 
     @Test
@@ -130,7 +130,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             )
             .getSynchronizationItem();
 
-        synchronizingProcessor.doProcess(item);
+        synchronizingProcessor.doSynchronize(item);
     }
 
     @Test
@@ -146,7 +146,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             )
             .getSynchronizationItem();
 
-        synchronizingProcessor.doProcess(item);
+        synchronizingProcessor.doSynchronize(item);
     }
 
     @Test
@@ -157,7 +157,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             .expectUserRequestsToMoodle()
             .getSynchronizationItem();
 
-        synchronizingProcessor.doProcess(item);
+        synchronizingProcessor.doSynchronize(item);
     }
 
     /* Remove roles */
@@ -175,7 +175,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             .expectUnAssignRolesToMoodleCourse(studentEnrollment())
             .getSynchronizationItem();
 
-        synchronizingProcessor.doProcess(item);
+        synchronizingProcessor.doSynchronize(item);
     }
 
     @Test
@@ -193,7 +193,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             .expectUnAssignRolesToMoodleCourse(studentEnrollment())
             .getSynchronizationItem();
 
-        synchronizingProcessor.doProcess(item);
+        synchronizingProcessor.doSynchronize(item);
     }
 
     @Test
@@ -227,7 +227,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             .expectUnAssignRolesToMoodleCourse(studentEnrollment())
             .getSynchronizationItem();
 
-        synchronizingProcessor.doProcess(item);
+        synchronizingProcessor.doSynchronize(item);
     }
 
     /* Add roles */
@@ -245,7 +245,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             .expectAssignRolesToMoodleCourse(studentEnrollment())
             .getSynchronizationItem();
 
-        synchronizingProcessor.doProcess(item);
+        synchronizingProcessor.doSynchronize(item);
     }
 
     @Test
@@ -261,7 +261,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             .expectAssignRolesToMoodleCourse(teacherEnrollment())
             .getSynchronizationItem();
 
-        synchronizingProcessor.doProcess(item);
+        synchronizingProcessor.doSynchronize(item);
     }
 
     /* Add moodi role */
@@ -277,7 +277,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             .expectAssignRolesToMoodleCourse(moodiEnrollment())
             .getSynchronizationItem();
 
-        synchronizingProcessor.doProcess(item);
+        synchronizingProcessor.doSynchronize(item);
     }
 
     @Test
@@ -291,7 +291,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             .expectAssignRolesToMoodleCourse(moodiEnrollment())
             .getSynchronizationItem();
 
-        synchronizingProcessor.doProcess(item);
+        synchronizingProcessor.doSynchronize(item);
     }
 
     /* No action */
@@ -307,7 +307,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             .expectUserRequestsToMoodle()
             .getSynchronizationItem();
 
-        synchronizingProcessor.doProcess(item);
+        synchronizingProcessor.doSynchronize(item);
     }
 
     @Test
@@ -321,7 +321,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
             .expectUserRequestsToMoodle()
             .getSynchronizationItem();
 
-        synchronizingProcessor.doProcess(item);
+        synchronizingProcessor.doSynchronize(item);
     }
 
     private class CourseSynchronizationRequestChain {

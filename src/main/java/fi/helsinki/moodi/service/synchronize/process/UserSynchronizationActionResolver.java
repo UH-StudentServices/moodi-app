@@ -19,6 +19,7 @@ package fi.helsinki.moodi.service.synchronize.process;
 
 import com.google.common.collect.Sets;
 import fi.helsinki.moodi.service.util.MapperService;
+import java.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -54,7 +55,7 @@ public class UserSynchronizationActionResolver {
     }
 
     private Set<Long> addDefaultRoleIfNotEmpty(Set<Long> roles) {
-        if (roles.size() > 0) {
+        if (!roles.isEmpty()) {
             roles.add(mapperService.getMoodiRoleId());
         }
         return roles;
@@ -72,17 +73,11 @@ public class UserSynchronizationActionResolver {
                     .collect(Collectors.toSet());
         }
 
-        return null;
+        return Collections.emptySet();
     }
 
-    private List<UserSynchronizationAction> createEnrollmentActions(Long moodleUserId, Set<Long> currentRolesInSisu) {
-        return addAction(moodleUserId, currentRolesInSisu, UserSynchronizationActionType.ADD_ENROLLMENT, newArrayList());
-    }
-
-    private List<UserSynchronizationAction> createRoleChangeAndSuspendActions(Long moodleUserId,
-                                                                              Set<Long> currentRegistryRoles,
-                                                                              Set<Long> currentRolesInMoodle,
-                                                                              boolean userSeesCourseInMoodle) {
+    private void addRoleChangeAndSuspendActions(Long moodleUserId, Set<Long> currentRegistryRoles, Set<Long> currentRolesInMoodle,
+                                                   boolean userSeesCourseInMoodle, List<UserSynchronizationAction> actions) {
         Set<Long> rolesToAdd = difference(currentRegistryRoles, currentRolesInMoodle);
         // Check that the user has the synced (moodi) role indicating he is controlled by Moodi instead of
         // having been manually added to Moodle.
@@ -92,9 +87,9 @@ public class UserSynchronizationActionResolver {
             .collect(Collectors.toSet()) :
             new HashSet<>();
 
-        List<UserSynchronizationAction> actions = newArrayList();
-
-        addAction(moodleUserId, rolesToAdd, UserSynchronizationActionType.ADD_ROLES, actions);
+        if (!rolesToAdd.isEmpty()) {
+            addAction(moodleUserId, rolesToAdd, UserSynchronizationActionType.ADD_ROLES, actions);
+        }
 
         // Suspend when
         //  the user can see the course AND
@@ -121,9 +116,9 @@ public class UserSynchronizationActionResolver {
             addAction(moodleUserId, Sets.newHashSet(mapperService.getStudentRoleId()), UserSynchronizationActionType.REACTIVATE_ENROLLMENT, actions);
         }
 
-        addAction(moodleUserId, rolesToRemove, UserSynchronizationActionType.REMOVE_ROLES, actions);
-
-        return actions;
+        if (!rolesToRemove.isEmpty()) {
+            addAction(moodleUserId, rolesToRemove, UserSynchronizationActionType.REMOVE_ROLES, actions);
+        }
     }
 
     private boolean hasOnlySyncRole(Set<Long> roles) {
@@ -134,29 +129,25 @@ public class UserSynchronizationActionResolver {
         return list1.stream().filter(item -> !list2.contains(item)).collect(Collectors.toSet());
     }
 
-    private List<UserSynchronizationAction> addAction(Long moodleUserId,
-                                                      Set<Long> roles,
-                                                      UserSynchronizationActionType type,
-                                                      List<UserSynchronizationAction> actions) {
-        if (type == UserSynchronizationActionType.SUSPEND_ENROLLMENT || !roles.isEmpty()) {
-            actions.add(new UserSynchronizationAction(type, roles, moodleUserId));
-        }
-        return actions;
+    private void addAction(Long moodleUserId, Set<Long> roles, UserSynchronizationActionType type, List<UserSynchronizationAction> actions) {
+        actions.add(new UserSynchronizationAction(type, roles, moodleUserId));
     }
 
     public UserSynchronizationItem enrichWithActions(final UserSynchronizationItem item) {
         Set<Long> currentStudyRegistryRolesWithDefaultRole = addDefaultRoleIfNotEmpty(getCurrentStudyRegistryRoles(item));
         Long moodleUserId = item.getMoodleUserId();
-
+        List<UserSynchronizationAction> actions = newArrayList();
         if (item.getMoodleUserEnrollments() != null) {
-            return item.withActions(createRoleChangeAndSuspendActions(
-                    moodleUserId,
-                    currentStudyRegistryRolesWithDefaultRole,
-                    getCurrentMoodleRoles(item),
-                    item.userSeesCourseInMoodle()
-                ));
-        } else {
-            return item.withActions(createEnrollmentActions(moodleUserId, currentStudyRegistryRolesWithDefaultRole));
+            addRoleChangeAndSuspendActions(
+                moodleUserId,
+                currentStudyRegistryRolesWithDefaultRole,
+                getCurrentMoodleRoles(item),
+                item.userSeesCourseInMoodle(),
+                actions
+            );
+        } else if (!currentStudyRegistryRolesWithDefaultRole.isEmpty()) {
+            addAction(moodleUserId, currentStudyRegistryRolesWithDefaultRole, UserSynchronizationActionType.ADD_ENROLLMENT, actions);
         }
+        return item.withActions(actions);
     }
 }
