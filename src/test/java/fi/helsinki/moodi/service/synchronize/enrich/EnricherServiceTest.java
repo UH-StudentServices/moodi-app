@@ -28,15 +28,15 @@ import org.springframework.test.context.TestPropertySource;
 import static org.junit.Assert.assertEquals;
 
 @TestPropertySource(properties = "SisuGraphQLClient.batchsize=2")
-public class SisuCourseEnricherTest extends AbstractMoodiIntegrationTest  {
+public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
     @Test
     public void thatSisuCoursesAndPersonsAreFetched() {
         setUpMockSisuAndPrefetchCourses();
         SynchronizationItem synchronizationItem = createFullSynchronizationItem("hy-CUR-1"); // Published and ongoing
 
-        SynchronizationItem enrichedItem = sisuCourseEnricher.doEnrich(synchronizationItem);
+        enricherService.enrichWithSisuCourse(synchronizationItem);
 
-        assertStatus(enrichedItem, EnrichmentStatus.IN_PROGRESS, true);
+        assertStatus(synchronizationItem, EnrichmentStatus.IN_PROGRESS, true);
     }
 
     @Test
@@ -44,9 +44,9 @@ public class SisuCourseEnricherTest extends AbstractMoodiIntegrationTest  {
         setUpMockSisuAndPrefetchCourses();
         SynchronizationItem synchronizationItem = createFullSynchronizationItem("hy-CUR-not-found");
 
-        SynchronizationItem enrichedItem = sisuCourseEnricher.doEnrich(synchronizationItem);
+        enricherService.enrichWithSisuCourse(synchronizationItem);
 
-        assertStatus(enrichedItem, EnrichmentStatus.ERROR, false);
+        assertStatus(synchronizationItem, EnrichmentStatus.ERROR, false);
     }
 
     @Test
@@ -54,9 +54,9 @@ public class SisuCourseEnricherTest extends AbstractMoodiIntegrationTest  {
         setUpMockSisuAndPrefetchCourses();
         SynchronizationItem synchronizationItem = createFullSynchronizationItem("hy-CUR-unpublished");
 
-        SynchronizationItem enrichedItem = sisuCourseEnricher.doEnrich(synchronizationItem);
+        enricherService.enrichWithSisuCourse(synchronizationItem);
 
-        assertStatus(enrichedItem, EnrichmentStatus.IN_PROGRESS, true);
+        assertStatus(synchronizationItem, EnrichmentStatus.IN_PROGRESS, true);
     }
 
     @Test
@@ -64,9 +64,9 @@ public class SisuCourseEnricherTest extends AbstractMoodiIntegrationTest  {
         setUpMockSisuAndPrefetchCourses();
         SynchronizationItem synchronizationItem = createFullSynchronizationItem("hy-CUR-ended");
 
-        SynchronizationItem enrichedItem = sisuCourseEnricher.doEnrich(synchronizationItem);
+        enricherService.enrichWithSisuCourse(synchronizationItem);
 
-        assertStatus(enrichedItem, EnrichmentStatus.COURSE_ENDED, false);
+        assertStatus(synchronizationItem, EnrichmentStatus.COURSE_ENDED, false);
     }
 
     private void assertStatus(SynchronizationItem item, EnrichmentStatus expectedStatus, boolean expectedCurPresent) {

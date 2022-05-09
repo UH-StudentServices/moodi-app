@@ -27,6 +27,7 @@ import fi.helsinki.moodi.integration.studyregistry.StudyRegistryTeacher;
 import fi.helsinki.moodi.service.batch.BatchProcessor;
 import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
+import fi.helsinki.moodi.service.synchronize.enrich.EnricherService;
 import fi.helsinki.moodi.service.synclock.SyncLockService;
 import fi.helsinki.moodi.service.util.MapperService;
 import org.slf4j.Logger;
@@ -40,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -49,10 +49,10 @@ import static com.google.common.collect.Lists.newArrayList;
 import static fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem.UserSynchronizationItemStatus.*;
 
 /**
- * Processor implementation that synchronizes courses.
+ * Synchronization for one course, represented by synchronizationItem
  */
 @Component
-public class SynchronizingProcessor extends AbstractProcessor {
+public class SynchronizingProcessor {
 
     private static final int ACTION_BATCH_MAX_SIZE = 300;
 
@@ -64,6 +64,7 @@ public class SynchronizingProcessor extends AbstractProcessor {
     private final MapperService mapperService;
     private final MoodleService moodleService;
     private final CourseService courseService;
+    private final EnricherService enricherService;
     private final SynchronizationThreshold synchronizationThreshold;
     private final SyncLockService syncLockService;
     private final UserSynchronizationActionResolver synchronizationActionResolver;
@@ -73,22 +74,22 @@ public class SynchronizingProcessor extends AbstractProcessor {
     public SynchronizingProcessor(MapperService mapperService,
                                   MoodleService moodleService,
                                   CourseService courseService,
+                                  EnricherService enricherService,
                                   SynchronizationThreshold synchronizationThreshold,
                                   SyncLockService syncLockService,
                                   UserSynchronizationActionResolver synchronizationActionResolver,
                                   BatchProcessor batchProcessor) {
-        super(Action.SYNCHRONIZE);
         this.mapperService = mapperService;
         this.moodleService = moodleService;
         this.courseService = courseService;
+        this.enricherService = enricherService;
         this.synchronizationThreshold = synchronizationThreshold;
         this.syncLockService = syncLockService;
         this.synchronizationActionResolver = synchronizationActionResolver;
         this.batchProcessor = batchProcessor;
     }
 
-    @Override
-    protected SynchronizationItem doProcess(final SynchronizationItem item) {
+    public SynchronizationItem doSynchronize(final SynchronizationItem item) {
 
         final Map<Long, MoodleUserEnrollments> moodleEnrollmentsById = groupMoodleEnrollmentsByUserId(item);
 
@@ -153,7 +154,23 @@ public class SynchronizingProcessor extends AbstractProcessor {
             .collect(Collectors.toList());
 
         try {
-            moodleServiceMethodForAction(actionType).accept(moodleEnrollments);
+            switch (actionType) {
+                case ADD_ENROLLMENT:
+                case REACTIVATE_ENROLLMENT: // Adding the enrollment again in Moodle sets the enrollment suspend flag to 0
+                    moodleService.addEnrollments(moodleEnrollments);
+                    break;
+                case SUSPEND_ENROLLMENT:
+                    moodleService.suspendEnrollments(moodleEnrollments);
+                    break;
+                case ADD_ROLES:
+                    moodleService.addRoles(moodleEnrollments);
+                    break;
+                case REMOVE_ROLES:
+                    moodleService.removeRoles(moodleEnrollments);
+                    break;
+                default:
+                    throw new IllegalArgumentException("No service method mapped for action: " + actionType);
+            }
             return actions.stream()
                 .map(UserSynchronizationAction::withSuccessStatus)
                 .collect(Collectors.toList());
@@ -163,24 +180,6 @@ public class SynchronizingProcessor extends AbstractProcessor {
             return actions.stream()
                 .map(UserSynchronizationAction::withErrorStatus)
                 .collect(Collectors.toList());
-        }
-    }
-
-    Consumer<List<MoodleEnrollment>> moodleServiceMethodForAction(UserSynchronizationActionType actionType) {
-        switch (actionType) {
-            case ADD_ENROLLMENT:
-                return moodleService::addEnrollments;
-            case SUSPEND_ENROLLMENT:
-                return moodleService::suspendEnrollments;
-            case REACTIVATE_ENROLLMENT:
-                // Adding the enrollment again in Moodle sets the enrollment suspend flag to 0
-                return moodleService::addEnrollments;
-            case ADD_ROLES:
-                return moodleService::addRoles;
-            case REMOVE_ROLES:
-                return moodleService::removeRoles;
-            default:
-                throw new IllegalArgumentException("No service method mapped for action: " + actionType.toString());
         }
     }
 
@@ -313,12 +312,10 @@ public class SynchronizingProcessor extends AbstractProcessor {
     }
 
     private Optional<MoodleUser> getMoodleUser(final List<String> usernameList) {
-        return moodleService.getUser(usernameList);
+        Optional<MoodleUser> moodleUser = enricherService.getPrefetchedMoodleUser(usernameList);
+        if (!moodleUser.isPresent()) {
+            moodleUser = moodleService.getUser(usernameList);
+        }
+        return moodleUser;
     }
-
-    @Override
-    protected Logger getLogger() {
-        return logger;
-    }
-
 }

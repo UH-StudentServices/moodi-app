@@ -17,40 +17,201 @@
 
 package fi.helsinki.moodi.service.synchronize.enrich;
 
+import fi.helsinki.moodi.integration.moodle.MoodleFullCourse;
+import fi.helsinki.moodi.integration.moodle.MoodleService;
+import fi.helsinki.moodi.integration.moodle.MoodleUser;
+import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryService;
+import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
+import fi.helsinki.moodi.service.synchronize.SynchronizationType;
+import fi.helsinki.moodi.service.synclock.SyncLockService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.Ordered;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class EnricherService {
 
-    private final List<Enricher> enrichers;
+    private final SyncLockService syncLockService;
+    private final StudyRegistryService studyRegistryService;
+    private final MoodleService moodleService;
+    private Map<String, StudyRegistryCourseUnitRealisation> prefetchedCursById = new HashMap<>();
+    private Map<Long, MoodleFullCourse> prefetchedMoodleCoursesById = new HashMap<>();
+    private final Map<String, MoodleUser> prefetchedMoodleUsers = new HashMap<>();
+    private final Map<Long, List<MoodleUserEnrollments>> prefetchedMoodleEnrollmentsByCourseId = new HashMap<>();
+    private static final Logger logger = LoggerFactory.getLogger(EnricherService.class);
 
     @Autowired
-    public EnricherService(List<Enricher> enrichers) {
-        this.enrichers = enrichers;
-        enrichers.sort(Comparator.comparingInt(Ordered::getOrder));
+    public EnricherService(SyncLockService syncLockService, StudyRegistryService studyRegistryService, MoodleService moodleService) {
+        this.syncLockService = syncLockService;
+        this.studyRegistryService = studyRegistryService;
+        this.moodleService = moodleService;
+    }
+
+    /**
+     * Enrich items with data required in synchronization.
+     */
+    public List<SynchronizationItem> enrichItems(final List<SynchronizationItem> items) {
+        prefetchSisuCourses(items.stream().map(item -> item.getCourse().realisationId).collect(toList()));
+        prefetchMoodleCoursesEnrollmentsAndUsers(items.stream().map(item -> item.getCourse().moodleId).collect(toList()));
+        return items.stream().map(this::enrichItem).collect(Collectors.toList());
     }
 
     public SynchronizationItem enrichItem(final SynchronizationItem item) {
-        return applyEnricher(item, 0);
+        try {
+            checkLockStatus(item);
+            enrichWithSisuCourse(item);
+            enrichWithMoodleCourse(item);
+            enrichWithMoodleEnrollments(item);
+            if (!completed(item)) {
+                item.completeEnrichmentPhase(EnrichmentStatus.SUCCESS, "Enrichment successful");
+            }
+        } catch (Exception e) {
+            throw new EnrichException("Error enriching synchronization item", e);
+        }
+        return item;
     }
 
-    private SynchronizationItem applyEnricher(final SynchronizationItem item, final int index) {
-        if (index < enrichers.size()) {
-            SynchronizationItem enrichedItem;
-            try {
-                enrichedItem = enrichers.get(index).enrich(item);
-            } catch (Exception e) {
-                throw new EnrichException("Error enriching synchronization item", e);
+    private boolean completed(final SynchronizationItem item) {
+        if (item.getEnrichmentStatus() != EnrichmentStatus.IN_PROGRESS) {
+            logger.debug("Item enrichment already completed, just return it");
+            return true;
+        }
+        return false;
+    }
+
+    private void checkLockStatus(SynchronizationItem item) {
+        if (completed(item)) {
+            return;
+        }
+        try {
+            final boolean isLocked = syncLockService.isLocked(item.getCourse());
+
+            if (SynchronizationType.UNLOCK.equals(item.getSynchronizationType())) {
+                item.setUnlock(true);
+            } else if (isLocked) {
+                item.completeEnrichmentPhase(EnrichmentStatus.LOCKED, "Item locked. Will not synchronize.");
             }
-            return applyEnricher(enrichedItem, index + 1);
-        } else {
-            return item;
+        } catch (Exception e) {
+            logger.error("Error while enriching item (checkLockStatus)", e);
+            item.completeEnrichmentPhase(EnrichmentStatus.ERROR, e.getMessage());
+        }
+    }
+
+    public void prefetchSisuCourses(List<String> curIds) {
+        List<String> uniqueSisuIds = new ArrayList<>(new LinkedHashSet<>(curIds));
+        prefetchedCursById = studyRegistryService.getSisuCourseUnitRealisations(uniqueSisuIds).stream()
+            .collect(Collectors.toMap(c -> c.realisationId, c -> c));
+    }
+
+    void enrichWithSisuCourse(SynchronizationItem item) {
+        if (completed(item)) {
+            return;
+        }
+        try {
+            final Course course = item.getCourse();
+            final StudyRegistryCourseUnitRealisation cur = prefetchedCursById.get(course.realisationId);
+
+            if (cur == null) {
+                item.completeEnrichmentPhase(
+                    EnrichmentStatus.ERROR,
+                    String.format("Course not found from Sisu with id %s", course.realisationId));
+            } else if (endedMoreThanYearAgo(cur)) {
+                item.completeEnrichmentPhase(
+                    EnrichmentStatus.COURSE_ENDED,
+                    String.format("Course with realisation id %s has ended", course.realisationId));
+            } else {
+                item.setStudyRegistryCourse(cur);
+            }
+        } catch (Exception e) {
+            logger.error("Error while enriching item (enrichWithSisuCourse)", e);
+            item.completeEnrichmentPhase(EnrichmentStatus.ERROR, e.getMessage());
+        }
+    }
+
+    private boolean endedMoreThanYearAgo(StudyRegistryCourseUnitRealisation cur) {
+        return cur.endDate.plusYears(1).isBefore(LocalDate.now());
+    }
+
+
+    public void prefetchMoodleCoursesEnrollmentsAndUsers(List<Long> moodleCourseIds) {
+        List<Long> uniqueMoodleCourseIds = new ArrayList<>(new LinkedHashSet<>(moodleCourseIds));
+        prefetchedMoodleCoursesById = moodleService.getCourses(uniqueMoodleCourseIds).stream()
+            .collect(Collectors.toMap(c -> c.id, c -> c));
+
+        prefetchedMoodleUsers.clear();
+        prefetchedMoodleEnrollmentsByCourseId.clear();
+        List<List<MoodleUserEnrollments>> allEnrollments = moodleService.getEnrolledUsers(uniqueMoodleCourseIds);
+        assert(uniqueMoodleCourseIds.size() == allEnrollments.size());
+        for (int i=0; i < uniqueMoodleCourseIds.size(); i++) {
+            long courseId = uniqueMoodleCourseIds.get(i);
+            List<MoodleUserEnrollments> enrollments = allEnrollments.get(i);
+            prefetchedMoodleEnrollmentsByCourseId.put(courseId, enrollments);
+            enrollments.forEach(moodleEnrollment -> {
+                if (!prefetchedMoodleUsers.containsKey(moodleEnrollment.username)) {
+                    MoodleUser moodleUser = new MoodleUser();
+                    moodleUser.id = moodleEnrollment.id;
+                    prefetchedMoodleUsers.put(moodleEnrollment.username, moodleUser);
+                }
+            });
+        }
+    }
+
+    public Optional<MoodleUser> getPrefetchedMoodleUser(List<String> usernameList) {
+        for (String username: usernameList) {
+            if (prefetchedMoodleUsers.containsKey(username)) {
+                return Optional.of(prefetchedMoodleUsers.get(username));
+            }
+        }
+        return Optional.empty();
+    }
+
+    private void enrichWithMoodleCourse(final SynchronizationItem item) {
+        if (completed(item)) {
+            return;
+        }
+        try {
+            final Course course = item.getCourse();
+            final MoodleFullCourse moodleCourse = prefetchedMoodleCoursesById.get(course.moodleId);
+
+            if (moodleCourse == null) {
+                item.completeEnrichmentPhase(
+                    EnrichmentStatus.MOODLE_COURSE_NOT_FOUND,
+                    "Course not found from Moodle with id " + course.moodleId);
+            } else {
+                item.setMoodleCourse(moodleCourse);
+            }
+        } catch (Exception e) {
+            logger.error("Error while enriching item (enrichWithMoodleCourse)", e);
+            item.completeEnrichmentPhase(EnrichmentStatus.ERROR, e.getMessage());
+        }
+    }
+
+    private void enrichWithMoodleEnrollments(final SynchronizationItem item) {
+        if (completed(item)) {
+            return;
+        }
+        try {
+            final Course course = item.getCourse();
+            final List<MoodleUserEnrollments> moodleEnrollments = prefetchedMoodleEnrollmentsByCourseId.get(course.moodleId);
+            item.setMoodleEnrollments(moodleEnrollments);
+        } catch (Exception e) {
+            logger.error("Error while enriching item (enrichWithMoodleEnrollments)", e);
+            item.completeEnrichmentPhase(EnrichmentStatus.ERROR, e.getMessage());
         }
     }
 }
