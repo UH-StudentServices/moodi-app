@@ -25,6 +25,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -40,11 +41,11 @@ public class MoodleClientGetCoursesTest extends AbstractMoodiIntegrationTest {
     public void deserializeRespose() {
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
                 .andExpect(method(HttpMethod.POST))
-                .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_course_get_courses&moodlewsrestformat=json"))
+                .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_course_get_courses&moodlewsrestformat=json&options%5Bids%5D%5B0%5D=33"))
                 .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
                 .andRespond(withSuccess(Fixtures.asString("/moodle/get-courses.json"), MediaType.APPLICATION_JSON));
 
-        final List<MoodleFullCourse> courses = moodleClient.getCourses(new ArrayList<>());
+        final List<MoodleFullCourse> courses = moodleClient.getCourses(Collections.singletonList(33L));
         assertEquals(1, courses.size());
 
         final MoodleFullCourse course = courses.get(0);

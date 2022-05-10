@@ -18,10 +18,12 @@
 package fi.helsinki.moodi.scheduled;
 
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
+import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseRepository;
 import fi.helsinki.moodi.service.util.MapperService;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -30,7 +32,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
@@ -72,25 +77,25 @@ public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
         // The JSON mock data files contain the courses above.
         setUpMockSisuAndPrefetchCourses();
 
+        //setupMoodleGetCourseResponse(Arrays.asList(MOODLE_COURSE_ID_1, MOODLE_COURSE_ID_2));
         setupMoodleGetCourseResponse(MOODLE_COURSE_ID_1);
         // Two users are already enrolled with student and synced roles.
         // One of them now gets returned from Sisu with a non-enrolled status, and the
         // other one does not get returned from Sisu at all, as someone has totally removed the whole enrollment from Sisu.
-        expectGetEnrollmentsRequestToMoodle(
-            MOODLE_COURSE_ID_1,
+        List<Pair<Long, List<MoodleUserEnrollments>>> expectedEnrollmentsByCourse = new ArrayList<>();
+        expectedEnrollmentsByCourse.add(Pair.of((long) MOODLE_COURSE_ID_1, Arrays.asList(
             getMoodleUserEnrollments((int) MOODLE_USER_NOT_ENROLLED_IN_SISU, MOODLE_USERNAME_NOT_ENROLLED_IN_SISU, MOODLE_COURSE_ID_1,
                 mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()),
             getMoodleUserEnrollments((int) MOODLE_USER_NOT_IN_STUDY_REGISTRY, MOODLE_USERNAME_NOT_IN_STUDY_REGISTRY, MOODLE_COURSE_ID_1,
                 mapperService.getStudentRoleId(), mapperService.getMoodiRoleId())
-        );
-        setupMoodleGetCourseResponse(MOODLE_COURSE_ID_2);
-        expectGetEnrollmentsRequestToMoodle(MOODLE_COURSE_ID_2);
+            )));
+        expectedEnrollmentsByCourse.add(Pair.of((long) MOODLE_COURSE_ID_2, Collections.emptyList()));
+        setupMoodleGetEnrolledUsersForCourses(expectedEnrollmentsByCourse);
 
         // Course one students and teacher are fetched from Moodle.
         expectGetUserRequestToMoodle(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA);
         expectGetUserRequestToMoodle(MOODLE_USERNAME_JUKKA, MOODLE_USER_ID_JUKKA);
         expectGetUserRequestToMoodle(MOODLE_USERNAME_MAKE, MOODLE_USER_ID_MAKE);
-        expectGetUserRequestToMoodle(MOODLE_USERNAME_NOT_ENROLLED_IN_SISU, MOODLE_USER_NOT_ENROLLED_IN_SISU);
         expectGetUserRequestToMoodle(MOODLE_USERNAME_ONE, MOODLE_USER_TEACH_ONE);
 
         // Course two student and teachers are fetched from Moodle.

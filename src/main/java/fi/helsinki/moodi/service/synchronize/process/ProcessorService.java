@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -109,7 +110,7 @@ public class ProcessorService {
         final Map<Action, List<SynchronizationItem>> itemsByAction = groupItemsByAction(items);
         final List<SynchronizationItem> processedItems = Lists.newArrayList();
 
-        itemsByAction.get(Action.SKIP).forEach(item -> {
+        itemsByAction.getOrDefault(Action.SKIP, Collections.emptyList()).forEach(item -> {
             try {
                 item = skipItem(item);
             } catch (Exception e) {
@@ -117,7 +118,7 @@ public class ProcessorService {
             }
             processedItems.add(item);
         });
-        itemsByAction.get(Action.REMOVE).forEach(item -> {
+        itemsByAction.getOrDefault(Action.REMOVE, Collections.emptyList()).forEach(item -> {
             try {
                 item = removeItem(item);
             } catch (Exception e) {
@@ -125,7 +126,7 @@ public class ProcessorService {
             }
             processedItems.add(item);
         });
-        itemsByAction.get(Action.SYNCHRONIZE).forEach(item -> {
+        itemsByAction.getOrDefault(Action.SYNCHRONIZE, Collections.emptyList()).forEach(item -> {
             try {
                 item = synchronizeItem(item);
             } catch (Exception e) {

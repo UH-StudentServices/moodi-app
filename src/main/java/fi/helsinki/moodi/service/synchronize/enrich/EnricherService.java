@@ -67,14 +67,24 @@ public class EnricherService {
      */
     public List<SynchronizationItem> enrichItems(final List<SynchronizationItem> items) {
         prefetchSisuCourses(items.stream().map(item -> item.getCourse().realisationId).collect(toList()));
-        prefetchMoodleCoursesEnrollmentsAndUsers(items.stream().map(item -> item.getCourse().moodleId).collect(toList()));
-        return items.stream().map(this::enrichItem).collect(Collectors.toList());
+        items.forEach(this::enrichItemWithSisu);
+        List<SynchronizationItem> activeItems = items.stream().filter(item -> !this.completed(item)).collect(toList());
+        prefetchMoodleCoursesEnrollmentsAndUsers(activeItems.stream().map(item -> item.getCourse().moodleId).collect(toList()));
+        activeItems.forEach(this::enrichItemWithMoodle);
+        return items;
     }
 
-    public SynchronizationItem enrichItem(final SynchronizationItem item) {
+    public void enrichItemWithSisu(final SynchronizationItem item) {
         try {
             checkLockStatus(item);
             enrichWithSisuCourse(item);
+        } catch (Exception e) {
+            throw new EnrichException("Error enriching synchronization item", e);
+        }
+    }
+
+    public void enrichItemWithMoodle(final SynchronizationItem item) {
+        try {
             enrichWithMoodleCourse(item);
             enrichWithMoodleEnrollments(item);
             if (!completed(item)) {
@@ -83,7 +93,6 @@ public class EnricherService {
         } catch (Exception e) {
             throw new EnrichException("Error enriching synchronization item", e);
         }
-        return item;
     }
 
     private boolean completed(final SynchronizationItem item) {
@@ -156,7 +165,9 @@ public class EnricherService {
         prefetchedMoodleUsers.clear();
         prefetchedMoodleEnrollmentsByCourseId.clear();
         List<List<MoodleUserEnrollments>> allEnrollments = moodleService.getEnrolledUsers(uniqueMoodleCourseIds);
-        assert(uniqueMoodleCourseIds.size() == allEnrollments.size());
+        assert uniqueMoodleCourseIds.size() == allEnrollments.size() :
+            "amount of courses with fetched enrollments (" + allEnrollments.size() + ") differs from amount of course ids: " +
+            uniqueMoodleCourseIds.size();
         for (int i=0; i < uniqueMoodleCourseIds.size(); i++) {
             long courseId = uniqueMoodleCourseIds.get(i);
             List<MoodleUserEnrollments> enrollments = allEnrollments.get(i);

@@ -38,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
@@ -100,12 +101,15 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, true);
 
-        expectGetEnrollmentsRequestToMoodle(
+        setupMoodleGetEnrolledUsersForCourses(
             MOODLE_COURSE_ID_IN_DB,
-            getEnrollmentsResponse(MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA,
-                MOODLE_COURSE_ID_IN_DB, mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId()));
+            Collections.singletonList(
+                getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA, (int) MOODLE_COURSE_ID_IN_DB,
+                    mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId())
+            )
+        );
 
-        expectFindUsersRequestsToMoodle();
+        expectFindTeacherRequestToMoodle(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE);
 
         expectEnrollmentRequestToMoodleWithResponse(moodleResponse,
             new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB),
@@ -131,12 +135,15 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
 
         setUpMockServerResponses(getFutureDateString(), false);
 
-        expectGetEnrollmentsRequestToMoodle(
+        setupMoodleGetEnrolledUsersForCourses(
             MOODLE_COURSE_ID_IN_DB,
-            getEnrollmentsResponse(MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA,
-                MOODLE_COURSE_ID_IN_DB, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
+            Collections.singletonList(
+                getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA, (int) MOODLE_COURSE_ID_IN_DB,
+                    mapperService.getStudentRoleId(), mapperService.getMoodiRoleId())
+            )
+        );
 
-        expectFindUsersRequestsToMoodle();
+        expectFindTeacherRequestToMoodle(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE);
 
         SynchronizationSummary summary = synchronizationService.synchronize(synchronizationType);
 

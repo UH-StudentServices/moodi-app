@@ -19,6 +19,7 @@ package fi.helsinki.moodi.test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.common.collect.ImmutableMap;
 import fi.helsinki.moodi.Application;
 import fi.helsinki.moodi.integration.moodle.MoodleCourseData;
@@ -29,6 +30,7 @@ import fi.helsinki.moodi.service.importing.ImportCourseRequest;
 import fi.helsinki.moodi.service.synchronize.enrich.EnricherService;
 import fi.helsinki.moodi.service.util.MapperService;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
+import org.apache.commons.lang3.tuple.Pair;
 import org.flywaydb.core.Flyway;
 import org.junit.After;
 import org.junit.Before;
@@ -42,6 +44,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.servlet.MockMvc;
@@ -52,7 +55,9 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiFunction;
@@ -205,8 +210,8 @@ public abstract class AbstractMoodiIntegrationTest {
     @After
     public void verifyMockServers() {
         studyRegistryMockServer.verify();
-        moodleMockServer.verify();
         moodleReadOnlyMockServer.verify();
+        moodleMockServer.verify();
         mockSisuGraphQLServer.verify();
     }
 
@@ -386,6 +391,7 @@ public abstract class AbstractMoodiIntegrationTest {
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
+            .andExpect(content().string(startsWith("wstoken=xxxx1234&wsfunction=core_course_get_courses&moodlewsrestformat=json")))
             .andRespond(request -> {
                 if (delayed) {
                     try {
@@ -404,6 +410,41 @@ public abstract class AbstractMoodiIntegrationTest {
 
     protected void setupMoodleGetCourseResponse() {
         setupMoodleGetCourseResponse(MOODLE_COURSE_ID_IN_DB);
+    }
+
+    private void mockGetEnrolledUsersForCoursesBatch(List<List<MoodleUserEnrollments>> resultObjects) {
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        try {
+            final String json = ow.writeValueAsString(resultObjects);
+            moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
+                .andExpect(content().string(startsWith("wstoken=xxxx1234&wsfunction=core_enrol_get_enrolled_users_with_capability&moodlewsrestformat=json")))
+                .andRespond(request -> withSuccess(json, MediaType.APPLICATION_JSON).createResponse(request));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    protected void setupMoodleGetEnrolledUsersForCourses(Long moodleId, List<MoodleUserEnrollments> enrollments) {
+        setupMoodleGetEnrolledUsersForCourses(Collections.singletonList(Pair.of(moodleId, enrollments)));
+    }
+
+    protected void setupMoodleGetEnrolledUsersForCourses(List<Pair<Long, List<MoodleUserEnrollments>>> expected) {
+        int count = 1;
+        int batchSize = 2;
+        List<List<MoodleUserEnrollments>> resultObjectBatch = new ArrayList<>();
+        for (Pair<Long, List<MoodleUserEnrollments>> course: expected) {
+            resultObjectBatch.add(course.getValue());
+            if (count % batchSize == 0) {
+                mockGetEnrolledUsersForCoursesBatch(resultObjectBatch);
+                resultObjectBatch.clear();
+            }
+            count++;
+        }
+        if (!resultObjectBatch.isEmpty()) {
+            mockGetEnrolledUsersForCoursesBatch(resultObjectBatch);
+        }
     }
 
     protected final MoodleUserEnrollments getMoodleUserEnrollments(int moodleUserId, String userName, int enrolledCourseId, long...roleIds) {
@@ -438,10 +479,6 @@ public abstract class AbstractMoodiIntegrationTest {
 
     protected final void expectGetEnrollmentsRequestToMoodle(final long courseId) {
         expectGetEnrollmentsRequestToMoodle(courseId, "[]");
-    }
-
-    protected final void expectGetEnrollmentsRequestToMoodle(final long courseId, MoodleUserEnrollments... responseEnrollments) {
-        expectGetEnrollmentsRequestToMoodle(courseId, toJson(responseEnrollments));
     }
 
     protected final void expectGetEnrollmentsRequestToMoodle(final long courseId, final String response) {
