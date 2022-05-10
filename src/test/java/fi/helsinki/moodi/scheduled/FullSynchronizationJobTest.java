@@ -29,6 +29,8 @@ import fi.helsinki.moodi.test.util.DateUtil;
 import org.junit.Test;
 import org.springframework.test.context.TestPropertySource;
 
+import java.util.Collections;
+
 import static fi.helsinki.moodi.service.course.Course.ImportStatus;
 import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
 import static fi.helsinki.moodi.test.util.DateUtil.getPastDateString;
@@ -40,7 +42,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
     private void thatCourseIsSynchronizedWithNoExistingEnrollments(String endDateString) {
         setUpMockServerResponses(endDateString, true);
 
-        expectGetEnrollmentsRequestToMoodle(MOODLE_COURSE_ID_IN_DB);
+        setupMoodleGetEnrolledUsersForCourses(MOODLE_COURSE_ID_IN_DB, Collections.emptyList());
 
         expectFindUsersRequestsToMoodle();
 
@@ -103,7 +105,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, false);
 
-        expectGetEnrollmentsRequestToMoodle(MOODLE_COURSE_ID_IN_DB);
+        setupMoodleGetEnrolledUsersForCourses(MOODLE_COURSE_ID_IN_DB, Collections.emptyList());
 
         expectFindUsersRequestsToMoodle();
 
@@ -119,12 +121,15 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, true);
 
-        expectGetEnrollmentsRequestToMoodle(
+        setupMoodleGetEnrolledUsersForCourses(
             MOODLE_COURSE_ID_IN_DB,
-            getEnrollmentsResponse(MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA,
-                MOODLE_COURSE_ID_IN_DB, mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId()));
+            Collections.singletonList(
+                getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA, (int) MOODLE_COURSE_ID_IN_DB,
+                    mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId())
+            )
+        );
 
-        expectFindUsersRequestsToMoodle();
+        expectFindTeacherRequestToMoodle(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE);
 
         expectEnrollmentRequestToMoodle(
             new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB),
@@ -140,12 +145,15 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, false);
 
-        expectGetEnrollmentsRequestToMoodle(
+        setupMoodleGetEnrolledUsersForCourses(
             MOODLE_COURSE_ID_IN_DB,
-            getEnrollmentsResponse(MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA,
-                MOODLE_COURSE_ID_IN_DB, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
+            Collections.singletonList(
+                getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA, (int) MOODLE_COURSE_ID_IN_DB,
+                    mapperService.getStudentRoleId(), mapperService.getMoodiRoleId())
+            )
+        );
 
-        expectFindUsersRequestsToMoodle();
+        expectFindTeacherRequestToMoodle(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE);
 
         expectEnrollmentRequestToMoodle(
             new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB),
@@ -165,11 +173,14 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         setUpMockServerResponses(endDateInFuture, true);
 
         // ...but only has the sync role in Moodle.
-        expectGetEnrollmentsRequestToMoodle(
+        setupMoodleGetEnrolledUsersForCourses(
             MOODLE_COURSE_ID_IN_DB,
-            getEnrollmentsResponse(MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA, MOODLE_COURSE_ID_IN_DB, mapperService.getMoodiRoleId()));
+            Collections.singletonList(
+                getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA, (int) MOODLE_COURSE_ID_IN_DB, mapperService.getMoodiRoleId())
+            )
+        );
 
-        expectFindUsersRequestsToMoodle();
+        expectFindTeacherRequestToMoodle(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE);
 
         expectEnrollmentRequestToMoodle(
             new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB),
@@ -188,12 +199,14 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, false);
 
-        expectGetEnrollmentsRequestToMoodle(
+        setupMoodleGetEnrolledUsersForCourses(
             MOODLE_COURSE_ID_IN_DB,
-            getEnrollmentsResponse(MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA,
-                SOME_OTHER_MOODLE_COURSE_ID, mapperService.getMoodiRoleId()));
+            Collections.singletonList(
+                getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA, (int) SOME_OTHER_MOODLE_COURSE_ID, mapperService.getMoodiRoleId())
+            )
+        );
 
-        expectFindUsersRequestsToMoodle();
+        expectFindTeacherRequestToMoodle(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE);
 
         expectEnrollmentRequestToMoodle(
             new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB),
@@ -209,15 +222,17 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
         setupCourseUnitRealisationResponseMultiplePeople();
 
-        expectGetEnrollmentsRequestToMoodle(
+        setupMoodleGetEnrolledUsersForCourses(
             MOODLE_COURSE_ID_IN_DB,
-            getEnrollmentsResponse(MOODLE_USER_NOT_ENROLLED_IN_SISU, MOODLE_USERNAME_NOT_ENROLLED_IN_SISU,
-                MOODLE_COURSE_ID_IN_DB, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()));
+            Collections.singletonList(
+                getMoodleUserEnrollments((int) MOODLE_USER_NOT_ENROLLED_IN_SISU, MOODLE_USERNAME_NOT_ENROLLED_IN_SISU,
+                    (int) MOODLE_COURSE_ID_IN_DB, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId())
+            )
+        );
 
         expectFindStudentRequestToMoodle(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA);
         expectFindStudentRequestToMoodle(MOODLE_USERNAME_JUKKA, MOODLE_USER_ID_JUKKA);
         expectFindStudentRequestToMoodle(MOODLE_USERNAME_MAKE, MOODLE_USER_ID_MAKE);
-        expectFindStudentRequestToMoodle(MOODLE_USERNAME_NOT_ENROLLED_IN_SISU, MOODLE_USER_NOT_ENROLLED_IN_SISU);
 
         expectFindTeacherRequestToMoodle(MOODLE_USERNAME_ONE, MOODLE_USER_TEACH_ONE);
         expectFindTeacherRequestToMoodle(MOODLE_USERNAME_TWO, MOODLE_USER_TEACH_TWO);
@@ -282,7 +297,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
         setupCourseUnitRealisationResponse(getFutureDateString(), true);
 
-        expectGetEnrollmentsRequestToMoodle(MOODLE_COURSE_ID_IN_DB);
+        setupMoodleGetEnrolledUsersForCourses(MOODLE_COURSE_ID_IN_DB, Collections.emptyList());
 
         expectGetUserRequestToMoodleUserNotFound(MOODLE_USERNAME_NIINA);
         expectGetUserRequestToMoodleUserNotFound(MOODLE_USERNAME_HRAOPE);
