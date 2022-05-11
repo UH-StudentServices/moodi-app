@@ -36,6 +36,7 @@ import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
 @Configuration
@@ -77,13 +78,17 @@ public class MoodleConfig {
     //RestTemplate for requests that make modifications to Moodle. Do not get retried immediately in case of error.
     @Bean
     public RestTemplate moodleRestTemplate(HttpClientBuilder clientBuilder) {
-        return createRestTemplate(new DefaultHttpRequestRetryHandler(RETRY_COUNT, false), clientBuilder);
+        RestTemplate template = createRestTemplate(new DefaultHttpRequestRetryHandler(RETRY_COUNT, false), clientBuilder);
+        template.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
+        return template;
     }
 
     //RestTemplate for request that only read data from Moodle. May get retried up to RETRY_COUNT times in case of failure.
     @Bean
     public RestTemplate moodleReadOnlyRestTemplate(HttpClientBuilder clientBuilder) {
-        return createRestTemplate(new DefaultHttpRequestRetryHandler(RETRY_COUNT, true), clientBuilder);
+        RestTemplate template = createRestTemplate(new DefaultHttpRequestRetryHandler(RETRY_COUNT, true), clientBuilder);
+        template.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
+        return template;
     }
 
     private String restUrl() {
