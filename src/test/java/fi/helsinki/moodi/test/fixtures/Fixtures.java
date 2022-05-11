@@ -21,8 +21,6 @@ import com.google.common.io.Files;
 import fi.helsinki.moodi.test.templates.Templates;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
