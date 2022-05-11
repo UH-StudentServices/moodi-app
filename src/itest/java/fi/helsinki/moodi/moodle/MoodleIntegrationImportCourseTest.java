@@ -55,7 +55,7 @@ public class MoodleIntegrationImportCourseTest extends AbstractMoodleIntegration
         assertThat(moodleCourses.size()).isEqualTo(1);
         MoodleFullCourse mfc = moodleCourses.get(0);
 
-        assertThat(mfc.fullName).isEqualTo("Lapsuus ja yhteiskunta");
+        assertThat(mfc.fullName).isEqualTo("Lapsuus ja yhteiskuntaFör att testaFor testing");
         assertThat(mfc.displayName).isEqualTo("Lapsuus ja yhteiskunta");
         assertThat(mfc.endDate).isGreaterThan(mfc.startDate);
         // The unique shortname suffix for integration tests is derived from the current time and
