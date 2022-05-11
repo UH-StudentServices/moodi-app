@@ -108,8 +108,10 @@ public class MoodleClient {
     public long createCourse(final MoodleCourse course) {
         final MultiValueMap<String, String> params = createParametersForFunction("core_course_create_courses");
 
+        String fullName =  course.fullName.contains("<span") ? URLEncoder.encode(course.fullName, StandardCharsets.UTF_8) : course.fullName;
+
         params.set(createParamName(COURSES, "idnumber", 0), course.idNumber);
-        params.set(createParamName(COURSES, "fullname", 0), course.fullName.contains("<span") ? URLEncoder.encode(course.fullName, StandardCharsets.UTF_8) : course.fullName);
+        params.set(createParamName(COURSES, "fullname", 0), fullName);
         params.set(createParamName(COURSES, "shortname", 0), course.shortName);
         params.set(createParamName(COURSES, "categoryid", 0), course.categoryId);
         params.set(createParamName(COURSES, "summary", 0), course.summary);
