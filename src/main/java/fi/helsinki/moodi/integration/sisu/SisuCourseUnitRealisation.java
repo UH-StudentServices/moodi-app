@@ -25,7 +25,6 @@ import io.aexp.nodes.graphql.annotations.GraphQLProperty;
 import io.micrometer.core.instrument.util.StringUtils;
 
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -158,18 +157,18 @@ public class SisuCourseUnitRealisation {
 
         // determine comp1 and comp2
         if (!StringUtils.isEmpty(comp1)) {
-            if (!defaultName.equals(comp1)) {
+            if(!defaultName.equals(comp1)) {
                 other1Final = getLocalizedSpan(otherLang1, otherName1);
             }
         }
         if (!StringUtils.isEmpty(comp2)) {
-            if (!defaultName.equals(comp2)) {
+            if(!defaultName.equals(comp2)) {
                 other2Final = getLocalizedSpan(otherLang2, otherName2);
             }
         }
 
         // if total length exceeds maximum length revert to non-localized teaching language name
-        if (defaultFinal.length() + other1Final.length() + other2Final.length() >= MAX_NAME_DB_LENGTH) {
+        if(defaultFinal.length() + other1Final.length() + other2Final.length() >= MAX_NAME_DB_LENGTH) {
             return defaultName;
         }
 
@@ -209,15 +208,9 @@ public class SisuCourseUnitRealisation {
     }
 
     private String getLocalizedSpan(SisuLocale locale, String text) {
-        String escapedText = text;
-        try {
-            escapedText = URLEncoder.encode(text, StandardCharsets.UTF_8.name());
-        } catch (Exception e) {
-
-        }
         String languageSpanStart = "<span lang=\"%lang%\" class=\"multilang\">";
         String languageSpanEnd = "</span>";
-        return languageSpanStart.replace("%lang%", locale.toString().toLowerCase()) + escapedText + languageSpanEnd;
+        return languageSpanStart.replace("%lang%", locale.toString().toLowerCase()) + text + languageSpanEnd;
     }
 
     private String getMainOrganisationId() {
