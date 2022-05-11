@@ -69,7 +69,7 @@ public class MoodleConfig {
 
         restTemplate.setMessageConverters(
             Lists.newArrayList(
-                new StringHttpMessageConverter(),
+                new StringHttpMessageConverter(StandardCharsets.UTF_8),
                 new FormHttpMessageConverter()));
 
         return restTemplate;
@@ -78,17 +78,13 @@ public class MoodleConfig {
     //RestTemplate for requests that make modifications to Moodle. Do not get retried immediately in case of error.
     @Bean
     public RestTemplate moodleRestTemplate(HttpClientBuilder clientBuilder) {
-        RestTemplate template = createRestTemplate(new DefaultHttpRequestRetryHandler(RETRY_COUNT, false), clientBuilder);
-        template.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-        return template;
+        return createRestTemplate(new DefaultHttpRequestRetryHandler(RETRY_COUNT, false), clientBuilder);
     }
 
     //RestTemplate for request that only read data from Moodle. May get retried up to RETRY_COUNT times in case of failure.
     @Bean
     public RestTemplate moodleReadOnlyRestTemplate(HttpClientBuilder clientBuilder) {
-        RestTemplate template = createRestTemplate(new DefaultHttpRequestRetryHandler(RETRY_COUNT, true), clientBuilder);
-        template.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-        return template;
+        return createRestTemplate(new DefaultHttpRequestRetryHandler(RETRY_COUNT, true), clientBuilder);
     }
 
     private String restUrl() {
