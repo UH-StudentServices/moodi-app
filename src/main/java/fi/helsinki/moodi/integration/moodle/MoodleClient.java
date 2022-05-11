@@ -33,6 +33,7 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -106,6 +107,7 @@ public class MoodleClient {
     public long createCourse(final MoodleCourse course) {
         final MultiValueMap<String, String> params = createParametersForFunction("core_course_create_courses");
 
+        params.set("_charset_", StandardCharsets.UTF_8.name());
         params.set(createParamName(COURSES, "idnumber", 0), course.idNumber);
         params.set(createParamName(COURSES, "fullname", 0), course.fullName);
         params.set(createParamName(COURSES, "shortname", 0), course.shortName);
