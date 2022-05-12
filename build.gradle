@@ -33,6 +33,11 @@ apply plugin: "io.spring.dependency-management"
 apply from: "gradle-build/required-properties.gradle"
 apply plugin: 'checkstyle'
 
+// disable plain jar which seems to make publishing to artifactory fail
+jar {
+    enabled = false
+}
+
 bootJar {
     mainClass = "fi.helsinki.moodi.Application"
     launchScript()
@@ -82,14 +87,14 @@ dependencies {
 
     implementation group: 'ch.qos.logback', name: 'logback-classic', version: logback_version
     implementation group: 'ch.qos.logback', name: 'logback-core', version: logback_version
-    implementation group: 'org.springframework', name: 'spring-context-support', version: spring_framework_version
+    implementation group: 'org.springframework', name: 'spring-context-support'
     implementation group: 'org.hibernate', name: 'hibernate-entitymanager', version: hibernate_entitymanager_version
     implementation group: 'org.hibernate', name: 'hibernate-ehcache', version: hibernate_entitymanager_version
 
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     implementation 'com.google.guava:guava:23.0'
     implementation 'com.h2database:h2:1.4.187'
-    implementation 'org.flywaydb:flyway-core:8.5.9'
+    implementation 'org.flywaydb:flyway-core:6.5.7'
     implementation "org.postgresql:postgresql:9.4-1201-jdbc41"
     implementation 'org.apache.httpcomponents:httpclient:4.5.13'
     implementation 'org.trimou:trimou-core:2.5.1.Final'
@@ -105,6 +110,15 @@ dependencies {
     testImplementation group: 'org.mock-server', name: 'mockserver-netty', version: mockserver_version
     testImplementation group: 'org.mock-server', name: 'mockserver-junit-rule', version: mockserver_version
     testImplementation group: 'com.graphql-java', name: 'graphql-java', version: graphql_java_version
+}
+
+configurations {
+    [apiElements, runtimeElements].each {
+        it.outgoing.artifacts.removeIf {
+            it.buildDependencies.getDependencies(null).contains(jar)
+        }
+        it.outgoing.artifact(bootJar)
+    }
 }
 
 apply from: "gradle-build/test.gradle"

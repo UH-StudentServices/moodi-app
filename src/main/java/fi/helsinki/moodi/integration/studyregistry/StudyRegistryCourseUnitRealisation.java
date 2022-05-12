@@ -42,6 +42,8 @@ public class StudyRegistryCourseUnitRealisation {
 
     public String realisationName;
 
+    public String teachingLanguageRealisationName;
+
     public String mainOrganisationId;
 
     @Override

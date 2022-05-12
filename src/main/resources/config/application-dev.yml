@@ -8,7 +8,9 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     database: PostgreSQL
   flyway:
-    locations: classpath:db/migration/common,classpath:db/migration/psql
+      locations: classpath:db/m igration/common,classpath:db/migration/psql
+      table: schema_version
+      ignore-missing-migrations: true
 
 integration:
   moodle:
