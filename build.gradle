@@ -33,6 +33,11 @@ apply plugin: "io.spring.dependency-management"
 apply from: "gradle-build/required-properties.gradle"
 apply plugin: 'checkstyle'
 
+// disable plain jar which seems to make publishing to artifactory fail
+jar {
+    enabled = false
+}
+
 bootJar {
     mainClass = "fi.helsinki.moodi.Application"
     launchScript()
