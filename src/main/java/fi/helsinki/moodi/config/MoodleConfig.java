@@ -36,6 +36,7 @@ import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
 @Configuration
@@ -68,7 +69,7 @@ public class MoodleConfig {
 
         restTemplate.setMessageConverters(
             Lists.newArrayList(
-                new StringHttpMessageConverter(),
+                new StringHttpMessageConverter(StandardCharsets.UTF_8),
                 new FormHttpMessageConverter()));
 
         return restTemplate;

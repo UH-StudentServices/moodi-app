@@ -63,7 +63,7 @@ public class MoodleCourseBuilder {
     public MoodleCourse buildMoodleCourse(StudyRegistryCourseUnitRealisation cur, Long dbCourseId) {
         return new MoodleCourse(cur.realisationId,
             cur.realisationName,
-            getShortName(cur.realisationName, dbCourseId),
+            getShortName(cur.teachingLanguageRealisationName, dbCourseId),
             mapperService.getMoodleCategoryByOrganisationId(cur.mainOrganisationId),
             cur.description,
             courseVisibility,
