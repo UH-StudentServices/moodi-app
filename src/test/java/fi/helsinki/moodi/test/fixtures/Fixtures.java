@@ -21,8 +21,7 @@ import com.google.common.io.Files;
 import fi.helsinki.moodi.test.templates.Templates;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,9 +39,9 @@ public final class Fixtures {
 
     public static String asString(final String prefix, final String path, final Map<String, ?> variables) {
         try {
-            final String content = Files.toString(new File(prefix + path), Charset.forName("UTF-8"));
+            final String content = Files.asCharSource(new File(prefix + path), StandardCharsets.UTF_8).read();
             return Templates.render(content, variables);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

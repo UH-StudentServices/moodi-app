@@ -22,10 +22,12 @@ import fi.helsinki.moodi.integration.studyregistry.StudyRegistryTeacher;
 import io.aexp.nodes.graphql.annotations.GraphQLArgument;
 import io.aexp.nodes.graphql.annotations.GraphQLIgnore;
 import io.aexp.nodes.graphql.annotations.GraphQLProperty;
+import io.micrometer.core.instrument.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +41,10 @@ import static fi.helsinki.moodi.Constants.TEACHER_TYPES;
     @GraphQLArgument(name = "id", type = "String")
 })
 public class SisuCourseUnitRealisation {
+    @GraphQLIgnore
+    public static final int MAX_NAME_DB_LENGTH = 255;
+    @GraphQLIgnore
+    public static final int SPAN_SIZE = 41;
 
     @GraphQLIgnore
     static final Map<SisuLocale, String> COURSE_UNIT_LOCALIZATION = new HashMap<SisuLocale, String>() {
@@ -68,7 +74,8 @@ public class SisuCourseUnitRealisation {
         StudyRegistryCourseUnitRealisation ret = new StudyRegistryCourseUnitRealisation();
         SisuLocale teachingLanguageCode = SisuLocale.byUrnOrDefaultToFi(teachingLanguageUrn);
         ret.realisationId = id;
-        ret.realisationName = name.getForLocaleOrDefault(teachingLanguageCode);
+        ret.realisationName = generateName(teachingLanguageCode);
+        ret.teachingLanguageRealisationName = name.getForLocaleOrDefault(teachingLanguageCode);
         ret.students = enrolments.stream().map(e -> e.person.toStudyRegistryStudent(e.isEnrolled())).collect(Collectors.toList());
         ret.published = "PUBLISHED".equals(flowState);
 
@@ -119,6 +126,74 @@ public class SisuCourseUnitRealisation {
         });
 
         return ret;
+    }
+
+    protected String generateName(SisuLocale teachingLanguage) {
+        SisuLocale otherLang1 = getOtherLanguage(teachingLanguage);
+        SisuLocale otherLang2 = getOtherLanguage(teachingLanguage, otherLang1);
+
+        String defaultName = name.getForLocaleOrDefault(teachingLanguage);
+        String otherName1 = name.getForLocale(otherLang1);
+        String otherName2 = name.getForLocale(otherLang2);
+
+        String compDefault = defaultName.trim();
+        String comp1 = otherName1 != null ? otherName1.trim() : null;
+        String comp2 = otherName2 != null ? otherName2.trim() : null;
+
+        String defaultFinal = "";
+        String other1Final = "";
+        String other2Final = "";
+
+        boolean allNamesAreSame = compDefault.equalsIgnoreCase(comp1) && compDefault.equalsIgnoreCase(comp2);
+        boolean otherNamesAreEmpty = StringUtils.isEmpty(comp1) && StringUtils.isEmpty(comp2);
+
+        // default name = teaching language name
+        // 1 cases when there is no localisation:
+        // 1.1 if all names are same
+        //      -> return the default name
+        // 1.2 if other names are empty or null
+        //      -> return the default name
+        // 1.3 the total number of characters in localised languages is higher than db max_length - (number of languages * localisation span size)
+        //     -> return default name
+        // 2 cases when there is localisation:
+        // 2.1 if at least languages are not null and are not equal
+        //     -> return localised non-null non-empty languages that are not equal to default language
+        // 2.2 see 1.3. (total length fits within the db max_length)
+
+        // 1.1. && 1.2
+        if (allNamesAreSame || otherNamesAreEmpty) {
+            return defaultName;
+        }
+
+        defaultFinal = getLocalizedSpan(teachingLanguage, defaultName);
+
+        // determine comp1 and comp2
+        if (!StringUtils.isEmpty(comp1)) {
+            if (!defaultName.equals(comp1)) {
+                other1Final = getLocalizedSpan(otherLang1, otherName1);
+            }
+        }
+        if (!StringUtils.isEmpty(comp2)) {
+            if (!defaultName.equals(comp2)) {
+                other2Final = getLocalizedSpan(otherLang2, otherName2);
+            }
+        }
+
+        // if total length exceeds maximum length revert to non-localized teaching language name
+        if (defaultFinal.length() + other1Final.length() + other2Final.length() >= MAX_NAME_DB_LENGTH) {
+            return defaultName;
+        }
+
+        return defaultFinal + other1Final + other2Final;
+    }
+
+    private SisuLocale getOtherLanguage(SisuLocale... languages) {
+        for (SisuLocale locale : SisuLocale.values()) {
+            if (!Arrays.asList(languages).contains(locale)) {
+                return locale;
+            }
+        }
+        return null;
     }
 
     private String getLearningEnvironmentUrl(List<SisuLearningEnvironment> learningEnvironments, SisuLocale sisuLocale, String defaultUrl) {
