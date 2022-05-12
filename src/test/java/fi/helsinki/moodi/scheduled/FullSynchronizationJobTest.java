@@ -42,7 +42,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
     private void thatCourseIsSynchronizedWithNoExistingEnrollments(String endDateString) {
         setUpMockServerResponses(endDateString, true);
 
-        setupMoodleGetEnrolledUsersForCourses(MOODLE_COURSE_ID_IN_DB, Collections.emptyList());
+        prepareMoodleGetEnrolledUsersForCoursesMock(MOODLE_COURSE_ID_IN_DB, Collections.emptyList());
 
         expectFindUsersRequestsToMoodle();
 
@@ -105,7 +105,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, false);
 
-        setupMoodleGetEnrolledUsersForCourses(MOODLE_COURSE_ID_IN_DB, Collections.emptyList());
+        prepareMoodleGetEnrolledUsersForCoursesMock(MOODLE_COURSE_ID_IN_DB, Collections.emptyList());
 
         expectFindUsersRequestsToMoodle();
 
@@ -121,7 +121,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, true);
 
-        setupMoodleGetEnrolledUsersForCourses(
+        prepareMoodleGetEnrolledUsersForCoursesMock(
             MOODLE_COURSE_ID_IN_DB,
             Collections.singletonList(
                 getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA, (int) MOODLE_COURSE_ID_IN_DB,
@@ -145,7 +145,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, false);
 
-        setupMoodleGetEnrolledUsersForCourses(
+        prepareMoodleGetEnrolledUsersForCoursesMock(
             MOODLE_COURSE_ID_IN_DB,
             Collections.singletonList(
                 getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA, (int) MOODLE_COURSE_ID_IN_DB,
@@ -173,7 +173,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         setUpMockServerResponses(endDateInFuture, true);
 
         // ...but only has the sync role in Moodle.
-        setupMoodleGetEnrolledUsersForCourses(
+        prepareMoodleGetEnrolledUsersForCoursesMock(
             MOODLE_COURSE_ID_IN_DB,
             Collections.singletonList(
                 getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA, (int) MOODLE_COURSE_ID_IN_DB, mapperService.getMoodiRoleId())
@@ -199,7 +199,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, false);
 
-        setupMoodleGetEnrolledUsersForCourses(
+        prepareMoodleGetEnrolledUsersForCoursesMock(
             MOODLE_COURSE_ID_IN_DB,
             Collections.singletonList(
                 getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA, (int) SOME_OTHER_MOODLE_COURSE_ID, mapperService.getMoodiRoleId())
@@ -218,11 +218,11 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
     @Test
     public void thatMultipleStudentsAndTeachersAreSyncedCorrectly() {
 
-        setupMoodleGetCourseResponse();
+        prepareMoodleGetCoursesResponseMock();
 
         setupCourseUnitRealisationResponseMultiplePeople();
 
-        setupMoodleGetEnrolledUsersForCourses(
+        prepareMoodleGetEnrolledUsersForCoursesMock(
             MOODLE_COURSE_ID_IN_DB,
             Collections.singletonList(
                 getMoodleUserEnrollments((int) MOODLE_USER_NOT_ENROLLED_IN_SISU, MOODLE_USERNAME_NOT_ENROLLED_IN_SISU,
@@ -293,11 +293,11 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
     @Test
     public void thatIfUserIsNotFoundFromMoodleSynchronizationIsNotCompleted() {
-        setupMoodleGetCourseResponse();
+        prepareMoodleGetCoursesResponseMock();
 
         setupCourseUnitRealisationResponse(getFutureDateString(), true);
 
-        setupMoodleGetEnrolledUsersForCourses(MOODLE_COURSE_ID_IN_DB, Collections.emptyList());
+        prepareMoodleGetEnrolledUsersForCoursesMock(MOODLE_COURSE_ID_IN_DB, Collections.emptyList());
 
         expectGetUserRequestToMoodleUserNotFound(MOODLE_USERNAME_NIINA);
         expectGetUserRequestToMoodleUserNotFound(MOODLE_USERNAME_HRAOPE);

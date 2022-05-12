@@ -17,18 +17,32 @@
 
 package fi.helsinki.moodi.service.synchronize.enrich;
 
+import com.google.common.collect.ImmutableMap;
+import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
+import fi.helsinki.moodi.test.fixtures.Fixtures;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import org.springframework.test.context.TestPropertySource;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 
-@TestPropertySource(properties = "SisuGraphQLClient.batchsize=2")
+@TestPropertySource(properties = {"MoodleClient.batchsize=2", "SisuGraphQLClient.batchsize=2"})
 public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
+
+    // add random 0-1000 millisecond delay to some moodle/sisu mock calls
+    private final boolean delayed = false;
+
     @Test
     public void thatSisuCoursesAndPersonsAreFetched() {
         setUpMockSisuAndPrefetchCourses();
@@ -81,5 +95,64 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
         course.realisationId = realisationId;
 
         return new SynchronizationItem(course, SynchronizationType.FULL);
+    }
+
+    private SynchronizationItem createFullSynchronizationItem(String realisationId, int moodleId) {
+        Course course = new Course();
+        course.realisationId = realisationId;
+        course.moodleId = (long) moodleId;
+
+        return new SynchronizationItem(course, SynchronizationType.FULL);
+    }
+
+    @Test
+    public void thatEnrichersAreRanForEachItem() {
+        List<SynchronizationItem> items = new ArrayList<>();
+        for (int i = 1; i < 5; i++) {
+            items.add(createFullSynchronizationItem("hy-CUR-" + i, i));
+        }
+        prepareSisuPrefetchMock(items);
+        prepareMoodleGetCoursesResponseMock(
+            items.stream().map(item -> item.getCourse().moodleId).collect(Collectors.toList()), delayed);
+        prepareMoodleGetEnrolledUsersForCoursesMock(
+            items.stream().map(item -> Pair.of(item.getCourse().moodleId, Collections.<MoodleUserEnrollments>emptyList())).collect(Collectors.toList())
+        );
+
+        List<SynchronizationItem> enrichedItems = enricherService.enrichItems(items);
+
+        enrichedItems.forEach(item ->
+            assertStatus(item, EnrichmentStatus.SUCCESS, true)
+        );
+    }
+
+    private void mockSisuCURRequestForBatch(List<SynchronizationItem> itemBatch) {
+        String curs = itemBatch.stream().map(item -> Fixtures.asString("/sisu/course-unit-realisation-template.json",
+            new ImmutableMap.Builder<String, String>()
+                .put("id", String.valueOf(item.getCourse().moodleId))
+                .build())
+        ).collect(Collectors.joining(", "));
+        String response = "{\"data\": {\"course_unit_realisations\": [" + curs + "] } }";
+        List<String> curIds = itemBatch.stream().map(item -> item.getCourse().realisationId).collect(Collectors.toList());
+        mockSisuGraphQLServer.expectCourseUnitRealisationsRequestFromString(curIds, response, delayed);
+    }
+
+    private void prepareSisuPrefetchMock(List<SynchronizationItem> items) {
+        int count = 1;
+        int batchSize = 2;
+        List<SynchronizationItem> itemBatch = new ArrayList<>();
+        for (SynchronizationItem item: items) {
+            itemBatch.add(item);
+            if (count % batchSize == 0) {
+                mockSisuCURRequestForBatch(itemBatch);
+                itemBatch.clear();
+            }
+            count++;
+        }
+        if (!itemBatch.isEmpty()) {
+            mockSisuCURRequestForBatch(itemBatch);
+        }
+        mockSisuGraphQLServer.expectPersonsRequest(singletonList("hy-hlo-1"), "/sisu/persons.json");
+        List<String> curIds = items.stream().map(item -> item.getCourse().realisationId).collect(Collectors.toList());
+        enricherService.prefetchSisuCourses(curIds);
     }
 }
