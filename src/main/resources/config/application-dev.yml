@@ -10,7 +10,7 @@ spring:
   flyway:
       locations: classpath:db/m igration/common,classpath:db/migration/psql
       table: schema_version
-      ignore-missing-migrations: true
+      out-of-order: true
 
 integration:
   moodle:
