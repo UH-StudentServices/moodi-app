@@ -87,14 +87,14 @@ dependencies {
 
     implementation group: 'ch.qos.logback', name: 'logback-classic', version: logback_version
     implementation group: 'ch.qos.logback', name: 'logback-core', version: logback_version
-    implementation group: 'org.springframework', name: 'spring-context-support', version: spring_framework_version
+    implementation group: 'org.springframework', name: 'spring-context-support'
     implementation group: 'org.hibernate', name: 'hibernate-entitymanager', version: hibernate_entitymanager_version
     implementation group: 'org.hibernate', name: 'hibernate-ehcache', version: hibernate_entitymanager_version
 
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     implementation 'com.google.guava:guava:23.0'
     implementation 'com.h2database:h2:1.4.187'
-    implementation 'org.flywaydb:flyway-core:4.2.0'
+    implementation 'org.flywaydb:flyway-core:6.5.7'
     implementation "org.postgresql:postgresql:9.4-1201-jdbc41"
     implementation 'org.apache.httpcomponents:httpclient:4.5.13'
     implementation 'org.trimou:trimou-core:2.5.1.Final'
