@@ -66,9 +66,12 @@ public class EnricherService {
      * Enrich items with data required in synchronization.
      */
     public List<SynchronizationItem> enrichItems(final List<SynchronizationItem> items) {
+        // First enrich all items with Sisu data
         prefetchSisuCourses(items.stream().map(item -> item.getCourse().realisationId).collect(toList()));
         items.forEach(this::enrichItemWithSisu);
+        // Then enrich those items that are not locked or finished with Moodle data
         List<SynchronizationItem> activeItems = items.stream().filter(item -> !this.completed(item)).collect(toList());
+        // Prefetching enrollments also gives us enrolled Moodle users, so we don't have to fetch them separately later
         prefetchMoodleCoursesEnrollmentsAndUsers(activeItems.stream().map(item -> item.getCourse().moodleId).collect(toList()));
         activeItems.forEach(this::enrichItemWithMoodle);
         return items;
@@ -131,24 +134,19 @@ public class EnricherService {
         if (completed(item)) {
             return;
         }
-        try {
-            final Course course = item.getCourse();
-            final StudyRegistryCourseUnitRealisation cur = prefetchedCursById.get(course.realisationId);
+        final Course course = item.getCourse();
+        final StudyRegistryCourseUnitRealisation cur = prefetchedCursById.get(course.realisationId);
 
-            if (cur == null) {
-                item.completeEnrichmentPhase(
-                    EnrichmentStatus.ERROR,
-                    String.format("Course not found from Sisu with id %s", course.realisationId));
-            } else if (endedMoreThanYearAgo(cur)) {
-                item.completeEnrichmentPhase(
-                    EnrichmentStatus.COURSE_ENDED,
-                    String.format("Course with realisation id %s has ended", course.realisationId));
-            } else {
-                item.setStudyRegistryCourse(cur);
-            }
-        } catch (Exception e) {
-            logger.error("Error while enriching item (enrichWithSisuCourse)", e);
-            item.completeEnrichmentPhase(EnrichmentStatus.ERROR, e.getMessage());
+        if (cur == null) {
+            item.completeEnrichmentPhase(
+                EnrichmentStatus.ERROR,
+                String.format("Course not found from Sisu with id %s", course.realisationId));
+        } else if (endedMoreThanYearAgo(cur)) {
+            item.completeEnrichmentPhase(
+                EnrichmentStatus.COURSE_ENDED,
+                String.format("Course with realisation id %s has ended", course.realisationId));
+        } else {
+            item.setStudyRegistryCourse(cur);
         }
     }
 
@@ -195,20 +193,15 @@ public class EnricherService {
         if (completed(item)) {
             return;
         }
-        try {
-            final Course course = item.getCourse();
-            final MoodleFullCourse moodleCourse = prefetchedMoodleCoursesById.get(course.moodleId);
+        final Course course = item.getCourse();
+        final MoodleFullCourse moodleCourse = prefetchedMoodleCoursesById.get(course.moodleId);
 
-            if (moodleCourse == null) {
-                item.completeEnrichmentPhase(
-                    EnrichmentStatus.MOODLE_COURSE_NOT_FOUND,
-                    "Course not found from Moodle with id " + course.moodleId);
-            } else {
-                item.setMoodleCourse(moodleCourse);
-            }
-        } catch (Exception e) {
-            logger.error("Error while enriching item (enrichWithMoodleCourse)", e);
-            item.completeEnrichmentPhase(EnrichmentStatus.ERROR, e.getMessage());
+        if (moodleCourse == null) {
+            item.completeEnrichmentPhase(
+                EnrichmentStatus.MOODLE_COURSE_NOT_FOUND,
+                "Course not found from Moodle with id " + course.moodleId);
+        } else {
+            item.setMoodleCourse(moodleCourse);
         }
     }
 
@@ -216,13 +209,8 @@ public class EnricherService {
         if (completed(item)) {
             return;
         }
-        try {
-            final Course course = item.getCourse();
-            final List<MoodleUserEnrollments> moodleEnrollments = prefetchedMoodleEnrollmentsByCourseId.get(course.moodleId);
-            item.setMoodleEnrollments(moodleEnrollments);
-        } catch (Exception e) {
-            logger.error("Error while enriching item (enrichWithMoodleEnrollments)", e);
-            item.completeEnrichmentPhase(EnrichmentStatus.ERROR, e.getMessage());
-        }
+        final Course course = item.getCourse();
+        final List<MoodleUserEnrollments> moodleEnrollments = prefetchedMoodleEnrollmentsByCourseId.get(course.moodleId);
+        item.setMoodleEnrollments(moodleEnrollments);
     }
 }
