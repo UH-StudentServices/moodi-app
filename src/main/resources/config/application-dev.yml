@@ -8,8 +8,8 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     database: PostgreSQL
   flyway:
-      locations: classpath:db/migration/common,classpath:db/migration/psql
-      baseline-on-migrate: true
+      locations: classpath:db/m igration/common,classpath:db/migration/psql
+      table: schema_version
 
 integration:
   moodle:
