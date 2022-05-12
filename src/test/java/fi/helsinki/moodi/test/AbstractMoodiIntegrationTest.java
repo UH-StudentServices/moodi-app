@@ -20,7 +20,6 @@ package fi.helsinki.moodi.test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.google.common.collect.ImmutableMap;
 import fi.helsinki.moodi.Application;
 import fi.helsinki.moodi.integration.moodle.MoodleCourseData;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
@@ -44,7 +43,6 @@ import org.springframework.cache.CacheManager;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.servlet.MockMvc;
@@ -383,11 +381,33 @@ public abstract class AbstractMoodiIntegrationTest {
             .andRespond(withSuccess("[{\"id\":\"" + moodleCourseIdToReturn + "\", \"shortname\":\"shortie\"}]", MediaType.APPLICATION_JSON));
     }
 
-    protected void setupMoodleGetCourseResponse(long moodleId) {
-        setupMoodleGetCourseResponse(moodleId, false);
+    protected void prepareMoodleGetCoursesResponseMock() {
+        prepareMoodleGetCoursesResponseMock(MOODLE_COURSE_ID_IN_DB);
     }
 
-    protected void setupMoodleGetCourseResponse(long moodleId, boolean delayed) {
+    protected void prepareMoodleGetCoursesResponseMock(long moodleId) {
+        prepareMoodleGetCoursesResponseBatchMock(Collections.singletonList(moodleId), false);
+    }
+
+    protected void prepareMoodleGetCoursesResponseMock(List<Long> moodleIds, boolean delayed) {
+        int count = 1;
+        int batchSize = 2;
+        List<Long> moodleIdBatch = new ArrayList<>();
+        for (Long moodleId: moodleIds) {
+            moodleIdBatch.add(moodleId);
+            if (count % batchSize == 0) {
+                prepareMoodleGetCoursesResponseBatchMock(moodleIdBatch, delayed);
+                moodleIdBatch.clear();
+            }
+            count++;
+        }
+        if (!moodleIdBatch.isEmpty()) {
+            prepareMoodleGetCoursesResponseBatchMock(moodleIdBatch, delayed);
+        }
+    }
+
+    protected void prepareMoodleGetCoursesResponseBatchMock(List<Long> moodleIds, boolean delayed) {
+        String json = "[" + moodleIds.stream().map(moodleId -> "{ \"id\": \"" + moodleId + "\" }").collect(Collectors.joining(", ")) + "]";
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
@@ -400,16 +420,8 @@ public abstract class AbstractMoodiIntegrationTest {
                         ;
                     }
                 }
-                return withSuccess(Fixtures.asString("/moodle/get-courses-parameterized.json",
-                    new ImmutableMap.Builder()
-                        .put("moodleId", moodleId)
-                        .build()
-                ), MediaType.APPLICATION_JSON).createResponse(request);
+                return withSuccess(json, MediaType.APPLICATION_JSON).createResponse(request);
             });
-    }
-
-    protected void setupMoodleGetCourseResponse() {
-        setupMoodleGetCourseResponse(MOODLE_COURSE_ID_IN_DB);
     }
 
     private void mockGetEnrolledUsersForCoursesBatch(List<List<MoodleUserEnrollments>> resultObjects) {
@@ -426,11 +438,11 @@ public abstract class AbstractMoodiIntegrationTest {
         }
     }
 
-    protected void setupMoodleGetEnrolledUsersForCourses(Long moodleId, List<MoodleUserEnrollments> enrollments) {
-        setupMoodleGetEnrolledUsersForCourses(Collections.singletonList(Pair.of(moodleId, enrollments)));
+    protected void prepareMoodleGetEnrolledUsersForCoursesMock(Long moodleId, List<MoodleUserEnrollments> enrollments) {
+        prepareMoodleGetEnrolledUsersForCoursesMock(Collections.singletonList(Pair.of(moodleId, enrollments)));
     }
 
-    protected void setupMoodleGetEnrolledUsersForCourses(List<Pair<Long, List<MoodleUserEnrollments>>> expected) {
+    protected void prepareMoodleGetEnrolledUsersForCoursesMock(List<Pair<Long, List<MoodleUserEnrollments>>> expected) {
         int count = 1;
         int batchSize = 2;
         List<List<MoodleUserEnrollments>> resultObjectBatch = new ArrayList<>();
@@ -451,57 +463,9 @@ public abstract class AbstractMoodiIntegrationTest {
         MoodleUserEnrollments ret = new MoodleUserEnrollments();
         ret.id = (long) moodleUserId;
         ret.username = userName;
-        ret.enrolledCourses = Arrays.asList(new MoodleCourseData(enrolledCourseId));
+        ret.enrolledCourses = Collections.singletonList(new MoodleCourseData(enrolledCourseId));
         ret.roles = Arrays.stream(roleIds).mapToObj(MoodleRole::new).collect(Collectors.toList());
         return ret;
-    }
-
-    protected String getEnrollmentsResponse(long moodleUserId, String userName, long enrolledCourseId, long...roleIds) {
-        long[] enrolledCourseIds = new long[] { enrolledCourseId };
-        String ret = String.format(
-            "[{ \"id\" : \"%s\", \"username\" : \"%s\", \"roles\" : [%s], \"enrolledcourses\" : [%s]}]",
-            moodleUserId,
-            userName,
-            longArrayJson("roleid", roleIds),
-            longArrayJson("id", enrolledCourseIds));
-
-        return ret;
-    }
-
-    private String longArrayJson(String key, long[] ids) {
-        return ids.length > 0 ?
-            Arrays.stream(ids)
-                .mapToObj(id -> String.format("{\"%s\" : %d}", key, id))
-                .reduce((a, b) -> a.concat(",").concat(b))
-                .get() :
-            "";
-    }
-
-    protected final void expectGetEnrollmentsRequestToMoodle(final long courseId) {
-        expectGetEnrollmentsRequestToMoodle(courseId, "[]");
-    }
-
-    protected final void expectGetEnrollmentsRequestToMoodle(final long courseId, final String response) {
-        expectGetEnrollmentsRequestToMoodle(courseId, response, false);
-    }
-
-    protected final void expectGetEnrollmentsRequestToMoodle(final long courseId, final String response, boolean delayed) {
-        final String payload = "wstoken=xxxx1234&wsfunction=core_enrol_get_enrolled_users&moodlewsrestformat=json&courseid=" + courseId;
-
-        moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
-            .andExpect(method(HttpMethod.POST))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
-            .andExpect(content().string(payload))
-            .andRespond(request -> {
-                if (delayed) {
-                    try {
-                        Thread.sleep(ThreadLocalRandom.current().nextInt(1001));
-                    } catch (InterruptedException ignored) {
-                        ;
-                    }
-                }
-                return withSuccess(response, MediaType.APPLICATION_JSON).createResponse(request);
-            });
     }
 
     protected void setUpMockSisuAndPrefetchCourses() {

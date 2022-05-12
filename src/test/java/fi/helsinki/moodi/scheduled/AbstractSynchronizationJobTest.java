@@ -70,7 +70,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
     private LockedSynchronizationItemMessageBuilder lockedSynchronizationItemMessageBuilder;
 
     protected void setUpMockServerResponses(String endDate, boolean enrolled) {
-        setupMoodleGetCourseResponse();
+        prepareMoodleGetCoursesResponseMock();
         setupCourseUnitRealisationResponse(endDate, enrolled);
     }
 
@@ -101,7 +101,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, true);
 
-        setupMoodleGetEnrolledUsersForCourses(
+        prepareMoodleGetEnrolledUsersForCoursesMock(
             MOODLE_COURSE_ID_IN_DB,
             Collections.singletonList(
                 getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA, (int) MOODLE_COURSE_ID_IN_DB,
@@ -135,7 +135,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
 
         setUpMockServerResponses(getFutureDateString(), false);
 
-        setupMoodleGetEnrolledUsersForCourses(
+        prepareMoodleGetEnrolledUsersForCoursesMock(
             MOODLE_COURSE_ID_IN_DB,
             Collections.singletonList(
                 getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA, (int) MOODLE_COURSE_ID_IN_DB,

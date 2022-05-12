@@ -43,13 +43,13 @@ import static org.mockito.Mockito.when;
 /**
  * Uses a mocked CourseRepository instead of the DB initialized by Flyway.
  */
-@TestPropertySource(properties = "SisuGraphQLClient.batchsize=2")
+@TestPropertySource(properties = { "SisuGraphQLClient.batchsize=2", "MoodleClient.batchsize=2" })
 public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
 
-    private static final int MOODLE_COURSE_ID_1 = 654321;
-    private static final int MOODLE_COURSE_ID_2 = 654322;
-    private static final int MOODLE_COURSE_ID_ENDED = 654323;
-    private static final int MOODLE_COURSE_ID_ARCHIVED = 654324;
+    private static final long MOODLE_COURSE_ID_1 = 654321;
+    private static final long MOODLE_COURSE_ID_2 = 654322;
+    private static final long MOODLE_COURSE_ID_ENDED = 654323;
+    private static final long MOODLE_COURSE_ID_ARCHIVED = 654324;
 
     @Autowired
     private FullSynchronizationJob job;
@@ -77,20 +77,20 @@ public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
         // The JSON mock data files contain the courses above.
         setUpMockSisuAndPrefetchCourses();
 
-        //setupMoodleGetCourseResponse(Arrays.asList(MOODLE_COURSE_ID_1, MOODLE_COURSE_ID_2));
-        setupMoodleGetCourseResponse(MOODLE_COURSE_ID_1);
+        // Moodle prefetching doesn't include courses that Sisu counts as finished
+        prepareMoodleGetCoursesResponseMock(Arrays.asList(MOODLE_COURSE_ID_1, MOODLE_COURSE_ID_2), true);
         // Two users are already enrolled with student and synced roles.
         // One of them now gets returned from Sisu with a non-enrolled status, and the
         // other one does not get returned from Sisu at all, as someone has totally removed the whole enrollment from Sisu.
         List<Pair<Long, List<MoodleUserEnrollments>>> expectedEnrollmentsByCourse = new ArrayList<>();
-        expectedEnrollmentsByCourse.add(Pair.of((long) MOODLE_COURSE_ID_1, Arrays.asList(
-            getMoodleUserEnrollments((int) MOODLE_USER_NOT_ENROLLED_IN_SISU, MOODLE_USERNAME_NOT_ENROLLED_IN_SISU, MOODLE_COURSE_ID_1,
+        expectedEnrollmentsByCourse.add(Pair.of(MOODLE_COURSE_ID_1, Arrays.asList(
+            getMoodleUserEnrollments((int) MOODLE_USER_NOT_ENROLLED_IN_SISU, MOODLE_USERNAME_NOT_ENROLLED_IN_SISU, (int) MOODLE_COURSE_ID_1,
                 mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()),
-            getMoodleUserEnrollments((int) MOODLE_USER_NOT_IN_STUDY_REGISTRY, MOODLE_USERNAME_NOT_IN_STUDY_REGISTRY, MOODLE_COURSE_ID_1,
+            getMoodleUserEnrollments((int) MOODLE_USER_NOT_IN_STUDY_REGISTRY, MOODLE_USERNAME_NOT_IN_STUDY_REGISTRY, (int) MOODLE_COURSE_ID_1,
                 mapperService.getStudentRoleId(), mapperService.getMoodiRoleId())
             )));
-        expectedEnrollmentsByCourse.add(Pair.of((long) MOODLE_COURSE_ID_2, Collections.emptyList()));
-        setupMoodleGetEnrolledUsersForCourses(expectedEnrollmentsByCourse);
+        expectedEnrollmentsByCourse.add(Pair.of(MOODLE_COURSE_ID_2, Collections.emptyList()));
+        prepareMoodleGetEnrolledUsersForCoursesMock(expectedEnrollmentsByCourse);
 
         // Course one students and teacher are fetched from Moodle.
         expectGetUserRequestToMoodle(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA);
