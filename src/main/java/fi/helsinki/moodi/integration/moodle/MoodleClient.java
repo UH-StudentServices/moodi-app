@@ -21,9 +21,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.helsinki.moodi.exception.IntegrationConnectionException;
 import fi.helsinki.moodi.exception.MoodiException;
-import fi.helsinki.moodi.integration.sisu.SisuPerson;
-import io.aexp.nodes.graphql.Argument;
-import io.aexp.nodes.graphql.Arguments;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -292,33 +289,6 @@ public class MoodleClient {
         }
         return ret;
     }
-/*
-options[0][name]="userfields"
-options[0][value][0]="id"
-options[0][value][1]="username"
-options[0][value][2]="roles"
-options[0][value][3]="enrolledcourses"
-
-Tätä voi kutsua tyhjällä capabilities:lla. Säästää joineissa.
-Kannattaa options:lla rajoittaa mitä kenttiä haetaan, muuten tulee kovin raskas.
-Pitää ehkä muutenkin pilkkoa moneksi.
-    // Teacher / Manager? enrol/self:manage
-    // Student? enrol/self:unenrolself
-    // Student? mod/assignment:submit
-
-* 	$args = array();
-	$coursecapabilities = array();
-	$capbs = array("mod/lesson:grade","mod/feedback:receivemail");
-	foreach($course_ids as $cid)
-	{
-		$coursecapabilities[] = array('courseid'=> $cid, 'capabilities' => $capbs);
-	}
-	$options = array(array('name'=>'userfields', 'value'=>'id, fullname, profileimageurl, profileimageurlsmall'));
-	$args['body'] = array('wsfunction' =>'core_enrol_get_enrolled_users_with_capability', 'wstoken' => "$moodle_token", 'moodlewsrestformat' => 'json', 'coursecapabilities'=>$coursecapabilities, 'options'=>$options);//array("mod/forum:viewdiscussion"));
-	$response = wp_remote_post($moodle_site, $args);
-	$respbody = json_decode($response['body']);
-	$course_teachers = array();
-* */
 
     public void addRoles(final List<MoodleEnrollment> moodleEnrollments) {
         assignRoles(moodleEnrollments, true);
