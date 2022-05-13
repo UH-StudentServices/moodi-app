@@ -62,7 +62,7 @@ public class MoodleService {
         return moodleClient.getEnrolledUsers(courseId);
     }
 
-    public List<List<MoodleUserEnrollments>> getEnrolledUsers(final List<Long> courseIds) {
+    public List<MoodleCourseWithEnrollments> getEnrolledUsers(final List<Long> courseIds) {
         return moodleClient.getEnrolledUsersForCourses(courseIds);
     }
 

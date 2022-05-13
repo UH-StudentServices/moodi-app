@@ -263,9 +263,9 @@ public class MoodleClient {
         }
     }
 
-    public List<List<MoodleUserEnrollments>> getEnrolledUsersForCourses(final List<Long> courseIds) {
-        List<List<MoodleUserEnrollments>> ret = new ArrayList<>();
-        List<List<MoodleUserEnrollments>> result;
+    public List<MoodleCourseWithEnrollments> getEnrolledUsersForCourses(final List<Long> courseIds) {
+        List<MoodleCourseWithEnrollments> ret = new ArrayList<>();
+        List<MoodleCourseWithEnrollments> result;
         int batchCounter = 1;
         List<List<Long>> batches = splitToBatches(courseIds);
         for (List<Long> batchIds : batches) {
@@ -274,7 +274,7 @@ public class MoodleClient {
             setListParameters(params, "coursecapabilities[%s][capabilities][0]", batchIds, x -> "");
             params.setAll(enrollmentFields);
             try {
-                result = execute(params, new TypeReference<List<List<MoodleUserEnrollments>>>() {
+                result = execute(params, new TypeReference<List<MoodleCourseWithEnrollments>>() {
                 }, DEFAULT_EVALUATION, true);
             } catch (Exception e) {
                 return handleException("Error executing method: getEnrolledUsers (batch " + batchCounter + "/" + batches.size() + ")", e);

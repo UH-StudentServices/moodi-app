@@ -17,13 +17,12 @@
 
 package fi.helsinki.moodi.scheduled;
 
+import fi.helsinki.moodi.integration.moodle.MoodleCourseWithEnrollments;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
-import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseRepository;
 import fi.helsinki.moodi.service.util.MapperService;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -82,14 +81,14 @@ public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
         // Two users are already enrolled with student and synced roles.
         // One of them now gets returned from Sisu with a non-enrolled status, and the
         // other one does not get returned from Sisu at all, as someone has totally removed the whole enrollment from Sisu.
-        List<Pair<Long, List<MoodleUserEnrollments>>> expectedEnrollmentsByCourse = new ArrayList<>();
-        expectedEnrollmentsByCourse.add(Pair.of(MOODLE_COURSE_ID_1, Arrays.asList(
+        List<MoodleCourseWithEnrollments> expectedEnrollmentsByCourse = new ArrayList<>();
+        expectedEnrollmentsByCourse.add(new MoodleCourseWithEnrollments(MOODLE_COURSE_ID_1, Arrays.asList(
             getMoodleUserEnrollments((int) MOODLE_USER_NOT_ENROLLED_IN_SISU, MOODLE_USERNAME_NOT_ENROLLED_IN_SISU, (int) MOODLE_COURSE_ID_1,
                 mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()),
             getMoodleUserEnrollments((int) MOODLE_USER_NOT_IN_STUDY_REGISTRY, MOODLE_USERNAME_NOT_IN_STUDY_REGISTRY, (int) MOODLE_COURSE_ID_1,
                 mapperService.getStudentRoleId(), mapperService.getMoodiRoleId())
             )));
-        expectedEnrollmentsByCourse.add(Pair.of(MOODLE_COURSE_ID_2, Collections.emptyList()));
+        expectedEnrollmentsByCourse.add(new MoodleCourseWithEnrollments(MOODLE_COURSE_ID_2, Collections.emptyList()));
         prepareMoodleGetEnrolledUsersForCoursesMock(expectedEnrollmentsByCourse);
 
         // Course one students and teacher are fetched from Moodle.
