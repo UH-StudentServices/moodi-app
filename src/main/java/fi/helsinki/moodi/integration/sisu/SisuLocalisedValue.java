@@ -17,6 +17,8 @@
 
 package fi.helsinki.moodi.integration.sisu;
 
+import io.micrometer.core.instrument.util.StringUtils;
+
 import java.util.Arrays;
 
 public class SisuLocalisedValue {
@@ -52,6 +54,18 @@ public class SisuLocalisedValue {
                 .map(this::getForLocale)
                 .findFirst()
                 .orElse(null);
+        }
+        return forLocale;
+    }
+
+    public String getForLocaleOrFirstAvailable(SisuLocale locale) {
+        String forLocale = getForLocale(locale);
+        if (forLocale == null) {
+            forLocale = Arrays.stream(SisuLocale.values())
+                .filter(srl -> !srl.equals(locale) && StringUtils.isNotEmpty(getForLocale(srl)))
+                .map(this::getForLocale)
+                .findFirst()
+                .orElse("");
         }
         return forLocale;
     }
