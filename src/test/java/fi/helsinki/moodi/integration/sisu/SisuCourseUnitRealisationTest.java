@@ -40,6 +40,26 @@ public class SisuCourseUnitRealisationTest {
     }
 
     @Test
+    public void testGetForLocaleOrFirstAvailableReturnsStringIfAvailable() {
+        cur.name.fi = null;
+        cur.name.en = null;
+        assertEquals(DEFAULT_SV, cur.name.getForLocaleOrFirstAvailable(EN));
+    }
+
+    @Test
+    public void testGetForLocaleOrFirstAvailableReturnsCorrectLocale() {
+        assertEquals(DEFAULT_EN, cur.name.getForLocaleOrFirstAvailable(EN));
+    }
+
+    @Test
+    public void testGetForLocaleOrFirstAvailableReturnsEmptyStringIfNotFound() {
+        cur.name.fi = null;
+        cur.name.en = null;
+        cur.name.sv = null;
+        assertEquals("", cur.name.getForLocaleOrFirstAvailable(EN));
+    }
+
+    @Test
     public void testNameLocalizationAllLanguages() {
         String name = cur.generateName(FI);
         assertEquals(generateSpan(FI, DEFAULT_FI) + generateSpan(SV, DEFAULT_SV) + generateSpan(EN, DEFAULT_EN), name);
