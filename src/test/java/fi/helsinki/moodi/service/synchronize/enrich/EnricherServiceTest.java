@@ -18,14 +18,13 @@
 package fi.helsinki.moodi.service.synchronize.enrich;
 
 import com.google.common.collect.ImmutableMap;
-import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
+import fi.helsinki.moodi.integration.moodle.MoodleCourseWithEnrollments;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import org.springframework.test.context.TestPropertySource;
 
@@ -115,7 +114,7 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
         prepareMoodleGetCoursesResponseMock(
             items.stream().map(item -> item.getCourse().moodleId).collect(Collectors.toList()), delayed);
         prepareMoodleGetEnrolledUsersForCoursesMock(
-            items.stream().map(item -> Pair.of(item.getCourse().moodleId, Collections.<MoodleUserEnrollments>emptyList())).collect(Collectors.toList())
+            items.stream().map(item -> new MoodleCourseWithEnrollments(item.getCourse().moodleId, Collections.emptyList())).collect(Collectors.toList())
         );
 
         List<SynchronizationItem> enrichedItems = enricherService.enrichItems(items);

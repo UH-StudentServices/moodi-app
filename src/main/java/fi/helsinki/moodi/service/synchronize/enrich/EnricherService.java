@@ -17,6 +17,7 @@
 
 package fi.helsinki.moodi.service.synchronize.enrich;
 
+import fi.helsinki.moodi.integration.moodle.MoodleCourseWithEnrollments;
 import fi.helsinki.moodi.integration.moodle.MoodleFullCourse;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
 import fi.helsinki.moodi.integration.moodle.MoodleUser;
@@ -162,13 +163,13 @@ public class EnricherService {
 
         prefetchedMoodleUsers.clear();
         prefetchedMoodleEnrollmentsByCourseId.clear();
-        List<List<MoodleUserEnrollments>> allEnrollments = moodleService.getEnrolledUsers(uniqueMoodleCourseIds);
+        List<MoodleCourseWithEnrollments> allEnrollments = moodleService.getEnrolledUsers(uniqueMoodleCourseIds);
         assert uniqueMoodleCourseIds.size() == allEnrollments.size() :
             "amount of courses with fetched enrollments (" + allEnrollments.size() + ") differs from amount of course ids: " +
             uniqueMoodleCourseIds.size();
         for (int i=0; i < uniqueMoodleCourseIds.size(); i++) {
             long courseId = uniqueMoodleCourseIds.get(i);
-            List<MoodleUserEnrollments> enrollments = allEnrollments.get(i);
+            List<MoodleUserEnrollments> enrollments = allEnrollments.get(i).users;
             prefetchedMoodleEnrollmentsByCourseId.put(courseId, enrollments);
             enrollments.forEach(moodleEnrollment -> {
                 if (!prefetchedMoodleUsers.containsKey(moodleEnrollment.username)) {

@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import fi.helsinki.moodi.Application;
 import fi.helsinki.moodi.integration.moodle.MoodleCourseData;
+import fi.helsinki.moodi.integration.moodle.MoodleCourseWithEnrollments;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.integration.moodle.MoodleRole;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
@@ -29,7 +30,6 @@ import fi.helsinki.moodi.service.importing.ImportCourseRequest;
 import fi.helsinki.moodi.service.synchronize.enrich.EnricherService;
 import fi.helsinki.moodi.service.util.MapperService;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
-import org.apache.commons.lang3.tuple.Pair;
 import org.flywaydb.core.Flyway;
 import org.junit.After;
 import org.junit.Before;
@@ -428,7 +428,7 @@ public abstract class AbstractMoodiIntegrationTest {
             });
     }
 
-    private void mockGetEnrolledUsersForCoursesBatch(List<List<MoodleUserEnrollments>> resultObjects) {
+    private void mockGetEnrolledUsersForCoursesBatch(List<MoodleCourseWithEnrollments> resultObjects) {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         try {
             final String json = ow.writeValueAsString(resultObjects);
@@ -443,15 +443,15 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     protected void prepareMoodleGetEnrolledUsersForCoursesMock(Long moodleId, List<MoodleUserEnrollments> enrollments) {
-        prepareMoodleGetEnrolledUsersForCoursesMock(Collections.singletonList(Pair.of(moodleId, enrollments)));
+        prepareMoodleGetEnrolledUsersForCoursesMock(Collections.singletonList(new MoodleCourseWithEnrollments(moodleId, enrollments)));
     }
 
-    protected void prepareMoodleGetEnrolledUsersForCoursesMock(List<Pair<Long, List<MoodleUserEnrollments>>> expected) {
+    protected void prepareMoodleGetEnrolledUsersForCoursesMock(List<MoodleCourseWithEnrollments> expected) {
         int count = 1;
         int batchSize = 2;
-        List<List<MoodleUserEnrollments>> resultObjectBatch = new ArrayList<>();
-        for (Pair<Long, List<MoodleUserEnrollments>> course: expected) {
-            resultObjectBatch.add(course.getValue());
+        List<MoodleCourseWithEnrollments> resultObjectBatch = new ArrayList<>();
+        for (MoodleCourseWithEnrollments course: expected) {
+            resultObjectBatch.add(course);
             if (count % batchSize == 0) {
                 mockGetEnrolledUsersForCoursesBatch(resultObjectBatch);
                 resultObjectBatch.clear();
