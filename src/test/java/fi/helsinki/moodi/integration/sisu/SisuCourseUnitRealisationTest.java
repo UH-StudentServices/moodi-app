@@ -27,7 +27,7 @@ import static org.junit.Assert.assertEquals;
 public class SisuCourseUnitRealisationTest {
 
     public static final String DEFAULT_FI = "suomi";
-    public static final String DEFAULT_SV = "ruosi";
+    public static final String DEFAULT_SV = "ruotsi";
     public static final String DEFAULT_EN = "englanti";
     public static final String SPAN_START = "<span lang=\":lang:\" class=\"multilang\">";
     public static final String SPAN_END = "</span>";
@@ -67,13 +67,6 @@ public class SisuCourseUnitRealisationTest {
         assertEquals(DEFAULT_FI, name);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void testNameOnlyOtherName() {
-        cur.name.sv = null;
-        cur.name.fi = null;
-        String name = cur.generateName(FI);
-    }
-
     @Test
     public void testNameLocalizationAllIdentical() {
         cur.name.sv = DEFAULT_FI;
@@ -87,6 +80,21 @@ public class SisuCourseUnitRealisationTest {
         cur.name.sv = DEFAULT_FI;
         String name = cur.generateName(FI);
         assertEquals(generateSpan(FI, DEFAULT_FI) + generateSpan(EN, DEFAULT_EN), name);
+    }
+
+    @Test
+    public void testDefaultLocalizationMissingButThereAreTwoOtherOptions() {
+        cur.name.fi = null;
+        String name = cur.generateName(FI);
+        assertEquals(generateSpan(SV, DEFAULT_SV) + generateSpan(EN, DEFAULT_EN), name);
+    }
+
+    @Test
+    public void testDefaultLocalizationMissingButThereIsAnotherOption() {
+        cur.name.fi = null;
+        cur.name.sv = null;
+        String name = cur.generateName(FI);
+        assertEquals(DEFAULT_EN, name);
     }
 
     @Test
