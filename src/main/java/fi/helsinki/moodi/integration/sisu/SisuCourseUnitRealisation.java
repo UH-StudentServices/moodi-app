@@ -75,7 +75,7 @@ public class SisuCourseUnitRealisation {
         SisuLocale teachingLanguageCode = SisuLocale.byUrnOrDefaultToFi(teachingLanguageUrn);
         ret.realisationId = id;
         ret.realisationName = generateName(teachingLanguageCode);
-        ret.teachingLanguageRealisationName = name.getForLocaleOrDefault(teachingLanguageCode);
+        ret.teachingLanguageRealisationName = name.getForLocaleOrFirstAvailable(teachingLanguageCode);
         ret.students = enrolments.stream().map(e -> e.person.toStudyRegistryStudent(e.isEnrolled())).collect(Collectors.toList());
         ret.published = "PUBLISHED".equals(flowState);
 
