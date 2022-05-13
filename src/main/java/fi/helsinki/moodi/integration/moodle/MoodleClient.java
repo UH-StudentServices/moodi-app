@@ -73,10 +73,7 @@ public class MoodleClient {
     private static final Map<String, String> enrollmentFields = new HashMap<>();
     static {
         enrollmentFields.put("options[0][name]", "userfields");
-        enrollmentFields.put("options[0][value][0]", "id");
-        enrollmentFields.put("options[0][value][1]", "username");
-        enrollmentFields.put("options[0][value][2]", "roles");
-        enrollmentFields.put("options[0][value][3]", "enrolledcourses");
+        enrollmentFields.put("options[0][value]", "id, username, roles, enrolledcourses");
     }
 
     public MoodleClient(String restUrl,
