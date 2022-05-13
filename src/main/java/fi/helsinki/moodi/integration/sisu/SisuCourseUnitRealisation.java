@@ -132,20 +132,19 @@ public class SisuCourseUnitRealisation {
         SisuLocale otherLang1 = getOtherLanguage(teachingLanguage);
         SisuLocale otherLang2 = getOtherLanguage(teachingLanguage, otherLang1);
 
-        String defaultName = name.getForLocaleOrDefault(teachingLanguage);
+        String defaultName = name.getForLocale(teachingLanguage);
         String otherName1 = name.getForLocale(otherLang1);
         String otherName2 = name.getForLocale(otherLang2);
 
-        String compDefault = defaultName.trim();
-        String comp1 = otherName1 != null ? otherName1.trim() : null;
-        String comp2 = otherName2 != null ? otherName2.trim() : null;
+        String compDefault = defaultName != null ? defaultName.trim() : "";
+        String comp1 = otherName1 != null ? otherName1.trim() : "";
+        String comp2 = otherName2 != null ? otherName2.trim() : "";
 
         String defaultFinal = "";
         String other1Final = "";
         String other2Final = "";
 
         boolean allNamesAreSame = compDefault.equalsIgnoreCase(comp1) && compDefault.equalsIgnoreCase(comp2);
-        boolean otherNamesAreEmpty = StringUtils.isEmpty(comp1) && StringUtils.isEmpty(comp2);
 
         // default name = teaching language name
         // 1 cases when there is no localisation:
@@ -153,35 +152,47 @@ public class SisuCourseUnitRealisation {
         //      -> return the default name
         // 1.2 if other names are empty or null
         //      -> return the default name
-        // 1.3 the total number of characters in localised languages is higher than db max_length - (number of languages * localisation span size)
+        // 1.3 if default name is empty but one other name exists
+        //      -> return existing name
+        // 1.4 the total number of characters in localised languages is higher than db max_length - (number of languages * localisation span size)
         //     -> return default name
         // 2 cases when there is localisation:
-        // 2.1 if at least languages are not null and are not equal
+        // 2.1 if at least 2 languages are not null and are not equal
         //     -> return localised non-null non-empty languages that are not equal to default language
-        // 2.2 see 1.3. (total length fits within the db max_length)
+        // 2.2 see 1.4. (total length fits within the db max_length)
 
-        // 1.1. && 1.2
-        if (allNamesAreSame || otherNamesAreEmpty) {
+        // 1.1., 1.2 and 1.3
+        if (allNamesAreSame) {
             return defaultName;
+        } else if (StringUtils.isNotEmpty(compDefault) && StringUtils.isEmpty(comp1) && StringUtils.isEmpty(comp2)) {
+            return defaultName;
+        } else if (StringUtils.isEmpty(compDefault) && StringUtils.isNotEmpty(comp1) && StringUtils.isEmpty(comp2)) {
+            return otherName1;
+        } else if (StringUtils.isEmpty(compDefault) && StringUtils.isEmpty(comp1) && StringUtils.isNotEmpty(comp2)) {
+            return otherName2;
         }
 
-        defaultFinal = getLocalizedSpan(teachingLanguage, defaultName);
-
+        if (StringUtils.isNotEmpty(compDefault)) {
+            defaultFinal = getLocalizedSpan(teachingLanguage, defaultName);
+        }
         // determine comp1 and comp2
-        if (!StringUtils.isEmpty(comp1)) {
-            if (!defaultName.equals(comp1)) {
-                other1Final = getLocalizedSpan(otherLang1, otherName1);
-            }
+        if (StringUtils.isNotEmpty(comp1) && !compDefault.equals(comp1)) {
+            other1Final = getLocalizedSpan(otherLang1, otherName1);
         }
-        if (!StringUtils.isEmpty(comp2)) {
-            if (!defaultName.equals(comp2)) {
-                other2Final = getLocalizedSpan(otherLang2, otherName2);
-            }
+        if (StringUtils.isNotEmpty(comp2) && !compDefault.equals(comp2)) {
+            other2Final = getLocalizedSpan(otherLang2, otherName2);
         }
 
         // if total length exceeds maximum length revert to non-localized teaching language name
         if (defaultFinal.length() + other1Final.length() + other2Final.length() >= MAX_NAME_DB_LENGTH) {
-            return defaultName;
+            if (StringUtils.isNotEmpty(compDefault)) {
+                return defaultName;
+            } else if (StringUtils.isNotEmpty(comp1)) {
+                return otherName1;
+            } else if (StringUtils.isNotEmpty(comp2)) {
+                return otherName2;
+            }
+            return "";
         }
 
         return defaultFinal + other1Final + other2Final;
