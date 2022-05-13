@@ -435,7 +435,8 @@ public abstract class AbstractMoodiIntegrationTest {
             moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
-                .andExpect(content().string(startsWith("wstoken=xxxx1234&wsfunction=core_enrol_get_enrolled_users_with_capability&moodlewsrestformat=json")))
+                .andExpect(content().string(startsWith(
+                    "wstoken=xxxx1234&wsfunction=core_enrol_get_enrolled_users_with_capability&moodlewsrestformat=json")))
                 .andRespond(request -> withSuccess(json, MediaType.APPLICATION_JSON).createResponse(request));
         } catch (JsonProcessingException e) {
             e.printStackTrace();

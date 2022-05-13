@@ -176,7 +176,8 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         prepareMoodleGetEnrolledUsersForCoursesMock(
             MOODLE_COURSE_ID_IN_DB,
             Collections.singletonList(
-                getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA, (int) MOODLE_COURSE_ID_IN_DB, mapperService.getMoodiRoleId())
+                getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA,
+                    (int) MOODLE_COURSE_ID_IN_DB, mapperService.getMoodiRoleId())
             )
         );
 
@@ -202,7 +203,8 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         prepareMoodleGetEnrolledUsersForCoursesMock(
             MOODLE_COURSE_ID_IN_DB,
             Collections.singletonList(
-                getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA, (int) SOME_OTHER_MOODLE_COURSE_ID, mapperService.getMoodiRoleId())
+                getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA,
+                    (int) SOME_OTHER_MOODLE_COURSE_ID, mapperService.getMoodiRoleId())
             )
         );
 
