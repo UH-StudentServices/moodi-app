@@ -155,7 +155,6 @@ public class EnricherService {
         return cur.endDate.plusYears(1).isBefore(LocalDate.now());
     }
 
-
     public void prefetchMoodleCoursesEnrollmentsAndUsers(List<Long> moodleCourseIds) {
         List<Long> uniqueMoodleCourseIds = new ArrayList<>(new LinkedHashSet<>(moodleCourseIds));
         prefetchedMoodleCoursesById = moodleService.getCourses(uniqueMoodleCourseIds).stream()
@@ -167,7 +166,7 @@ public class EnricherService {
         assert uniqueMoodleCourseIds.size() == allEnrollments.size() :
             "amount of courses with fetched enrollments (" + allEnrollments.size() + ") differs from amount of course ids: " +
             uniqueMoodleCourseIds.size();
-        for (int i=0; i < uniqueMoodleCourseIds.size(); i++) {
+        for (int i = 0; i < uniqueMoodleCourseIds.size(); i++) {
             long courseId = uniqueMoodleCourseIds.get(i);
             List<MoodleUserEnrollments> enrollments = allEnrollments.get(i).users;
             prefetchedMoodleEnrollmentsByCourseId.put(courseId, enrollments);

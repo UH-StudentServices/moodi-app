@@ -61,7 +61,6 @@ public class SynchronizationService {
     private final TimeService timeService;
     private final List<SynchronizationItemNotifier> notifiers;
 
-
     @Autowired
     public SynchronizationService(
         EnricherService enricherService,
@@ -141,8 +140,9 @@ public class SynchronizationService {
                 final List<String> realisationIds = null;
 
                 return courseService.findCompletedWithMoodleIdByRealisationIds(realisationIds);
+            default:
+                return Collections.emptyList();
         }
-        return Collections.emptyList();
     }
 
     /**

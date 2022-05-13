@@ -39,7 +39,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -69,12 +68,6 @@ public class MoodleClient {
     private static final String SUSPEND = "suspend";
     private static final String COURSES = "courses";
     private static final String USERS = "users";
-
-    private static final Map<String, String> enrollmentFields = new HashMap<>();
-    static {
-        enrollmentFields.put("options[0][name]", "userfields");
-        enrollmentFields.put("options[0][value]", "id, username, roles, enrolledcourses");
-    }
 
     public MoodleClient(String restUrl,
                         String wstoken,
@@ -272,7 +265,8 @@ public class MoodleClient {
             final MultiValueMap<String, String> params = createParametersForFunction("core_enrol_get_enrolled_users_with_capability");
             setListParameters(params, "coursecapabilities[%s][courseid]", batchIds, String::valueOf);
             setListParameters(params, "coursecapabilities[%s][capabilities][0]", batchIds, x -> "");
-            params.setAll(enrollmentFields);
+            params.set("options[0][name]", "userfields");
+            params.set("options[0][value]", "id, username, roles, enrolledcourses");
             try {
                 result = execute(params, new TypeReference<List<MoodleCourseWithEnrollments>>() {
                 }, DEFAULT_EVALUATION, true);

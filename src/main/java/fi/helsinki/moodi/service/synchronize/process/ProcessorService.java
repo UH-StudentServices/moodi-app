@@ -76,7 +76,6 @@ public class ProcessorService {
         return item;
     }
 
-
     private SynchronizationItem removeItem(final SynchronizationItem item) {
         if (completed(item)) {
             return item;

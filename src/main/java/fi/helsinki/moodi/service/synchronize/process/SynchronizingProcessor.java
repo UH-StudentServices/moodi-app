@@ -49,7 +49,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem.UserSynchronizationItemStatus.*;
 
 /**
- * Synchronization for one course, represented by synchronizationItem
+ * Synchronization for one course, represented by synchronizationItem.
  */
 @Component
 public class SynchronizingProcessor {
