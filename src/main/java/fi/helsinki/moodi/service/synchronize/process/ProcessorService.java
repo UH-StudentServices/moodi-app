@@ -18,58 +18,139 @@
 package fi.helsinki.moodi.service.synchronize.process;
 
 import com.google.common.collect.Lists;
+import fi.helsinki.moodi.exception.ProcessingException;
+import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toMap;
 
 /**
- * Orchestrates processors.
- *
- * @see Processor
- * @see SynchronizationItem
+ * Process item by either skipping, removing or synchronizing it.
  */
 @Service
 public class ProcessorService {
 
-    private final Map<Action, Processor> processorsByAction;
+    private static final Logger logger = LoggerFactory.getLogger(ProcessorService.class);
+    private final CourseService courseService;
+    private final SynchronizingProcessor synchronizingProcessor;
 
     @Autowired
-    public ProcessorService(List<Processor> processors) {
-        this.processorsByAction = processors.stream()
-                .collect(toMap(Processor::getAction, Function.identity(), (a, b) -> b));
+    public ProcessorService(CourseService courseService, SynchronizingProcessor synchronizingProcessor) {
+        this.courseService = courseService;
+        this.synchronizingProcessor = synchronizingProcessor;
     }
 
-    public SynchronizationItem processItem(SynchronizationItem item, Processor processor) {
-        try {
-            return processor.process(item);
-        } catch (Exception e) {
-            throw new ProcessException("Error processing item " + item.toString(), e);
+    private SynchronizationItem synchronizationError(SynchronizationItem item, ProcessingStatus status, Exception e) {
+        logger.error("Error while processing item: ", e);
+        item.completeProcessingPhase(status, e.getMessage());
+        return item;
+    }
+
+    private boolean completed(final SynchronizationItem item) {
+        if (item.getProcessingStatus() != ProcessingStatus.IN_PROGRESS) {
+            logger.debug("Item already processed, just return it");
+            return true;
         }
+        return false;
+    }
+
+    private SynchronizationItem synchronizeItem(SynchronizationItem item) {
+        if (completed(item)) {
+            return item;
+        }
+        try {
+            item = synchronizingProcessor.doSynchronize(item);
+        } catch (ProcessingException e) {
+            return synchronizationError(item, e.getStatus(), e);
+        } catch (Exception e) {
+            return synchronizationError(item, ProcessingStatus.ERROR, e);
+        }
+        return item;
+    }
+
+    private SynchronizationItem removeItem(final SynchronizationItem item) {
+        if (completed(item)) {
+            return item;
+        }
+        try {
+            courseService.markAsRemoved(item.getCourse(), item.getEnrichmentStatus().toString());
+            item.completeProcessingPhase(ProcessingStatus.SUCCESS, "Removed", true);
+        } catch (ProcessingException e) {
+            return synchronizationError(item, e.getStatus(), e);
+        } catch (Exception e) {
+            return synchronizationError(item, ProcessingStatus.ERROR, e);
+        }
+        return item;
+    }
+
+    private SynchronizationItem skipItem(final SynchronizationItem item) {
+        if (completed(item)) {
+            return item;
+        }
+        try {
+            item.completeProcessingPhase(ProcessingStatus.SKIPPED, "Can't synchronize");
+        } catch (ProcessingException e) {
+            return synchronizationError(item, e.getStatus(), e);
+        } catch (Exception e) {
+            return synchronizationError(item, ProcessingStatus.ERROR, e);
+        }
+        return item;
     }
 
     public List<SynchronizationItem> process(final List<SynchronizationItem> items) {
         final Map<Action, List<SynchronizationItem>> itemsByAction = groupItemsByAction(items);
-        final  List<SynchronizationItem> processedItems = Lists.newArrayList();
+        final List<SynchronizationItem> processedItems = Lists.newArrayList();
 
-        for (final Action action : Action.values()) {
-            final List<SynchronizationItem> itemsToProcess = itemsByAction.getOrDefault(action, Lists.newArrayList());
-            final Processor processor = processorsByAction.get(action);
-            itemsToProcess.stream()
-                .map(item -> processItem(item, processor))
-                .forEach(processedItems::add);
-        }
-
+        itemsByAction.getOrDefault(Action.SKIP, Collections.emptyList()).forEach(item -> {
+            try {
+                item = skipItem(item);
+            } catch (Exception e) {
+                throw new ProcessException("Error processing item (SKIPPING) " + item.toString(), e);
+            }
+            processedItems.add(item);
+        });
+        itemsByAction.getOrDefault(Action.REMOVE, Collections.emptyList()).forEach(item -> {
+            try {
+                item = removeItem(item);
+            } catch (Exception e) {
+                throw new ProcessException("Error processing item (REMOVING) " + item.toString(), e);
+            }
+            processedItems.add(item);
+        });
+        itemsByAction.getOrDefault(Action.SYNCHRONIZE, Collections.emptyList()).forEach(item -> {
+            try {
+                item = synchronizeItem(item);
+            } catch (Exception e) {
+                throw new ProcessException("Error processing item (SYNCHRONIZING) " + item.toString(), e);
+            }
+            processedItems.add(item);
+        });
         return processedItems;
     }
 
     private Map<Action, List<SynchronizationItem>> groupItemsByAction(final List<SynchronizationItem> items) {
-        return items.stream().collect(groupingBy(ActionResolver::resolve));
+        return items.stream().collect(groupingBy(this::resolveAction));
+    }
+
+    private Action resolveAction(final SynchronizationItem item) {
+        switch (item.getEnrichmentStatus()) {
+            case SUCCESS:
+                return Action.SYNCHRONIZE;
+            case COURSE_NOT_PUBLIC:
+            case COURSE_ENDED:
+            case MOODLE_COURSE_NOT_FOUND:
+                return Action.REMOVE;
+            case LOCKED:
+            default:
+                return Action.SKIP;
+        }
     }
 }

@@ -20,20 +20,25 @@ package fi.helsinki.moodi.service.synchronize;
 import com.google.common.base.Stopwatch;
 import fi.helsinki.moodi.exception.SynchronizationInProgressException;
 import fi.helsinki.moodi.service.course.Course;
+import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.log.LoggingService;
 import fi.helsinki.moodi.service.synchronize.enrich.EnricherService;
-import fi.helsinki.moodi.service.synchronize.enrich.SisuCourseEnricher;
+import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRun;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRunService;
-import fi.helsinki.moodi.service.synchronize.loader.CourseLoaderService;
 import fi.helsinki.moodi.service.synchronize.notify.SynchronizationItemNotifier;
 import fi.helsinki.moodi.service.synchronize.process.ProcessorService;
+import fi.helsinki.moodi.service.synclock.SyncLockService;
+import fi.helsinki.moodi.service.time.TimeService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -45,13 +50,15 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class SynchronizationService {
 
     private static final Logger logger = getLogger(SynchronizationService.class);
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final EnricherService enricherService;
     private final ProcessorService processorService;
     private final SynchronizationJobRunService synchronizationJobRunService;
-    private final CourseLoaderService courseLoaderService;
-    private final SisuCourseEnricher sisuCourseEnricher;
     private final LoggingService loggingService;
+    private final CourseService courseService;
+    private final SyncLockService syncLockService;
+    private final TimeService timeService;
     private final List<SynchronizationItemNotifier> notifiers;
 
     @Autowired
@@ -59,17 +66,19 @@ public class SynchronizationService {
         EnricherService enricherService,
         ProcessorService processorService,
         SynchronizationJobRunService synchronizationJobRunService,
-        CourseLoaderService courseLoaderService,
         LoggingService loggingService,
-        SisuCourseEnricher sisuCourseEnricher,
+        CourseService courseService,
+        SyncLockService syncLockService,
+        TimeService timeService,
         List<SynchronizationItemNotifier> notifiers) {
 
         this.enricherService = enricherService;
         this.processorService = processorService;
         this.synchronizationJobRunService = synchronizationJobRunService;
-        this.courseLoaderService = courseLoaderService;
         this.loggingService = loggingService;
-        this.sisuCourseEnricher = sisuCourseEnricher;
+        this.courseService = courseService;
+        this.syncLockService = syncLockService;
+        this.timeService = timeService;
         this.notifiers = notifiers;
     }
 
@@ -88,12 +97,9 @@ public class SynchronizationService {
             logger.info("Synchronization of type {} started with jobId {}", type, jobId);
 
             final List<Course> courses = loadCourses(type);
-            // The current software architecture does not easily support fetching several courses with one API call.
-            // Instead of refactoring the whole overcomplicated architecture now, we implement this hack to fetch several Sisu courses at once.
-            sisuCourseEnricher.prefetchCourses(courses.stream().map(c -> c.realisationId).collect(toList()));
             final List<SynchronizationItem> items = makeItems(courses, type);
-            final List<SynchronizationItem> enrichedItems = enrichItems(items);
-            processedItems.addAll(processItems(enrichedItems));
+            final List<SynchronizationItem> enrichedItems = enricherService.enrichItems(items);
+            processedItems.addAll(processorService.process(enrichedItems));
         } catch (Exception e) {
             logger.error("Exception in SynchronizationService", e);
             exception = e;
@@ -116,7 +122,27 @@ public class SynchronizationService {
      * Load courses to be synchronized.
      */
     private List<Course> loadCourses(final SynchronizationType type) {
-        return courseLoaderService.load(type);
+        switch (type) {
+            case FULL:
+                return courseService.findAllCompletedWithMoodleId();
+            case UNLOCK:
+                return syncLockService.getAndUnlockLockedCourses();
+            case INCREMENTAL:
+                final Optional<SynchronizationJobRun> lastRun =
+                    synchronizationJobRunService.findLatestCompletedIncrementalJob();
+                final LocalDateTime afterDate =
+                    lastRun.map(s -> s.completed).orElse(timeService.getCurrentUTCDateTime().minusDays(1));
+
+                logger.debug("Last successful synchronization run at {}", FORMATTER.format(afterDate));
+
+                // Here we would call the Sisu export API to get changed courses.
+                // We would also need to get changed/new enrollments and match those to the course ID we have in DB.
+                final List<String> realisationIds = null;
+
+                return courseService.findCompletedWithMoodleIdByRealisationIds(realisationIds);
+            default:
+                return Collections.emptyList();
+        }
     }
 
     /**
@@ -125,22 +151,6 @@ public class SynchronizationService {
      */
     private List<SynchronizationItem> makeItems(final List<Course> courses, SynchronizationType type) {
         return courses.stream().map(c -> new SynchronizationItem(c, type)).collect(toList());
-    }
-
-    /**
-     * Enrich items with data required in synchronization.
-     */
-    public List<SynchronizationItem> enrichItems(final List<SynchronizationItem> items) {
-        return items.stream()
-            .map(enricherService::enrichItem)
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * Perform the actual synchronization.
-     */
-    public List<SynchronizationItem> processItems(final List<SynchronizationItem> items) {
-        return processorService.process(items);
     }
 
     private SynchronizationSummary complete(

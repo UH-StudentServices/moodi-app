@@ -23,6 +23,7 @@ import fi.helsinki.moodi.exception.IntegrationConnectionException;
 import fi.helsinki.moodi.exception.MoodiException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -40,6 +41,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import static fi.helsinki.moodi.integration.moodle.MoodleClient.ResponseBodyEvaluator.Action.CONTINUE;
@@ -56,6 +58,8 @@ public class MoodleClient {
     private final RestTemplate readOnlyRestTemplate;
     private final ObjectMapper objectMapper;
     private final String wstoken;
+    @Value("${MoodleClient.batchsize:100}")
+    private int batchSize;
 
     private static final String ENROLMENTS = "enrolments";
     private static final String COURSEID = "courseid";
@@ -78,15 +82,26 @@ public class MoodleClient {
     }
 
     public List<MoodleFullCourse> getCourses(List<Long> ids) {
-        final MultiValueMap<String, String> params = createParametersForFunction("core_course_get_courses");
+        List<MoodleFullCourse> ret = new ArrayList<>();
+        List<MoodleFullCourse> result;
+        int batchCounter = 1;
+        List<List<Long>> batches = splitToBatches(ids);
+        for (List<Long> batchIds : batches) {
+            final MultiValueMap<String, String> params = createParametersForFunction("core_course_get_courses");
 
-        setListParameters(params, "options[ids][%s]", ids, String::valueOf);
+            setListParameters(params, "options[ids][%s]", batchIds, String::valueOf);
 
-        try {
-            return execute(params, new TypeReference<List<MoodleFullCourse>>() {}, DEFAULT_EVALUATION, true);
-        } catch (Exception e) {
-            return handleException("Error executing method: getCourses", e);
+            try {
+                result = execute(params, new TypeReference<List<MoodleFullCourse>>() {}, DEFAULT_EVALUATION, true);
+            } catch (Exception e) {
+                return handleException("Error executing method: getCourses (batch " + batchCounter + "/" + batches.size() + ")", e);
+            }
+            if (result != null) {
+                ret.addAll(result);
+            }
+            batchCounter++;
         }
+        return ret;
     }
 
     private <T> void setListParameters(
@@ -130,6 +145,20 @@ public class MoodleClient {
 
     private String localDateToString(LocalDate d) {
         return "" + d.atStartOfDay(ZoneId.of("Europe/Helsinki")).toEpochSecond();
+    }
+
+    private List<List<Long>> splitToBatches(final List<Long> ids) {
+        final List<List<Long>> batches = new ArrayList<>();
+        final AtomicInteger counter = new AtomicInteger();
+        List<Long> batch = new ArrayList<>();
+        for (Long id : ids) {
+            if (counter.getAndIncrement() % batchSize == 0) {
+                batch = new ArrayList<>();
+                batches.add(batch);
+            }
+            batch.add(id);
+        }
+        return batches;
     }
 
     public void addEnrollments(final List<MoodleEnrollment> moodleEnrollments) {
@@ -227,6 +256,31 @@ public class MoodleClient {
         }
     }
 
+    public List<MoodleCourseWithEnrollments> getEnrolledUsersForCourses(final List<Long> courseIds) {
+        List<MoodleCourseWithEnrollments> ret = new ArrayList<>();
+        List<MoodleCourseWithEnrollments> result;
+        int batchCounter = 1;
+        List<List<Long>> batches = splitToBatches(courseIds);
+        for (List<Long> batchIds : batches) {
+            final MultiValueMap<String, String> params = createParametersForFunction("core_enrol_get_enrolled_users_with_capability");
+            setListParameters(params, "coursecapabilities[%s][courseid]", batchIds, String::valueOf);
+            setListParameters(params, "coursecapabilities[%s][capabilities][0]", batchIds, x -> "");
+            params.set("options[0][name]", "userfields");
+            params.set("options[0][value]", "id, username, roles, enrolledcourses");
+            try {
+                result = execute(params, new TypeReference<List<MoodleCourseWithEnrollments>>() {
+                }, DEFAULT_EVALUATION, true);
+            } catch (Exception e) {
+                return handleException("Error executing method: getEnrolledUsers (batch " + batchCounter + "/" + batches.size() + ")", e);
+            }
+            if (result != null) {
+                ret.addAll(result);
+            }
+            batchCounter++;
+        }
+        return ret;
+    }
+
     public void addRoles(final List<MoodleEnrollment> moodleEnrollments) {
         assignRoles(moodleEnrollments, true);
     }
@@ -303,7 +357,7 @@ public class MoodleClient {
         final String body = getRestTemplate(readOnly)
             .postForObject(restUrl, new HttpEntity<>(params, createHeaders()), String.class);
 
-        logger.debug("Got response body:\n{}", body);
+        logger.info("Got response body:\n{}", body);
 
         switch (responseBodyEvaluator.evaluate(body)) {
             case CONTINUE:
