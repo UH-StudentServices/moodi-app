@@ -137,9 +137,9 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
         expectPostEnrollmentsRequestToMoodle(8, true);
 
         // items are grouped by their relevant action and actions are processed in this order:
-        // SkippingProcessor Action.SKIP
-        // RemovingProcessor Action.REMOVE
-        // SynchronizingProcessor Action.SYNCHRONIZE
+        // Action.SKIP = ProcessorService.skipItem
+        // Action.REMOVE = ProcessorService.removeItem
+        // Action.SYNCHRONIZE = ProcessorService.synchronizeItem
         List<SynchronizationItem> processedItems = processorService.process(items);
         // expecting first 3 in result list to be skipped, next 3 to be removed (result is SUCCESS) and last 3 processed
         int[] expectedOrder = {1, 5, 6, 2, 3, 4, 0, 7, 8};

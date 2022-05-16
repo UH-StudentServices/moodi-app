@@ -15,11 +15,22 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.service.synchronize.enrich;
+package fi.helsinki.moodi.integration.moodle;
 
-import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
-import org.springframework.core.Ordered;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public interface Enricher extends Ordered {
-    SynchronizationItem enrich(final SynchronizationItem item);
+import java.util.List;
+
+public final class MoodleCourseWithEnrollments {
+
+    @JsonProperty("courseid")
+    public Long courseid;
+
+    @JsonProperty("users")
+    public List<MoodleUserEnrollments> users;
+
+    public MoodleCourseWithEnrollments(Long courseid, List<MoodleUserEnrollments> users) {
+        this.courseid = courseid;
+        this.users = users;
+    }
 }
