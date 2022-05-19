@@ -30,6 +30,7 @@ import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.enrich.EnricherService;
 import fi.helsinki.moodi.service.synclock.SyncLockService;
 import fi.helsinki.moodi.service.util.MapperService;
+import io.micrometer.core.instrument.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -293,10 +294,10 @@ public class SynchronizingProcessor {
 
     private UserSynchronizationItem enrichWithMoodleUser(UserSynchronizationItem item) {
         List<String> usernames = new ArrayList<>();
-        if (item.getStudent() != null) {
+        if (item.getStudent() != null && StringUtils.isNotEmpty(item.getStudent().userName)) {
             usernames.add(item.getStudent().userName);
         }
-        if (item.getTeacher() != null) {
+        if (item.getTeacher() != null && StringUtils.isNotEmpty(item.getTeacher().userName)) {
             usernames.add(item.getTeacher().userName);
         }
 
