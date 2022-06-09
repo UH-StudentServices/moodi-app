@@ -50,8 +50,10 @@ public class SynchronizationSummaryLog {
         this.fullSummary = fullSummary;
     }
 
-    public SynchronizationSymmaryLogRoot getSyncronizationSummary() {
-        return new SynchronizationSymmaryLogRoot(
+    // as a public getter this gets called by json serializer, and this provides the summary as objects with
+    // public fields, which are easily converted to json.
+    public SynchronizationSummaryLogRoot getSyncronizationSummary() {
+        return new SynchronizationSummaryLogRoot(
             fullSummary.getElapsedTime(),
             fullSummary.getType(),
             fullSummary.getSuccessfulItemsCount(),
@@ -94,14 +96,14 @@ public class SynchronizationSummaryLog {
         return items.stream().filter(i -> i.status != UserSynchronizationItemStatus.SUCCESS).collect(Collectors.groupingBy(item -> item.status));
     }
 
-    public static class SynchronizationSymmaryLogRoot {
+    public static class SynchronizationSummaryLogRoot {
         public final String elapsedTime;
         public final SynchronizationType type;
         public final long successfulItemsCount;
         public final long failedItemsCount;
         public final List<SynchronizationItemLogEntry> courses;
 
-        public SynchronizationSymmaryLogRoot(String elapsedTime,
+        public SynchronizationSummaryLogRoot(String elapsedTime,
                                              SynchronizationType type,
                                              long successfulItemsCount,
                                              long failedItemsCount,
