@@ -87,7 +87,7 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
 
         SynchronizationSummaryLog synchronizationSummaryLog = new SynchronizationSummaryLog(summary);
 
-        SynchronizationSymmaryLogRoot logRoot = synchronizationSummaryLog.getSyncronizationSummary();
+        SynchronizationSummaryLogRoot logRoot = synchronizationSummaryLog.getSyncronizationSummary();
 
         assertEquals(synchronizationType, logRoot.type);
         assertEquals(0, logRoot.successfulItemsCount);

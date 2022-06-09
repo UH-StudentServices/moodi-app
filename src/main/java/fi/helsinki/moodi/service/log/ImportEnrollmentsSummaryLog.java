@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 import static fi.helsinki.moodi.service.importing.Enrollment.ROLE_STUDENT;
 import static fi.helsinki.moodi.service.importing.Enrollment.ROLE_TEACHER;
 
-public class ImportSummaryLog {
+public class ImportEnrollmentsSummaryLog {
     private final List<Enrollment> enrollments;
     private final List<EnrollmentWarning> enrollmentWarnings;
     private final List<Enrollment> successfulEnrollments;
@@ -41,7 +41,7 @@ public class ImportSummaryLog {
     public final Map<String, List<EnrollmentEntry>> failedStudents;
     public final Map<String, List<EnrollmentEntry>> failedTeachers;
 
-    public ImportSummaryLog(List<Enrollment> enrollments, List<EnrollmentWarning> enrollmentWarnings) {
+    public ImportEnrollmentsSummaryLog(List<Enrollment> enrollments, List<EnrollmentWarning> enrollmentWarnings) {
         this.enrollments = enrollments;
         this.enrollmentWarnings = enrollmentWarnings;
         this.failedEnrollments = enrollmentWarnings.stream().map(e -> e.enrollment).collect(Collectors.toList());
@@ -54,7 +54,6 @@ public class ImportSummaryLog {
 
         this.failedStudents = getFailedEnrollmentEntries(ROLE_STUDENT, this::createStudentEnrollmentEntry);
         this.failedTeachers = getFailedEnrollmentEntries(ROLE_TEACHER, this::createTeacherEnrollmentEntry);
-
     }
 
     private List<EnrollmentEntry> getSuccessfulEnrollmentEntries(String role, Function<Enrollment, EnrollmentEntry> createEnrollmentEntry) {
