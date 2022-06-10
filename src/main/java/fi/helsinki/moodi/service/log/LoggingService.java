@@ -58,7 +58,7 @@ public class LoggingService {
     }
 
     public void logCourseImportEnrollments(Course course, List<Enrollment> enrollments, List<EnrollmentWarning> enrollmentWarnings) {
-        log(String.format(COURSE_ENROLLMENT_TITLE, course.realisationId), new ImportSummaryLog(enrollments, enrollmentWarnings));
+        log(String.format(COURSE_ENROLLMENT_TITLE, course.realisationId), new ImportEnrollmentsSummaryLog(enrollments, enrollmentWarnings));
     }
 
     private void log(String title, Object data) {

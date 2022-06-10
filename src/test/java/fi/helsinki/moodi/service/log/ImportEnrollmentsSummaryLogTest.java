@@ -19,8 +19,8 @@ package fi.helsinki.moodi.service.log;
 
 import fi.helsinki.moodi.service.importing.Enrollment;
 import fi.helsinki.moodi.service.importing.EnrollmentWarning;
-import fi.helsinki.moodi.service.log.ImportSummaryLog.StudentEnrollmentEntry;
-import fi.helsinki.moodi.service.log.ImportSummaryLog.TeacherEnrollmentEntry;
+import fi.helsinki.moodi.service.log.ImportEnrollmentsSummaryLog.StudentEnrollmentEntry;
+import fi.helsinki.moodi.service.log.ImportEnrollmentsSummaryLog.TeacherEnrollmentEntry;
 import org.junit.Test;
 
 import java.util.List;
@@ -29,7 +29,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static fi.helsinki.moodi.service.importing.EnrollmentWarning.CODE_ENROLLMENT_FAILED;
 import static org.junit.Assert.assertEquals;
 
-public class ImportSummaryLogTest extends AbstractSummaryLogTest {
+public class ImportEnrollmentsSummaryLogTest extends AbstractSummaryLogTest {
 
     @Test
     public void thatImportSummaryLogIsCreated() {
@@ -41,20 +41,20 @@ public class ImportSummaryLogTest extends AbstractSummaryLogTest {
 
         List<EnrollmentWarning> enrollmentWarnings = newArrayList(new EnrollmentWarning(CODE_ENROLLMENT_FAILED, teacherEnrollment));
 
-        ImportSummaryLog importSummaryLog = new ImportSummaryLog(enrollments, enrollmentWarnings);
+        ImportEnrollmentsSummaryLog importEnrollmentsSummaryLog = new ImportEnrollmentsSummaryLog(enrollments, enrollmentWarnings);
 
-        assertEquals(1, importSummaryLog.summary.enrolledStudents);
-        assertEquals(0, importSummaryLog.summary.enrolledTeachers);
-        assertEquals(0, importSummaryLog.summary.failedStudents.size());
-        assertEquals(1, importSummaryLog.summary.failedTeachers.size());
-        assertEquals(1, importSummaryLog.summary.failedTeachers.get(CODE_ENROLLMENT_FAILED).intValue());
-        assertEquals(1, importSummaryLog.enrolledStudents.size());
-        assertEquals(0, importSummaryLog.enrolledTeachers.size());
-        assertEquals(0, importSummaryLog.failedStudents.size());
-        assertEquals(1, importSummaryLog.failedTeachers.size());
-        assertEquals(STUDENT_NUMBER, ((StudentEnrollmentEntry) importSummaryLog.enrolledStudents
+        assertEquals(1, importEnrollmentsSummaryLog.summary.enrolledStudents);
+        assertEquals(0, importEnrollmentsSummaryLog.summary.enrolledTeachers);
+        assertEquals(0, importEnrollmentsSummaryLog.summary.failedStudents.size());
+        assertEquals(1, importEnrollmentsSummaryLog.summary.failedTeachers.size());
+        assertEquals(1, importEnrollmentsSummaryLog.summary.failedTeachers.get(CODE_ENROLLMENT_FAILED).intValue());
+        assertEquals(1, importEnrollmentsSummaryLog.enrolledStudents.size());
+        assertEquals(0, importEnrollmentsSummaryLog.enrolledTeachers.size());
+        assertEquals(0, importEnrollmentsSummaryLog.failedStudents.size());
+        assertEquals(1, importEnrollmentsSummaryLog.failedTeachers.size());
+        assertEquals(STUDENT_NUMBER, ((StudentEnrollmentEntry) importEnrollmentsSummaryLog.enrolledStudents
             .get(0)).studentNumber);
-        assertEquals(TEACHER_ID, ((TeacherEnrollmentEntry) importSummaryLog.failedTeachers
+        assertEquals(TEACHER_ID, ((TeacherEnrollmentEntry) importEnrollmentsSummaryLog.failedTeachers
             .get(CODE_ENROLLMENT_FAILED).get(0)).employeeNumber);
 
     }
