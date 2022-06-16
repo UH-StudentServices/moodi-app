@@ -108,9 +108,15 @@ public class SisuCourseUnitRealisation {
             + getLocalizedSpan(SisuLocale.EN, courseUnitRealisationType.name.getForLocaleOrDefault(SisuLocale.EN))
             + getLocalizedSpan(SisuLocale.SV, courseUnitRealisationType.name.getForLocaleOrDefault(SisuLocale.SV));
 
+        String courseDatesPart = "";
+        if (activityPeriod != null && activityPeriod.startDate != null) {
+            courseDatesPart = ", " + FINNISH_DATE_FORMAT.format(activityPeriod.startDate) +
+                (activityPeriod.endDate != null ? "–" + FINNISH_DATE_FORMAT.format(activityPeriod.endDate) : "");
+        }
+
         ret.description = "<p>" + localizedUrls + "</p>"
             + "<p>" + localizedCUNames + " " + courseUnitCodes + "</p>"
-            + "<p>" + localizedCUTypes + ", " + FINNISH_DATE_FORMAT.format(ret.startDate) + "-" + FINNISH_DATE_FORMAT.format(ret.endDate) + "</p>";
+            + "<p>" + localizedCUTypes + courseDatesPart + "</p>";
 
         return ret;
     }
