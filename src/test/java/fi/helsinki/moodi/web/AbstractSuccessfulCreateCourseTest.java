@@ -35,7 +35,7 @@ public abstract class AbstractSuccessfulCreateCourseTest extends AbstractMoodiIn
         "span%3E%3Cspan+lang%3D%22en%22+class%3D%22multilang%22%3ECourses%3C%2Fspan%3E%3Cspan+lang%3D%22sv%22+class%3D%22multilang%22%3E" +
         "Studieavsnitten%3C%2Fspan%3E+%3C%2Fp%3E%3Cp%3E%3Cspan+lang%3D%22fi%22+class%3D%22multilang%22%3EKurssi%3C%2Fspan%3E%3Cspan+lang%3D" +
         "%22en%22+class%3D%22multilang%22%3ECourse%3C%2Fspan%3E%3Cspan+lang%3D%22sv%22+class%3D%22multilang%22%3EKurs%3C%2Fspan%3E%2C+5.8.2019" +
-        "%E2%80%935.11.2019%3C%2Fp%3E";
+        "%E2%80%934.11.2019%3C%2Fp%3E";
 
     protected void expectEnrollmentsWithAddedMoodiRoles(List<MoodleEnrollment> moodleEnrollments) {
         expectEnrollmentRequestToMoodle(moodleEnrollments.stream()
