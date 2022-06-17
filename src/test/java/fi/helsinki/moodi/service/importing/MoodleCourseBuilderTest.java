@@ -79,7 +79,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
             "<p><span lang=\"fi\" class=\"multilang\">Opintojaksot</span><span lang=\"en\" class=\"multilang\">Courses</span>" +
             "<span lang=\"sv\" class=\"multilang\">Studieavsnitten</span> CODE1, CODE2, CODE3</p><p>" +
             "<span lang=\"fi\" class=\"multilang\">Kurssi</span><span lang=\"en\" class=\"multilang\">Course</span>" +
-            "<span lang=\"sv\" class=\"multilang\">Kurs</span>, 5.8.2019–5.11.2019</p>", moodleCourse.summary);
+            "<span lang=\"sv\" class=\"multilang\">Kurs</span>, 5.8.2019–4.11.2019</p>", moodleCourse.summary);
         assertEquals(LocalDate.of(2019, 8, 5), moodleCourse.startTime);
         assertEquals(LocalDate.of(2019, 12, 5), moodleCourse.endTime);
         assertEquals("9", moodleCourse.categoryId);
@@ -103,7 +103,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
             "<p><span lang=\"fi\" class=\"multilang\">Opintojaksot</span><span lang=\"en\" class=\"multilang\">Courses</span>" +
             "<span lang=\"sv\" class=\"multilang\">Studieavsnitten</span> CODE1, CODE2, CODE3</p><p>" +
             "<span lang=\"fi\" class=\"multilang\">Kurssi</span><span lang=\"en\" class=\"multilang\">Course</span>" +
-            "<span lang=\"sv\" class=\"multilang\">Kurs</span>, 5.8.2019–5.11.2019</p>", moodleCourse.summary);
+            "<span lang=\"sv\" class=\"multilang\">Kurs</span>, 5.8.2019–4.11.2019</p>", moodleCourse.summary);
         assertEquals(LocalDate.of(2019, 8, 5), moodleCourse.startTime);
         assertEquals(LocalDate.of(2019, 12, 5), moodleCourse.endTime);
         assertEquals("9", moodleCourse.categoryId);
