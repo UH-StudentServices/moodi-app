@@ -110,8 +110,15 @@ public class SisuCourseUnitRealisation {
 
         String courseDatesPart = "";
         if (activityPeriod != null && activityPeriod.startDate != null) {
-            courseDatesPart = ", " + FINNISH_DATE_FORMAT.format(activityPeriod.startDate) +
-                (activityPeriod.endDate != null ? "–" + FINNISH_DATE_FORMAT.format(activityPeriod.endDate) : "");
+            String endPart = "";
+            // endDates are exclusive, so startDate 14.5. and endDate 15.5 would mean that the event is single day 14.5.
+            // so remove one day from all end dates and don't display them as ranges if there is only one day.
+            if (activityPeriod.endDate == null) {
+                endPart = "–";
+            } else if (activityPeriod.endDate.minusDays(1).isAfter(activityPeriod.startDate)) {
+                endPart = "–" + FINNISH_DATE_FORMAT.format(activityPeriod.endDate.minusDays(1));
+            }
+            courseDatesPart = ", " + FINNISH_DATE_FORMAT.format(activityPeriod.startDate) + endPart;
         }
 
         ret.description = "<p>" + localizedUrls + "</p>"
