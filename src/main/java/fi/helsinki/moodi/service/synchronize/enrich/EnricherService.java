@@ -159,10 +159,10 @@ public class EnricherService {
         List<Long> uniqueMoodleCourseIds = new ArrayList<>(new LinkedHashSet<>(moodleCourseIds));
         prefetchedMoodleCoursesById = moodleService.getCourses(uniqueMoodleCourseIds).stream()
             .collect(Collectors.toMap(c -> c.id, c -> c));
-
+        List<Long> foundCourseIds = new ArrayList<>(prefetchedMoodleCoursesById.keySet());
         prefetchedMoodleUsers.clear();
         prefetchedMoodleEnrollmentsByCourseId.clear();
-        List<MoodleCourseWithEnrollments> allEnrollments = moodleService.getEnrolledUsers(uniqueMoodleCourseIds);
+        List<MoodleCourseWithEnrollments> allEnrollments = moodleService.getEnrolledUsers(foundCourseIds);
         assert uniqueMoodleCourseIds.size() == allEnrollments.size() :
             "amount of courses with fetched enrollments (" + allEnrollments.size() + ") differs from amount of course ids: " +
             uniqueMoodleCourseIds.size();
