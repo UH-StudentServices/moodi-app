@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -62,8 +63,8 @@ public class MoodleService {
         return moodleClient.getEnrolledUsers(courseId);
     }
 
-    public List<MoodleCourseWithEnrollments> getEnrolledUsers(final List<Long> courseIds) {
-        return moodleClient.getEnrolledUsersForCourses(courseIds);
+    public void fetchEnrolledUsersForCourses(final Map<Long, List<MoodleUserEnrollments>> enrolmentsByCourseId, final List<Long> courseIds) {
+        moodleClient.getEnrolledUsersForCourses(enrolmentsByCourseId, courseIds);
     }
 
     public void addRoles(final List<MoodleEnrollment> moodleEnrollments) {
