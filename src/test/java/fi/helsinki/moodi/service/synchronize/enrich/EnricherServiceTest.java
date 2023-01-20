@@ -137,7 +137,7 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
         prepareMoodleGetEnrolledUsersForCoursesMock(
             items.stream().map(item ->
                 new MoodleCourseWithEnrollments(item.getCourse().moodleId, Collections.emptyList())).collect(Collectors.toList()),
-        3);
+            3);
 
         List<SynchronizationItem> enrichedItems = enricherService.enrichItems(items);
 
