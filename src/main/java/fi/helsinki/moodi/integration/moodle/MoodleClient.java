@@ -260,21 +260,21 @@ public class MoodleClient {
     public void getEnrolledUsersForCourses(final Map<Long, List<MoodleUserEnrollments>> enrolmentsByCourseId, final List<Long> courseIds) {
         int batchCounter = 1;
         List<List<Long>> batches = splitToBatches(courseIds);
-        for (List<Long> batchIds : batches) {
+        for (List<Long> batchCourseIds : batches) {
             List<MoodleCourseWithEnrollments> result = null;
-            MultiValueMap<String, String> params = createEnrolmentQueryParams(batchIds);
+            MultiValueMap<String, String> params = createEnrolmentQueryParams(batchCourseIds);
             try {
                 result = execute(params, new TypeReference<List<MoodleCourseWithEnrollments>>() {
                 }, DEFAULT_EVALUATION, true);
-                if (result != null && result.size() != batchIds.size()) {
-                    throw new MoodleClientException("Received response with less courses (" + result.size() + ") than sent batchIds: " + batchIds.size(), "", "500");
+                if (result != null && result.size() != batchCourseIds.size()) {
+                    throw new MoodleClientException("Received response with less courses (" + result.size() + ") than sent batchCourseIds: " + batchCourseIds.size(), "", "500");
                 }
             } catch (Exception e) {
                 result = null;
                 logger.info("Error executing method: getEnrolledUsersForCourses (batch " + batchCounter + "/" + batches.size() + ")", e);
                 logger.info("attempt calling course enrollments one course at time");
                 int errorsInBatch = 0;
-                for (Long courseId : batchIds) {
+                for (Long courseId : batchCourseIds) {
                     params = createEnrolmentQueryParams(Collections.singletonList(courseId));
                     List<MoodleCourseWithEnrollments> singleResult = null;
                     try {
@@ -296,9 +296,9 @@ public class MoodleClient {
                     handleException("Too many errors in one batch, abort: " + errorsInBatch + " (batch " + batchCounter + "/" + batches.size() + ")", e);
                 }
             }
-            if (result != null) { // result.size() == batchIds.size() always at this point
-                for (int i = 0; i < batchIds.size(); i++) {
-                    long courseId = batchIds.get(i);
+            if (result != null) { // result.size() == batchCourseIds.size() always at this point
+                for (int i = 0; i < batchCourseIds.size(); i++) {
+                    long courseId = batchCourseIds.get(i);
                     List<MoodleUserEnrollments> enrollments = result.get(i).users;
                     enrolmentsByCourseId.put(courseId, enrollments);
                 }
@@ -307,10 +307,10 @@ public class MoodleClient {
         }
     }
 
-    private MultiValueMap<String, String> createEnrolmentQueryParams(List<Long> batchIds) {
+    private MultiValueMap<String, String> createEnrolmentQueryParams(List<Long> batchCourseIds) {
         final MultiValueMap<String, String> params = createParametersForFunction("core_enrol_get_enrolled_users_with_capability");
-        setListParameters(params, "coursecapabilities[%s][courseid]", batchIds, String::valueOf);
-        setListParameters(params, "coursecapabilities[%s][capabilities][0]", batchIds, x -> "");
+        setListParameters(params, "coursecapabilities[%s][courseid]", batchCourseIds, String::valueOf);
+        setListParameters(params, "coursecapabilities[%s][capabilities][0]", batchCourseIds, x -> "");
         params.set("options[0][name]", "userfields");
         params.set("options[0][value]", "id, username, roles, enrolledcourses");
         return params;
