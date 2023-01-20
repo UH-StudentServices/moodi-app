@@ -17,7 +17,6 @@
 
 package fi.helsinki.moodi.service.synchronize.enrich;
 
-import fi.helsinki.moodi.integration.moodle.MoodleCourseWithEnrollments;
 import fi.helsinki.moodi.integration.moodle.MoodleFullCourse;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
 import fi.helsinki.moodi.integration.moodle.MoodleUser;

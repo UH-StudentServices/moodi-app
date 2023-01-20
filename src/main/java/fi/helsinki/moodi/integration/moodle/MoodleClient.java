@@ -267,7 +267,8 @@ public class MoodleClient {
                 result = execute(params, new TypeReference<List<MoodleCourseWithEnrollments>>() {
                 }, DEFAULT_EVALUATION, true);
                 if (result != null && result.size() != batchCourseIds.size()) {
-                    throw new MoodleClientException("Received response with less courses (" + result.size() + ") than sent batchCourseIds: " + batchCourseIds.size(), "", "500");
+                    throw new MoodleClientException("Received response with less courses (" + result.size() +
+                        ") than sent batchCourseIds: " + batchCourseIds.size(), "", "500");
                 }
             } catch (Exception e) {
                 result = null;
@@ -293,7 +294,8 @@ public class MoodleClient {
                     }
                 }
                 if (errorsInBatch > 50) {
-                    handleException("Too many errors in one batch, abort: " + errorsInBatch + " (batch " + batchCounter + "/" + batches.size() + ")", e);
+                    handleException("Too many errors in one batch, abort: " + errorsInBatch + " (batch " + batchCounter +
+                        "/" + batches.size() + ")", e);
                 }
             }
             if (result != null) { // result.size() == batchCourseIds.size() always at this point
