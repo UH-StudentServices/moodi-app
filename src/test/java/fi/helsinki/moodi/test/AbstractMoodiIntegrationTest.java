@@ -28,7 +28,6 @@ import fi.helsinki.moodi.integration.moodle.MoodleRole;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.service.importing.ImportCourseRequest;
 import fi.helsinki.moodi.service.synchronize.enrich.EnricherService;
-import fi.helsinki.moodi.service.synchronize.enrich.EnrichmentStatus;
 import fi.helsinki.moodi.service.util.MapperService;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
 import org.flywaydb.core.Flyway;
