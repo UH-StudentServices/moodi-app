@@ -125,6 +125,28 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
         );
     }
 
+    @Test
+    public void thatMissingEnrollmentsCauseErrorForEnrichmentItem() {
+        List<SynchronizationItem> items = new ArrayList<>();
+        for (int i = 1; i < 5; i++) {
+            items.add(createFullSynchronizationItem("hy-CUR-" + i, i));
+        }
+        prepareSisuPrefetchMock(items);
+        prepareMoodleGetCoursesResponseMock(
+            items.stream().map(item -> item.getCourse().moodleId).collect(Collectors.toList()), delayed);
+        prepareMoodleGetEnrolledUsersForCoursesMock(
+            items.stream().map(item ->
+                new MoodleCourseWithEnrollments(item.getCourse().moodleId, Collections.emptyList())).collect(Collectors.toList()),
+        3);
+
+        List<SynchronizationItem> enrichedItems = enricherService.enrichItems(items);
+
+        // item 3 is set to fail
+        for (int i = 0; i < enrichedItems.size(); i++) {
+            assertStatus(enrichedItems.get(i), i == 3 ? EnrichmentStatus.ERROR : EnrichmentStatus.SUCCESS, true);
+        }
+    }
+
     private void mockSisuCURRequestForBatch(List<SynchronizationItem> itemBatch) {
         String curs = itemBatch.stream().map(item -> Fixtures.asString("/sisu/course-unit-realisation-template.json",
             new ImmutableMap.Builder<String, String>()

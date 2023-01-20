@@ -28,6 +28,7 @@ import fi.helsinki.moodi.integration.moodle.MoodleRole;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.service.importing.ImportCourseRequest;
 import fi.helsinki.moodi.service.synchronize.enrich.EnricherService;
+import fi.helsinki.moodi.service.synchronize.enrich.EnrichmentStatus;
 import fi.helsinki.moodi.service.util.MapperService;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
 import org.flywaydb.core.Flyway;
@@ -65,6 +66,7 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -428,6 +430,31 @@ public abstract class AbstractMoodiIntegrationTest {
             });
     }
 
+    private void mockGetEnrolledUsersForCoursesBatchWithError(List<MoodleCourseWithEnrollments> resultObjects, int failAtIndex) {
+        // first the whole batch creates error
+        moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
+            .andExpect(method(HttpMethod.POST))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
+            .andExpect(content().string(startsWith(
+                "wstoken=xxxx1234&wsfunction=core_enrol_get_enrolled_users_with_capability&moodlewsrestformat=json")))
+            .andRespond(request -> withServerError().createResponse(request));
+
+        // then each item of the batch attempts request separately, and one of them creates error
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        for (int i = 0; i < resultObjects.size(); i++) {
+            if (failAtIndex == i) {
+                moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
+                    .andExpect(method(HttpMethod.POST))
+                    .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
+                    .andExpect(content().string(startsWith(
+                        "wstoken=xxxx1234&wsfunction=core_enrol_get_enrolled_users_with_capability&moodlewsrestformat=json")))
+                    .andRespond(request -> withServerError().createResponse(request));
+            } else {
+                mockGetEnrolledUsersForCoursesBatch(Collections.singletonList(resultObjects.get(i)));
+            }
+        }
+    }
+
     private void mockGetEnrolledUsersForCoursesBatch(List<MoodleCourseWithEnrollments> resultObjects) {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         try {
@@ -444,23 +471,40 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     protected void prepareMoodleGetEnrolledUsersForCoursesMock(Long moodleId, List<MoodleUserEnrollments> enrollments) {
-        prepareMoodleGetEnrolledUsersForCoursesMock(Collections.singletonList(new MoodleCourseWithEnrollments(moodleId, enrollments)));
+        prepareMoodleGetEnrolledUsersForCoursesMock(Collections.singletonList(new MoodleCourseWithEnrollments(moodleId, enrollments)), null);
     }
 
     protected void prepareMoodleGetEnrolledUsersForCoursesMock(List<MoodleCourseWithEnrollments> expected) {
-        int count = 1;
+        prepareMoodleGetEnrolledUsersForCoursesMock(expected, null);
+    }
+
+    protected void prepareMoodleGetEnrolledUsersForCoursesMock(List<MoodleCourseWithEnrollments> expected, Integer failAtIndex) {
+        int count = 0;
         int batchSize = 2;
+        boolean batchHasError = false;
         List<MoodleCourseWithEnrollments> resultObjectBatch = new ArrayList<>();
         for (MoodleCourseWithEnrollments course: expected) {
             resultObjectBatch.add(course);
-            if (count % batchSize == 0) {
-                mockGetEnrolledUsersForCoursesBatch(resultObjectBatch);
+            if (failAtIndex != null && failAtIndex == count) {
+                batchHasError = true;
+            }
+            if (count % batchSize == 1) {
+                if (batchHasError) {
+                    mockGetEnrolledUsersForCoursesBatchWithError(resultObjectBatch, failAtIndex % batchSize);
+                } else {
+                    mockGetEnrolledUsersForCoursesBatch(resultObjectBatch);
+                }
                 resultObjectBatch.clear();
+                batchHasError = false;
             }
             count++;
         }
         if (!resultObjectBatch.isEmpty()) {
-            mockGetEnrolledUsersForCoursesBatch(resultObjectBatch);
+            if (batchHasError) {
+                mockGetEnrolledUsersForCoursesBatchWithError(resultObjectBatch, failAtIndex % batchSize);
+            } else {
+                mockGetEnrolledUsersForCoursesBatch(resultObjectBatch);
+            }
         }
     }
 
