@@ -17,7 +17,6 @@
 
 package fi.helsinki.moodi.service.synchronize.enrich;
 
-import fi.helsinki.moodi.integration.moodle.MoodleCourseWithEnrollments;
 import fi.helsinki.moodi.integration.moodle.MoodleFullCourse;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
 import fi.helsinki.moodi.integration.moodle.MoodleUser;
@@ -162,22 +161,18 @@ public class EnricherService {
         List<Long> foundCourseIds = new ArrayList<>(prefetchedMoodleCoursesById.keySet());
         prefetchedMoodleUsers.clear();
         prefetchedMoodleEnrollmentsByCourseId.clear();
-        List<MoodleCourseWithEnrollments> allEnrollments = moodleService.getEnrolledUsers(foundCourseIds);
-        assert foundCourseIds.size() == allEnrollments.size() :
-            "amount of courses with fetched enrollments (" + allEnrollments.size() + ") differs from amount of course ids: " +
-                foundCourseIds.size();
-        for (int i = 0; i < foundCourseIds.size(); i++) {
-            long courseId = foundCourseIds.get(i);
-            List<MoodleUserEnrollments> enrollments = allEnrollments.get(i).users;
-            prefetchedMoodleEnrollmentsByCourseId.put(courseId, enrollments);
-            enrollments.forEach(moodleEnrollment -> {
-                if (!prefetchedMoodleUsers.containsKey(moodleEnrollment.username)) {
-                    MoodleUser moodleUser = new MoodleUser();
-                    moodleUser.id = moodleEnrollment.id;
-                    prefetchedMoodleUsers.put(moodleEnrollment.username, moodleUser);
-                }
-            });
-        }
+        moodleService.fetchEnrolledUsersForCourses(prefetchedMoodleEnrollmentsByCourseId, foundCourseIds);
+        prefetchedMoodleEnrollmentsByCourseId.values().forEach(enrollments -> {
+            if (enrollments != null) {
+                enrollments.forEach(moodleEnrollment -> {
+                    if (!prefetchedMoodleUsers.containsKey(moodleEnrollment.username)) {
+                        MoodleUser moodleUser = new MoodleUser();
+                        moodleUser.id = moodleEnrollment.id;
+                        prefetchedMoodleUsers.put(moodleEnrollment.username, moodleUser);
+                    }
+                });
+            }
+        });
     }
 
     public Optional<MoodleUser> getPrefetchedMoodleUser(List<String> usernameList) {
@@ -211,6 +206,12 @@ public class EnricherService {
         }
         final Course course = item.getCourse();
         final List<MoodleUserEnrollments> moodleEnrollments = prefetchedMoodleEnrollmentsByCourseId.get(course.moodleId);
-        item.setMoodleEnrollments(moodleEnrollments);
+        if (moodleEnrollments == null) {
+            item.completeEnrichmentPhase(
+                EnrichmentStatus.ERROR,
+                String.format("Error while fetching enrollments for moodle course %s", course.moodleId));
+        } else {
+            item.setMoodleEnrollments(moodleEnrollments);
+        }
     }
 }
