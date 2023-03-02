@@ -78,7 +78,7 @@ public class SisuCourseUnitRealisation {
         SisuLocale teachingLanguageCode = SisuLocale.byUrnOrDefaultToFi(teachingLanguageUrn);
         ret.realisationId = id;
         ret.realisationName = generateName(teachingLanguageCode);
-        ret.teachingLanguageRealisationName = calculateName(name.getForLocaleOrFirstAvailable(teachingLanguageCode), nameSpecifier.getForLocaleOrFirstAvailable(teachingLanguageCode));
+        ret.teachingLanguageRealisationName = calculateName(teachingLanguageCode);
         ret.students = enrolments.stream().map(e -> e.person.toStudyRegistryStudent(e.isEnrolled())).collect(Collectors.toList());
         ret.published = "PUBLISHED".equals(flowState);
 
@@ -148,9 +148,9 @@ public class SisuCourseUnitRealisation {
         SisuLocale otherLang1 = getOtherLanguage(teachingLanguage);
         SisuLocale otherLang2 = getOtherLanguage(teachingLanguage, otherLang1);
 
-        String defaultName = calculateName(name.getForLocale(teachingLanguage), nameSpecifier.getForLocale(teachingLanguage));
-        String otherName1 = calculateName(name.getForLocale(otherLang1), nameSpecifier.getForLocale(otherLang1));
-        String otherName2 = calculateName(name.getForLocale(otherLang2), nameSpecifier.getForLocale(otherLang2));
+        String defaultName = calculateName(teachingLanguage);
+        String otherName1 = calculateName(otherLang1);
+        String otherName2 = calculateName(otherLang2);
 
         String compDefault = defaultName != null ? defaultName.trim() : "";
         String comp1 = otherName1 != null ? otherName1.trim() : "";
@@ -214,22 +214,24 @@ public class SisuCourseUnitRealisation {
         return defaultFinal + other1Final + other2Final;
     }
 
-    protected String calculateName(String name, String nameSpecifier) {
+    protected String calculateName(SisuLocale locale) {
+        String n = name != null ? name.getForLocale(locale) : null;
+        String ns = nameSpecifier != null ? nameSpecifier.getForLocale(locale) : null;
         if (id.toLowerCase().startsWith("hy-opt-cur")) {
-            return name;
-        } else if(id.toLowerCase().startsWith("hy-cur")) {
-            return combineFields(name, nameSpecifier);
+            return n;
+        } else if (id.toLowerCase().startsWith("hy-cur")) {
+            return combineFields(n, ns);
         } else {
-            return combineFields(nameSpecifier, name);
+            return combineFields(ns, n);
         }
     }
 
     private String combineFields(String value, String value2) {
-        if (StringUtils.isNotBlank(value) && StringUtils.isNotBlank(value2)) {
-            return value + SEPARATOR + value2;
-        }
         if (StringUtils.isBlank(value) && StringUtils.isBlank(value2)) {
             return null;
+        }
+        if (StringUtils.isNotBlank(value) && StringUtils.isNotBlank(value2)) {
+            return value + SEPARATOR + value2;
         }
         if (StringUtils.isBlank(value2)) {
             return value;
