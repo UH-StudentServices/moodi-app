@@ -71,9 +71,9 @@ public class SisuCourseUnitRealisationTest {
     @Test
     public void testNameLocalizationAllLanguages() {
         String name = cur.generateName(FI);
-        assertEquals(generateSpan(FI, cur.calculateName(NAME_FI, SPECIFIER_FI))
-            + generateSpan(SV, cur.calculateName(NAME_SV, SPECIFIER_SV))
-            + generateSpan(EN, cur.calculateName(NAME_EN, SPECIFIER_EN)), name);
+        assertEquals(generateSpan(FI, cur.calculateName(FI))
+            + generateSpan(SV, cur.calculateName(SV))
+            + generateSpan(EN, cur.calculateName(EN)), name);
     }
 
     @Test
@@ -81,15 +81,15 @@ public class SisuCourseUnitRealisationTest {
         cur.name.sv = null;
         cur.nameSpecifier.sv = null;
         String name = cur.generateName(FI);
-        assertEquals(generateSpan(FI, cur.calculateName(NAME_FI, SPECIFIER_FI)) + generateSpan(EN, cur.calculateName(NAME_EN, SPECIFIER_EN)), name);
+        assertEquals(generateSpan(FI, cur.calculateName(FI)) + generateSpan(EN, cur.calculateName(EN)), name);
     }
 
     @Test
     public void testNameLocalizationTwoLanguagesOtherParams() {
         cur.name.fi = null;
         cur.nameSpecifier.fi = null;
-        String name = cur.generateName(SV);
-        assertEquals(generateSpan(SV, cur.calculateName(NAME_SV, SPECIFIER_SV)) + generateSpan(EN, cur.calculateName(NAME_EN, SPECIFIER_EN)), name);
+        String name = cur.generateName(FI);
+        assertEquals(generateSpan(SV, cur.calculateName(SV)) + generateSpan(EN, cur.calculateName(EN)), name);
     }
 
     @Test
@@ -99,7 +99,7 @@ public class SisuCourseUnitRealisationTest {
         cur.name.en = null;
         cur.nameSpecifier.en = null;
         String name = cur.generateName(FI);
-        assertEquals(cur.calculateName(NAME_FI, SPECIFIER_FI), name);
+        assertEquals(cur.calculateName(FI), name);
     }
 
     @Test
@@ -109,7 +109,7 @@ public class SisuCourseUnitRealisationTest {
         cur.name.en = NAME_FI;
         cur.nameSpecifier.en = SPECIFIER_FI;
         String name = cur.generateName(FI);
-        assertEquals(cur.calculateName(NAME_FI, SPECIFIER_FI), name);
+        assertEquals(cur.calculateName(FI), name);
     }
 
     @Test
@@ -117,7 +117,8 @@ public class SisuCourseUnitRealisationTest {
         cur.name.sv = NAME_FI;
         cur.nameSpecifier.sv = SPECIFIER_FI;
         String name = cur.generateName(FI);
-        assertEquals(generateSpan(FI, cur.calculateName(NAME_FI, SPECIFIER_FI)) + generateSpan(EN, cur.calculateName(NAME_EN, SPECIFIER_EN)), name);
+        assertEquals(generateSpan(FI, cur.calculateName(FI))
+            + generateSpan(EN, cur.calculateName(EN)), name);
     }
 
     @Test
@@ -125,15 +126,18 @@ public class SisuCourseUnitRealisationTest {
         cur.name.fi = null;
         cur.nameSpecifier.fi = null;
         String name = cur.generateName(FI);
-        assertEquals(generateSpan(SV, cur.calculateName(NAME_SV, SPECIFIER_SV)) + generateSpan(EN, cur.calculateName(NAME_EN, SPECIFIER_EN)), name);
+        assertEquals(generateSpan(SV, cur.calculateName(SV))
+            + generateSpan(EN, cur.calculateName(EN)), name);
     }
 
     @Test
     public void testDefaultLocalizationMissingButThereIsAnotherOption() {
         cur.name.fi = null;
+        cur.nameSpecifier.fi = null;
         cur.name.sv = null;
+        cur.nameSpecifier.sv = null;
         String name = cur.generateName(FI);
-        assertEquals(cur.calculateName(NAME_EN, SPECIFIER_EN), name);
+        assertEquals(cur.calculateName(EN), name);
     }
 
     @Test
@@ -142,7 +146,7 @@ public class SisuCourseUnitRealisationTest {
             "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890" +
             "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
         String name = cur.generateName(EN);
-        assertEquals(cur.calculateName(NAME_EN, SPECIFIER_EN), name);
+        assertEquals(cur.calculateName(EN), name);
     }
 
     @Test
@@ -165,9 +169,9 @@ public class SisuCourseUnitRealisationTest {
     public void testNonOptimeSisuOodiIdFormat() {
         cur.id = "123412341234";
         String name = cur.generateName(FI);
-        assertEquals(generateSpan(FI, cur.calculateName(NAME_FI, SPECIFIER_FI))
-            + generateSpan(SV, cur.calculateName(NAME_SV, SPECIFIER_SV))
-            + generateSpan(EN, cur.calculateName(NAME_EN, SPECIFIER_EN)), name);
+        assertEquals(generateSpan(FI, cur.calculateName(FI))
+            + generateSpan(SV, cur.calculateName(SV))
+            + generateSpan(EN, cur.calculateName(EN)), name);
 
     }
 

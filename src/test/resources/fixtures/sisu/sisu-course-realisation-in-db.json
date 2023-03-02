@@ -6,6 +6,11 @@
         "sv": "För att testa",
         "en": "For testing"
       },
+      "nameSpecifier": {
+        "fi": "Tentti",
+        "sv": "Examen",
+        "en": "Exam"
+      },
       "courseUnitRealisationType": {
         "name": {
           "fi": "Kurssi",
