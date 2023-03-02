@@ -219,7 +219,7 @@ public class SisuCourseUnitRealisation {
         String ns = nameSpecifier != null ? nameSpecifier.getForLocale(locale) : null;
         if (id.toLowerCase().startsWith("hy-opt-cur")) {
             return n;
-        } else if (id.toLowerCase().startsWith("hy-cur")) {
+        } else if (id.toLowerCase().startsWith("hy-cur") && !id.toLowerCase().contains("aili")) {
             return combineFields(n, ns);
         } else {
             return combineFields(ns, n);
