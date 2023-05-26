@@ -17,6 +17,7 @@
 
 package fi.helsinki.moodi.service.course;
 
+import fi.helsinki.moodi.integration.moodle.MoodleService;
 import fi.helsinki.moodi.service.time.TimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,11 +38,13 @@ public class CourseService {
 
     private final CourseRepository courseRepository;
     private final TimeService timeService;
+    private final MoodleService moodleService;
 
     @Autowired
-    public CourseService(CourseRepository courseRepository, TimeService timeService) {
+    public CourseService(CourseRepository courseRepository, TimeService timeService, MoodleService moodleService) {
         this.courseRepository = courseRepository;
         this.timeService = timeService;
+        this.moodleService = moodleService;
     }
 
     public void markAsRemoved(Course course, String message) {
@@ -113,5 +116,12 @@ public class CourseService {
     private Course saveCourse(Course course) {
         course.modified = timeService.getCurrentUTCDateTime();
         return courseRepository.save(course);
+    }
+
+    public boolean ensureCourseVisibility(String realisationId) {
+        Course dbCourse = findByRealisationId(realisationId).orElseThrow(notFoundException(
+            String.format("Study registry course not found with realisation id %s",
+                realisationId)));
+        return moodleService.updateCourseVisibility(dbCourse.moodleId, true) != null;
     }
 }
