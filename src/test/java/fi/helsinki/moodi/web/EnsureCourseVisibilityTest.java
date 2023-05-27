@@ -57,4 +57,14 @@ public class EnsureCourseVisibilityTest extends AbstractMoodiIntegrationTest {
         String content = result.getResponse().getContentAsString();
         assertEquals("true", content);
    }
+
+    @Test
+    public void makeVisibleForNonexistingCourseReturnsNotFound() throws Exception {
+        mockMvc.perform(
+                post("/api/v1/courses/make_visible/" + SISU_REALISATION_NOT_IN_DB_ID)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("client-id", "testclient")
+                    .header("client-token", "xxx123")
+            ).andExpect(status().isNotFound());
+    }
 }
