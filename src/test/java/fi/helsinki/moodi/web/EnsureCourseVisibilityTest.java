@@ -56,7 +56,7 @@ public class EnsureCourseVisibilityTest extends AbstractMoodiIntegrationTest {
             .andReturn();
         String content = result.getResponse().getContentAsString();
         assertEquals("true", content);
-   }
+    }
 
     @Test
     public void makeVisibleForNonexistingCourseReturnsNotFound() throws Exception {
