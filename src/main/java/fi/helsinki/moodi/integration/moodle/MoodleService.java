@@ -82,4 +82,8 @@ public class MoodleService {
     public void suspendEnrollments(final List<MoodleEnrollment> moodleEnrollments) {
         moodleClient.suspendEnrollments(moodleEnrollments);
     }
+
+    public Long updateCourseVisibility(final long courseId, boolean visible) {
+        return moodleClient.updateCourseVisibility(courseId, visible);
+    }
 }

@@ -309,6 +309,23 @@ public class MoodleClient {
         }
     }
 
+    public long updateCourseVisibility(final long courseId, final boolean visible) {
+        final MultiValueMap<String, String> params = createParametersForFunction("core_course_update_courses");
+        // courses[0][id]= courseId
+        // courses[0][visible]= int
+        params.set(createParamName(COURSES, "id", 0), String.valueOf(courseId));
+        params.set(createParamName(COURSES, "visible", 0), booleanToIntString(visible));
+        try {
+            return execute(params, new TypeReference<List<MoodleCourseData>>() {}, DEFAULT_EVALUATION, false)
+                .stream()
+                .findFirst()
+                .map(s -> s.id)
+                .orElse(null);
+        } catch (Exception e) {
+            return handleException("Error executing method: updateCourseVisibility", e);
+        }
+    }
+
     private MultiValueMap<String, String> createEnrolmentQueryParams(List<Long> batchCourseIds) {
         final MultiValueMap<String, String> params = createParametersForFunction("core_enrol_get_enrolled_users_with_capability");
         setListParameters(params, "coursecapabilities[%s][courseid]", batchCourseIds, String::valueOf);

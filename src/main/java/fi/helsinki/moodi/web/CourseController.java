@@ -19,6 +19,7 @@ package fi.helsinki.moodi.web;
 
 import fi.helsinki.moodi.MoodiHealthIndicator;
 import fi.helsinki.moodi.service.Result;
+import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.dto.CourseDto;
 import fi.helsinki.moodi.service.importing.ImportCourseRequest;
 import fi.helsinki.moodi.service.importing.ImportCourseResponse;
@@ -34,15 +35,17 @@ import javax.validation.Valid;
 public class CourseController {
 
     private final ImportingService importingService;
+    private final CourseService courseService;
     private final MoodiHealthIndicator moodiHealthIndicator;
 
     @Autowired
-    public CourseController(ImportingService importingService, MoodiHealthIndicator moodiHealthIndicator) {
+    public CourseController(ImportingService importingService, CourseService courseService, MoodiHealthIndicator moodiHealthIndicator) {
         this.importingService = importingService;
+        this.courseService = courseService;
         this.moodiHealthIndicator = moodiHealthIndicator;
     }
 
-    @RequestMapping(value = "/api/v1/courses", method = RequestMethod.POST)
+    @PostMapping(value = "/api/v1/courses")
     public ResponseEntity<Result<ImportCourseResponse, String>> importCourse(
         @Valid @RequestBody final ImportCourseRequest request) {
 
@@ -56,11 +59,18 @@ public class CourseController {
         }
     }
 
-    @RequestMapping(value = "/api/v1/courses/{realisationId}", method = RequestMethod.GET)
+    @GetMapping(value = "/api/v1/courses/{realisationId}")
     public ResponseEntity<CourseDto> getCourse(
         @PathVariable("realisationId") String realisationId) {
 
         return response(importingService.getImportedCourse(realisationId));
+    }
+
+    @PostMapping(value = "/api/v1/courses/make_visible/{realisationId}")
+    public ResponseEntity<Boolean> makeVisible(
+        @PathVariable("realisationId") String realisationId) {
+
+        return response(courseService.ensureCourseVisibility(realisationId));
     }
 
     private <D, E> ResponseEntity<Result<D, E>> response(Result<D, E> result) {
