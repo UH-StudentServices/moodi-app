@@ -40,7 +40,7 @@ public class EnsureCourseVisibilityTest extends AbstractMoodiIntegrationTest {
             .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
             .andExpect(content().string(startsWith(
                 "wstoken=xxxx1234&wsfunction=core_course_update_courses&moodlewsrestformat=json")))
-            .andRespond(request -> withSuccess("[{\"id\":\"" + moodleId + "\", \"shortname\":\"shortie\"}]", MediaType.APPLICATION_JSON)
+            .andRespond(request -> withSuccess("{\"warnings\":[]}", MediaType.APPLICATION_JSON)
             .createResponse(request));
     }
 
