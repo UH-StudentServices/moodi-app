@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -316,11 +317,8 @@ public class MoodleClient {
         params.set(createParamName(COURSES, "id", 0), String.valueOf(courseId));
         params.set(createParamName(COURSES, "visible", 0), booleanToIntString(visible));
         try {
-            return execute(params, new TypeReference<List<MoodleCourseData>>() {}, DEFAULT_EVALUATION, false)
-                .stream()
-                .findFirst()
-                .map(s -> s.id)
-                .orElse(null);
+            execute(params, new TypeReference<Map<String, Object>>() {}, DEFAULT_EVALUATION, false);
+            return courseId;
         } catch (Exception e) {
             return handleException("Error executing method: updateCourseVisibility", e);
         }
