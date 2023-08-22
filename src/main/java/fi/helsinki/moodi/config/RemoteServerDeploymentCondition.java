@@ -25,6 +25,6 @@ public final class RemoteServerDeploymentCondition implements Condition {
 
     @Override
     public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-        return context.getEnvironment().acceptsProfiles("dev", "prod");
+        return context.getEnvironment().acceptsProfiles("dev", "prod", "local_docker");
     }
 }

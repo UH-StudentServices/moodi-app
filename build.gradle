@@ -81,6 +81,7 @@ if(hasProperty("opintoni_artifactory_base_url")) {
 }
 
 dependencies {
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
     implementation('org.springframework.boot:spring-boot-starter-web') {
         exclude module: 'spring-boot-starter-tomcat'
