@@ -1,0 +1,26 @@
+[
+  {
+    "id": 15,
+    "courseid": 2603,
+    "name": "Muu opetustapahtuma 1",
+    "description": "",
+    "descriptionformat": 1,
+    "idnumber": "sisu:hy-SGS-137371177"
+  },
+  {
+    "id": 16,
+    "courseid": 2603,
+    "name": "Muu opetustapahtuma 2",
+    "description": "",
+    "descriptionformat": 1,
+    "idnumber": "sisu:hy-SGS-137371178"
+  },
+  {
+    "id": 14,
+    "courseid": 2603,
+    "name": "Sisusta synkronoidut",
+    "description": "",
+    "descriptionformat": 1,
+    "idnumber": "sisu-synchronised"
+  }
+]

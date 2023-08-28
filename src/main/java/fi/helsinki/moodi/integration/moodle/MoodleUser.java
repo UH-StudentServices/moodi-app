@@ -17,17 +17,20 @@
 
 package fi.helsinki.moodi.integration.moodle;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public final class MoodleUser {
 
-    @JsonProperty("id")
-    public Long id;
+    private Long id;
 
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
+    private String username;
+
+    public static MoodleUser from(MoodleUserEnrollments moodleUserEnrollments) {
+        return new MoodleUser(moodleUserEnrollments.id, moodleUserEnrollments.username);
     }
 }

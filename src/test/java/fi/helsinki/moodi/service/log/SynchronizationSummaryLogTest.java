@@ -191,7 +191,7 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
                                                                   List<UserSynchronizationAction> actions,
                                                                   MoodleUserEnrollments moodleUserEnrollments) {
         MoodleUser moodleUser = new MoodleUser();
-        moodleUser.id = moodleUserId;
+        moodleUser.setId(moodleUserId);
 
         return item
             .withMoodleUser(moodleUser)

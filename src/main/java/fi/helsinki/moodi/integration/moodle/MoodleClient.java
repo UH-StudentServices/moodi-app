@@ -58,6 +58,13 @@ public class MoodleClient {
     private static final String SUSPEND = "suspend";
     private static final String COURSES = "courses";
     private static final String USERS = "users";
+    private static final String GROUPS = "groups";
+    private static final String GROUPIDS = "groupids";
+    private static final String ASSIGNMENTS = "assignments";
+    private static final String UNASSIGNMENTS = "unassignments";
+    private static final String MEMBERS = "members";
+    private static final String GROUPID = "groupid";
+    private static final String GROUPINGID = "groupingid";
 
     public MoodleClient(String restUrl,
                         String wstoken,
@@ -202,6 +209,18 @@ public class MoodleClient {
         }
     }
 
+    public List<MoodleUser> getUsers(final List<Long> userIds) {
+        final MultiValueMap<String, String> params = createParametersForFunction("core_user_get_users_by_field");
+        params.set("field", "id");
+        setListParameters(params, "values[%s]", userIds, String::valueOf);
+
+        try {
+            return execute(params, new TypeReference<List<MoodleUser>>() {}, true);
+        } catch (Exception e) {
+            return handleException("Error executing method: getUsers", e);
+        }
+    }
+
     // For testing purposes
     public long createUser(final String username, final String firstName, final String lastName,
                            final String email, final String password, final String idNumber) {
@@ -250,7 +269,7 @@ public class MoodleClient {
         int batchCounter = 1;
         List<List<Long>> batches = splitToBatches(courseIds);
         for (List<Long> batchCourseIds : batches) {
-            List<MoodleCourseWithEnrollments> result = null;
+            List<MoodleCourseWithEnrollments> result;
             MultiValueMap<String, String> params = createEnrolmentQueryParams(batchCourseIds);
             try {
                 result = execute(params, new TypeReference<List<MoodleCourseWithEnrollments>>() {
@@ -350,6 +369,198 @@ public class MoodleClient {
         }
     }
 
+    public Long createGroup(MoodleGroupData moodleGroup) {
+        final MultiValueMap<String, String> params = createParametersForFunction("core_group_create_groups");
+        params.set(createParamName(GROUPS, "courseid", 0), String.valueOf(moodleGroup.getCourseId()));
+        params.set(createParamName(GROUPS, "name", 0), moodleGroup.getName());
+        params.set(createParamName(GROUPS, "description", 0), moodleGroup.getDescription());
+        params.set(createParamName(GROUPS, "descriptionformat", 0), String.valueOf(moodleGroup.getDescriptionFormat()));
+        params.set(createParamName(GROUPS, "enrolmentkey", 0), moodleGroup.getEnrolmentKey());
+        params.set(createParamName(GROUPS, "idnumber", 0), moodleGroup.getIdNumber());
+
+        try {
+            return execute(params, new TypeReference<List<MoodleCourseData>>() {}, false)
+                .stream()
+                .findFirst()
+                .map(s -> s.id)
+                .orElse(null);
+        } catch (Exception e) {
+            return handleException("Error executing method: createGroup", e);
+        }
+
+    }
+
+    // Removes also members and links to courses or groupings
+    public void deleteGroups(List<Long> ids) {
+        final MultiValueMap<String, String> params = createParametersForFunction("core_group_delete_groups");
+        setListParameters(params, "groupids[%s]", ids, String::valueOf);
+
+        try {
+            execute(params, new TypeReference<Void>() {}, false);
+        } catch (Exception e) {
+            handleException("Error executing method: deleteGroups", e);
+        }
+    }
+
+    public List<MoodleGroupData> getCourseGroups(Long moodleCourseId) {
+        final MultiValueMap<String, String> params = createParametersForFunction("core_group_get_course_groups");
+        params.set(COURSEID, String.valueOf(moodleCourseId));
+
+        try {
+            return execute(params, new TypeReference<List<MoodleGroupData>>() {}, true);
+        } catch (Exception e) {
+            return handleException("Error executing method: getCourseGroups", e);
+        }
+    }
+
+    public List<MoodleGroupingData> getCourseGroupings(Long moodleCourseId) {
+        final MultiValueMap<String, String> params = createParametersForFunction("core_group_get_course_groupings");
+        params.set(COURSEID, String.valueOf(moodleCourseId));
+
+        try {
+            return execute(params, new TypeReference<List<MoodleGroupingData>>() {}, true);
+        } catch (Exception e) {
+            return handleException("Error executing method: getCourseGroupings", e);
+        }
+    }
+
+    public List<MoodleGroupingData> getGroupings(List<Long> groupingIds, Boolean returnGroups) {
+        if (groupingIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        final MultiValueMap<String, String> params = createParametersForFunction("core_group_get_groupings");
+        setListParameters(params, "groupingids[%s]", groupingIds, String::valueOf);
+        params.set("returngroups", booleanToIntString(returnGroups));
+
+        try {
+            return execute(params, new TypeReference<List<MoodleGroupingData>>() {}, true);
+        } catch (Exception e) {
+            return handleException("Error executing method: getGroupings", e);
+        }
+    }
+
+    public Long createGrouping(MoodleGroupingData grouping) {
+        final MultiValueMap<String, String> params = createParametersForFunction("core_group_create_groupings");
+        params.set("groupings[0][name]", grouping.getName());
+        params.set("groupings[0][courseid]", String.valueOf(grouping.getCourseId()));
+        params.set("groupings[0][description]", grouping.getDescription());
+        params.set("groupings[0][descriptionformat]", String.valueOf(grouping.getDescriptionFormat()));
+        params.set("groupings[0][idnumber]", grouping.getIdNumber());
+
+        try {
+            return execute(params, new TypeReference<List<MoodleGroupingData>>() {}, false)
+                .stream()
+                .findFirst()
+                .map(MoodleGroupingData::getId)
+                .orElse(null);
+        } catch (Exception e) {
+            return handleException("Error executing method: createGrouping", e);
+        }
+    }
+
+    // Deleting grouping doesn't delete groups in grouping
+    public void deleteGroupings(List<Long> ids) {
+        final MultiValueMap<String, String> params = createParametersForFunction("core_group_delete_groupings");
+        setListParameters(params, "groupingids[%s]", ids, String::valueOf);
+
+        try {
+            execute(params, new TypeReference<Void>() {}, false);
+        } catch (Exception e) {
+            handleException("Error executing method: deleteGroupings", e);
+        }
+    }
+
+    public void assignGrouping(Long groupingId, List<Long> groupIds) {
+        final MultiValueMap<String, String> params = createParametersForFunction("core_group_assign_grouping");
+        for (int i = 0; i < groupIds.size(); i++) {
+            params.set(createParamName(ASSIGNMENTS, GROUPINGID, i), String.valueOf(groupingId));
+            params.set(createParamName(ASSIGNMENTS, GROUPID, i), String.valueOf(groupIds.get(i)));
+        }
+
+        try {
+            execute(params, new TypeReference<Void>() {}, false);
+        } catch (Exception e) {
+            handleException("Error executing method: assignGroupingToGroup", e);
+        }
+    }
+
+    public void assignGroupings(Map<Long, List<Long>> groupIdsByGroupingId) {
+        final MultiValueMap<String, String> params = createParametersForFunction("core_group_assign_grouping");
+        int assignmentIdx = 0;
+        for (Long groupingId : groupIdsByGroupingId.keySet()) {
+            List<Long> groupIds = groupIdsByGroupingId.get(groupingId);
+            for (int i = 0; i < groupIds.size(); i++) {
+                params.set(createParamName(ASSIGNMENTS, GROUPINGID, assignmentIdx), String.valueOf(groupingId));
+                params.set(createParamName(ASSIGNMENTS, GROUPID, assignmentIdx), String.valueOf(groupIds.get(i)));
+                assignmentIdx++;
+            }
+        }
+
+        try {
+            execute(params, new TypeReference<Void>() {}, false);
+        } catch (Exception e) {
+            handleException("Error executing method: assignGroupingToGroup", e);
+        }
+    }
+
+    public void unassignGrouping(Long groupingId, List<Long> groupIds) {
+        final MultiValueMap<String, String> params = createParametersForFunction("core_group_unassign_grouping");
+        for (int i = 0; i < groupIds.size(); i++) {
+            params.set(createParamName(UNASSIGNMENTS, GROUPINGID, i), String.valueOf(groupingId));
+            params.set(createParamName(UNASSIGNMENTS, GROUPID, i), String.valueOf(groupIds.get(i)));
+        }
+
+        try {
+            execute(params, new TypeReference<Void>() {}, false);
+        } catch (Exception e) {
+            handleException("Error executing method: unassignGroupingFromGroup", e);
+        }
+    }
+
+    public List<MoodleGroupMembers> getGroupMembers(List<Long> groupIds) {
+        if (groupIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        final MultiValueMap<String, String> params = createParametersForFunction("core_group_get_group_members");
+        for (int i = 0; i < groupIds.size(); i++) {
+            params.set(createParamName(GROUPIDS, i), String.valueOf(groupIds.get(i)));
+        }
+
+        try {
+            return execute(params, new TypeReference<List<MoodleGroupMembers>>() {}, true);
+        } catch (Exception e) {
+            return handleException("Error executing method: getGroupMembers", e);
+        }
+    }
+
+    public void addGroupMembers(Long groupId, List<Long> userIds) {
+        final MultiValueMap<String, String> params = createParametersForFunction("core_group_add_group_members");
+        for (int i = 0; i < userIds.size(); i++) {
+            params.set(createParamName(MEMBERS, GROUPID, i), String.valueOf(groupId));
+            params.set(createParamName(MEMBERS, USERID, i), String.valueOf(userIds.get(i)));
+        }
+
+        try {
+            execute(params, new TypeReference<Void>() {}, false);
+        } catch (Exception e) {
+            handleException("Error executing method: addGroupMembers", e);
+        }
+    }
+
+    public void deleteGroupMembers(Long groupId, List<Long> userIds) {
+        final MultiValueMap<String, String> params = createParametersForFunction("core_group_delete_group_members");
+        for (int i = 0; i < userIds.size(); i++) {
+            params.set(createParamName(MEMBERS, GROUPID, i), String.valueOf(groupId));
+            params.set(createParamName(MEMBERS, USERID, i), String.valueOf(userIds.get(i)));
+        }
+
+        try {
+            execute(params, new TypeReference<Void>() {}, false);
+        } catch (Exception e) {
+            handleException("Error executing method: deleteGroupMembers", e);
+        }
+    }
+
     private <T> T handleException(final String message, final Exception e) {
         if (e instanceof MoodleClientException) {
             throw (MoodleClientException) e;
@@ -373,6 +584,11 @@ public class MoodleClient {
     private String createParamName(String param1, String param2, int i) {
         // "enrolments", "courseid", 0 -> "enrolments[0][courseid]"
         return String.format("%s[%d][%s]", param1, i, param2);
+    }
+
+    private String createParamName(String param, int i) {
+        // "groupids", 0 -> "groupids[0]"
+        return String.format("%s[%d]", param, i);
     }
 
     private HttpHeaders createHeaders() {

@@ -67,7 +67,7 @@
                 <th>Name</th>
                 <th>Username</th>
                 <th>Moodle ID</th>
-                <th></th>
+                <th><button ng-click="formCtrl.addUsers(formCtrl.users)" class="btn btn-default">Add all users to Moodle</button></th>
             </tr>
 
             <tr ng-repeat="user in formCtrl.users">
@@ -118,7 +118,20 @@ angular.module('testApp', ['jsonFormatter'])
       ctrl.loadUsers();
     };
 
-    ctrl.addUser = function(user) {
+    ctrl.addUsers = function (users) {
+        for (var i=0; i < users.length; i++) {
+            var user = users[i];
+            if (user.moodleId === 0) {
+                console.log('adding user ' + user.username);
+                ctrl.addUser(user, (error) => {
+                    console.log(error);
+                });
+            }
+        }
+
+    }
+
+    ctrl.addUser = function(user, errorCallback = null) {
         var request = {
             username: user.username,
             firstName: user.firstName,
@@ -138,7 +151,11 @@ angular.module('testApp', ['jsonFormatter'])
                     }
                 })
                 .error(function(error) {
-                    alert(error.message);
+                    if (errorCallback !== null) {
+                        errorCallback(error.message);
+                    } else {
+                        alert(error.message);
+                    }
                 });
     };
 

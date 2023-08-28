@@ -20,6 +20,7 @@ package fi.helsinki.moodi.service.importing;
 import com.google.common.base.Stopwatch;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
+import fi.helsinki.moodi.integration.moodle.MoodleUser;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
 import fi.helsinki.moodi.service.batch.BatchProcessor;
 import fi.helsinki.moodi.service.course.Course;
@@ -102,7 +103,7 @@ public class EnrollmentService {
     }
 
     private List<Enrollment> enrichEnrollmentsWithMoodleIds(final List<Enrollment> enrollments) {
-        enrollments.forEach(e -> e.moodleId = moodleService.getUser(e.usernameList).map(user -> user.id));
+        enrollments.forEach(e -> e.moodleId = moodleService.getUser(e.usernameList).map(MoodleUser::getId));
         return enrollments;
     }
 

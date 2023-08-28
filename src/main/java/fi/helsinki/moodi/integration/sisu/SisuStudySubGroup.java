@@ -17,7 +17,19 @@
 
 package fi.helsinki.moodi.integration.sisu;
 
+import io.aexp.nodes.graphql.annotations.GraphQLIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class SisuStudySubGroup {
-    public String id;
-    public SisuLocalisedValue name;
+    private String id;
+    private SisuLocalisedValue name;
+    @GraphQLIgnore
+    private List<String> memberIds;
 }

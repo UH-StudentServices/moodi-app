@@ -121,6 +121,9 @@ if(hasProperty("artifactory_base_url")) {
 dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
+    implementation 'org.projectlombok:lombok:1.18.28'
+    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+
     implementation('org.springframework.boot:spring-boot-starter-web') {
         exclude module: 'spring-boot-starter-tomcat'
     }

@@ -18,12 +18,13 @@
 package fi.helsinki.moodi.web;
 
 import fi.helsinki.moodi.config.DevMode;
-import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
+import fi.helsinki.moodi.service.util.DevModeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -150,14 +151,16 @@ public class DevModeController {
         users.addAll(students);
         users.addAll(teachers);
 
-        users.stream().filter(u -> u.username != null).forEach(u -> u.moodleId = getMoodleId(u.username));
+        users.forEach(u -> {
+            u.moodleId = getMoodleId(u.username);
+        });
 
         return users;
     }
 
     private long getMoodleId(String username) {
         try {
-            return moodleService.getUser(Arrays.asList(username)).get().id;
+            return moodleService.getUser(Arrays.asList(username)).get().getId();
         } catch (Exception e) {
             return 0;
         }
@@ -189,7 +192,7 @@ public class DevModeController {
         final String email = UUID.randomUUID() + ".mooditest@helsinki.fi";
 
         long moodleId = moodleService.createUser(request.username, request.firstName, request.lastName,
-                email, UUID.randomUUID().toString(), request.idNumber);
+                email, DevModeUtils.generatePassword(12), request.idNumber);
 
         final MoodleUser moodleUser = new MoodleUser(request.role, request.firstName, request.lastName, request.username, request.idNumber);
         moodleUser.moodleId = moodleId;

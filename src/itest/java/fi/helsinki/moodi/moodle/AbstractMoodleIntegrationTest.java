@@ -109,11 +109,11 @@ public abstract class AbstractMoodleIntegrationTest {
     protected static final String TEACHER_USERNAME = "doo_1@helsinki.fi";
     protected static final String CREATOR_USERNAME = "doo_7@helsinki.fi";
 
-    protected final StudentUser studentUser = new StudentUser(STUDENT_USERNAME, "014010293", true);
+    protected final StudentUser studentUser = new StudentUser(STUDENT_USERNAME, "014010293", true, "hy-ssg-1");
     protected final TeacherUser studentUserInTeacherRole = new TeacherUser(STUDENT_USERNAME, "hy-hlo-student-1");
-    protected final StudentUser studentUserNotInMoodle = new StudentUser(STUDENT_NOT_IN_MOODLE_USERNAME, "012345678", true);
+    protected final StudentUser studentUserNotInMoodle = new StudentUser(STUDENT_NOT_IN_MOODLE_USERNAME, "012345678", true, "hy-ssg-2");
     protected final TeacherUser teacherUser = new TeacherUser(TEACHER_USERNAME, "hy-hlo-teacher-1");
-    protected final StudentUser teacherInStudentRole = new StudentUser(TEACHER_USERNAME, "011911609", true);
+    protected final StudentUser teacherInStudentRole = new StudentUser(TEACHER_USERNAME, "011911609", true, "hy-ssg-1");
 
     protected final TeacherUser creatorUser = new TeacherUser(CREATOR_USERNAME, "hy-hlo-creator-1");
 
@@ -163,16 +163,18 @@ public abstract class AbstractMoodleIntegrationTest {
 
     protected static class StudentUser extends IntegrationTestUser {
         public String studentNumber;
+        public String studySubGroupId;
         public boolean enrolled;
 
-        public StudentUser(String username, String studentNumber, boolean enrolled) {
+        public StudentUser(String username, String studentNumber, boolean enrolled, String studySubGroupId) {
             super(username);
             this.studentNumber = studentNumber;
             this.enrolled = enrolled;
+            this.studySubGroupId = studySubGroupId;
         }
 
         public StudentUser setEnrolled(boolean enrolled) {
-            return new StudentUser(this.username, this.studentNumber, enrolled);
+            return new StudentUser(this.username, this.studentNumber, enrolled, this.studySubGroupId);
         }
 
         // Referred to by course-unit-realisations-itest.json
@@ -231,6 +233,19 @@ public abstract class AbstractMoodleIntegrationTest {
     protected void expectCourseRealisationsWithUsers(String courseId, List<StudentUser> students, List<TeacherUser> teachers) {
         mockSisuGraphQLServer.expectCourseUnitRealisationsRequest(Arrays.asList(courseId),
             "/sisu-itest/course-unit-realisations-itest.json",
+
+            curVariables(courseId, students, teachers));
+
+        if (!teachers.isEmpty()) {
+            expectTeachers(teachers);
+        }
+    }
+
+    protected void resetAndExpectCourseRealisationsWithRemovedSubGroupSet(String courseId, List<StudentUser> students, List<TeacherUser> teachers) {
+        mockSisuGraphQLServer.reset();
+
+        mockSisuGraphQLServer.expectCourseUnitRealisationsRequest(Arrays.asList(courseId),
+            "/sisu-itest/course-unit-realisations-remove-studysubgroupset-itest.json",
 
             curVariables(courseId, students, teachers));
 
