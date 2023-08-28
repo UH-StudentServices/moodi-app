@@ -15,16 +15,11 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.config;
+package fi.helsinki.moodi.exception;
 
-import org.springframework.context.annotation.Condition;
-import org.springframework.context.annotation.ConditionContext;
-import org.springframework.core.type.AnnotatedTypeMetadata;
-
-public final class RemoteServerDeploymentCondition implements Condition {
-
-    @Override
-    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-        return context.getEnvironment().acceptsProfiles("dev", "prod", "local_docker");
+// Indicates a course is not found in Moodi.
+public class MoodleCourseNotFoundException extends MoodiException {
+    public MoodleCourseNotFoundException(Long courseId) {
+        super(String.format("Moodle course with courseId %s not found", courseId));
     }
 }

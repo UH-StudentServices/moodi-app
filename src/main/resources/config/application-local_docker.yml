@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    dataSourceClassName: org.postgresql.ds.PGSimpleDataSource
+    url: jdbc:postgresql://postgres-moodi:5432/moodi
+    username: moodi
+    password: moodi
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database: PostgreSQL
+  flyway:
+    locations: classpath:db/migration/common,classpath:db/migration/psql
+    table: schema_version
+    ignore-missing-migrations: true
+    validateOnMigrate: false
+
+integration:
+  moodle:
+    baseUrl: http://local.moodle.helsinki.fi
+  sisu:
+    baseUrl: https://gw-api-test.it.helsinki.fi/secure/sisu
+    apiKey: ${apiGatewayApiKey}
+
+auth.client.user: 123456
+auth.enabled: false
+
+dev.mode.enabled: true
+
+synchronize.FULL.enabled: false
+synchronize.INCREMENTAL.enabled: false
+
+logging:
+  retain-logs: PT30M
+  file-logging-path: /tmp/log/moodi-import-sync-log

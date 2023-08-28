@@ -18,11 +18,7 @@
 package fi.helsinki.moodi.integration.sisu;
 
 import fi.helsinki.moodi.exception.IntegrationConnectionException;
-import io.aexp.nodes.graphql.Argument;
-import io.aexp.nodes.graphql.Arguments;
-import io.aexp.nodes.graphql.GraphQLRequestEntity;
-import io.aexp.nodes.graphql.GraphQLResponseEntity;
-import io.aexp.nodes.graphql.GraphQLTemplate;
+import io.aexp.nodes.graphql.*;
 import io.aexp.nodes.graphql.exceptions.GraphQLException;
 import io.aexp.nodes.graphql.internal.Error;
 import org.slf4j.Logger;
@@ -39,13 +35,7 @@ import org.springframework.web.client.RestOperations;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -99,6 +89,13 @@ public class SisuClient {
             }
         }
         return ret;
+    }
+
+    public Optional<SisuCourseUnitRealisation> getCourseUnitRealisation(final String id) {
+        if (id == null) {
+            return Optional.empty();
+        }
+        return this.getCourseUnitRealisations(Collections.singletonList(id)).stream().findFirst();
     }
 
     @Cacheable(value = "sisu-client.organisations-by-id", unless = "#result == null or #result.size()==0")

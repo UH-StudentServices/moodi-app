@@ -17,30 +17,7 @@
 
 package fi.helsinki.moodi.integration.sisu;
 
-import java.util.List;
-
-public class SisuEnrolment {
-
-    public EnrolmentState state;
-    public SisuPerson person;
-    public List<String> confirmedStudySubGroupIds;
-
-    public SisuEnrolment() {
-    }
-
-    public SisuEnrolment(EnrolmentState state, SisuPerson person, List<String> confirmedStudySubGroupIds) {
-        this.state = state;
-        this.person = person;
-        this.confirmedStudySubGroupIds = confirmedStudySubGroupIds;
-    }
-
-    public boolean isEnrolled() {
-        return EnrolmentState.ENROLLED.equals(state);
-    }
-
-    public enum EnrolmentState {
-        NOT_ENROLLED, PROCESSING, RESERVED,
-        CONFIRMED, ENROLLED, REJECTED,
-        ABORTED_BY_STUDENT, ABORTED_BY_TEACHER
-    }
+public class SisuStudySubGroup {
+    public String id;
+    public SisuLocalisedValue name;
 }
