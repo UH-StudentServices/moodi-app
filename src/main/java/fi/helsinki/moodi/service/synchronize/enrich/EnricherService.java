@@ -167,7 +167,7 @@ public class EnricherService {
                 enrollments.forEach(moodleEnrollment -> {
                     if (!prefetchedMoodleUsers.containsKey(moodleEnrollment.username)) {
                         MoodleUser moodleUser = new MoodleUser();
-                        moodleUser.id = moodleEnrollment.id;
+                        moodleUser.setId(moodleEnrollment.id);
                         prefetchedMoodleUsers.put(moodleEnrollment.username, moodleUser);
                     }
                 });

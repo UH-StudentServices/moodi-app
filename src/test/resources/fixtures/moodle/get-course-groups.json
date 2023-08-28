@@ -1,0 +1,38 @@
+[
+  {
+    "id": 196,
+    "courseid": 2603,
+    "name": "Arabia",
+    "description": "",
+    "descriptionformat": 1,
+    "enrolmentkey": "",
+    "idnumber": "sisu:hy-SSG-137371177"
+  },
+  {
+    "id": 197,
+    "courseid": 2603,
+    "name": "Englanti",
+    "description": "",
+    "descriptionformat": 1,
+    "enrolmentkey": "",
+    "idnumber": "sisu:hy-SSG-137371228"
+  },
+  {
+    "id": 198,
+    "courseid": 2603,
+    "name": "Espanja",
+    "description": "",
+    "descriptionformat": 1,
+    "enrolmentkey": "",
+    "idnumber": "sisu:hy-SSG-137371233"
+  },
+  {
+    "id": 199,
+    "courseid": 2603,
+    "name": "Eteläslaavilaiset kielet",
+    "description": "",
+    "descriptionformat": 1,
+    "enrolmentkey": "",
+    "idnumber": "sisu:hy-SSG-137371250"
+  }
+]

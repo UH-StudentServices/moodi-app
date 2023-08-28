@@ -89,32 +89,6 @@
               }
             }
           ]
-        },
-        {
-          "localId": "gs-2",
-          "name": {
-            "fi": "Harjoitukset 2",
-            "sv": null,
-            "en": "Exercises"
-          },
-          "studySubGroups": [
-            {
-              "id": "hy-ssg-3",
-              "name": {
-                "fi": "Ryhmä 3",
-                "sv": null,
-                "en": "Group 3"
-              }
-            },
-            {
-              "id": "hy-ssg-4",
-              "name": {
-                "fi": "Ryhmä 4",
-                "sv": null,
-                "en": "Group 4"
-              }
-            }
-          ]
         }
       ],
       "learningEnvironments": [
