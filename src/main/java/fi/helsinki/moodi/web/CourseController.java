@@ -20,6 +20,8 @@ package fi.helsinki.moodi.web;
 import fi.helsinki.moodi.MoodiHealthIndicator;
 import fi.helsinki.moodi.service.Result;
 import fi.helsinki.moodi.service.course.CourseService;
+import fi.helsinki.moodi.service.course.group.GroupSynchronizationService;
+import fi.helsinki.moodi.service.course.group.SynchronizeGroupsResponse;
 import fi.helsinki.moodi.service.dto.CourseDto;
 import fi.helsinki.moodi.service.importing.ImportCourseRequest;
 import fi.helsinki.moodi.service.importing.ImportCourseResponse;
@@ -37,12 +39,19 @@ public class CourseController {
     private final ImportingService importingService;
     private final CourseService courseService;
     private final MoodiHealthIndicator moodiHealthIndicator;
+    private final GroupSynchronizationService groupSynchronizationService;
 
     @Autowired
-    public CourseController(ImportingService importingService, CourseService courseService, MoodiHealthIndicator moodiHealthIndicator) {
+    public CourseController(
+        ImportingService importingService,
+        CourseService courseService,
+        MoodiHealthIndicator moodiHealthIndicator,
+        GroupSynchronizationService groupSynchronizationService
+    ) {
         this.importingService = importingService;
         this.courseService = courseService;
         this.moodiHealthIndicator = moodiHealthIndicator;
+        this.groupSynchronizationService = groupSynchronizationService;
     }
 
     @PostMapping(value = "/api/v1/courses")
@@ -71,6 +80,12 @@ public class CourseController {
         @PathVariable("realisationId") String realisationId) {
 
         return response(courseService.ensureCourseVisibility(realisationId));
+    }
+
+    @PostMapping(value = "/api/v1/courses/{realisationId}/synchronize-groups")
+    public ResponseEntity<SynchronizeGroupsResponse> synchronizeGroups(
+        @PathVariable("realisationId") String realisationId) {
+        return response(groupSynchronizationService.synchronizeGroups(realisationId));
     }
 
     private <D, E> ResponseEntity<Result<D, E>> response(Result<D, E> result) {

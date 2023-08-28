@@ -20,6 +20,8 @@ package fi.helsinki.moodi.integration.moodle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -57,6 +59,10 @@ public class MoodleService {
 
     public List<MoodleFullCourse> getCourses(final List<Long> courseIds) {
         return moodleClient.getCourses(courseIds);
+    }
+
+    public Optional<MoodleFullCourse> getCourse(@NotNull Long courseId) {
+        return this.getCourses(Collections.singletonList(courseId)).stream().findFirst();
     }
 
     public List<MoodleUserEnrollments> getEnrolledUsers(final long courseId) {

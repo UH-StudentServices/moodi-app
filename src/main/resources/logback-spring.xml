@@ -48,6 +48,13 @@
         <logger name="fi.helsinki.moodi" level="DEBUG"/>
     </springProfile>
 
+    <springProfile name="local_docker">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+        <logger name="fi.helsinki.moodi" level="DEBUG"/>
+    </springProfile>
+
     <springProfile name="test">
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
@@ -56,7 +63,7 @@
         <logger name="fi.helsinki.moodi.test" level="TRACE"/>
     </springProfile>
 
-    <springProfile name="local, test">
+    <springProfile name="local, test, local_docker">
         <logger name="SUMMARY_LOGGER" level="INFO">
             <appender-ref ref="CONSOLE"/>
         </logger>
