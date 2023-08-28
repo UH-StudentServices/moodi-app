@@ -15,22 +15,11 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.integration.moodle;
+package fi.helsinki.moodi.exception;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public final class MoodleUser {
-
-    private Long id;
-
-    private String username;
-
-    public static MoodleUser from(MoodleUserEnrollments moodleUserEnrollments) {
-        return new MoodleUser(moodleUserEnrollments.id, moodleUserEnrollments.username);
+// Indicates a course is not found in Moodi.
+public class CourseImportNotReadyException extends MoodiException {
+    public CourseImportNotReadyException(Long courseId, String importStatus) {
+        super(String.format("Course import with courseId %s is not ready. Import status: %s", courseId, importStatus));
     }
 }

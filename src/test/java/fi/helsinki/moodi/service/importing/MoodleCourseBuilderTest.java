@@ -172,7 +172,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         ret.courseUnits.add(new SisuCourseUnit("CODE2"));
         ret.courseUnits.add(new SisuCourseUnit("CODE3"));
         ret.courseUnitRealisationType = new SisuCourseUnitRealisationType();
-        ret.courseUnitRealisationType.name = new SisuLocalisedValue(REALISATION_TYPE_FI, REALISATION_TYPE_SV, REALISTION_TYPE_EN);
+        ret.courseUnitRealisationType.name = new SisuLocalisedValue(REALISATION_TYPE_FI, REALISATION_TYPE_SV, REALISATION_TYPE_EN);
         ret.name = new SisuLocalisedValue(REALISATION_NAME_FI, REALISATION_NAME_SV, REALISATION_NAME_EN);
         ret.activityPeriod = new SisuDateRange(LocalDate.of(2019, 8, 5), LocalDate.of(2019, 11, 5));
         ret.flowState = "PUBLISHED";

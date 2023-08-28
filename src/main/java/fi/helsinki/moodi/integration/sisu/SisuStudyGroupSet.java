@@ -17,10 +17,17 @@
 
 package fi.helsinki.moodi.integration.sisu;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class SisuStudyGroupSet {
-    public String localId;
-    public SisuLocalisedValue name;
-    public List<SisuStudySubGroup> studySubGroups;
+    private String localId;
+    private SisuLocalisedValue name;
+    private List<SisuStudySubGroup> studySubGroups;
 }

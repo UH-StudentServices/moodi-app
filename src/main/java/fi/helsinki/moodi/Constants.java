@@ -17,6 +17,8 @@
 
 package fi.helsinki.moodi;
 
+import fi.helsinki.moodi.integration.sisu.SisuLocalisedValue;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,7 +36,23 @@ public final class Constants {
     public static final List<String> TEACHER_TYPES = Arrays.asList(RESPONSIBLE_TEACHER, TEACHER);
     public static final String REALISATION_TYPE_FI = "Kurssi";
     public static final String REALISATION_TYPE_SV = "Kurs";
-    public static final String REALISTION_TYPE_EN = "Course";
+    public static final String REALISATION_TYPE_EN = "Course";
+
+    public static final String MOODLE_SISU_COMMON_GROUPING_ID = "sisu-synchronised";
+    public static final String MOODLE_SISU_COMMON_GROUPING_NAME_FI = "Sisusta synkronoidut";
+    public static final String MOODLE_SISU_COMMON_GROUPING_NAME_SV = "Synkroniserade från Sisu";
+    public static final String MOODLE_SISU_COMMON_GROUPING_NAME_EN = "Synchronized from Sisu";
+
+    public static final SisuLocalisedValue SISU_COMMON_GROUPING_NAME = new SisuLocalisedValue(
+        MOODLE_SISU_COMMON_GROUPING_NAME_FI,
+        MOODLE_SISU_COMMON_GROUPING_NAME_SV,
+        MOODLE_SISU_COMMON_GROUPING_NAME_EN
+    );
+    public static final String MOODLE_SISU_ID_PREFIX = "sisu:";
+    public static final Long MOODLE_DESCRIPTION_FORMAT_AUTO = 0L;
+    public static final Long MOODLE_DESCRIPTION_FORMAT_HTML = 1L;
+    public static final Long MOODLE_DESCRIPTION_FORMAT_PLAIN = 2L;
+    public static final Long MOODLE_DESCRIPTION_FORMAT_MARKDOWN = 4L;
 
     private Constants() {
     }

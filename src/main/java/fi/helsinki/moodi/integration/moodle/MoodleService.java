@@ -17,14 +17,14 @@
 
 package fi.helsinki.moodi.integration.moodle;
 
+import fi.helsinki.moodi.Constants;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class MoodleService {
@@ -91,5 +91,89 @@ public class MoodleService {
 
     public Long updateCourseVisibility(final long courseId, boolean visible) {
         return moodleClient.updateCourseVisibility(courseId, visible);
+    }
+
+    public List<MoodleGrouping> getGroupingsWithGroups(Long moodleCourseId, boolean includeMembers) {
+        List<MoodleGroupingData> groupings = moodleClient.getCourseGroupings(moodleCourseId);
+        List<Long> groupingIds = groupings.stream().map(MoodleGroupingData::getId).collect(Collectors.toList());
+        // Only way to get groups for a grouping is to re-fetch them with flag to include groups
+        final List<MoodleGrouping> groupingsWithGroups = moodleClient.getGroupings(groupingIds, true).stream()
+            .map(MoodleGrouping::fromData).collect(Collectors.toList());
+        if (includeMembers) {
+            final List<MoodleGroup> groups = groupingsWithGroups.stream()
+                .filter(g -> g.getGroups() != null)
+                .flatMap(g -> g.getGroups().stream()).collect(Collectors.toList());
+            final List<Long> groupIds = groups.stream()
+                .map(MoodleGroup::getId).collect(Collectors.toList());
+            final Map<Long, List<Long>> groupMembers = moodleClient.getGroupMembers(groupIds).stream()
+                .collect(Collectors.toMap(MoodleGroupMembers::getGroupId, MoodleGroupMembers::getUserIds, (l1, l2) -> l1.addAll(l2) ? l1 : l2));
+            if (!groupMembers.isEmpty()) {
+                final List<MoodleUser> users = moodleClient.getUsers(groupMembers.values().stream()
+                    .flatMap(List::stream).collect(Collectors.toList()));
+                groups.forEach(g -> g.setMembers(
+                    groupMembers.get(g.getId()).stream()
+                        .map(userId -> users.stream()
+                            .filter(u -> u.getId().equals(userId))
+                            .findFirst()
+                            .orElse(null)
+                        )
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList())));
+            }
+        }
+        return groupingsWithGroups;
+    }
+
+    public Long createGrouping(MoodleGrouping grouping) {
+        return moodleClient.createGrouping(new MoodleGroupingData(grouping));
+    }
+
+    public Long createGroup(MoodleGroup group, List<Long> groupingIds) {
+        Long groupId = moodleClient.createGroup(new MoodleGroupData(group));
+        assignGroupingsToGroup(groupingIds, groupId);
+        return groupId;
+    }
+
+    public void addGroupMembers(Long groupId, List<Long> userIds) {
+        moodleClient.addGroupMembers(groupId, userIds);
+    }
+
+    public void removeGroupMembers(Long groupId, List<Long> userIds) {
+        moodleClient.deleteGroupMembers(groupId, userIds);
+    }
+
+    public MoodleGrouping getOrCreateSisuCommonGrouping(Long courseId, String courseLang) {
+        val groupings = getGroupingsWithGroups(courseId, false);
+        val sisuGrouping = groupings.stream()
+            .filter(g -> Optional.ofNullable(g.getIdNumber()).orElse("").equals(Constants.MOODLE_SISU_COMMON_GROUPING_ID))
+            .findFirst();
+        if (sisuGrouping.isPresent()) {
+            return sisuGrouping.get();
+        } else {
+            MoodleGrouping grouping = MoodleGrouping.newSisuCommonGrouping(
+                courseId,
+                courseLang
+            );
+            grouping.setId(moodleClient.createGrouping(new MoodleGroupingData(grouping)));
+            return grouping;
+        }
+    }
+
+    public void assignGroupingsToGroup(List<Long> groupingIds, Long groupId) {
+        Map<Long, List<Long>> groupIdsByGroupingId = new HashMap<>();
+        for (Long groupingId : groupingIds) {
+            groupIdsByGroupingId.put(groupingId, Collections.singletonList(groupId));
+        }
+        if (!groupIdsByGroupingId.isEmpty()) {
+            moodleClient.assignGroupings(groupIdsByGroupingId);
+        }
+    }
+
+    public void deleteGroup(Long moodleGroupId) {
+        moodleClient.deleteGroups(Collections.singletonList(moodleGroupId));
+    }
+
+    public void deleteGrouping(Long moodleGroupingId) {
+        moodleClient.deleteGroupings(Collections.singletonList(moodleGroupingId));
     }
 }
