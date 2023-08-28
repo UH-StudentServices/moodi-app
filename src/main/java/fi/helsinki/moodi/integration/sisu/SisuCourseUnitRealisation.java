@@ -26,12 +26,7 @@ import io.micrometer.core.instrument.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static fi.helsinki.moodi.Constants.RESPONSIBLE_ORGANISATION;
@@ -69,6 +64,7 @@ public class SisuCourseUnitRealisation {
     public String teachingLanguageUrn;
     public List<SisuLearningEnvironment> learningEnvironments = new ArrayList<>();
     public List<SisuResponsibilityInfo> responsibilityInfos = new ArrayList<>();
+    public List<SisuStudyGroupSet> studyGroupSets = new ArrayList<>();
     public List<SisuEnrolment> enrolments = new ArrayList<>();
     public List<SisuOrganisationRoleShare> organisations = new ArrayList<>();
     public List<SisuCourseUnit> courseUnits = new ArrayList<>();

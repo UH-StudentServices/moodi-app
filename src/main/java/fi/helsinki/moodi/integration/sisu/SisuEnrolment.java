@@ -17,17 +17,21 @@
 
 package fi.helsinki.moodi.integration.sisu;
 
+import java.util.List;
+
 public class SisuEnrolment {
 
     public EnrolmentState state;
     public SisuPerson person;
+    public List<String> confirmedStudySubGroupIds;
 
     public SisuEnrolment() {
     }
 
-    public SisuEnrolment(EnrolmentState state, SisuPerson person) {
+    public SisuEnrolment(EnrolmentState state, SisuPerson person, List<String> confirmedStudySubGroupIds) {
         this.state = state;
         this.person = person;
+        this.confirmedStudySubGroupIds = confirmedStudySubGroupIds;
     }
 
     public boolean isEnrolled() {
