@@ -18,10 +18,8 @@
 package fi.helsinki.moodi.integration.moodle;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fi.helsinki.moodi.exception.IntegrationConnectionException;
-import fi.helsinki.moodi.exception.MoodiException;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
@@ -30,24 +28,15 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
-import static fi.helsinki.moodi.integration.moodle.MoodleClient.ResponseBodyEvaluator.Action.CONTINUE;
-import static fi.helsinki.moodi.integration.moodle.MoodleClient.ResponseBodyEvaluator.Action.ERROR;
-import static fi.helsinki.moodi.integration.moodle.MoodleClient.ResponseBodyEvaluator.Action.RETURN_NULL;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class MoodleClient {
@@ -93,7 +82,7 @@ public class MoodleClient {
             setListParameters(params, "options[ids][%s]", batchIds, String::valueOf);
 
             try {
-                result = execute(params, new TypeReference<List<MoodleFullCourse>>() {}, DEFAULT_EVALUATION, true);
+                result = execute(params, new TypeReference<List<MoodleFullCourse>>() {}, true);
             } catch (Exception e) {
                 return handleException("Error executing method: getCourses (batch " + batchCounter + "/" + batches.size() + ")", e);
             }
@@ -134,7 +123,7 @@ public class MoodleClient {
         params.set(createParamName(COURSES, "courseformatoptions", 0) + "[0][value]", String.valueOf(course.numberOfSections));
 
         try {
-            return execute(params, new TypeReference<List<MoodleCourseData>>() {}, DEFAULT_EVALUATION, false)
+            return execute(params, new TypeReference<List<MoodleCourseData>>() {}, false)
                 .stream()
                 .findFirst()
                 .map(s -> s.id)
@@ -173,7 +162,7 @@ public class MoodleClient {
         }
 
         try {
-            execute(params, new TypeReference<Void>() {}, EMPTY_OK_RESPONSE_EVALUATION, false);
+            execute(params, null, false);
         } catch (Exception e) {
             handleException("Error executing method: addEnrollments", e);
         }
@@ -191,7 +180,7 @@ public class MoodleClient {
         }
 
         try {
-            execute(params, new TypeReference<Void>() {}, EMPTY_OK_RESPONSE_EVALUATION, false);
+            execute(params, null, false);
         } catch (Exception e) {
             handleException("Error executing method: suspendEnrollments", e);
         }
@@ -204,7 +193,7 @@ public class MoodleClient {
         setListParameters(params, "values[%s]", username, String::valueOf);
 
         try {
-            return execute(params, new TypeReference<List<MoodleUser>>() {}, DEFAULT_EVALUATION, true)
+            return execute(params, new TypeReference<List<MoodleUser>>() {}, true)
                 .stream()
                 .findFirst()
                 .orElse(null);
@@ -227,9 +216,9 @@ public class MoodleClient {
         params.set(createParamName(USERS, "idnumber", 0), idNumber);
 
         try {
-            return Long.valueOf(execute(params, new TypeReference<List<Map<String, String>>>() {},
-                    DEFAULT_EVALUATION, false).get(0).get("id"));
-        } catch (IOException e) {
+            return Long.parseLong(execute(params, new TypeReference<List<Map<String, String>>>() {},
+                false).get(0).get("id"));
+        } catch (Exception e) {
             return handleException("Error executing method: createUser", e);
         }
     }
@@ -240,8 +229,8 @@ public class MoodleClient {
         params.set("userids[0]", String.valueOf(moodleId));
 
         try {
-            execute(params, new TypeReference<Void>() {}, DEFAULT_EVALUATION, false);
-        } catch (IOException e) {
+            execute(params, null, false);
+        } catch (Exception e) {
             handleException("Error executing method: deleteUser", e);
         }
     }
@@ -251,7 +240,7 @@ public class MoodleClient {
         params.set(COURSEID, String.valueOf(courseId));
 
         try {
-            return execute(params, new TypeReference<List<MoodleUserEnrollments>>() {}, DEFAULT_EVALUATION, true);
+            return execute(params, new TypeReference<List<MoodleUserEnrollments>>() {}, true);
         } catch (Exception e) {
             return handleException("Error executing method: getEnrolledUsers", e);
         }
@@ -265,7 +254,7 @@ public class MoodleClient {
             MultiValueMap<String, String> params = createEnrolmentQueryParams(batchCourseIds);
             try {
                 result = execute(params, new TypeReference<List<MoodleCourseWithEnrollments>>() {
-                }, DEFAULT_EVALUATION, true);
+                }, true);
                 if (result != null && result.size() != batchCourseIds.size()) {
                     throw new MoodleClientException("Received response with less courses (" + result.size() +
                         ") than sent batchCourseIds: " + batchCourseIds.size(), "", "500");
@@ -280,7 +269,7 @@ public class MoodleClient {
                     List<MoodleCourseWithEnrollments> singleResult = null;
                     try {
                         singleResult = execute(params, new TypeReference<List<MoodleCourseWithEnrollments>>() {
-                        }, DEFAULT_EVALUATION, true);
+                        }, true);
                         if (singleResult != null && singleResult.size() != 1) {
                             throw new MoodleClientException("Received response with no courses for courseId " + courseId, "", "500");
                         }
@@ -316,7 +305,7 @@ public class MoodleClient {
         params.set(createParamName(COURSES, "id", 0), String.valueOf(courseId));
         params.set(createParamName(COURSES, "visible", 0), booleanToIntString(visible));
         try {
-            execute(params, new TypeReference<Map<String, Object>>() {}, DEFAULT_EVALUATION, false);
+            execute(params, null, false);
             return courseId;
         } catch (Exception e) {
             return handleException("Error executing method: updateCourseVisibility", e);
@@ -355,15 +344,15 @@ public class MoodleClient {
         }
 
         try {
-            execute(params, null, EMPTY_OK_RESPONSE_EVALUATION, false);
+            execute(params, null, false);
         } catch (Exception e) {
             handleException("Error executing method: assignRoles", e);
         }
     }
 
     private <T> T handleException(final String message, final Exception e) {
-        if (e instanceof MoodiException) {
-            throw (MoodiException) e;
+        if (e instanceof MoodleClientException) {
+            throw (MoodleClientException) e;
         } else {
             throw new MoodleClientException(message, e);
         }
@@ -399,7 +388,6 @@ public class MoodleClient {
     private <T> T execute(
             final MultiValueMap<String, String> params,
             final TypeReference<T> typeReference,
-            final ResponseBodyEvaluator responseBodyEvaluator,
             final boolean readOnly)
             throws IOException {
 
@@ -408,54 +396,34 @@ public class MoodleClient {
         final String body = getRestTemplate(readOnly)
             .postForObject(restUrl, new HttpEntity<>(params, createHeaders()), String.class);
 
-        switch (responseBodyEvaluator.evaluate(body)) {
-            case CONTINUE:
-                break;
-            case ERROR:
-                throw createMoodleClientException(body);
-            case RETURN_NULL:
-                return null;
-            case RETURN_BODY:
-                return (T) body;
-            default:
+        if (body != null && !body.isEmpty()) {
+            logger.info("Response body: {}", body.length() > 300 ? body.substring(0, 300) + "..." : body);
+            final JsonNode jsonNode = objectMapper.readTree(body);
+
+            // Checking if there is a Moodle exception in the response body. Moodle returns 200 OK even if there is an
+            // exception.
+            if (jsonNode.has("exception")) {
+                String exception = jsonNode.get("exception").asText();
+                String message = Optional.of(jsonNode.get("message")).map(JsonNode::asText).orElse("");
+                String errorCode = Optional.of(jsonNode.get("errorcode")).map(JsonNode::asText).orElse("");
+                throw new MoodleClientException(message, exception, errorCode);
+            }
+        } else {
+            logger.info("Response body is empty");
         }
 
-        try {
-            return objectMapper.readValue(body, typeReference);
-        } catch (ResourceAccessException e) {
-            throw new IntegrationConnectionException("Moodle connection failure", e);
-        } catch (Exception e) {
-            throw createMoodleClientException(body);
-        }
-    }
-
-    private MoodleClientException createMoodleClientException(final String body) throws IOException {
-        logger.error("Got unexpected response body " + body);
-        final Map<String, String> map = objectMapper.readValue(body, Map.class);
-        return new MoodleClientException(map.get("message"), map.get("exception"), map.get("errorcode"));
-    }
-
-    @FunctionalInterface
-    protected interface ResponseBodyEvaluator {
-
-        enum Action {
-            CONTINUE,
-            RETURN_BODY,
-            RETURN_NULL,
-            ERROR
+        // No mapping requested, return null
+        if (typeReference == null) {
+            return null;
         }
 
-        Action evaluate(String responseBody);
+        return objectMapper.readValue(body, typeReference);
     }
-
-    private static ResponseBodyEvaluator DEFAULT_EVALUATION = s -> CONTINUE;
-
-    private static ResponseBodyEvaluator EMPTY_OK_RESPONSE_EVALUATION =  s -> StringUtils.isEmpty(s) || "null".equals(s) ? RETURN_NULL : ERROR;
 
     private static String paramsToString(final MultiValueMap<String, String> params) {
         final StringBuilder sb = new StringBuilder();
         for (final String name : params.keySet()) {
-            List<String> values = name.equals("wstoken") ? Arrays.asList("xxxx") : params.get(name);
+            List<String> values = name.equals("wstoken") ? Collections.singletonList("xxxx") : params.get(name);
             sb.append(name).append(": ").append(values).append("\n");
         }
 
