@@ -27,6 +27,18 @@ plugins {
     id "java"
     id 'checkstyle'
     id 'org.sonarqube' version '3.3'
+    id "io.sentry.jvm.gradle" version "3.14.0"
+}
+
+sentry {
+    // Generates a JVM (Java, Kotlin, etc.) source bundle and uploads your source code to Sentry.
+    // This enables source context, allowing you to see your source
+    // code as part of your stack traces in Sentry.
+    includeSourceContext = true
+
+    org = "university-of-helsinki-0p"
+    projectName = "moodi"
+    authToken = System.getenv("SENTRY_AUTH_TOKEN")
 }
 
 java {
@@ -130,8 +142,9 @@ dependencies {
     implementation 'org.trimou:trimou-core:2.5.1.Final'
     implementation "javax.mail:mail:1.4.7"
     implementation "javax.validation:validation-api:2.0.1.Final"
-
     implementation group: 'com.github.americanexpress.nodes', name: 'nodes', version: nodes_version
+    implementation 'io.sentry:sentry-spring-boot-starter:6.33.0'
+    implementation 'io.sentry:sentry-logback:6.33.0'
 
     testImplementation 'com.h2database:h2:2.1.212'
     testImplementation "org.springframework.boot:spring-boot-starter-test"
