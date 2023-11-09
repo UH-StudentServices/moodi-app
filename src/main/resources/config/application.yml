@@ -76,3 +76,8 @@ syncTresholds:
 mailNotification:
   from: moodi-app
   lockedMessageSubject: Synchronization locked
+
+sentry:
+    enabled: ${sentryEnabled:false}
+    environment: ${sentryEnvironment:dev}
+    dsn: ${sentryDsn:-}
