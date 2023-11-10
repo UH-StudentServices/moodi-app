@@ -29,5 +29,7 @@ synchronize.FULL.enabled: false
 synchronize.INCREMENTAL.enabled: false
 
 logging:
-  retain-logs: PT30M
-  file-logging-path: /tmp/log/moodi-import-sync-log
+  level:
+    root: INFO
+    fi.helsinki.moodi: DEBUG
+
