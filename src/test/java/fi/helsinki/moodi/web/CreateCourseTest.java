@@ -79,7 +79,7 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
         // First try.
         makeCreateCourseRequest(SISU_REALISATION_NOT_IN_DB_ID)
             // Why return client error when Moodle is broken? I don't know, but not touching that right now.
-            .andExpect(status().is4xxClientError());
+            .andExpect(status().is5xxServerError());
 
         try {
             importingService.getImportedCourse(SISU_REALISATION_NOT_IN_DB_ID);
