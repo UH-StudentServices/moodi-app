@@ -48,6 +48,6 @@ public class MoodleClientGetCoursesTest extends AbstractMoodiIntegrationTest {
         assertEquals(1, courses.size());
 
         final MoodleFullCourse course = courses.get(0);
-        assertEquals(new Long(9), course.id);
+        assertEquals(Long.valueOf(9), course.id);
     }
 }
