@@ -8,7 +8,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     database: PostgreSQL
   flyway:
-      locations: classpath:db/m igration/common,classpath:db/migration/psql
+      locations: classpath:db/migration/common
       table: schema_version
       ignore-missing-migrations: true
 
