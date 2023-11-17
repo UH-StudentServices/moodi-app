@@ -22,7 +22,7 @@ buildscript {
 }
 
 plugins {
-    id "org.springframework.boot" version "2.6.6"
+    id "org.springframework.boot" version "2.7.14"
     id "net.researchgate.release" version "2.8.1"
     id "java"
     id 'checkstyle'
@@ -30,15 +30,17 @@ plugins {
     id "io.sentry.jvm.gradle" version "3.14.0"
 }
 
-sentry {
-    // Generates a JVM (Java, Kotlin, etc.) source bundle and uploads your source code to Sentry.
-    // This enables source context, allowing you to see your source
-    // code as part of your stack traces in Sentry.
-    includeSourceContext = true
+if (System.getenv("SENTRY_AUTH_TOKEN")) {
+    sentry {
+        // Generates a JVM (Java, Kotlin, etc.) source bundle and uploads your source code to Sentry.
+        // This enables source context, allowing you to see your source
+        // code as part of your stack traces in Sentry.
+        includeSourceContext = true
 
-    org = "university-of-helsinki-0p"
-    projectName = "moodi"
-    authToken = System.getenv("SENTRY_AUTH_TOKEN")
+        org = "university-of-helsinki-0p"
+        projectName = "moodi"
+        authToken = System.getenv("SENTRY_AUTH_TOKEN")
+    }
 }
 
 java {
@@ -133,11 +135,11 @@ dependencies {
     implementation group: 'org.hibernate', name: 'hibernate-entitymanager', version: hibernate_entitymanager_version
     implementation group: 'org.hibernate', name: 'hibernate-ehcache', version: hibernate_entitymanager_version
 
-    implementation 'org.apache.commons:commons-lang3:3.12.0'
-    implementation 'com.google.guava:guava:23.0'
-    implementation 'com.h2database:h2:1.4.187'
-    implementation 'org.flywaydb:flyway-core:6.5.7'
-    implementation "org.postgresql:postgresql:9.4-1201-jdbc41"
+    implementation 'org.apache.commons:commons-lang3:3.13.0'
+    implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'com.h2database:h2'
+    implementation 'org.flywaydb:flyway-core:9.21.0'
+    implementation "org.postgresql:postgresql"
     implementation 'org.apache.httpcomponents:httpclient:4.5.13'
     implementation 'org.trimou:trimou-core:2.5.1.Final'
     implementation "javax.mail:mail:1.4.7"
@@ -146,7 +148,7 @@ dependencies {
     implementation 'io.sentry:sentry-spring-boot-starter:6.33.0'
     implementation 'io.sentry:sentry-logback:6.33.0'
 
-    testImplementation 'com.h2database:h2:2.1.212'
+    testImplementation 'com.h2database:h2:2.1.214'
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation 'com.jayway.jsonpath:json-path-assert:2.7.0'
     testImplementation 'junit:junit:4.13.2'

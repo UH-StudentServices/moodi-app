@@ -45,7 +45,7 @@ public class MoodleClientGetUsersTest extends AbstractMoodiIntegrationTest {
                 .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
                 .andRespond(withSuccess(Fixtures.asString("/moodle/get-users-one-username.json"), MediaType.APPLICATION_JSON));
 
-        final MoodleUser user = moodleClient.getUser(Arrays.asList("integraatio"));
+        MoodleUser user = moodleClient.getUser(Arrays.asList("integraatio"));
         assertNotNull(user);
 
         assertEquals(Long.valueOf(3), user.id);
@@ -60,7 +60,7 @@ public class MoodleClientGetUsersTest extends AbstractMoodiIntegrationTest {
                 .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
                 .andRespond(withSuccess(Fixtures.asString("/moodle/get-users-second-username.json"), MediaType.APPLICATION_JSON));
 
-        final MoodleUser user = moodleClient.getUser(Arrays.asList("first", "second"));
+        MoodleUser user = moodleClient.getUser(Arrays.asList("first", "second"));
         assertNotNull(user);
 
         assertEquals(Long.valueOf(2), user.id);
