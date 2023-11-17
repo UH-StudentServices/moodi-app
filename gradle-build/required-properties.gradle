@@ -21,20 +21,20 @@
 
 tasks.withType(PublishToMavenRepository) { task ->
     task.doFirst {
-        ['base_url', 'username', 'password'].collect { "opintoni_artifactory_$it" }.each {
+        ['gitlab_server', 'gitlab_project_id', 'gitlab_token'].each {
             if (!project.hasProperty(it)) {
                 def msg = """
          |Missing project property: $it
          |
-         |Configure Artifactory connection in file: \$USER_HOME/.gradle/gradle.properties
+         |Configure Gitlab Package Registry connection in file: \$USER_HOME/.gradle/gradle.properties
          |
-         |opintoni_artifactory_base_url=<base url>
-         |opintoni_artifactory_username=<username>
-         |opintoni_artifactory_password=<password>
+         |gitlab_server=<gitlab server domain name>
+         |gitlab_project_id=<project id>
+         |gitlab_token=<access to registy token>
          |
          |Or provide with command line args like:
          |
-         |-Popintoni_artifactory_base_url=<base url> -Popintoni_artifactory_username=<username> -Popintoni_artifactory_password=<password>
+         |-Pgitlab_server=<gitlab server domain name> -Pgitlab_project_id=<project id> -Pgitlab_token=<token>
        """.stripMargin()
                 throw new GradleException(msg)
             }
