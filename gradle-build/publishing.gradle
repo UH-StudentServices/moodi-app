@@ -30,20 +30,18 @@ publishing {
             from components.java
         }
     }
-
-    if(project.hasProperty("opintoni_artifactory_base_url")) {
+    if (project.hasProperty("gitlab_server")) {
         repositories {
             maven {
-                allowInsecureProtocol(true)
-                credentials {
-                    username opintoni_artifactory_username
-                    password opintoni_artifactory_password
-                }
+                name = gitlab_server
+                url = uri("https://${gitlab_server}/api/v4/projects/${gitlab_project_id}/packages/maven")
 
-                if (version.endsWith("SNAPSHOT")) {
-                    url "${opintoni_artifactory_base_url}/libs-snapshot-local"
-                } else {
-                    url "${opintoni_artifactory_base_url}/libs-release-local"
+                credentials(HttpHeaderCredentials) {
+                    name = 'Job-Token'
+                    value = gitlab_token
+                }
+                authentication {
+                    header(HttpHeaderAuthentication)
                 }
             }
         }

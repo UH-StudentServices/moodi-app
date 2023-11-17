@@ -1,0 +1,94 @@
+stages:
+    - test
+    - release
+    - deploy
+
+test:
+    stage: test
+    image: gradle:7.6-jdk11
+    script:
+        - ./gradlew check test
+    artifacts:
+        reports:
+            junit: build/test-results/test/*.xml
+
+release prod:
+    stage: release
+    image: gradle:7.6-jdk11
+    variables:
+        GIT_STRATEGY: clone
+    script:
+        - git config --global user.email "gitlab-ci@localhost"
+        - git config --global user.name "GitLab CI"
+        - mkdir -p ~/.ssh
+        - chmod 700 ~/.ssh
+        - echo "${MOODI_APP_SSH_KEY}" > ~/.ssh/id_rsa
+        - chmod 600 ~/.ssh/id_rsa
+        - git config core.sshCommand "ssh -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+        - git remote set-url origin git@${CI_SERVER_SHELL_SSH_HOST}:${CI_PROJECT_PATH}.git
+        - git fetch
+        - git switch master
+        - ./gradlew release -Pgitlab_server=${CI_SERVER_HOST} -Pgitlab_project_id=${CI_PROJECT_ID} -Pgitlab_token=${CI_JOB_TOKEN} -Prelease.useAutomaticVersion=true -Prelease.pushOptions=ci.skip
+        # Make sure, that ci-deploy.properties contain new line in the end.
+        - echo "" >> ci-deploy.properties
+        - PACKAGE_VERSION=$(grep -i "^version=" ci-deploy.properties | cut -d'=' -f2 | tr -d '\n')
+        - git checkout "${PACKAGE_VERSION}"
+        - ./gradlew publish -x test -Pgitlab_server=${CI_SERVER_HOST} -Pgitlab_project_id=${CI_PROJECT_ID} -Pgitlab_token=${CI_JOB_TOKEN}
+    only:
+        - master
+    artifacts:
+        reports:
+            junit: build/test-results/test/*.xml
+        paths:
+            - ci-deploy.properties
+    when: manual
+    needs:
+        - test
+
+publish SNAPSHOT:
+    stage: release
+    image: gradle:7.6-jdk11
+    variables:
+        GIT_STRATEGY: clone
+    script:
+        - ./gradlew publish -x test -Pgitlab_server=${CI_SERVER_HOST} -Pgitlab_project_id=${CI_PROJECT_ID} -Pgitlab_token=${CI_JOB_TOKEN}
+        - grep -i "^version=" gradle.properties > ci-deploy.properties
+    artifacts:
+        paths:
+            - ci-deploy.properties
+    only:
+        - master
+    needs:
+        - test
+
+.deploy: &deploy_template
+    image: curlimages/curl
+    stage: deploy
+    script:
+        - PACKAGE_VERSION=`grep "^version=" ci-deploy.properties | cut -d'=' -f2 | tr -d '\n'`
+        - >
+            curl -X POST
+            -F token=$MOODI_INFRA_TRIGGER_TOKEN
+            -F ref=master
+            -F "variables[DEPLOY_ENV]=${ENV}"
+            -F "variables[PACKAGE_VERSION]=${PACKAGE_VERSION}"
+            https://${CI_SERVER_HOST}/api/v4/projects/${MOODI_INFRA_PROJECT_ID}/trigger/pipeline
+
+deploy prod:
+    <<: *deploy_template
+    variables:
+        ENV: prod
+    only:
+        - master
+    needs:
+        - release prod
+
+deploy dev:
+    <<: *deploy_template
+    image: curlimages/curl
+    variables:
+        ENV: dev
+    only:
+        - master
+    needs:
+        - publish SNAPSHOT

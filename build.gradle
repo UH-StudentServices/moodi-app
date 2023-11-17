@@ -23,7 +23,7 @@ buildscript {
 
 plugins {
     id "org.springframework.boot" version "2.7.14"
-    id "net.researchgate.release" version "2.8.1"
+    id "net.researchgate.release" version "3.0.2"
     id "java"
     id 'checkstyle'
     id 'org.sonarqube' version '3.3'
@@ -100,10 +100,10 @@ checkstyle {
     configProperties 'checkstyle.header.file': file('gradle-build/checkstyle/required-header.txt');
 }
 
-if(hasProperty("opintoni_artifactory_base_url")) {
+if(hasProperty("artifactory_base_url")) {
     repositories {
         maven {
-            url "${opintoni_artifactory_base_url}/remote-repos/"
+            url "${artifactory_base_url}/remote-repos/"
             allowInsecureProtocol(true)
         }
         mavenLocal()
