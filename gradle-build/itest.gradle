@@ -50,6 +50,7 @@ task itest(type: Test) {
     }
 
     testLogging {
+        showStandardStreams = true
         events "passed", "skipped", "failed"
     }
 }

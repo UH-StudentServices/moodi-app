@@ -12,3 +12,5 @@ build/
 # Deploy
 ci-deploy.properties
 
+# Direnv
+.envrc

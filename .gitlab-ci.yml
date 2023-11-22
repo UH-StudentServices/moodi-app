@@ -1,8 +1,8 @@
 stages:
     - test
+    - integration test
     - release
     - deploy
-
 test:
     stage: test
     image: gradle:7.6-jdk11
@@ -92,3 +92,37 @@ deploy dev:
         - master
     needs:
         - publish SNAPSHOT
+
+.integration test: &integration_test_template
+    image: gradle:7.6-jdk11
+    stage: integration test
+    script:
+        - >
+            ./gradlew itest --rerun-tasks
+            -Pmoodle_base_url=${MOODLE_URL}/webservice/rest/server.php
+            -Pmoodle_ws_token=${MOODLE_WS_TOKEN}
+
+integration test current:
+    <<: *integration_test_template
+    variables:
+        MOODLE_URL: ${MOODLE_URL_DEV_CURRENT}
+        MOODLE_WS_TOKEN: ${MOODLE_WS_TOKEN_DEV}
+    needs:
+        - test
+    when: manual
+    artifacts:
+        reports:
+            junit: build/test-results/itest/*.xml
+
+integration test next:
+    <<: *integration_test_template
+    variables:
+        MOODLE_URL: ${MOODLE_URL_DEV_NEXT}
+        MOODLE_WS_TOKEN: ${MOODLE_WS_TOKEN_DEV}
+    needs:
+        - test
+    when: manual
+    artifacts:
+        reports:
+            junit: build/test-results/itest/*.xml
+
