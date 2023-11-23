@@ -12,10 +12,20 @@ enrolled via Moodle api by Moodi application)
 
 Currently Moodi has 4 environments: local, local_docker, dev, and prod. Integrations are mapped for each environment in corresponding application-<env>.yml. local_docker is meant to be used with the [dockerized development environment] (https://github.com/UH-StudentServices/moodi-development) (see below).
 
+## Servers & Deployment
+
+The application utilizes two servers:
+
+- QA server: moodi-qa-23.it.helsinki.fi
+- Production server: moodi-prod-23.it.helsinki.fi
+
+Port 443 is open at UH for internal, VPN networks, and the Silta environment.
+
+Deployment processes leverage GitLab CI for testing, building, and deployment initiation. Deployments occur within a separate project, [moodi-infra](https://version.helsinki.fi/OPADev/moodi-infra). The QA server receives automatic deployments upon new commits to the master branch. Production deployments are manual, initiated by executing the `release prod` job in the GitLab CI pipeline. The GitLab Package Registry stores the application's Maven package. For detailed information, refer to [.gitlab-ci.yml](.gitlab-ci.yml).
 ## Requirements
 
 The following programs must be installed if not using the dockerized development environment:
-- JDK 8
+- JDK 11
 
 # Local development
 
@@ -35,12 +45,12 @@ You can use also the [dockerized development environment](https://github.com/UH-
 
 ## Running Moodi-Moodle integration tests
 
-This is normally done in Jenkins, but if you want to test something locally, you need to go through 
-an ssh tunnel via moodi-dev, because the Moodle API has an IP restriction in place.
+This is normally done in Gitlab CI (see [pipelines](https://version.helsinki.fi/OPADev/moodi-app/-/pipelines)), but if you want to test them locally, you need to go through 
+an ssh tunnel via `moodi-qa`, because the Moodle API has IP restrictions in place.
 
-Open an ssh tunnel to call the Moodle API:
+Open a ssh tunnel to call the Moodle API:
 ```
-ssh moodi-dev -L 1444:moodi-2-moodle-20.student.helsinki.fi:443
+ssh moodi-qa-23.it.helsinki.fi -L 1444:moodi-2-moodle-20.student.helsinki.fi:443
 ```
 Into /etc/hosts:
 ```
@@ -49,7 +59,7 @@ Into /etc/hosts:
 
 Then run the tests
 ```
-# Get the token from moodi-dev:/opt/moodi/config/moodi.properties
+# Get the token from moodi-qa-23.it.helsinki.fi:/opt/moodi/config/moodi.properties
 read MOODLE_WS_TOKEN 
 ./gradlew itest --rerun-tasks -Pmoodle_base_url=https://moodi-2-moodle-20.student.helsinki.fi:1444/moodlecurrent/webservice/rest/server.php -Pmoodle_ws_token=$MOODLE_WS_TOKEN   
 ```
@@ -60,7 +70,7 @@ read MOODLE_WS_TOKEN
 
 Open an ssh tunnel to call Sisu through the test API GW and the Moodle API:
 ```
-ssh  moodi-1.student.helsinki.fi -L 1443:gw-api-test.it.helsinki.fi:443 -L 1444:moodi-2-moodle-20.student.helsinki.fi:443
+ssh  moodi-qa-23.it.helsinki.fi -L 1443:gw-api-test.it.helsinki.fi:443 -L 1444:moodi-2-moodle-20.student.helsinki.fi:443
 ```
 
 The file ~/moodi/moodi.properties needs to exist:
@@ -118,7 +128,7 @@ related to external services (API-GW, Moodle) via environment variables either b
 
 ## Servers
 
-The server environments use Postgres 9.4.
+The server environments use Postgres 16.
 
 ## Local
 
@@ -144,7 +154,7 @@ docker volume rm moodi-app_moodi-postgres-data
 
 To create a new dump:
 ```
-ssh moodi-1.student.helsinki.fi
+ssh moodi-qa-23.it.helsinki.fi
 sudo su - postgres
 pg_dump -x -f moodi_dump.sql moodi
 # Then copy the new dump file over docker-entrypoint-initdb.d/moodi_dump.sql
