@@ -98,16 +98,21 @@ public class ImportingService {
         // Use the DB Course.id for generating the shortname.
         final MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(courseUnitRealisation, dbCourse.id);
 
-        final long moodleCourseId = moodleService.createCourse(moodleCourse);
+        long moodleCourseId;
+
+        try {
+            moodleCourseId = moodleService.createCourse(moodleCourse);
+        } catch (Exception e) {
+            // Creating moodle course failed. Removing created course row from db and propagating error.
+            courseService.deleteCourse(dbCourse.id);
+            throw e;
+        }
 
         // Update the course in DB with the newly created moodleId
         dbCourse = courseService.updateMoodleId(request.realisationId, moodleCourseId);
-
         // If this fails, the course gets created in Moodle without users, and sync will later try and put them in place.
         enrollmentExecutor.processEnrollments(dbCourse, courseUnitRealisation, moodleCourseId);
-
         loggingService.logCourseImport(dbCourse);
-
         return Result.success(new ImportCourseResponse(moodleCourseId));
     }
 
