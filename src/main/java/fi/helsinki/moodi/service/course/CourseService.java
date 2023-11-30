@@ -124,4 +124,8 @@ public class CourseService {
                 realisationId)));
         return moodleService.updateCourseVisibility(dbCourse.moodleId, true) != null;
     }
+
+    public void deleteCourse(long id) {
+        courseRepository.deleteById(id);
+    }
 }
