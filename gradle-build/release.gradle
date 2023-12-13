@@ -22,3 +22,10 @@
 apply plugin: "net.researchgate.release"
 
 createReleaseTag.dependsOn storeDeployInformationToFile
+
+release {
+    git {
+        requireBranch.set('master')
+        pushOptions.set(['-o ci.skip'])
+    }
+}
