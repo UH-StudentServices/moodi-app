@@ -28,7 +28,7 @@ release prod:
         - git remote set-url origin git@${CI_SERVER_SHELL_SSH_HOST}:${CI_PROJECT_PATH}.git
         - git fetch
         - git switch master
-        - ./gradlew release -Pgitlab_server=${CI_SERVER_HOST} -Pgitlab_project_id=${CI_PROJECT_ID} -Pgitlab_token=${CI_JOB_TOKEN} -Prelease.useAutomaticVersion=true -PpushOptions=ci.skip -PrequireBranch=master
+        - ./gradlew release -Pgitlab_server=${CI_SERVER_HOST} -Pgitlab_project_id=${CI_PROJECT_ID} -Pgitlab_token=${CI_JOB_TOKEN} -Prelease.useAutomaticVersion=true
         # Make sure, that ci-deploy.properties contain new line in the end.
         - echo "" >> ci-deploy.properties
         - PACKAGE_VERSION=$(grep -i "^version=" ci-deploy.properties | cut -d'=' -f2 | tr -d '\n')
