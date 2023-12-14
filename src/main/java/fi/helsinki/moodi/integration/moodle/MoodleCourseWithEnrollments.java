@@ -29,6 +29,10 @@ public final class MoodleCourseWithEnrollments {
     @JsonProperty("users")
     public List<MoodleUserEnrollments> users;
 
+    // Default constructor needed for deserialization
+    public MoodleCourseWithEnrollments() {
+    }
+
     public MoodleCourseWithEnrollments(Long courseid, List<MoodleUserEnrollments> users) {
         this.courseid = courseid;
         this.users = users;
