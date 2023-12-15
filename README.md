@@ -1,5 +1,9 @@
 # Moodi
 
+Upstream: <https://version.helsinki.fi/OPADev/moodi-app>
+
+This project is mirrored to GitHub for public visibility. The canonical repository is at the upstream link above. Do not push directly to GitHub.
+
 Moodi is an integration application that automates course creation and user enrollment to Moodle based on master data from Sisu.
 
 ## Integrations
