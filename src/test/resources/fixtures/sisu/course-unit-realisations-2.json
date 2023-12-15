@@ -37,6 +37,10 @@
         ],
         "enrolments": [
           {
+            "state": "RESERVED",
+            "person": null
+          },
+          {
             "state": "ENROLLED",
             "person": {
               "eduPersonPrincipalName": "niina3@helsinki.fi"
