@@ -269,6 +269,9 @@ public class SisuCourseUnitRealisation {
     }
 
     private String getMainOrganisationId() {
+        if (organisations == null || organisations.isEmpty()) {
+            return null;
+        }
         return organisations.stream()
             .filter(o -> RESPONSIBLE_ORGANISATION.equals(o.roleUrn) && o.share > 0.5)
             .findFirst()
