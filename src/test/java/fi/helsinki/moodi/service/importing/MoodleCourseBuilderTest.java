@@ -165,6 +165,17 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         assertEquals(MOODLE_DEFAULT_CATEGORY_ID, moodleCourse.categoryId);
     }
 
+    @Test
+    public void thatNullOrganisationsReturnDefaultCategory() {
+        SisuCourseUnitRealisation cur = getSisuCur("sv");
+        cur.teachingLanguageUrn = "urn:code:language:sv";
+        cur.organisations = null;
+
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation(), 10000000L);
+
+        assertEquals(MOODLE_DEFAULT_CATEGORY_ID, moodleCourse.categoryId);
+    }
+
     private SisuCourseUnitRealisation getSisuCur(String langCode) {
         SisuCourseUnitRealisation ret = new SisuCourseUnitRealisation();
         ret.id = "hy-cur-1";
