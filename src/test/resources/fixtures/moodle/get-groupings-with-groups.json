@@ -1,0 +1,104 @@
+[
+  {
+    "id": 15,
+    "courseid": 2603,
+    "name": "Muu opetustapahtuma 1",
+    "description": "",
+    "descriptionformat": 1,
+    "idnumber": "sisu:hy-SGS-137371177",
+    "groups": [
+      {
+        "id": 196,
+        "courseid": 2603,
+        "name": "Arabia",
+        "description": "",
+        "descriptionformat": 1,
+        "enrolmentkey": "",
+        "idnumber": "sisu:hy-SSG-137371177"
+      },
+      {
+        "id": 197,
+        "courseid": 2603,
+        "name": "Englanti",
+        "description": "",
+        "descriptionformat": 1,
+        "enrolmentkey": "",
+        "idnumber": "sisu:hy-SSG-137371228"
+      }
+    ]
+  },
+  {
+    "id": 16,
+    "courseid": 2603,
+    "name": "Muu opetustapahtuma 2",
+    "description": "",
+    "descriptionformat": 1,
+    "idnumber": "sisu:hy-SGS-137371178",
+    "groups": [
+      {
+        "id": 198,
+        "courseid": 2603,
+        "name": "Espanja",
+        "description": "",
+        "descriptionformat": 1,
+        "enrolmentkey": "",
+        "idnumber": "sisu:hy-SSG-137371233"
+      },
+      {
+        "id": 199,
+        "courseid": 2603,
+        "name": "Eteläslaavilaiset kielet",
+        "description": "",
+        "descriptionformat": 1,
+        "enrolmentkey": "",
+        "idnumber": "sisu:hy-SSG-137371250"
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "courseid": 2603,
+    "name": "Sisusta synkronoidut",
+    "description": "",
+    "descriptionformat": 1,
+    "idnumber": "sisu-synchronised",
+    "groups": [
+      {
+        "id": 196,
+        "courseid": 2603,
+        "name": "Arabia",
+        "description": "",
+        "descriptionformat": 1,
+        "enrolmentkey": "",
+        "idnumber": "sisu:hy-SSG-137371177"
+      },
+      {
+        "id": 197,
+        "courseid": 2603,
+        "name": "Englanti",
+        "description": "",
+        "descriptionformat": 1,
+        "enrolmentkey": "",
+        "idnumber": "sisu:hy-SSG-137371228"
+      },
+      {
+        "id": 198,
+        "courseid": 2603,
+        "name": "Espanja",
+        "description": "",
+        "descriptionformat": 1,
+        "enrolmentkey": "",
+        "idnumber": "sisu:hy-SSG-137371233"
+      },
+      {
+        "id": 199,
+        "courseid": 2603,
+        "name": "Eteläslaavilaiset kielet",
+        "description": "",
+        "descriptionformat": 1,
+        "enrolmentkey": "",
+        "idnumber": "sisu:hy-SSG-137371250"
+      }
+    ]
+  }
+]

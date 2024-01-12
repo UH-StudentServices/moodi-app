@@ -229,7 +229,7 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
 
     private MoodleUser getMoodleUser() {
         MoodleUser moodleUser = new MoodleUser();
-        moodleUser.id = MOODLE_USER_ID;
+        moodleUser.setId(MOODLE_USER_ID);
         return moodleUser;
     }
 }

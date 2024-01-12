@@ -85,10 +85,39 @@ public class SisuClient {
             Arguments idArgument = new Arguments("course_unit_realisations", new Argument<>("ids", batchIds));
             SisuCourseUnitRealisation.SisuCURWrapper result = queryWithArguments(SisuCourseUnitRealisation.SisuCURWrapper.class, idArgument);
             if (result != null) {
+                addMembersToSubgroups(result.course_unit_realisations);
                 ret.addAll(result.course_unit_realisations);
             }
         }
         return ret;
+    }
+
+    private void addMembersToSubgroups(List<SisuCourseUnitRealisation> courseUnitRealisations) {
+        HashMap<String, List<String>> memberIdsBySubGroupId = new HashMap<>();
+        for (SisuCourseUnitRealisation r : courseUnitRealisations) {
+            for (SisuEnrolment e : r.enrolments) {
+                if (e.confirmedStudySubGroupIds == null) {
+                    continue;
+                }
+                for (String groupId : e.confirmedStudySubGroupIds) {
+                    if (!memberIdsBySubGroupId.containsKey(groupId)) {
+                        memberIdsBySubGroupId.put(groupId, new ArrayList<>());
+                    }
+                    memberIdsBySubGroupId.get(groupId).add(e.person.getEduPersonPrincipalName());
+                }
+            }
+        }
+        for (SisuCourseUnitRealisation r : courseUnitRealisations) {
+            for (SisuStudyGroupSet s : r.studyGroupSets) {
+                for (SisuStudySubGroup g : s.getStudySubGroups()) {
+                    if (memberIdsBySubGroupId.get(g.getId()) != null) {
+                        g.setMemberIds(memberIdsBySubGroupId.get(g.getId()));
+                    } else {
+                        g.setMemberIds(Collections.emptyList());
+                    }
+                }
+            }
+        }
     }
 
     public Optional<SisuCourseUnitRealisation> getCourseUnitRealisation(final String id) {

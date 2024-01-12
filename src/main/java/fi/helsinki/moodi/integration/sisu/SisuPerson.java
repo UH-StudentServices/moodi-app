@@ -19,32 +19,33 @@ package fi.helsinki.moodi.integration.sisu;
 
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryStudent;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryTeacher;
+import fi.helsinki.moodi.service.util.DevModeUtils;
 import io.aexp.nodes.graphql.annotations.GraphQLArgument;
 import io.aexp.nodes.graphql.annotations.GraphQLProperty;
+import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Data
 public class SisuPerson {
-    public String id;
-    public String studentNumber;
-    public String lastName;
-    public String firstNames;
+    private String id;
+    private String studentNumber;
+    private String lastName;
+    private String firstNames;
     /**
      * This may be null, for example for Open university Students that have never activated their
      * University of Helsinki user accounts. In that case, they would not be found by student number from IAM either.
      */
-    public String eduPersonPrincipalName;
-    public String employeeNumber;
+    private String eduPersonPrincipalName;
+    private String employeeNumber;
 
-    public SisuPerson() {
-    }
-
-    public SisuPerson(String studentNumber, String firstNames, String lastName) {
-        this.studentNumber = studentNumber;
-        this.firstNames = firstNames;
-        this.lastName = lastName;
+    public String getEduPersonPrincipalName() {
+        if (eduPersonPrincipalName == null) {
+            eduPersonPrincipalName = DevModeUtils.getFakeEduPersonPrincipalName(this);
+        }
+        return eduPersonPrincipalName;
     }
 
     public StudyRegistryStudent toStudyRegistryStudent(boolean isEnrolled) {

@@ -121,7 +121,7 @@ public class ImportingService {
             sisuClient.getPersons(Collections.singletonList(creatorSisuId)).stream()
                 .findFirst()
                 .orElseThrow(notFoundException(String.format("Sisu person not found with id %s", creatorSisuId)))
-                .eduPersonPrincipalName :
+                .getEduPersonPrincipalName() :
             null;
     }
 

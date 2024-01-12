@@ -54,7 +54,7 @@ public class UserSynchronizationItem {
     public UserSynchronizationItem(MoodleUserEnrollments moodleUserEnrollments) {
         this.moodleUserEnrollments = moodleUserEnrollments;
         this.moodleUser = new MoodleUser();
-        this.moodleUser.id = moodleUserEnrollments.id;
+        this.moodleUser.setId(moodleUserEnrollments.id);
     }
 
     public UserSynchronizationItem(StudyRegistryTeacher teacher) {
@@ -88,7 +88,7 @@ public class UserSynchronizationItem {
     }
 
     public Long getMoodleUserId() {
-        return moodleUser != null ? moodleUser.id : null;
+        return moodleUser != null ? moodleUser.getId() : null;
     }
 
     public StudyRegistryStudent getStudent() {

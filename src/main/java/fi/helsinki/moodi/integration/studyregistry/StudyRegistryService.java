@@ -54,7 +54,7 @@ public class StudyRegistryService {
         // because it is simpler and more efficient this way.
         Map<String, StudyRegistryTeacher> teachersById =
             sisuClient.getPersons(uniquePersonIds)
-                .stream().collect(Collectors.toMap(p -> p.id, SisuPerson::toStudyRegistryTeacher));
+                .stream().collect(Collectors.toMap(SisuPerson::getId, SisuPerson::toStudyRegistryTeacher));
 
         return sisuCurs.stream()
             .map(cur -> cur.toStudyRegistryCourseUnitRealisation(teachersById)).collect(Collectors.toList());
