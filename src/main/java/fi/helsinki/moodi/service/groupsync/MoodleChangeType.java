@@ -15,22 +15,12 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.integration.moodle;
+package fi.helsinki.moodi.service.groupsync;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public final class MoodleUser {
-
-    private Long id;
-
-    private String username;
-
-    public static MoodleUser from(MoodleUserEnrollments moodleUserEnrollments) {
-        return new MoodleUser(moodleUserEnrollments.id, moodleUserEnrollments.username);
-    }
+public enum MoodleChangeType {
+    CREATE,
+    UPDATE,
+    DELETE,
+    KEEP,
+    DETACHED
 }

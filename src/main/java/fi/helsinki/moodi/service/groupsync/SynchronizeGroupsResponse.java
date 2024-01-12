@@ -15,22 +15,18 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.integration.moodle;
+package fi.helsinki.moodi.service.groupsync;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public final class MoodleUser {
+import java.util.List;
 
-    private Long id;
+@Getter
+public final class SynchronizeGroupsResponse {
 
-    private String username;
+    private final List<MoodleGroupingChange> groupingChanges;
 
-    public static MoodleUser from(MoodleUserEnrollments moodleUserEnrollments) {
-        return new MoodleUser(moodleUserEnrollments.id, moodleUserEnrollments.username);
+    public SynchronizeGroupsResponse(List<MoodleGroupingChange> groupingChanges) {
+        this.groupingChanges = groupingChanges;
     }
 }

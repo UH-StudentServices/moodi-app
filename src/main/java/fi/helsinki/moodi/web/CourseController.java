@@ -20,8 +20,8 @@ package fi.helsinki.moodi.web;
 import fi.helsinki.moodi.MoodiHealthIndicator;
 import fi.helsinki.moodi.service.Result;
 import fi.helsinki.moodi.service.course.CourseService;
-import fi.helsinki.moodi.service.course.group.GroupSynchronizationService;
-import fi.helsinki.moodi.service.course.group.SynchronizeGroupsResponse;
+import fi.helsinki.moodi.service.groupsync.GroupSynchronizationService;
+import fi.helsinki.moodi.service.groupsync.SynchronizeGroupsResponse;
 import fi.helsinki.moodi.service.dto.CourseDto;
 import fi.helsinki.moodi.service.importing.ImportCourseRequest;
 import fi.helsinki.moodi.service.importing.ImportCourseResponse;
@@ -82,10 +82,16 @@ public class CourseController {
         return response(courseService.ensureCourseVisibility(realisationId));
     }
 
-    @PostMapping(value = "/api/v1/courses/{realisationId}/synchronize-groups")
-    public ResponseEntity<SynchronizeGroupsResponse> synchronizeGroups(
+    @PostMapping(value = "/api/v1/courses/synchronize-groups/preview/{realisationId}")
+    public ResponseEntity<SynchronizeGroupsResponse> previewGroupChanges(
         @PathVariable("realisationId") String realisationId) {
-        return response(groupSynchronizationService.synchronizeGroups(realisationId));
+        return response(groupSynchronizationService.preview(realisationId));
+    }
+
+    @PostMapping(value = "/api/v1/courses/synchronize-groups/process/{realisationId}")
+    public ResponseEntity<SynchronizeGroupsResponse> processGroupChanges(
+        @PathVariable("realisationId") String realisationId) {
+        return response(groupSynchronizationService.process(realisationId));
     }
 
     private <D, E> ResponseEntity<Result<D, E>> response(Result<D, E> result) {
