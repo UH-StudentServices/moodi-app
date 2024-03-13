@@ -108,9 +108,9 @@ public class MoodleService {
             final Map<Long, List<Long>> groupMembers = moodleClient.getGroupMembers(groupIds).stream()
                 .collect(Collectors.toMap(MoodleGroupMembers::getGroupId, MoodleGroupMembers::getUserIds, (l1, l2) -> l1.addAll(l2) ? l1 : l2));
             if (!groupMembers.isEmpty()) {
-                final Map<Long, MoodleUser> usersById = moodleClient.getUsers(groupMembers.values().stream()
-                    .flatMap(List::stream).collect(Collectors.toList())).stream()
-                    .collect(Collectors.toMap(MoodleUser::getId, u -> u));
+                List<Long> userIds = groupMembers.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
+                final Map<Long, MoodleUser> usersById = userIds.size() > 0 ? moodleClient.getUsers(userIds).stream()
+                    .collect(Collectors.toMap(MoodleUser::getId, u -> u)) : Collections.emptyMap();
                 groups.forEach(g -> g.setMembers(
                     groupMembers.get(g.getId()).stream()
                         .map(usersById::get)
