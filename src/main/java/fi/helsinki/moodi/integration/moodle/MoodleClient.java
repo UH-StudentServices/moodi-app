@@ -210,6 +210,9 @@ public class MoodleClient {
     }
 
     public List<MoodleUser> getUsers(final List<Long> userIds) {
+        if (userIds.isEmpty()) {
+            return Collections.emptyList();
+        }
         final MultiValueMap<String, String> params = createParametersForFunction("core_user_get_users_by_field");
         params.set("field", "id");
         setListParameters(params, "values[%s]", userIds, String::valueOf);
