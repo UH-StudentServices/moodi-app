@@ -57,7 +57,7 @@ public class GroupSynchronizationUpdateTest extends AbstractGroupSynchronization
         List<SisuStudySubGroup> sisuStudySubGroups = new ArrayList<>();
         for (int i = 2; i <= 4; i++) {
             sisuStudySubGroups.add(createSisuStudySubGroup("group" + i, moodleCourseUsers.subList((i - 1) * 10, i * 10)
-                .stream().map(MoodleUser::getUsername).collect(Collectors.toList())));
+                .stream().map(MoodleUser::getUsername).collect(Collectors.toList()), false));
         }
         // grouping3 is removed. group1 is removed from grouping1.
         List<SisuStudyGroupSet> sisuStudyGroupSets = Arrays.asList(
