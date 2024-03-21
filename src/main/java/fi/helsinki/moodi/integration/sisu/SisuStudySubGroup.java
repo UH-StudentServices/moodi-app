@@ -30,6 +30,7 @@ import java.util.List;
 public class SisuStudySubGroup {
     private String id;
     private SisuLocalisedValue name;
+    private boolean cancelled;
     @GraphQLIgnore
     private List<String> memberIds;
 }

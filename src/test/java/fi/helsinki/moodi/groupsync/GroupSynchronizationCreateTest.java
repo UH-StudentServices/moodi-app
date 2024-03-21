@@ -45,7 +45,7 @@ public class GroupSynchronizationCreateTest extends AbstractGroupSynchronization
         List<SisuStudySubGroup> sisuStudySubGroups = new ArrayList<>();
         for (int i = 1; i <= 4; i++) {
             sisuStudySubGroups.add(createSisuStudySubGroup("group" + i, moodleCourseUsers.subList((i - 1) * 20, i * 20).stream()
-                .map(MoodleUser::getUsername).collect(Collectors.toList())));
+                .map(MoodleUser::getUsername).collect(Collectors.toList()), false));
         }
         List<SisuStudyGroupSet> sisuStudyGroupSets = Arrays.asList(
             createSisuStudyGroupSet("grouping1", Arrays.asList(sisuStudySubGroups.get(0), sisuStudySubGroups.get(1))),

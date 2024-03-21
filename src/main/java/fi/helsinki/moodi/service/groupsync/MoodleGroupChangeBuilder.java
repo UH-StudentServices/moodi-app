@@ -138,6 +138,7 @@ public class MoodleGroupChangeBuilder {
         final List<MoodleGroupChange> existingMoodleGroupChanges = moodleGroups.stream()
             .map(moodleGroup -> {
                 final Optional<SisuStudySubGroup> studySubGroup = sisuStudySubGroups.stream()
+                    .filter(sisuStudySubGroup -> !sisuStudySubGroup.isCancelled())
                     .filter(sisuStudySubGroup -> sisuStudySubGroup.getId().equals(moodleGroup.getStudySubGroupId()))
                     .findFirst();
                 if (studySubGroup.isPresent()) {

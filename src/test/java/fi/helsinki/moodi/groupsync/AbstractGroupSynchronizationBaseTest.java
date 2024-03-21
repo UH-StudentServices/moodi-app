@@ -127,11 +127,11 @@ public abstract class AbstractGroupSynchronizationBaseTest {
         );
     }
 
-    protected SisuStudySubGroup createSisuStudySubGroup(String id, List<String> memberIds) {
+    protected SisuStudySubGroup createSisuStudySubGroup(String id, List<String> memberIds, boolean isCancelled) {
         return new SisuStudySubGroup(id, new SisuLocalisedValue(
             "fi group " + id,
             "sv group " + id,
             "en group " + id
-        ), memberIds);
+        ), isCancelled, memberIds);
     }
 }
