@@ -131,13 +131,16 @@ public class MoodleGroupChangeBuilder {
 
     private @NotNull List<MoodleGroupChange> buildMoodleGroupChanges(
         List<MoodleGroup> moodleGroups,
-        List<SisuStudySubGroup> sisuStudySubGroups,
+        List<SisuStudySubGroup> allSisuStudySubGroups,
         boolean isDetached
     ) {
+        List<SisuStudySubGroup> activeSisuStudySubGroups = allSisuStudySubGroups.stream()
+            .filter(s -> !s.isCancelled())
+            .collect(java.util.stream.Collectors.toList());
         // Update existing Moodle groups
         final List<MoodleGroupChange> existingMoodleGroupChanges = moodleGroups.stream()
             .map(moodleGroup -> {
-                final Optional<SisuStudySubGroup> studySubGroup = sisuStudySubGroups.stream()
+                final Optional<SisuStudySubGroup> studySubGroup = activeSisuStudySubGroups.stream()
                     .filter(sisuStudySubGroup -> !sisuStudySubGroup.isCancelled())
                     .filter(sisuStudySubGroup -> sisuStudySubGroup.getId().equals(moodleGroup.getStudySubGroupId()))
                     .findFirst();
@@ -168,7 +171,7 @@ public class MoodleGroupChangeBuilder {
 
         // Add new groups from Sisu
         List<MoodleGroupChange> newMoodleGroupChanges = new ArrayList<>();
-        for (SisuStudySubGroup s : sisuStudySubGroups) {
+        for (SisuStudySubGroup s : activeSisuStudySubGroups) {
             if (moodleGroups.stream().filter(g -> g.getStudySubGroupId() != null).noneMatch(g -> g.getStudySubGroupId().equals(s.getId()))) {
                 newMoodleGroupChanges.add(
                     MoodleGroupChange.newGroup(
