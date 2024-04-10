@@ -103,7 +103,11 @@ public class SisuClient {
                     if (!memberIdsBySubGroupId.containsKey(groupId)) {
                         memberIdsBySubGroupId.put(groupId, new ArrayList<>());
                     }
-                    memberIdsBySubGroupId.get(groupId).add(e.person.getEduPersonPrincipalName());
+                    if (e.person != null) {
+                        memberIdsBySubGroupId.get(groupId).add(e.person.getEduPersonPrincipalName());
+                    } else {
+                        log.warn("An enrolment in course unit realisation {} has no person", r.id);
+                    }
                 }
             }
         }
