@@ -79,7 +79,7 @@ public class SisuCourseUnitRealisation {
         SisuLocale teachingLanguageCode = SisuLocale.byUrnOrDefaultToFi(teachingLanguageUrn);
         ret.realisationId = id;
         ret.realisationName = generateName(teachingLanguageCode);
-        ret.teachingLanguageRealisationName = calculateName(teachingLanguageCode);
+        ret.teachingLanguageRealisationName = Objects.requireNonNullElse(calculateName(teachingLanguageCode), ret.realisationName);
         ret.students = enrolments.stream()
             .filter(e -> e.person != null)
             .map(e -> e.person.toStudyRegistryStudent(e.isEnrolled()))
