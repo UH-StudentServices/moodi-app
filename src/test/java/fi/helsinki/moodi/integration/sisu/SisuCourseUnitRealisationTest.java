@@ -17,12 +17,14 @@
 
 package fi.helsinki.moodi.integration.sisu;
 
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
 import org.junit.Before;
 import org.junit.Test;
 import static fi.helsinki.moodi.integration.sisu.SisuLocale.FI;
 import static fi.helsinki.moodi.integration.sisu.SisuLocale.SV;
 import static fi.helsinki.moodi.integration.sisu.SisuLocale.EN;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class SisuCourseUnitRealisationTest {
 
@@ -32,6 +34,9 @@ public class SisuCourseUnitRealisationTest {
     public static final String NAME_FI = "suomi";
     public static final String NAME_SV = "ruotsi";
     public static final String NAME_EN = "englanti";
+    public static final String TYPE_FI = "tyyppi";
+    public static final String TYPE_SV = "typ";
+    public static final String TYPE_EN = "type";
 
     public static final String SPECIFIER_FI = "1";
     public static final String SPECIFIER_SV = "2";
@@ -46,6 +51,8 @@ public class SisuCourseUnitRealisationTest {
         cur.id = CUR_ID_SISU;
         cur.name = new SisuLocalisedValue(NAME_FI, NAME_SV, NAME_EN);
         cur.nameSpecifier = new SisuLocalisedValue(SPECIFIER_FI, SPECIFIER_SV, SPECIFIER_EN);
+        cur.courseUnitRealisationType = new SisuCourseUnitRealisationType();
+        cur.courseUnitRealisationType.name = new SisuLocalisedValue(TYPE_FI, TYPE_SV, TYPE_EN);
     }
 
     @Test
@@ -100,6 +107,14 @@ public class SisuCourseUnitRealisationTest {
         cur.nameSpecifier.en = null;
         String name = cur.generateName(FI);
         assertEquals(cur.calculateName(FI), name);
+    }
+
+    @Test
+    public void testMissingTeachingLanguageNameLocalization() {
+        cur.name.fi = null;
+        cur.nameSpecifier.fi = null;
+        StudyRegistryCourseUnitRealisation srCur = cur.toStudyRegistryCourseUnitRealisation();
+        assertNotNull(srCur.teachingLanguageRealisationName);
     }
 
     @Test
