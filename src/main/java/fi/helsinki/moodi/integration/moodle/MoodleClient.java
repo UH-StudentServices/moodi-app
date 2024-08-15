@@ -48,7 +48,7 @@ public class MoodleClient {
     private final RestTemplate readOnlyRestTemplate;
     private final ObjectMapper objectMapper;
     private final String wstoken;
-    @Value("${MoodleClient.batchsize:100}")
+    @Value("${MoodleClient.batchsize:50}")
     private int batchSize;
 
     private static final String ENROLMENTS = "enrolments";
