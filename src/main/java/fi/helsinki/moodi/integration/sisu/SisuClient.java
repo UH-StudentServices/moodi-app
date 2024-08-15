@@ -48,7 +48,7 @@ public class SisuClient {
     private static final String API_KEY_HEADER_NAME = "X-Api-Key";
     private final String sisuBaseUrl;
     private final String apiKey;
-    @Value("${SisuGraphQLClient.batchsize:100}")
+    @Value("${SisuGraphQLClient.batchsize:50}")
     private int batchSize;
     private int connectTimeout;
     private int socketTimeout;
