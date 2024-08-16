@@ -38,6 +38,19 @@ import static fi.helsinki.moodi.Constants.TEACHER_TYPES;
     @GraphQLArgument(name = "id", type = "String")
 })
 public class SisuCourseUnitRealisation {
+    public enum DocumentState {
+        DRAFT,
+        ACTIVE,
+        DELETED
+    }
+
+    public enum FlowState {
+        NOT_READY,
+        PUBLISHED,
+        CANCELLED,
+        ARCHIVED
+    }
+
     @GraphQLIgnore
     public static final int MAX_NAME_DB_LENGTH = 255;
     @GraphQLIgnore
@@ -64,7 +77,8 @@ public class SisuCourseUnitRealisation {
     public SisuLocalisedValue nameSpecifier;
     public SisuCourseUnitRealisationType courseUnitRealisationType;
     public SisuDateRange activityPeriod;
-    public String flowState;
+    public DocumentState documentState;
+    public FlowState flowState;
     public String teachingLanguageUrn;
     public List<SisuLearningEnvironment> learningEnvironments = new ArrayList<>();
     public List<SisuResponsibilityInfo> responsibilityInfos = new ArrayList<>();
@@ -84,7 +98,8 @@ public class SisuCourseUnitRealisation {
             .filter(e -> e.person != null)
             .map(e -> e.person.toStudyRegistryStudent(e.isEnrolled()))
             .collect(Collectors.toList());
-        ret.published = "PUBLISHED".equals(flowState);
+        ret.flowState = flowState;
+        ret.documentState = documentState;
 
         if (activityPeriod != null) {
             ret.startDate = activityPeriod.startDate != null ? activityPeriod.startDate : LocalDate.now();

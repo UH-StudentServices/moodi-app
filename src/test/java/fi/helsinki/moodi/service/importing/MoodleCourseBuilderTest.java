@@ -186,7 +186,8 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         ret.courseUnitRealisationType.name = new SisuLocalisedValue(REALISATION_TYPE_FI, REALISATION_TYPE_SV, REALISATION_TYPE_EN);
         ret.name = new SisuLocalisedValue(REALISATION_NAME_FI, REALISATION_NAME_SV, REALISATION_NAME_EN);
         ret.activityPeriod = new SisuDateRange(LocalDate.of(2019, 8, 5), LocalDate.of(2019, 11, 5));
-        ret.flowState = "PUBLISHED";
+        ret.documentState = SisuCourseUnitRealisation.DocumentState.ACTIVE;
+        ret.flowState = SisuCourseUnitRealisation.FlowState.PUBLISHED;
         ret.teachingLanguageUrn = "urn:code:language:" + langCode;
         ret.learningEnvironments.add(new SisuLearningEnvironment("urli suomeksi", "fi", true));
         ret.learningEnvironments.add(new SisuLearningEnvironment("fel url på svenska", "sv", false));
