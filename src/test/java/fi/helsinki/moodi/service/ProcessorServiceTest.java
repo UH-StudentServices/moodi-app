@@ -34,26 +34,16 @@ import fi.helsinki.moodi.service.synchronize.process.ProcessorService;
 import fi.helsinki.moodi.service.time.TimeService;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
-
-    // add random 0-1000 millisecond delay to some moodle/sisu mock calls
-    private final boolean delayed = false;
 
     private static final String STUDENT_MOODLE_USERNAME = "studentUsername";
     private static final String TEACHER_MOODLE_USERNAME = "teacherUsername";
@@ -66,8 +56,6 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
     private static final long SYNCED_ROLE_ID = 10;
     private static final int TEACHER_ID_BASE = 100;
     private static final int MISSING_TEACHER_ID_BASE = 200;
-
-    private final Logger logger = LoggerFactory.getLogger(ProcessorServiceTest.class);
 
     @Autowired
     private ProcessorService processorService;
@@ -86,7 +74,7 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
         createStudyRegistryTeachers();
 
         List<SynchronizationItem> items = new ArrayList<>();
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 8; i++) {
             items.add(createFullSynchronizationItem("hy-CUR-" + i, i));
         }
 
@@ -99,42 +87,40 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
         List<Integer> expectedUsers = Arrays.asList(0, 1, 2, 3);
         List<Integer> expectedTeachers = Arrays.asList(0, 1);
         expectGetUserRequestsToMoodle(expectedUsers, expectedTeachers, 0);
-        expectPostEnrollmentsRequestToMoodle(0, false);
+        expectPostEnrollmentsRequestToMoodle(0);
 
         // Items 1-6 need no mocks because they will be skipped or successfully deleted.
         items.get(1).completeEnrichmentPhase(EnrichmentStatus.IN_PROGRESS, "in progress");
         expectedStatus.put(1, ProcessingStatus.SKIPPED);
         items.get(2).completeEnrichmentPhase(EnrichmentStatus.COURSE_ENDED, "course ended");
         expectedStatus.put(2, ProcessingStatus.SUCCESS);
-        items.get(3).completeEnrichmentPhase(EnrichmentStatus.COURSE_NOT_PUBLIC, "course not public");
+        items.get(3).completeEnrichmentPhase(EnrichmentStatus.MOODLE_COURSE_NOT_FOUND, "moodle course not found");
         expectedStatus.put(3, ProcessingStatus.SUCCESS);
-        items.get(4).completeEnrichmentPhase(EnrichmentStatus.MOODLE_COURSE_NOT_FOUND, "moodle course not found");
-        expectedStatus.put(4, ProcessingStatus.SUCCESS);
-        items.get(5).completeEnrichmentPhase(EnrichmentStatus.ERROR, "error");
+        items.get(4).completeEnrichmentPhase(EnrichmentStatus.ERROR, "error");
+        expectedStatus.put(4, ProcessingStatus.SKIPPED);
+        items.get(5).completeEnrichmentPhase(EnrichmentStatus.LOCKED, "locked");
         expectedStatus.put(5, ProcessingStatus.SKIPPED);
-        items.get(6).completeEnrichmentPhase(EnrichmentStatus.LOCKED, "locked");
-        expectedStatus.put(6, ProcessingStatus.SKIPPED);
 
-        // Prepare mocks for successful processing of item 7
+        // Prepare mocks for successful processing of item 6
+        item = items.get(6);
+        item.completeEnrichmentPhase(EnrichmentStatus.SUCCESS, "success");
+        when(courseRepository.findByRealisationId(item.getCourse().realisationId)).thenReturn(Optional.of(item.getCourse()));
+        expectedStatus.put(6, ProcessingStatus.SUCCESS);
+        expectedUsers = Arrays.asList(6, 7, 8, 9);
+        expectedTeachers = Arrays.asList(6, 7);
+        expectGetUserRequestsToMoodle(expectedUsers, expectedTeachers, 6);
+        expectPostEnrollmentsRequestToMoodle(6);
+
+        // Prepare mocks for successful processing of item 8
         item = items.get(7);
         item.completeEnrichmentPhase(EnrichmentStatus.SUCCESS, "success");
         when(courseRepository.findByRealisationId(item.getCourse().realisationId)).thenReturn(Optional.of(item.getCourse()));
         expectedStatus.put(7, ProcessingStatus.SUCCESS);
-        expectedUsers = Arrays.asList(7, 8, 9, 10);
-        expectedTeachers = Arrays.asList(7, 8);
-        expectGetUserRequestsToMoodle(expectedUsers, expectedTeachers, 7);
-        expectPostEnrollmentsRequestToMoodle(7, false);
-
-        // Prepare mocks for successful processing of item 8
-        item = items.get(8);
-        item.completeEnrichmentPhase(EnrichmentStatus.SUCCESS, "success");
-        when(courseRepository.findByRealisationId(item.getCourse().realisationId)).thenReturn(Optional.of(item.getCourse()));
-        expectedStatus.put(8, ProcessingStatus.SUCCESS);
         // users 8-10 are found cached
-        expectedUsers = singletonList(11);
-        expectedTeachers = singletonList(9);
-        expectGetUserRequestsToMoodle(expectedUsers, expectedTeachers, 8);
-        expectPostEnrollmentsRequestToMoodle(8, true);
+        expectedUsers = singletonList(10);
+        expectedTeachers = singletonList(8);
+        expectGetUserRequestsToMoodle(expectedUsers, expectedTeachers, 7);
+        expectPostEnrollmentsRequestToMoodle(7);
 
         // items are grouped by their relevant action and actions are processed in this order:
         // Action.SKIP = ProcessorService.skipItem
@@ -142,8 +128,8 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
         // Action.SYNCHRONIZE = ProcessorService.synchronizeItem
         List<SynchronizationItem> processedItems = processorService.process(items);
         // expecting first 3 in result list to be skipped, next 3 to be removed (result is SUCCESS) and last 3 processed
-        int[] expectedOrder = {1, 5, 6, 2, 3, 4, 0, 7, 8};
-        for (int i = 0; i < 9; i++) {
+        int[] expectedOrder = {1, 4, 5, 2, 3, 0, 6, 7};
+        for (int i = 0; i < 8; i++) {
             item = processedItems.get(i);
             int id = item.getCourse().moodleId.intValue();
             assertEquals(expectedOrder[i], id);
@@ -151,13 +137,8 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
         }
     }
 
-    private void expectPostEnrollmentsRequestToMoodle(int courseId, boolean missingFirst) {
+    private void expectPostEnrollmentsRequestToMoodle(int courseId) {
         List<MoodleEnrollment> enrollments = new ArrayList<>();
-        // For some reason in last batch missing teacher is posted first.
-        if (missingFirst) {
-            enrollments.add(new MoodleEnrollment(TEACHER_ROLE_ID, MISSING_TEACHER_ID_BASE + courseId, courseId));
-            enrollments.add(new MoodleEnrollment(SYNCED_ROLE_ID, MISSING_TEACHER_ID_BASE + courseId, courseId));
-        }
         for (int i = courseId; i < courseId + 4; i++) {
             enrollments.add(new MoodleEnrollment(STUDENT_ROLE_ID, i, courseId));
             enrollments.add(new MoodleEnrollment(SYNCED_ROLE_ID, i, courseId));
@@ -166,25 +147,23 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
             enrollments.add(new MoodleEnrollment(TEACHER_ROLE_ID, i, courseId));
             enrollments.add(new MoodleEnrollment(SYNCED_ROLE_ID, i, courseId));
         }
-        if (!missingFirst) {
-            enrollments.add(new MoodleEnrollment(TEACHER_ROLE_ID, MISSING_TEACHER_ID_BASE + courseId, courseId));
-            enrollments.add(new MoodleEnrollment(SYNCED_ROLE_ID, MISSING_TEACHER_ID_BASE + courseId, courseId));
-        }
+        enrollments.add(new MoodleEnrollment(TEACHER_ROLE_ID, MISSING_TEACHER_ID_BASE + courseId, courseId));
+        enrollments.add(new MoodleEnrollment(SYNCED_ROLE_ID, MISSING_TEACHER_ID_BASE + courseId, courseId));
         expectEnrollmentRequestToMoodleWithResponse(EMPTY_RESPONSE, enrollments.toArray(new MoodleEnrollment[0]));
     }
 
     private void expectGetUserRequestsToMoodle(List<Integer> expectedStudents, List<Integer> expectedTeachers, int missingId) {
         expectedStudents.forEach(i -> {
                 StudyRegistryStudent student = STUDY_REGISTRY_STUDENTS.get(i);
-                expectGetUserRequestToMoodle(student.userName, i, delayed);
+                expectGetUserRequestToMoodle(student.userName, i);
             }
         );
         expectedTeachers.forEach(i -> {
                 StudyRegistryTeacher teacher = STUDY_REGISTRY_TEACHERS.get(i);
-                expectGetUserRequestToMoodle(teacher.userName, TEACHER_ID_BASE + i, delayed);
+                expectGetUserRequestToMoodle(teacher.userName, TEACHER_ID_BASE + i);
             }
         );
-        expectGetUserRequestToMoodle("missing_creator" + missingId + "@test.fi", MISSING_TEACHER_ID_BASE + missingId, delayed);
+        expectGetUserRequestToMoodle("missing_creator" + missingId + "@test.fi", MISSING_TEACHER_ID_BASE + missingId);
     }
 
     private void createStudyRegistryStudents() {

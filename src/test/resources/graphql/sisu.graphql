@@ -296,6 +296,7 @@ type CourseUnitRealisation {
   enrolmentPeriod: DateTimePeriod
   externalEnrolmentLink: Link
   lateEnrolmentEnd: String
+  documentState: String
   flowState: String
   gradeDistributions: [GradeDistribution!]
   learningEnvironmentsDescription: LocalizedString
