@@ -20,6 +20,7 @@
           "startDate": "2019-08-05",
           "endDate": "2019-11-05"
         },
+        "documentState": "ACTIVE",
         "flowState": "PUBLISHED",
         "responsibilityInfos": [
           {
@@ -75,6 +76,7 @@
           "startDate": "2019-08-05",
           "endDate": "2019-11-05"
         },
+        "documentState": "ACTIVE",
         "flowState": "ARCHIVED",
         "responsibilityInfos": [
           {
@@ -122,7 +124,8 @@
           "startDate": "2039-08-05",
           "endDate": "2039-11-05"
         },
-        "flowState": "DRAFT",
+        "documentState": "DRAFT",
+        "flowState": "NOT_READY",
         "responsibilityInfos": [
           {
             "roleUrn": "urn:code:course-unit-realisation-responsibility-info-type:responsible-teacher",

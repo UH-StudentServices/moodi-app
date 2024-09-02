@@ -21,7 +21,6 @@ public enum EnrichmentStatus {
 
     IN_PROGRESS,
     MOODLE_COURSE_NOT_FOUND,
-    COURSE_NOT_PUBLIC,
     COURSE_ENDED,
     SUCCESS,
     ERROR,
