@@ -20,6 +20,7 @@
           "startDate": "2019-08-05",
           "endDate": "2039-11-05"
         },
+        "documentState": "ACTIVE",
         "flowState": "PUBLISHED",
         "responsibilityInfos": [
           {
@@ -89,6 +90,7 @@
           "startDate": "2019-08-05",
           "endDate": "2039-11-05"
         },
+        "documentState": "ACTIVE",
         "flowState": "PUBLISHED",
         "responsibilityInfos": [
           {

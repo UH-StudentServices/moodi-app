@@ -21,6 +21,7 @@ import fi.helsinki.moodi.integration.moodle.MoodleFullCourse;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
 import fi.helsinki.moodi.integration.moodle.MoodleUser;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
+import fi.helsinki.moodi.integration.sisu.SisuCourseUnitRealisation;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryService;
 import fi.helsinki.moodi.service.course.Course;
@@ -33,12 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -141,7 +137,11 @@ public class EnricherService {
             item.completeEnrichmentPhase(
                 EnrichmentStatus.ERROR,
                 String.format("Course not found from Sisu with id %s", course.realisationId));
-        } else if (endedMoreThanYearAgo(cur)) {
+        } else if (
+            endedMoreThanYearAgo(cur)
+                || cur.documentState == SisuCourseUnitRealisation.DocumentState.DELETED
+                || cur.flowState == SisuCourseUnitRealisation.FlowState.ARCHIVED
+                || cur.flowState == SisuCourseUnitRealisation.FlowState.CANCELLED) {
             item.completeEnrichmentPhase(
                 EnrichmentStatus.COURSE_ENDED,
                 String.format("Course with realisation id %s has ended", course.realisationId));

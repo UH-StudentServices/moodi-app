@@ -17,6 +17,7 @@
 
 package fi.helsinki.moodi.integration.studyregistry;
 
+import fi.helsinki.moodi.integration.sisu.SisuCourseUnitRealisation;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -32,7 +33,9 @@ public class StudyRegistryCourseUnitRealisation {
 
     public LocalDate startDate;
 
-    public boolean published;
+    public SisuCourseUnitRealisation.FlowState flowState;
+
+    public SisuCourseUnitRealisation.DocumentState documentState;
 
     public List<StudyRegistryStudent> students = newArrayList();
 

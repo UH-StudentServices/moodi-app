@@ -139,7 +139,7 @@ public class SisuClient {
         while (true) {
             SisuOrganisation.SisuOrganisationExportBatch batch =
                     getRestData(sisuBaseUrl + "/kori/api/organisations/v2/export?limit=10000&since=" + since,
-                    new ParameterizedTypeReference<SisuOrganisation.SisuOrganisationExportBatch>() {});
+                        new ParameterizedTypeReference<SisuOrganisation.SisuOrganisationExportBatch>() {});
             snapshots.addAll(batch.entities);
             if (!batch.hasMore) {
                 break;

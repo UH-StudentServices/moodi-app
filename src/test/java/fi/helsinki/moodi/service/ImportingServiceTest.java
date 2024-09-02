@@ -51,9 +51,6 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 public class ImportingServiceTest extends AbstractMoodiIntegrationTest {
 
-    // add random 0-1000 millisecond delay to some moodle/sisu mock calls
-    private final boolean delayed = false;
-
     private static final String REALISATION_ID = "hy-CUR-1";
     protected static final String CREATOR_SISU_ID = "hy-hlo-creator";
     protected static final long MOODLE_COURSE_ID = 101L;
@@ -93,11 +90,11 @@ public class ImportingServiceTest extends AbstractMoodiIntegrationTest {
         mockSisuGraphQLServer.expectPersonsRequest(Arrays.asList("hy-hlo-1", "hy-hlo-2", "hy-hlo-2.1"),
             "/sisu/persons-many-1.json");
         expectCreateCourseRequestToMoodle(REALISATION_ID, MOODLE_COURSE_ID);
-        expectGetUserRequestToMoodle(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA, delayed);
-        expectGetUserRequestToMoodle(MOODLE_USERNAME_JUKKA, MOODLE_USER_ID_JUKKA, delayed);
-        expectGetUserRequestToMoodle(MOODLE_USERNAME_MAKE, MOODLE_USER_ID_MAKE, delayed);
-        expectGetUserRequestToMoodle(MOODLE_USERNAME_ONE, MOODLE_USER_TEACH_ONE, delayed);
-        expectGetUserRequestToMoodle(MOODLE_USERNAME_CREATOR, MOODLE_USER_CREATOR, delayed);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_JUKKA, MOODLE_USER_ID_JUKKA);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_MAKE, MOODLE_USER_ID_MAKE);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_ONE, MOODLE_USER_TEACH_ONE);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_CREATOR, MOODLE_USER_CREATOR);
         expectPostEnrollmentsRequestToMoodle();
 
         Result<ImportCourseResponse, String> result = importingService.importCourse(importCourseRequest);
