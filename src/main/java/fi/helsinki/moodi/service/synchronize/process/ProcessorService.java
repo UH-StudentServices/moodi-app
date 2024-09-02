@@ -144,7 +144,6 @@ public class ProcessorService {
         switch (item.getEnrichmentStatus()) {
             case SUCCESS:
                 return Action.SYNCHRONIZE;
-            case COURSE_NOT_PUBLIC:
             case COURSE_ENDED:
             case MOODLE_COURSE_NOT_FOUND:
                 return Action.REMOVE;

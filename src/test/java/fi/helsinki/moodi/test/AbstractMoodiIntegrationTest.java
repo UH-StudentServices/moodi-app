@@ -326,23 +326,19 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     protected final void expectGetUserRequestToMoodleUserNotFound(final String username) {
-        expectGetUserRequestToMoodleWithResponse(username, MOODLE_EMPTY_LIST_RESPONSE, false);
-    }
-
-    protected final void expectGetUserRequestToMoodle(final String username, final long userMoodleId, boolean delayed) {
-        expectGetUserRequestToMoodle(username, String.valueOf(userMoodleId), delayed);
+        expectGetUserRequestToMoodleWithResponse(username, MOODLE_EMPTY_LIST_RESPONSE);
     }
 
     protected final void expectGetUserRequestToMoodle(final String username, final long userMoodleId) {
-        expectGetUserRequestToMoodle(username, String.valueOf(userMoodleId), false);
+        expectGetUserRequestToMoodle(username, String.valueOf(userMoodleId));
     }
 
-    protected final void expectGetUserRequestToMoodle(final String username, final String userMoodleId, boolean delayed) {
+    protected final void expectGetUserRequestToMoodle(final String username, final String userMoodleId) {
         final String response = String.format("[{\"id\":\"%s\", \"username\":\"%s\", \"email\":\"\", \"fullname\":\"\"}]", userMoodleId, username);
-        expectGetUserRequestToMoodleWithResponse(username, response, delayed);
+        expectGetUserRequestToMoodleWithResponse(username, response);
     }
 
-    private void expectGetUserRequestToMoodleWithResponse(String username, String response, boolean delayed) {
+    private void expectGetUserRequestToMoodleWithResponse(String username, String response) {
         String payload = "wstoken=xxxx1234&wsfunction=core_user_get_users_by_field&moodlewsrestformat=json&field=username&values%5B0%5D="
             + urlEncode(username);
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
@@ -350,13 +346,6 @@ public abstract class AbstractMoodiIntegrationTest {
             .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
             .andExpect(content().string(payload))
             .andRespond(request -> {
-                if (delayed) {
-                    try {
-                        Thread.sleep(ThreadLocalRandom.current().nextInt(1001));
-                    } catch (InterruptedException ignored) {
-                        ;
-                    }
-                }
                 return withSuccess(response, MediaType.APPLICATION_JSON).createResponse(request);
             });
     }
