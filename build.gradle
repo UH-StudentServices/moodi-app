@@ -22,7 +22,7 @@ buildscript {
 }
 
 plugins {
-    id "org.springframework.boot" version "2.7.14"
+    id "org.springframework.boot" version "2.7.18"
     id "net.researchgate.release" version "3.0.2"
     id "java"
     id 'checkstyle'
@@ -138,10 +138,10 @@ dependencies {
     implementation group: 'org.hibernate', name: 'hibernate-entitymanager', version: hibernate_entitymanager_version
     implementation group: 'org.hibernate', name: 'hibernate-ehcache', version: hibernate_entitymanager_version
 
-    implementation 'org.apache.commons:commons-lang3:3.13.0'
-    implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'org.apache.commons:commons-lang3'
+    implementation 'com.google.guava:guava:33.3.0-jre'
     implementation 'com.h2database:h2'
-    implementation 'org.flywaydb:flyway-core:9.21.0'
+    implementation 'org.flywaydb:flyway-core'
     implementation "org.postgresql:postgresql"
     implementation 'org.apache.httpcomponents:httpclient:4.5.13'
     implementation 'org.trimou:trimou-core:2.5.1.Final'
