@@ -19,11 +19,15 @@ package fi.helsinki.moodi.config;
 
 import fi.helsinki.moodi.interceptor.AccessLoggingInterceptor;
 import fi.helsinki.moodi.interceptor.AuthorizingInterceptor;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.config.SocketConfig;
-import org.apache.http.impl.NoConnectionReuseStrategy;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ConnectionReuseStrategy;
+import org.apache.hc.core5.http.HttpRequest;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.io.SocketConfig;
+import org.apache.hc.core5.http.protocol.HttpContext;
+import org.apache.hc.core5.util.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -33,11 +37,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-    @Value("${httpClient.connectTimeout}")
-    private int connectTimeout;
+    @Value("${httpClient.connectTimeout} milliseconds")
+    private Timeout connectTimeout;
 
-    @Value("${httpClient.socketTimeout}")
-    private int socketTimeout;
+    @Value("${httpClient.socketTimeout} milliseconds")
+    private Timeout socketTimeout;
 
     @Autowired
     private AuthorizingInterceptor authorizingInterceptor;
@@ -53,9 +57,16 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Bean
     HttpClientBuilder httpClientBuilder() {
+        ConnectionReuseStrategy noConnectionReuseStrategy = new ConnectionReuseStrategy() {
+            @Override
+            public boolean keepAlive(HttpRequest request, HttpResponse response, HttpContext context) {
+                return false;
+            }
+        };
+
         RequestConfig requestConfig = RequestConfig.custom()
             .setConnectTimeout(connectTimeout)
-            .setSocketTimeout(socketTimeout)
+            // .setSocketTimeout(socketTimeout)
             .build();
         // Socket timeout until the HTTPS connection has been established:
         SocketConfig socketConfig = SocketConfig.custom()
@@ -63,7 +74,7 @@ public class WebConfig implements WebMvcConfigurer {
             .build();
         return HttpClients.custom()
             .setDefaultRequestConfig(requestConfig)
-            .setDefaultSocketConfig(socketConfig)
-            .setConnectionReuseStrategy(new NoConnectionReuseStrategy()); // Try to get rid of NoHttpResponseExceptions.
+            // .setDefaultSocketConfig(socketConfig)
+            .setConnectionReuseStrategy(noConnectionReuseStrategy);
     }
 }

@@ -21,6 +21,6 @@
             memoryStoreEvictionPolicy="LRU">
     </defaultCache>
 
-    <cache name="moodle-client.moodle-user-by-username"></cache>
+    <cache name="moodle-client.moodle-user-by-username" />
     <cache name="sisu-client.organisations-by-id" timeToLiveSeconds="3600" />
 </ehcache>

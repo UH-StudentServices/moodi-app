@@ -19,7 +19,7 @@ package fi.helsinki.moodi.service.synclock;
 
 import fi.helsinki.moodi.service.course.Course;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;

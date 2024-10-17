@@ -60,6 +60,8 @@ logging:
   retain-logs: P30D
   file-logging-path: /var/log/moodi-import-sync-log
 
+spring.cache.jcache.config: claspath:ehcache.xml
+
 spring.jpa.hibernate.ddl-auto: none
 spring.jpa.generate-ddl: false
 

@@ -21,10 +21,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import fi.helsinki.moodi.integration.http.RequestTimingInterceptor;
 import fi.helsinki.moodi.integration.moodle.MoodleClient;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.HttpRequestRetryHandler;
-import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.util.TimeValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,6 +37,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class MoodleConfig {
@@ -56,10 +56,7 @@ public class MoodleConfig {
             moodleReadOnlyRestTemplate(clientBuilder));
     }
 
-    private RestTemplate createRestTemplate(HttpRequestRetryHandler httpRequestRetryHandler, HttpClientBuilder clientBuilder) {
-        final HttpClient httpClient = clientBuilder
-            .setRetryHandler(httpRequestRetryHandler)
-            .build();
+    private RestTemplate createRestTemplate(HttpClient httpClient) {
 
         final ClientHttpRequestFactory requestFactory =
             new BufferingClientHttpRequestFactory(new HttpComponentsClientHttpRequestFactory(httpClient));
@@ -78,13 +75,14 @@ public class MoodleConfig {
     //RestTemplate for requests that make modifications to Moodle. Do not get retried immediately in case of error.
     @Bean
     public RestTemplate moodleRestTemplate(HttpClientBuilder clientBuilder) {
-        return createRestTemplate(new DefaultHttpRequestRetryHandler(RETRY_COUNT, false), clientBuilder);
+        return createRestTemplate(clientBuilder.build());
     }
 
     //RestTemplate for request that only read data from Moodle. May get retried up to RETRY_COUNT times in case of failure.
     @Bean
     public RestTemplate moodleReadOnlyRestTemplate(HttpClientBuilder clientBuilder) {
-        return createRestTemplate(new DefaultHttpRequestRetryHandler(RETRY_COUNT, true), clientBuilder);
+        clientBuilder.setRetryStrategy(new CustomRetryStrategy(RETRY_COUNT, TimeValue.of(3, TimeUnit.SECONDS)));
+        return createRestTemplate(clientBuilder.build());
     }
 
     private String restUrl() {

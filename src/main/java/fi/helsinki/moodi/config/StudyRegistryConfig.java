@@ -21,10 +21,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.helsinki.moodi.integration.http.LoggingInterceptor;
 import fi.helsinki.moodi.integration.http.RequestTimingInterceptor;
 import fi.helsinki.moodi.integration.sisu.SisuClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.ssl.SSLContextBuilder;
+import jakarta.annotation.PostConstruct;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.core5.ssl.SSLContextBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -33,13 +40,11 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
 import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.security.KeyStore;
+import java.time.Duration;
 import java.util.Collections;
-
-import static com.google.common.collect.Lists.newArrayList;
 
 @Configuration
 public class StudyRegistryConfig {
@@ -90,17 +95,19 @@ public class StudyRegistryConfig {
     }
 
     @Bean
-    public RestTemplate studyRegistryRestTemplate(ObjectMapper objectMapper, HttpClientBuilder clientBuilder) {
-        final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(objectMapper);
+    public RestTemplate studyRegistryRestTemplate(RestTemplateBuilder builder, ObjectMapper objectMapper) {
+        SSLConnectionSocketFactory sslSocketFactory = SSLConnectionSocketFactoryBuilder.create().setSslContext(sslContext()).build();
+        HttpClientConnectionManager cm = PoolingHttpClientConnectionManagerBuilder.create().setSSLSocketFactory(sslSocketFactory).build();
+        HttpClient httpClient = HttpClients.custom().setConnectionManager(cm).evictExpiredConnections().build();
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
 
-        RestTemplate restTemplate = new RestTemplate(Collections.singletonList(converter));
-        restTemplate.setInterceptors(newArrayList(new LoggingInterceptor(), new RequestTimingInterceptor()));
-
-        if (useClientCert()) {
-            clientBuilder.setSSLContext(sslContext());
-        }
-        restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(clientBuilder.build()));
-        return restTemplate;
+        builder.messageConverters(Collections.singletonList(new MappingJackson2HttpMessageConverter(objectMapper)));
+        builder.interceptors(new LoggingInterceptor(), new RequestTimingInterceptor());
+        builder.setBufferRequestBody(true);
+        builder.setConnectTimeout(Duration.ofMillis(connectTimeout));
+        builder.setReadTimeout(Duration.ofMillis(socketTimeout));
+        builder.requestFactory(() -> factory);
+        return builder.build();
     }
 
     @Bean
