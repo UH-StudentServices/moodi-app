@@ -14,13 +14,25 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
   -->
+<config xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+        xmlns='http://www.ehcache.org/v3'
+        xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core-3.0.xsd"
+>
+    <cache-template name="defaultCacheTemplate">
+        <expiry>
+            <none/>
+        </expiry>
+        <heap unit="MB">512</heap>
+    </cache-template>
 
-<ehcache maxBytesLocalHeap="512M">
-    <defaultCache
-            eternal="true"
-            memoryStoreEvictionPolicy="LRU">
-    </defaultCache>
+    <cache alias="moodle-client.moodle-user-by-username" uses-template="defaultCacheTemplate">
+        <!-- Uses default template -->
+    </cache>
 
-    <cache name="moodle-client.moodle-user-by-username"></cache>
-    <cache name="sisu-client.organisations-by-id" timeToLiveSeconds="3600" />
-</ehcache>
+    <cache alias="sisu-client.organisations-by-id" uses-template="defaultCacheTemplate">
+        <expiry>
+            <ttl unit="seconds">3600</ttl>
+        </expiry>
+    </cache>
+
+</config>

@@ -18,80 +18,120 @@
 package fi.helsinki.moodi.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
 import fi.helsinki.moodi.integration.http.RequestTimingInterceptor;
 import fi.helsinki.moodi.integration.moodle.MoodleClient;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.HttpRequestRetryHandler;
-import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.hc.client5.http.HttpRequestRetryStrategy;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.core5.http.HttpRequest;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.io.SocketConfig;
+import org.apache.hc.core5.http.protocol.HttpContext;
+import org.apache.hc.core5.util.TimeValue;
+import org.apache.hc.core5.util.Timeout;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.Nullable;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
+import java.time.Duration;
 
 @Configuration
 public class MoodleConfig {
     private static final int RETRY_COUNT = 3;
 
-    @Autowired
-    private Environment environment;
+    @Value("${httpClient.moodle.connectTimeout}")
+    private int connectTimeout;
+
+    @Value("${httpClient.moodle.socketTimeout}")
+    private int socketTimeout;
+
+    @Value("${integration.moodle.baseUrl}/webservice/rest/server.php")
+    private String restUrl;
+
+    @Value("${integration.moodle.wstoken}")
+    private String wstoken;
 
     @Bean
-    public MoodleClient moodleClient(ObjectMapper objectMapper, HttpClientBuilder clientBuilder) {
+    public MoodleClient moodleClient(
+        ObjectMapper objectMapper,
+        @Qualifier("moodleRestTemplate") RestTemplate moodleRestTemplate,
+        @Qualifier("moodleReadOnlyRestTemplate") RestTemplate moodleReadOnlyRestTemplate) {
         return new MoodleClient(
-            restUrl(),
-            wstoken(),
+            restUrl,
+            wstoken,
             objectMapper,
-            moodleRestTemplate(clientBuilder),
-            moodleReadOnlyRestTemplate(clientBuilder));
+            moodleRestTemplate,
+            moodleReadOnlyRestTemplate
+        );
     }
 
-    private RestTemplate createRestTemplate(HttpRequestRetryHandler httpRequestRetryHandler, HttpClientBuilder clientBuilder) {
-        final HttpClient httpClient = clientBuilder
-            .setRetryHandler(httpRequestRetryHandler)
-            .build();
+    private RestTemplate createRestTemplate(
+        RestTemplateBuilder restTemplateBuilder,
+        @Nullable HttpRequestRetryStrategy retryStrategy
+    ) {
+        PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder = PoolingHttpClientConnectionManagerBuilder.create();
+        // Separate timeout for the socket before the connection is established. See https://jira.it.helsinki.fi/browse/MOODI-118.
+        connectionManagerBuilder.setDefaultSocketConfig(SocketConfig.custom().setSoTimeout(Timeout.ofMilliseconds(socketTimeout)).build());
 
-        final ClientHttpRequestFactory requestFactory =
-            new BufferingClientHttpRequestFactory(new HttpComponentsClientHttpRequestFactory(httpClient));
+        HttpClientBuilder httpClientBuilder = HttpClients.custom()
+            .setConnectionManager(connectionManagerBuilder.build())
+            .setConnectionReuseStrategy((request, response, context) -> false);
+        if (retryStrategy != null) {
+            httpClientBuilder.setRetryStrategy(retryStrategy);
+        }
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(
+            httpClientBuilder.build()
+        );
 
-        final RestTemplate restTemplate = new RestTemplate(requestFactory);
-        restTemplate.setInterceptors(Collections.singletonList(new RequestTimingInterceptor()));
+        factory.setConnectTimeout(Duration.ofMillis(socketTimeout));
+        factory.setConnectionRequestTimeout(Duration.ofMillis(connectTimeout));
 
-        restTemplate.setMessageConverters(
-            Lists.newArrayList(
+        return restTemplateBuilder
+            .interceptors(new RequestTimingInterceptor())
+            .messageConverters(
                 new StringHttpMessageConverter(StandardCharsets.UTF_8),
-                new FormHttpMessageConverter()));
-
-        return restTemplate;
+                new FormHttpMessageConverter()
+            )
+            .requestFactory(() -> new BufferingClientHttpRequestFactory(factory))
+            .build();
     }
 
     //RestTemplate for requests that make modifications to Moodle. Do not get retried immediately in case of error.
     @Bean
-    public RestTemplate moodleRestTemplate(HttpClientBuilder clientBuilder) {
-        return createRestTemplate(new DefaultHttpRequestRetryHandler(RETRY_COUNT, false), clientBuilder);
+    public RestTemplate moodleRestTemplate(RestTemplateBuilder restTemplateBuilder) {
+        return createRestTemplate(restTemplateBuilder, null);
     }
 
     //RestTemplate for request that only read data from Moodle. May get retried up to RETRY_COUNT times in case of failure.
     @Bean
-    public RestTemplate moodleReadOnlyRestTemplate(HttpClientBuilder clientBuilder) {
-        return createRestTemplate(new DefaultHttpRequestRetryHandler(RETRY_COUNT, true), clientBuilder);
+    public RestTemplate moodleReadOnlyRestTemplate(RestTemplateBuilder restTemplateBuilder) {
+        return createRestTemplate(restTemplateBuilder, new HttpRequestRetryStrategy() {
+            @Override
+            public boolean retryRequest(HttpRequest request, IOException exception, int execCount, HttpContext context) {
+                return execCount <= RETRY_COUNT;
+            }
+
+            @Override
+            public boolean retryRequest(HttpResponse response, int execCount, HttpContext context) {
+                return execCount <= RETRY_COUNT && response.getCode() >= 500;
+            }
+
+            @Override
+            public TimeValue getRetryInterval(HttpResponse response, int execCount, HttpContext context) {
+                return TimeValue.ofSeconds(3);
+            }
+        });
     }
 
-    private String restUrl() {
-        return environment.getProperty("integration.moodle.baseUrl") + "/webservice/rest/server.php";
-    }
-
-    private String wstoken() {
-        return environment.getRequiredProperty("integration.moodle.wstoken");
-    }
 }

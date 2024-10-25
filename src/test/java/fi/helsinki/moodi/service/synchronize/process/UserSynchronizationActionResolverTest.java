@@ -172,7 +172,7 @@ public class UserSynchronizationActionResolverTest extends AbstractMoodiIntegrat
         assertActions(item, Maps.newHashMap());
     }
 
-    private MoodleUserEnrollments getMoodleUserEnrollments(List<Long> roleIds, Long...moodleCourseIds) {
+    private MoodleUserEnrollments getMoodleUserEnrollments(List<Long> roleIds, Long... moodleCourseIds) {
         MoodleUserEnrollments moodleUserEnrollments = new MoodleUserEnrollments();
         moodleUserEnrollments.roles = roleIds.stream().map(role -> {
             MoodleRole moodleRole = new MoodleRole();

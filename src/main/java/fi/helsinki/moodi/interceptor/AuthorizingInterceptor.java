@@ -21,14 +21,14 @@ import fi.helsinki.moodi.exception.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.HandlerInterceptor;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Component
-public class AuthorizingInterceptor extends HandlerInterceptorAdapter {
+public class AuthorizingInterceptor implements HandlerInterceptor {
 
     private static final String CLIENT_ID = "client-id";
     private static final String CLIENT_TOKEN = "client-token";

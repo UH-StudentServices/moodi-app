@@ -21,11 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import fi.helsinki.moodi.Application;
-import fi.helsinki.moodi.integration.moodle.MoodleCourseData;
-import fi.helsinki.moodi.integration.moodle.MoodleCourseWithEnrollments;
-import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
-import fi.helsinki.moodi.integration.moodle.MoodleRole;
-import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
+import fi.helsinki.moodi.integration.moodle.*;
 import fi.helsinki.moodi.service.importing.ImportCourseRequest;
 import fi.helsinki.moodi.service.synchronize.enrich.EnricherService;
 import fi.helsinki.moodi.service.util.MapperService;
@@ -71,7 +67,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(
-    properties = { "server.port:0", "spring.main.allow-bean-definition-overriding=true" },
+    properties = { "server.port:0", "spring.main.allow-bean-definition-overriding=true", "flyway.cleanDisabled=false" },
     classes = { Application.class, TestConfig.class })
 
 /*
@@ -195,7 +191,7 @@ public abstract class AbstractMoodiIntegrationTest {
     public final void resetDBAndClearCache() {
         flyway.clean();
         flyway.migrate();
-        cacheManager.getCacheNames().stream().forEach(c -> cacheManager.getCache(c).clear());
+        cacheManager.getCacheNames().forEach(c -> cacheManager.getCache(c).clear());
     }
 
     @Before
@@ -363,7 +359,7 @@ public abstract class AbstractMoodiIntegrationTest {
                             + realisationId +
                             "&courses%5B0%5D%5Bfullname%5D=" +
                             "%3Cspan+lang%3D%22fi%22+class%3D%22multilang%22%3ELapsuus+ja+yhteiskunta%3C%2Fspan%3E" +
-                            "%3Cspan+lang%3D%22sv%22+class%3D%22multilang%22%3EF%EF%BF%BDr+att+testa%3C%2Fspan%3E" +
+                            "%3Cspan+lang%3D%22sv%22+class%3D%22multilang%22%3EF%C3%B6r+att+testa%3C%2Fspan%3E" +
                             "%3Cspan+lang%3D%22en%22+class%3D%22multilang%22%3EFor+testing%3C%2Fspan%3E" +
                             "&courses%5B0%5D%5Bshortname%5D=Lapsuus+ja"),
                     // The actual short name unique suffix is too difficult to check here, so we leave it out.
@@ -496,7 +492,7 @@ public abstract class AbstractMoodiIntegrationTest {
         }
     }
 
-    protected final MoodleUserEnrollments getMoodleUserEnrollments(int moodleUserId, String userName, int enrolledCourseId, long...roleIds) {
+    protected final MoodleUserEnrollments getMoodleUserEnrollments(int moodleUserId, String userName, int enrolledCourseId, long... roleIds) {
         MoodleUserEnrollments ret = new MoodleUserEnrollments();
         ret.id = (long) moodleUserId;
         ret.username = userName;

@@ -21,12 +21,12 @@ import com.google.common.collect.Lists;
 import fi.helsinki.moodi.service.synchronize.SynchronizationStatus;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.service.time.TimeService;
+import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
