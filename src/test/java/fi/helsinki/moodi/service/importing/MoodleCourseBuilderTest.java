@@ -42,20 +42,6 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
     private static final String REALISATION_NAME_FI = "Kurssin nimi";
     private static final String REALISATION_NAME_SV = "Kurs namn";
     private static final String REALISATION_NAME_EN = "Course name";
-    private static final int REALISATION_ID = 1;
-
-    private static final String DESCRIPTION_1_FI = "Course description 1 (fi)";
-    private static final String DESCRIPTION_2_FI = "Course description 2 (fi)";
-    private static final String DESCRIPTION_3_FI = "Course description 3 (fi)";
-    private static final String DESCRIPTION_1_SV = "Course description 1 (sv)";
-    private static final String DESCRIPTION_2_SV = "Course description 2 (sv)";
-    private static final String DESCRIPTION_3_SV = "Course description 3 (sv)";
-    private static final String DESCRIPTION_1_EN = "Course description 1 (en)";
-    private static final String DESCRIPTION_2_EN = "Course description 2 (en)";
-    private static final String DESCRIPTION_3_EN = "Course description 3 (en)";
-    private static final Integer DESCRIPTION_1_ID = 10;
-    private static final Integer DESCRIPTION_2_ID = 20;
-    private static final Integer DESCRIPTION_3_ID = 30;
     private static final String MOODLE_DEFAULT_CATEGORY_ID = "17";
 
     @Autowired

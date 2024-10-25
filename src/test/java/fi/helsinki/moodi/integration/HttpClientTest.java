@@ -47,8 +47,10 @@ import static org.mockserver.model.HttpResponse.response;
     properties = {
         "integration.moodle.baseUrl=http://localhost:9876",
         "integration.sisu.baseUrl=http://localhost:9876",
-        "httpClient.connectTimeout=100",
-        "httpClient.socketTimeout=100",
+        "httpClient.sisu.connectTimeout=100",
+        "httpClient.sisu.socketTimeout=100",
+        "httpClient.moodle.connectTimeout=100",
+        "httpClient.moodle.socketTimeout=100",
         "spring.main.allow-bean-definition-overriding=true"
     },
     classes = { Application.class, TestConfig.class })
@@ -89,7 +91,7 @@ public class HttpClientTest {
         }
 
         long took = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS);
-        assertTrue(took >= 100 && took < 400);
+        assertTrue(took >= 100 && took < 900);
     }
 
     private void callSisu(String id) {

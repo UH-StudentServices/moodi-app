@@ -1,6 +1,6 @@
 # This file is meant to be used for dockerized local development and testing with
 # https://github.com/UH-StudentServices/moodi-development project.
-FROM gradle:7.6-jdk11
+FROM gradle:7.6-jdk17
 
 USER gradle
 

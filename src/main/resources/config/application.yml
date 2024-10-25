@@ -13,12 +13,16 @@ management:
       show-details: always # The health endpoint is not publicly reachable, so we can give out details to facilitate troubleshooting.
 
 httpClient:
-  # Determines the timeout in milliseconds until a connection is established.
-  connectTimeout: 9000
-  # Defines the socket timeout (SO_TIMEOUT) in milliseconds,
-  # which is the timeout for waiting for data  or, put differently,
-  # a maximum period inactivity between two consecutive data packets).
-  socketTimeout: 60000
+    sisu:
+      # Determines the timeout in milliseconds until a connection is established.
+      connectTimeout: 9000
+      # Defines the socket timeout (SO_TIMEOUT) in milliseconds,
+      # which is the timeout for waiting for data  or, put differently,
+      # a maximum period inactivity between two consecutive data packets).
+      socketTimeout: 60000
+    moodle:
+      connectTimeout: 9000
+      socketTimeout: 120000
 
 mapper.moodle.defaultCategory: 17
 # Some Moodle categories are overridden for the prod environment.
@@ -59,6 +63,8 @@ synchronize.INCREMENTAL.enabled: false
 logging:
   retain-logs: P30D
   file-logging-path: /var/log/moodi-import-sync-log
+
+spring.cache.jcache.config: classpath:ehcache.xml
 
 spring.jpa.hibernate.ddl-auto: none
 spring.jpa.generate-ddl: false

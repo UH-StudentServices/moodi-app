@@ -5,7 +5,7 @@ stages:
     - deploy
 test:
     stage: test
-    image: gradle:7.6-jdk11
+    image: gradle:7.6-jdk17
     script:
         - ./gradlew check test
     artifacts:
@@ -14,7 +14,7 @@ test:
 
 release prod:
     stage: release
-    image: gradle:7.6-jdk11
+    image: gradle:7.6-jdk17
     variables:
         GIT_STRATEGY: clone
     script:
@@ -47,7 +47,7 @@ release prod:
 
 publish SNAPSHOT:
     stage: release
-    image: gradle:7.6-jdk11
+    image: gradle:7.6-jdk17
     variables:
         GIT_STRATEGY: clone
     script:
@@ -94,7 +94,7 @@ deploy dev:
         - publish SNAPSHOT
 
 .integration test: &integration_test_template
-    image: gradle:7.6-jdk11
+    image: gradle:7.6-jdk17
     stage: integration test
     script:
         - >

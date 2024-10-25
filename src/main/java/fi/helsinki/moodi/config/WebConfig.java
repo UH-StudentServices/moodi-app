@@ -19,26 +19,13 @@ package fi.helsinki.moodi.config;
 
 import fi.helsinki.moodi.interceptor.AccessLoggingInterceptor;
 import fi.helsinki.moodi.interceptor.AuthorizingInterceptor;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.config.SocketConfig;
-import org.apache.http.impl.NoConnectionReuseStrategy;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-    @Value("${httpClient.connectTimeout}")
-    private int connectTimeout;
-
-    @Value("${httpClient.socketTimeout}")
-    private int socketTimeout;
-
     @Autowired
     private AuthorizingInterceptor authorizingInterceptor;
 
@@ -51,19 +38,4 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(authorizingInterceptor).excludePathPatterns("/login", "/logout");
     }
 
-    @Bean
-    HttpClientBuilder httpClientBuilder() {
-        RequestConfig requestConfig = RequestConfig.custom()
-            .setConnectTimeout(connectTimeout)
-            .setSocketTimeout(socketTimeout)
-            .build();
-        // Socket timeout until the HTTPS connection has been established:
-        SocketConfig socketConfig = SocketConfig.custom()
-            .setSoTimeout(socketTimeout)
-            .build();
-        return HttpClients.custom()
-            .setDefaultRequestConfig(requestConfig)
-            .setDefaultSocketConfig(socketConfig)
-            .setConnectionReuseStrategy(new NoConnectionReuseStrategy()); // Try to get rid of NoHttpResponseExceptions.
-    }
 }
