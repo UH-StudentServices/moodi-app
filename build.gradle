@@ -22,7 +22,7 @@ buildscript {
 }
 
 plugins {
-    id "org.springframework.boot" version "2.7.14"
+    id "org.springframework.boot" version "3.3.4"
     id "net.researchgate.release" version "3.0.2"
     id "java"
     id 'checkstyle'
@@ -44,8 +44,8 @@ if (System.getenv("SENTRY_AUTH_TOKEN")) {
 }
 
 java {
-    sourceCompatibility = "1.11"
-    targetCompatibility = "1.11"
+    sourceCompatibility = "1.17"
+    targetCompatibility = "1.17"
 }
 
 apply plugin: "io.spring.dependency-management"
@@ -95,7 +95,7 @@ wrapper {
 }
 
 checkstyle {
-    toolVersion = '8.29'
+    toolVersion = '10.18.1'
     configDirectory = rootProject.file('gradle-build/checkstyle')
     configProperties 'checkstyle.header.file': file('gradle-build/checkstyle/required-header.txt');
 }
@@ -127,37 +127,43 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-web') {
         exclude module: 'spring-boot-starter-tomcat'
     }
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-undertow'
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-undertow'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
 
-    implementation group: 'ch.qos.logback', name: 'logback-classic', version: logback_version
-    implementation group: 'ch.qos.logback', name: 'logback-core', version: logback_version
-    implementation group: 'org.springframework', name: 'spring-context-support'
-    implementation group: 'org.hibernate', name: 'hibernate-entitymanager', version: hibernate_entitymanager_version
-    implementation group: 'org.hibernate', name: 'hibernate-ehcache', version: hibernate_entitymanager_version
+    implementation 'ch.qos.logback:logback-classic'
+    implementation 'ch.qos.logback:logback-core'
+    implementation 'org.springframework:spring-context-support'
+    implementation("org.ehcache:ehcache") {
+        capabilities {
+            requireCapability('org.ehcache:ehcache-jakarta')
+        }
+    }
 
-    implementation 'org.apache.commons:commons-lang3:3.13.0'
-    implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'org.apache.commons:commons-lang3'
+    implementation 'com.google.guava:guava:33.3.0-jre'
     implementation 'com.h2database:h2'
-    implementation 'org.flywaydb:flyway-core:9.21.0'
-    implementation "org.postgresql:postgresql"
-    implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.postgresql:postgresql'
+    implementation 'org.apache.httpcomponents.client5:httpclient5'
     implementation 'org.trimou:trimou-core:2.5.1.Final'
-    implementation "javax.mail:mail:1.4.7"
-    implementation "javax.validation:validation-api:2.0.1.Final"
+    implementation 'javax.mail:mail:1.4.7'
+    implementation 'javax.validation:validation-api:2.0.1.Final'
     implementation group: 'com.github.americanexpress.nodes', name: 'nodes', version: nodes_version
     implementation 'io.sentry:sentry-spring-boot-starter:6.33.0'
     implementation 'io.sentry:sentry-logback:6.33.0'
 
-    testImplementation 'com.h2database:h2:2.1.214'
+    testImplementation 'com.h2database:h2'
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation 'com.jayway.jsonpath:json-path-assert:2.7.0'
     testImplementation 'junit:junit:4.13.2'
-    testImplementation group: 'org.mock-server', name: 'mockserver-netty', version: mockserver_version
-    testImplementation group: 'org.mock-server', name: 'mockserver-junit-rule', version: mockserver_version
-    testImplementation group: 'com.graphql-java', name: 'graphql-java', version: graphql_java_version
+    testImplementation group: 'org.mock-server', name: 'mockserver-netty', version: '5.15.0'
+    testImplementation group: 'org.mock-server', name: 'mockserver-junit-rule', version: '5.15.0'
+    testImplementation 'com.graphql-java:graphql-java'
+
+    runtimeOnly("org.springframework.boot:spring-boot-properties-migrator")
 }
 
 configurations {

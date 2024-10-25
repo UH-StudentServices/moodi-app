@@ -21,36 +21,49 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.helsinki.moodi.integration.http.LoggingInterceptor;
 import fi.helsinki.moodi.integration.http.RequestTimingInterceptor;
 import fi.helsinki.moodi.integration.sisu.SisuClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.ssl.SSLContextBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.core5.http.io.SocketConfig;
+import org.apache.hc.core5.ssl.SSLContextBuilder;
+import org.apache.hc.core5.util.Timeout;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
 import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.security.KeyStore;
+import java.time.Duration;
 import java.util.Collections;
-
-import static com.google.common.collect.Lists.newArrayList;
 
 @Configuration
 public class StudyRegistryConfig {
-    @Value("${httpClient.connectTimeout}")
+    @Value("${httpClient.sisu.connectTimeout}")
     private int connectTimeout;
 
-    @Value("${httpClient.socketTimeout}")
+    @Value("${httpClient.sisu.socketTimeout}")
     private int socketTimeout;
 
-    @Autowired
-    private Environment environment;
+    @Value("${httpClient.sisu.keystoreLocation:#{null}}")
+    private String keystoreLocation;
+
+    @Value("${httpClient.sisu.keystorePassword:#{null}}")
+    private String keystorePassword;
+
+    @Value("${integration.sisu.baseUrl}")
+    private String sisuBaseUrl;
+
+    @Value("${integration.sisu.apiKey}")
+    private String sisuApiKey;
 
     private KeyStore keyStore(String keystoreLocation, char[] keystorePassword) throws Exception {
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
@@ -62,23 +75,10 @@ public class StudyRegistryConfig {
     }
 
     private boolean useClientCert() {
-        return environment.containsProperty("httpClient.keystoreLocation") && environment.containsProperty("httpClient.keystorePassword");
-    }
-
-    @PostConstruct
-    public void initDefaultSSLContext() {
-        if (useClientCert()) {
-            SSLContext sslContext = sslContext();
-
-            if (sslContext != null) {
-                SSLContext.setDefault(sslContext);
-            }
-        }
+        return keystoreLocation != null && keystorePassword != null;
     }
 
     private SSLContext sslContext() {
-        String keystoreLocation = environment.getRequiredProperty("httpClient.keystoreLocation");
-        String keystorePassword = environment.getRequiredProperty("httpClient.keystorePassword");
         char[] keystorePasswordCharArray = keystorePassword.toCharArray();
 
         try {
@@ -90,25 +90,37 @@ public class StudyRegistryConfig {
     }
 
     @Bean
-    public RestTemplate studyRegistryRestTemplate(ObjectMapper objectMapper, HttpClientBuilder clientBuilder) {
-        final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(objectMapper);
-
-        RestTemplate restTemplate = new RestTemplate(Collections.singletonList(converter));
-        restTemplate.setInterceptors(newArrayList(new LoggingInterceptor(), new RequestTimingInterceptor()));
-
+    public RestTemplate studyRegistryRestTemplate(RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper) {
+        PoolingHttpClientConnectionManagerBuilder cm = PoolingHttpClientConnectionManagerBuilder.create();
         if (useClientCert()) {
-            clientBuilder.setSSLContext(sslContext());
+            SSLConnectionSocketFactory sslSocketFactory = SSLConnectionSocketFactoryBuilder
+                .create()
+                .setSslContext(sslContext())
+                .build();
+            cm.setSSLSocketFactory(sslSocketFactory);
         }
-        restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(clientBuilder.build()));
-        return restTemplate;
+        // Separate timeout for the socket before the connection is established. See https://jira.it.helsinki.fi/browse/MOODI-118.
+        cm.setDefaultSocketConfig(SocketConfig.custom().setSoTimeout(Timeout.ofMilliseconds(socketTimeout)).build());
+        HttpClient httpClient = HttpClients.custom().setConnectionManager(cm.build()).build();
+
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
+
+        restTemplateBuilder.messageConverters(Collections.singletonList(new MappingJackson2HttpMessageConverter(objectMapper)));
+        restTemplateBuilder.interceptors(new LoggingInterceptor(), new RequestTimingInterceptor());
+        restTemplateBuilder.setConnectTimeout(Duration.ofMillis(connectTimeout));
+        restTemplateBuilder.setReadTimeout(Duration.ofMillis(socketTimeout));
+        restTemplateBuilder.requestFactory(() -> factory);
+        return restTemplateBuilder.build();
     }
 
     @Bean
-    public SisuClient sisuClient(RestTemplate studyRegistryRestTemplate) {
-        return new SisuClient(environment.getProperty("integration.sisu.baseUrl"),
-                environment.getProperty("integration.sisu.apiKey"),
-                connectTimeout,
-                socketTimeout,
-                studyRegistryRestTemplate);
+    public SisuClient sisuClient(@Qualifier("studyRegistryRestTemplate") RestTemplate studyRegistryRestTemplate) {
+        return new SisuClient(
+            sisuBaseUrl,
+            sisuApiKey,
+            connectTimeout,
+            socketTimeout,
+            studyRegistryRestTemplate
+        );
     }
 }
