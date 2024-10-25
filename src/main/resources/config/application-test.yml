@@ -6,7 +6,8 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     database: PostgreSQL
   flyway:
-    locations: classpath:db/migration/common, classpath:db/migration/h2
+      locations: classpath:db/migration/common, classpath:db/migration/h2
+      clean-disabled: false
 
 auth.client.testclient: xxx123
 auth.enabled: true

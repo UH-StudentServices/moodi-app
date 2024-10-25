@@ -10,7 +10,7 @@ spring:
   flyway:
     locations: classpath:db/migration/common,classpath:db/migration/psql
     table: schema_version
-    ignore-missing-migrations: true
+    ignoreMigrationPatterns: ['*:missing']
     validateOnMigrate: false
 
 integration:
