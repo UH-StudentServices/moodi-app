@@ -132,6 +132,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
 
     implementation 'ch.qos.logback:logback-classic'
     implementation 'ch.qos.logback:logback-core'
@@ -150,7 +151,6 @@ dependencies {
     implementation 'org.postgresql:postgresql'
     implementation 'org.apache.httpcomponents.client5:httpclient5'
     implementation 'org.trimou:trimou-core:2.5.1.Final'
-    implementation 'javax.mail:mail:1.4.7'
     implementation 'javax.validation:validation-api:2.0.1.Final'
     implementation group: 'com.github.americanexpress.nodes', name: 'nodes', version: nodes_version
     implementation 'io.sentry:sentry-spring-boot-starter:6.33.0'
