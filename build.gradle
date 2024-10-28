@@ -146,6 +146,7 @@ dependencies {
     implementation 'com.google.guava:guava:33.3.0-jre'
     implementation 'com.h2database:h2'
     implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-database-postgresql'
     implementation 'org.postgresql:postgresql'
     implementation 'org.apache.httpcomponents.client5:httpclient5'
     implementation 'org.trimou:trimou-core:2.5.1.Final'
