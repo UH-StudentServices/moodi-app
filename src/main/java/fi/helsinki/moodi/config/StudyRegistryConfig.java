@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.helsinki.moodi.integration.http.LoggingInterceptor;
 import fi.helsinki.moodi.integration.http.RequestTimingInterceptor;
 import fi.helsinki.moodi.integration.sisu.SisuClient;
+import jakarta.annotation.PostConstruct;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
@@ -76,6 +77,17 @@ public class StudyRegistryConfig {
 
     private boolean useClientCert() {
         return keystoreLocation != null && keystorePassword != null;
+    }
+
+    @PostConstruct
+    public void initDefaultSSLContext() {
+        if (useClientCert()) {
+            SSLContext sslContext = sslContext();
+
+            if (sslContext != null) {
+                SSLContext.setDefault(sslContext);
+            }
+        }
     }
 
     private SSLContext sslContext() {
