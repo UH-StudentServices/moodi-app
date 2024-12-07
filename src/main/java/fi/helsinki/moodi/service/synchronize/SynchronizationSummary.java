@@ -18,19 +18,21 @@
 package fi.helsinki.moodi.service.synchronize;
 
 import com.google.common.base.Stopwatch;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
-import static fi.helsinki.moodi.service.synchronize.SynchronizationStatus.COMPLETED_FAILURE;
-import static fi.helsinki.moodi.service.synchronize.SynchronizationStatus.COMPLETED_SUCCESS;
+import static fi.helsinki.moodi.service.synchronize.SynchronizationStatus.*;
 
 /**
  * Summary of synchronization run.
  */
 public final class SynchronizationSummary {
 
+    @Getter
     private final SynchronizationType type;
+    @Getter
     private final List<SynchronizationItem> items;
     private final Stopwatch stopwatch;
     private final Exception exception;
@@ -43,11 +45,17 @@ public final class SynchronizationSummary {
     }
 
     public SynchronizationStatus getStatus() {
-        return (exception == null && getItemCount() == getSuccessfulItemsCount()) ? COMPLETED_SUCCESS : COMPLETED_FAILURE;
-    }
-
-    public SynchronizationType getType() {
-        return type;
+        long successfulItemCount = getSuccessfulItemsCount();
+        long itemCount = getItemCount();
+        if (exception != null
+            || itemCount > 0 && successfulItemCount == 0
+        ) {
+            return COMPLETED_FAILURE;
+        }
+        if (itemCount > successfulItemCount) {
+            return COMPLETED_PARTIAL_FAILURE;
+        }
+        return COMPLETED_SUCCESS;
     }
 
     public long getItemCount() {
@@ -75,7 +83,4 @@ public final class SynchronizationSummary {
         return ret;
     }
 
-    public List<SynchronizationItem> getItems() {
-        return items;
-    }
 }

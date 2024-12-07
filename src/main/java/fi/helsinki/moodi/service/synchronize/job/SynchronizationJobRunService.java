@@ -23,6 +23,7 @@ import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.service.time.TimeService;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,7 @@ import static fi.helsinki.moodi.service.synchronize.SynchronizationType.INCREMEN
 
 @Service
 @Transactional
+@Slf4j
 public class SynchronizationJobRunService {
 
     private final SynchronizationJobRunRepository synchronizationJobRunRepository;
@@ -56,19 +58,19 @@ public class SynchronizationJobRunService {
     @PostConstruct
     public void checkForInterruptedRuns() {
         List<SynchronizationJobRun> interruptedRuns = synchronizationJobRunRepository.findByStatus(SynchronizationStatus.STARTED);
-        interruptedRuns.stream().forEach(run -> run.status = SynchronizationStatus.INTERRUPTED);
+        interruptedRuns.forEach(run -> run.status = SynchronizationStatus.INTERRUPTED);
         synchronizationJobRunRepository.saveAll(interruptedRuns);
     }
 
     public boolean isSynchronizationInProgress() {
         List<SynchronizationJobRun> inProgressRuns = synchronizationJobRunRepository.findByStatus(SynchronizationStatus.STARTED);
-        return inProgressRuns.size() > 0;
+        return !inProgressRuns.isEmpty();
     }
 
     public Optional<SynchronizationJobRun> findLatestCompletedIncrementalJob() {
         return synchronizationJobRunRepository.findFirstByTypeAndStatusInOrderByCompletedDesc(
             INCREMENTAL,
-            Lists.newArrayList(COMPLETED_SUCCESS, COMPLETED_FAILURE));
+            Lists.newArrayList(COMPLETED_SUCCESS, COMPLETED_PARTIAL_FAILURE, COMPLETED_FAILURE));
     }
 
     public Optional<SynchronizationJobRun> findLatestJob(SynchronizationType type) {
@@ -76,7 +78,8 @@ public class SynchronizationJobRunService {
     }
 
     public Optional<SynchronizationJobRun> findLatestCompletedJob() {
-        return synchronizationJobRunRepository.findFirstByStatusInOrderByCompletedDesc(Lists.newArrayList(COMPLETED_SUCCESS, COMPLETED_FAILURE));
+        return synchronizationJobRunRepository
+            .findFirstByStatusInOrderByCompletedDesc(Lists.newArrayList(COMPLETED_SUCCESS, COMPLETED_PARTIAL_FAILURE, COMPLETED_FAILURE));
     }
 
     public long begin(final SynchronizationType type) {
@@ -99,6 +102,10 @@ public class SynchronizationJobRunService {
         job.completed = timeService.getCurrentUTCDateTime();
 
         synchronizationJobRunRepository.save(job);
+
+        if (job.status != COMPLETED_SUCCESS) {
+            log.error("Synchronization job (id: {}) failed with status {}. Message: {}", id, job.status, job.message);
+        }
     }
 
     public void cleanOldRuns() {
