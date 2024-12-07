@@ -18,21 +18,18 @@
         xmlns='http://www.ehcache.org/v3'
         xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core-3.0.xsd"
 >
-    <cache-template name="defaultCacheTemplate">
+    <cache alias="moodle-client.moodle-user-by-username">
         <expiry>
             <none/>
         </expiry>
-        <heap unit="MB">512</heap>
-    </cache-template>
-
-    <cache alias="moodle-client.moodle-user-by-username" uses-template="defaultCacheTemplate">
-        <!-- Uses default template -->
+        <heap unit="entries">30000</heap>
     </cache>
 
-    <cache alias="sisu-client.organisations-by-id" uses-template="defaultCacheTemplate">
+    <cache alias="sisu-client.organisations-by-id">
         <expiry>
-            <ttl unit="seconds">3600</ttl>
+            <ttl>3600</ttl>
         </expiry>
+        <heap unit="entries">1</heap>
     </cache>
 
 </config>
