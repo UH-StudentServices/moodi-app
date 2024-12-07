@@ -23,6 +23,7 @@ package fi.helsinki.moodi.service.synchronize;
 public enum SynchronizationStatus {
     STARTED,
     COMPLETED_SUCCESS,
+    COMPLETED_PARTIAL_FAILURE,
     COMPLETED_FAILURE,
     INTERRUPTED
 }

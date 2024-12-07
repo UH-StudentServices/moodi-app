@@ -18,9 +18,6 @@
 package fi.helsinki.moodi.web;
 
 import fi.helsinki.moodi.MoodiHealthIndicator;
-import fi.helsinki.moodi.service.Result;
-import fi.helsinki.moodi.service.importing.ImportCourseRequest;
-import fi.helsinki.moodi.service.importing.ImportCourseResponse;
 import fi.helsinki.moodi.service.importing.ImportingService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationStatus;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRun;
@@ -38,10 +35,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -84,6 +80,15 @@ public class HealthCheckTest extends AbstractMoodiIntegrationTest {
             .andExpect(jsonPath("$.status").value("DOWN"))
             .andExpect(jsonPath("$.components.moodi.details.error")
                 .value("The last sync job failed: COMPLETED_FAILURE"));
+    }
+
+    @Test
+    public void thatReturnsOkWhenJobCompletedPartialFailure() throws Exception {
+        setupJobRunHoursAgo(1, SynchronizationStatus.COMPLETED_PARTIAL_FAILURE);
+
+        mockMvc.perform(get("/health"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("UP"));
     }
 
     @Test
