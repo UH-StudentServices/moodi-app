@@ -21,6 +21,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+/**
+ * This class is used for launching long-running synchronization task
+ * through the REST API controller, which returns immediately an
+ * acknowledgment of the start of the operation. Otherwise, the
+ * SynchronizationService synchronize method could be used directly.
+ */
 @Component
 public class SynchronizationExecutor {
 
