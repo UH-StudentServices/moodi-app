@@ -29,7 +29,7 @@ Deployment processes leverage GitLab CI for testing, building, and deployment in
 ## Requirements
 
 The following programs must be installed if not using the dockerized development environment:
-- JDK 11
+- JDK 17
 
 # Local development
 
