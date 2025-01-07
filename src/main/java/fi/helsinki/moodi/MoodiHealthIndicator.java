@@ -22,6 +22,7 @@ import fi.helsinki.moodi.service.synchronize.SynchronizationStatus;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRun;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRunService;
 import fi.helsinki.moodi.service.time.TimeService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
@@ -32,6 +33,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Component
+@Slf4j
 public class MoodiHealthIndicator implements HealthIndicator {
     private static final int MAX_HOURS_SINCE_COMPLETED_SYNC = 4;
     private static final int MIN_MINUTES_SINCE_ERROR = 30;
@@ -62,7 +64,7 @@ public class MoodiHealthIndicator implements HealthIndicator {
                     if (latest.completed == null || latest.completed.isBefore(now.minusHours(MAX_HOURS_SINCE_COMPLETED_SYNC))) {
                         return indicateError(String.format("No sync job completed in %d hours. Latest job completed at %s UTC",
                             MAX_HOURS_SINCE_COMPLETED_SYNC, latest.completed));
-                    } else if (latest.status != SynchronizationStatus.COMPLETED_SUCCESS) {
+                    } else if (latest.status == SynchronizationStatus.COMPLETED_FAILURE) {
                         return indicateError(String.format("The last sync job failed: %s", latest.message));
                     }
                 } else {
@@ -92,6 +94,7 @@ public class MoodiHealthIndicator implements HealthIndicator {
     }
 
     private Health indicateError(String message, Exception e) {
+        log.error("Health check failure: {}", message);
         return Health.down()
             .withDetail("error", message)
             .withDetail("stack", e != null ? stackString(e) : "none")
