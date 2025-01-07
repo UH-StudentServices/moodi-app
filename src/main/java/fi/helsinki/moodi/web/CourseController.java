@@ -26,6 +26,7 @@ import fi.helsinki.moodi.service.dto.CourseDto;
 import fi.helsinki.moodi.service.importing.ImportCourseRequest;
 import fi.helsinki.moodi.service.importing.ImportCourseResponse;
 import fi.helsinki.moodi.service.importing.ImportingService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @RestController
+@Slf4j
 public class CourseController {
 
     private final ImportingService importingService;
@@ -60,10 +62,13 @@ public class CourseController {
 
         try {
             Result<ImportCourseResponse, String> ret = importingService.importCourse(request);
-            moodiHealthIndicator.clearError();
             return response(ret);
         } catch (Exception e) {
-            moodiHealthIndicator.reportError(e.toString(), e);
+            log.error("Import course failed for realisation {} by user {} with exception {}",
+                request.realisationId,
+                request.creatorSisuId,
+                e.getMessage()
+            );
             throw e;
         }
     }
