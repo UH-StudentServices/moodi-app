@@ -12,6 +12,13 @@ test:
         reports:
             junit: build/test-results/test/*.xml
 
+sonarqube:
+    stage: test
+    image: gradle:7.6-jdk17
+    script:
+        - ./gradlew sonar -Dsonar.token=${SONAR_TOKEN}
+    when: manual
+
 release prod:
     stage: release
     image: gradle:7.6-jdk17
