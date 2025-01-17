@@ -20,6 +20,7 @@ package fi.helsinki.moodi.service.log;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryStudent;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryTeacher;
+import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
@@ -35,7 +36,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -61,18 +61,19 @@ public class SynchronizationSummaryLog {
             fullSummary.getItems()
                 .stream()
                 .map(this::toSynchronizationItemLogEntry)
-                .collect(Collectors.toList()));
+                .toList());
     }
 
     private SynchronizationItemLogEntry toSynchronizationItemLogEntry(SynchronizationItem item) {
         try {
             List<UserSyncronizationItemLogEntry> userSyncronizationItemLogEntries = item.getUserSynchronizationItems().stream()
                 .map(UserSyncronizationItemLogEntry::new)
-                .collect(Collectors.toList());
+                .toList();
 
+            Course course = item.getCourse();
             return new SynchronizationItemLogEntry(
-                Optional.ofNullable(item.getCourse()).map(course -> course.realisationId).orElse(null),
-                Optional.ofNullable(item.getCourse()).map(course -> course.moodleId).orElse(null),
+                course.realisationId,
+                course.moodleId,
                 item.getEnrichmentStatus(),
                 item.getProcessingStatus(),
                 new UserEnrollmentsLogEntry(
@@ -160,12 +161,12 @@ public class SynchronizationSummaryLog {
         public final StudyRegistryStudent student;
         public final StudyRegistryTeacher teacher;
 
-        public String moodleUsername;
-        public List<Long> moodleRoleIds;
+        public final String moodleUsername;
+        public final List<Long> moodleRoleIds;
 
         private UserSyncronizationItemLogEntry(UserSynchronizationItem item) {
             this.status = item.getStatus();
-            this.actions = item.getActions().stream().map(SyncronizationItemActionLogEntry::new).collect(Collectors.toList());
+            this.actions = item.getActions().stream().map(SyncronizationItemActionLogEntry::new).toList();
             this.moodleUserId = item.getMoodleUserId();
             this.student = item.getStudent();
             this.teacher = item.getTeacher();
@@ -175,7 +176,10 @@ public class SynchronizationSummaryLog {
                 this.moodleRoleIds = item.getMoodleUserEnrollments().roles
                     .stream()
                     .map(role -> role.roleId)
-                    .collect(Collectors.toList());
+                    .toList();
+            } else {
+                this.moodleUsername = null;
+                this.moodleRoleIds = null;
             }
         }
     }
