@@ -37,8 +37,6 @@ release prod:
     only:
         - master
     artifacts:
-        reports:
-            junit: build/test-results/test/*.xml
         paths:
             - ci-deploy.properties
     when: manual
