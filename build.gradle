@@ -28,7 +28,10 @@ plugins {
     id 'checkstyle'
     id 'org.sonarqube' version '3.3'
     id "io.sentry.jvm.gradle" version "3.14.0"
+    id 'org.cyclonedx.bom' version '1.8.2'
 }
+
+project.group = 'fi.helsinki.moodi'
 
 if (System.getenv("SENTRY_AUTH_TOKEN")) {
     sentry {
