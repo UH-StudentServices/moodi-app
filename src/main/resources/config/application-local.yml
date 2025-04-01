@@ -26,3 +26,7 @@ synchronize.INCREMENTAL.enabled: false
 logging:
   retain-logs: PT30M
   file-logging-path: /tmp/log/moodi-import-sync-log
+
+sentry.environment: local
+sentry.enabled: true
+sentry.dsn: https://68b041a12b1a917e979334b005101b27@o309751.ingest.us.sentry.io/4506162290098176
