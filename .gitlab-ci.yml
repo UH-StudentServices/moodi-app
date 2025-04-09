@@ -4,6 +4,8 @@ stages:
     - integration test
     - release
     - deploy
+    - dtrack-sbom
+    - dtrack-submit
 
 test:
     stage: test
@@ -153,3 +155,30 @@ integration test next:
         reports:
             junit: build/test-results/itest/*.xml
 
+dtrack-sbom:
+    stage: dtrack-sbom
+    image: gradle:7.6-jdk17
+    script:
+        - ./gradlew cyclonedxBom
+    only:
+        - master
+    needs:
+        - deploy prod
+    artifacts:
+        expire_in: 1h
+        paths:
+            - build/reports/application.cdx.json
+
+submit-sbom:
+    stage: dtrack-submit
+    image: alpine:latest
+    dependencies:
+        - dtrack-sbom
+    only:
+        - master
+    needs:
+        - dtrack-sbom
+    before_script:
+        - apk add --no-cache curl
+    script:
+        - "curl -X POST ${DTRACK_API_URL}/v1/bom -H 'Content-Type: multipart/form-data' -H 'X-Api-Key: '${DTRACK_API_KEY} -F 'projectName='${PROJECT_NAME} -F 'autoCreate=true' -F 'bom=@build/reports/application.cdx.json'"

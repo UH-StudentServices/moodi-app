@@ -27,6 +27,9 @@ Port 443 is open at UH for internal, VPN networks, and the Silta environment.
 
 Deployment processes leverage GitLab CI for testing, building, and deployment initiation. Deployments occur within a separate project, [moodi-infra](https://version.helsinki.fi/OPADev/moodi-infra). The QA server receives automatic deployments upon new commits to the master branch. Production deployments are manual, initiated by executing the `release prod` job in the GitLab CI pipeline. The GitLab Package Registry stores the application's Maven package. For detailed information, refer to [.gitlab-ci.yml](.gitlab-ci.yml).
 
+
+The project is integrated to Dependency Track for security scanning. The Dependency Track server is located at <https://dtrack.it.helsinki.fi>. After production deployment, the SBOM is uploaded to Dependency Track for scanning to track vulnerabilities in the production environment.
+
 ## Requirements
 
 The following programs must be installed if not using the dockerized development environment:
