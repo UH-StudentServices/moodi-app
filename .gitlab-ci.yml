@@ -1,16 +1,45 @@
 stages:
     - test
+    - quality
     - integration test
     - release
     - deploy
+
 test:
     stage: test
     image: gradle:7.6-jdk17
     script:
-        - ./gradlew check test
+        - ./gradlew check test jacocoTestReport
     artifacts:
+        paths:
+            - build/classes/
+            - build/test-results/test
+            - build/reports/jacoco/test
         reports:
+            coverage_report:
+                coverage_format: jacoco
+                path: build/reports/jacoco/test/jacocoTestReport.xml
             junit: build/test-results/test/*.xml
+    rules:
+        - if: $CI_PIPELINE_SOURCE == 'push' || $CI_PIPELINE_SOURCE == 'merge_request_event'
+
+sonarqube:
+    stage: quality
+    dependencies:
+        - test
+    image: gradle:7.6-jdk17
+    variables:
+        SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+        GIT_DEPTH: "0"
+    cache:
+        key: "${CI_JOB_NAME}"
+        paths:
+            - .sonar/cache
+    script:
+        - gradle sonar -Dsonar.token=${SONAR_TOKEN} -Dsonar.host.url=https://sonarqube.it.helsinki.fi/  -Dsonar.qualitygate.wait=true
+    allow_failure: false
+    rules:
+        - if: $CI_COMMIT_REF_NAME == 'master' || $CI_PIPELINE_SOURCE == 'merge_request_event'
 
 release prod:
     stage: release
