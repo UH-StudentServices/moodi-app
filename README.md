@@ -26,6 +26,7 @@ The application utilizes two servers:
 Port 443 is open at UH for internal, VPN networks, and the Silta environment.
 
 Deployment processes leverage GitLab CI for testing, building, and deployment initiation. Deployments occur within a separate project, [moodi-infra](https://version.helsinki.fi/OPADev/moodi-infra). The QA server receives automatic deployments upon new commits to the master branch. Production deployments are manual, initiated by executing the `release prod` job in the GitLab CI pipeline. The GitLab Package Registry stores the application's Maven package. For detailed information, refer to [.gitlab-ci.yml](.gitlab-ci.yml).
+
 ## Requirements
 
 The following programs must be installed if not using the dockerized development environment:
@@ -67,6 +68,10 @@ Then run the tests
 read MOODLE_WS_TOKEN 
 ./gradlew itest --rerun-tasks -Pmoodle_base_url=https://moodi-2-moodle-20.student.helsinki.fi:1444/moodlecurrent/webservice/rest/server.php -Pmoodle_ws_token=$MOODLE_WS_TOKEN   
 ```
+
+## Code quality with SonarQube
+
+The project uses SonarQube for code quality checks. The SonarQube server is available at <https://sonarqube.it.helsinki.fi>. See `.gitlab-ci.yml` and `build.gradle` for the details. The best  way to leverage SonarQube analysis is to use SonarQube for IDE plugin e.g. in IntelliJ IDEA. To fully utilize the plugin, you need to connect it to the SonarQube server via plugin settings. You need user token to connect to the SonarQube server. The token can be generated in the SonarQube server under the user settings.
 
 ## Running Moodi locally
 

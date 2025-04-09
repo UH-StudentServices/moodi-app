@@ -93,7 +93,7 @@ public class GroupSynchronizationService {
             .courseLanguage(courseLanguage)
             .moodleGroupingsWithGroups(moodleService.getGroupingsWithGroups(moodleCourse.id, true))
             .moodleCourseMembers(moodleService.getEnrolledUsers(moodleCourse.id).stream()
-            .map(MoodleUser::from).collect(java.util.stream.Collectors.toList()))
+            .map(MoodleUser::from).toList())
             .build();
     }
 }
