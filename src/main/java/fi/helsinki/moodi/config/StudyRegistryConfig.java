@@ -25,8 +25,7 @@ import jakarta.annotation.PostConstruct;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
 import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.ssl.SSLContextBuilder;
 import org.apache.hc.core5.util.Timeout;
@@ -105,11 +104,8 @@ public class StudyRegistryConfig {
     public RestTemplate studyRegistryRestTemplate(RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper) {
         PoolingHttpClientConnectionManagerBuilder cm = PoolingHttpClientConnectionManagerBuilder.create();
         if (useClientCert()) {
-            SSLConnectionSocketFactory sslSocketFactory = SSLConnectionSocketFactoryBuilder
-                .create()
-                .setSslContext(sslContext())
-                .build();
-            cm.setSSLSocketFactory(sslSocketFactory);
+            DefaultClientTlsStrategy tlsStrategy = new DefaultClientTlsStrategy(sslContext());
+            cm.setTlsSocketStrategy(tlsStrategy);
         }
         // Separate timeout for the socket before the connection is established. See https://jira.it.helsinki.fi/browse/MOODI-118.
         cm.setDefaultSocketConfig(SocketConfig.custom().setSoTimeout(Timeout.ofMilliseconds(socketTimeout)).build());
@@ -119,8 +115,8 @@ public class StudyRegistryConfig {
 
         restTemplateBuilder.messageConverters(Collections.singletonList(new MappingJackson2HttpMessageConverter(objectMapper)));
         restTemplateBuilder.interceptors(new LoggingInterceptor(), new RequestTimingInterceptor());
-        restTemplateBuilder.setConnectTimeout(Duration.ofMillis(connectTimeout));
-        restTemplateBuilder.setReadTimeout(Duration.ofMillis(socketTimeout));
+        restTemplateBuilder.connectTimeout(Duration.ofMillis(connectTimeout));
+        restTemplateBuilder.readTimeout(Duration.ofMillis(socketTimeout));
         restTemplateBuilder.requestFactory(() -> factory);
         return restTemplateBuilder.build();
     }

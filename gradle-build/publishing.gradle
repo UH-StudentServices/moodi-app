@@ -24,9 +24,9 @@ apply plugin: "maven-publish"
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId "fi.helsinki.moodi"
-            artifactId "moodi"
-            version version
+            groupId = "fi.helsinki.moodi"
+            artifactId = "moodi"
+            version = version
             from components.java
         }
     }

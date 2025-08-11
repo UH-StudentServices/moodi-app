@@ -2,14 +2,15 @@ server.port: 8084
 
 management:
   endpoints:
-    enabled-by-default: false
+    access:
+      default: none
     web:
       base-path: /
       path-mapping:
         health: health
   endpoint:
     health:
-      enabled: true
+      access: unrestricted
       show-details: always # The health endpoint is not publicly reachable, so we can give out details to facilitate troubleshooting.
 
 httpClient:
