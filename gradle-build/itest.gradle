@@ -15,11 +15,6 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-configurations {
-    itestImplementation.extendsFrom testImplementation
-    itestRuntimeOnly.extendsFrom testRuntimeOnly
-}
-
 sourceSets {
     itest {
         compileClasspath += sourceSets.main.output + sourceSets.test.output
@@ -32,7 +27,12 @@ sourceSets {
     }
 }
 
-task itest(type: Test) {
+configurations {
+    itestImplementation.extendsFrom testImplementation
+    itestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+tasks.register('itest', Test) {
     maxHeapSize = "4G"
     doFirst {
         systemProperty "spring.profiles.active", "test"

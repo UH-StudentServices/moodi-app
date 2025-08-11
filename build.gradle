@@ -22,7 +22,7 @@ buildscript {
 }
 
 plugins {
-    id "org.springframework.boot" version "3.3.4"
+    id "org.springframework.boot" version "3.5.4"
     id "net.researchgate.release" version "3.0.2"
     id "java"
     id 'checkstyle'
@@ -48,8 +48,8 @@ if (System.getenv("SENTRY_AUTH_TOKEN")) {
 }
 
 java {
-    sourceCompatibility = "1.17"
-    targetCompatibility = "1.17"
+    sourceCompatibility = "1.21"
+    targetCompatibility = "1.21"
 }
 
 apply plugin: "io.spring.dependency-management"
@@ -95,29 +95,29 @@ test {
 }
 
 wrapper {
-    gradleVersion = '7.6'
+    gradleVersion = '8.14.3'
 }
 
 checkstyle {
     toolVersion = '10.18.1'
     configDirectory = rootProject.file('gradle-build/checkstyle')
-    configProperties 'checkstyle.header.file': file('gradle-build/checkstyle/required-header.txt');
+    configProperties = ['checkstyle.header.file': file('gradle-build/checkstyle/required-header.txt')]
 }
 
 if(hasProperty("artifactory_base_url")) {
     repositories {
         maven {
-            url "${artifactory_base_url}/remote-repos/"
+            url = "${artifactory_base_url}/remote-repos/"
             allowInsecureProtocol(true)
         }
         mavenLocal()
-        maven { url 'https://jitpack.io' }
+        maven { url = 'https://jitpack.io' }
         mavenCentral()
     }
 } else {
     repositories {
         mavenLocal()
-        maven { url 'https://jitpack.io' }
+        maven { url = 'https://jitpack.io' }
         mavenCentral()
     }
 }
@@ -125,8 +125,8 @@ if(hasProperty("artifactory_base_url")) {
 dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
-    implementation 'org.projectlombok:lombok:1.18.28'
-    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+    implementation 'org.projectlombok:lombok:1.18.38'
+    annotationProcessor 'org.projectlombok:lombok:1.18.38'
 
     implementation('org.springframework.boot:spring-boot-starter-web') {
         exclude module: 'spring-boot-starter-tomcat'

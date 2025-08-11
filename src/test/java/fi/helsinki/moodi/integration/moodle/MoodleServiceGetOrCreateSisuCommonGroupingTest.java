@@ -38,7 +38,7 @@ public class MoodleServiceGetOrCreateSisuCommonGroupingTest extends AbstractMood
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
             .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_group_get_course_groupings&moodlewsrestformat=json&courseid=123"))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
@@ -47,7 +47,7 @@ public class MoodleServiceGetOrCreateSisuCommonGroupingTest extends AbstractMood
                 + "&groupings%5B0%5D%5Bname%5D=Sisusta+synkronoidut&groupings%5B0%5D%5Bcourseid%5D=123&groupings%5B0%5D%5Bdescription%5D"
                 + "&groupings%5B0%5D%5Bdescriptionformat%5D=1&groupings%5B0%5D%5Bidnumber%5D=sisu-synchronised"
             ))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andRespond(withSuccess(Fixtures.asString("/moodle/create-sisu-common-grouping.json"), MediaType.APPLICATION_JSON));
 
         final MoodleGrouping grouping = moodleService.getOrCreateSisuCommonGrouping(123L, "fi");

@@ -37,7 +37,7 @@ public class EnsureCourseVisibilityTest extends AbstractMoodiIntegrationTest {
     private void mockUpdateCourseVisibility(long moodleId) {
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andExpect(content().string(startsWith(
                 "wstoken=xxxx1234&wsfunction=core_course_update_courses&moodlewsrestformat=json")))
             .andRespond(request -> withSuccess("{\"warnings\":[]}", MediaType.APPLICATION_JSON)
