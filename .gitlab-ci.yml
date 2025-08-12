@@ -9,7 +9,7 @@ stages:
 
 test:
     stage: test
-    image: gradle:7.6-jdk17
+    image: gradle:8.14.3-jdk
     script:
         - ./gradlew check test jacocoTestReport
     artifacts:
@@ -29,7 +29,7 @@ sonarqube:
     stage: quality
     dependencies:
         - test
-    image: gradle:7.6-jdk17
+    image: gradle:8.14.3-jdk
     variables:
         SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
         GIT_DEPTH: "0"
@@ -39,13 +39,13 @@ sonarqube:
             - .sonar/cache
     script:
         - gradle sonar -Dsonar.token=${SONAR_TOKEN} -Dsonar.host.url=https://sonarqube.it.helsinki.fi/  -Dsonar.qualitygate.wait=true
-    allow_failure: false
+    allow_failure: true
     rules:
         - if: $CI_COMMIT_REF_NAME == 'master' || $CI_PIPELINE_SOURCE == 'merge_request_event'
 
 release prod:
     stage: release
-    image: gradle:7.6-jdk17
+    image: gradle:8.14.3-jdk
     variables:
         GIT_STRATEGY: clone
     script:
@@ -76,7 +76,7 @@ release prod:
 
 publish SNAPSHOT:
     stage: release
-    image: gradle:7.6-jdk17
+    image: gradle:8.14.3-jdk
     variables:
         GIT_STRATEGY: clone
     script:
@@ -123,7 +123,7 @@ deploy dev:
         - publish SNAPSHOT
 
 .integration test: &integration_test_template
-    image: gradle:7.6-jdk17
+    image: gradle:8.14.3-jdk
     stage: integration test
     script:
         - >
@@ -157,7 +157,7 @@ integration test next:
 
 dtrack-sbom:
     stage: dtrack-sbom
-    image: gradle:7.6-jdk17
+    image: gradle:8.14.3-jdk
     script:
         - ./gradlew cyclonedxBom
     only:

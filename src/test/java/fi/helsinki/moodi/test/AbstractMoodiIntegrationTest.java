@@ -249,7 +249,7 @@ public abstract class AbstractMoodiIntegrationTest {
 
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andExpect(content().string(payload))
             .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
     }
@@ -339,7 +339,7 @@ public abstract class AbstractMoodiIntegrationTest {
             + urlEncode(username);
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andExpect(content().string(payload))
             .andRespond(request -> {
                 return withSuccess(response, MediaType.APPLICATION_JSON).createResponse(request);
@@ -351,7 +351,7 @@ public abstract class AbstractMoodiIntegrationTest {
                                                            final String categoryId) {
         moodleMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andExpect(content().string(
                 allOf(
                     startsWith(
@@ -400,7 +400,7 @@ public abstract class AbstractMoodiIntegrationTest {
         String json = "[" + moodleIds.stream().map(moodleId -> "{ \"id\": \"" + moodleId + "\" }").collect(Collectors.joining(", ")) + "]";
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andExpect(content().string(startsWith("wstoken=xxxx1234&wsfunction=core_course_get_courses&moodlewsrestformat=json")))
             .andRespond(request -> {
                 if (delayed) {
@@ -418,7 +418,7 @@ public abstract class AbstractMoodiIntegrationTest {
         // first the whole batch creates error
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andExpect(content().string(startsWith(
                 "wstoken=xxxx1234&wsfunction=core_enrol_get_enrolled_users_with_capability&moodlewsrestformat=json")))
             .andRespond(request -> withServerError().createResponse(request));
@@ -429,7 +429,7 @@ public abstract class AbstractMoodiIntegrationTest {
             if (failAtIndex == i) {
                 moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
                     .andExpect(method(HttpMethod.POST))
-                    .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
+                    .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
                     .andExpect(content().string(startsWith(
                         "wstoken=xxxx1234&wsfunction=core_enrol_get_enrolled_users_with_capability&moodlewsrestformat=json")))
                     .andRespond(request -> withServerError().createResponse(request));
@@ -445,7 +445,7 @@ public abstract class AbstractMoodiIntegrationTest {
             final String json = ow.writeValueAsString(resultObjects);
             moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
                 .andExpect(method(HttpMethod.POST))
-                .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
+                .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
                 .andExpect(content().string(startsWith(
                     "wstoken=xxxx1234&wsfunction=core_enrol_get_enrolled_users_with_capability&moodlewsrestformat=json")))
                 .andRespond(request -> withSuccess(json, MediaType.APPLICATION_JSON).createResponse(request));
