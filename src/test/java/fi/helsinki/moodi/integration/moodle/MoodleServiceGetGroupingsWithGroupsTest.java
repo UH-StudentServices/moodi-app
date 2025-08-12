@@ -42,7 +42,7 @@ public class MoodleServiceGetGroupingsWithGroupsTest extends AbstractMoodiIntegr
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
             .andExpect(content().string("wstoken=xxxx1234&wsfunction=core_group_get_course_groupings&moodlewsrestformat=json&courseid=123"))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andRespond(withSuccess(Fixtures.asString("/moodle/get-course-groupings.json"), MediaType.APPLICATION_JSON));
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
@@ -50,7 +50,7 @@ public class MoodleServiceGetGroupingsWithGroupsTest extends AbstractMoodiIntegr
                 "wstoken=xxxx1234&wsfunction=core_group_get_groupings&moodlewsrestformat=json"
                 + "&groupingids%5B0%5D=15&groupingids%5B1%5D=16&groupingids%5B2%5D=14&returngroups=1"
             ))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andRespond(withSuccess(Fixtures.asString("/moodle/get-groupings-with-groups.json"), MediaType.APPLICATION_JSON));
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
@@ -59,7 +59,7 @@ public class MoodleServiceGetGroupingsWithGroupsTest extends AbstractMoodiIntegr
                     + "&groupids%5B0%5D=196&groupids%5B1%5D=197&groupids%5B2%5D=198&groupids%5B3%5D=199&groupids%5B4%5D=196"
                     + "&groupids%5B5%5D=197&groupids%5B6%5D=198&groupids%5B7%5D=199"
             ))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andRespond(withSuccess(Fixtures.asString("/moodle/get-group-members.json"), MediaType.APPLICATION_JSON));
         moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
             .andExpect(method(HttpMethod.POST))
@@ -72,7 +72,7 @@ public class MoodleServiceGetGroupingsWithGroupsTest extends AbstractMoodiIntegr
                     + "&values%5B24%5D=302&values%5B25%5D=433&values%5B26%5D=295&values%5B27%5D=297&values%5B28%5D=305&values%5B29%5D=298"
                     + "&values%5B30%5D=431&values%5B31%5D=471&values%5B32%5D=300&values%5B33%5D=448&values%5B34%5D=460&values%5B35%5D=359"
             ))
-            .andExpect(header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8"))
+            .andExpect(header("Content-Type", "application/x-www-form-urlencoded"))
             .andRespond(withSuccess(Fixtures.asString("/moodle/get-users-by-field.json"), MediaType.APPLICATION_JSON));
 
         final List<MoodleGrouping> groupings = moodleService.getGroupingsWithGroups(123L, true);
