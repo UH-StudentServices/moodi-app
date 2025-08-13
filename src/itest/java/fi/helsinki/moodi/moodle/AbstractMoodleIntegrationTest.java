@@ -32,10 +32,9 @@ import fi.helsinki.moodi.test.TestConfig;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.runner.RunWith;
-import org.mockserver.client.MockServerClient;
-import org.mockserver.junit.MockServerRule;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
@@ -97,10 +96,7 @@ public abstract class AbstractMoodleIntegrationTest {
     @Autowired
     private CacheManager cacheManager;
 
-    @Rule
-    public MockServerRule mockServerRule = new MockServerRule(this, 9876);
-    // Gets populated by the @Rule above.
-    private MockServerClient mockServerClient;
+    private WireMockServer wireMockServer;
     protected MockSisuGraphQLServer mockSisuGraphQLServer;
     protected MockRestServiceServer studyRegistryMockServer;
 
@@ -126,7 +122,9 @@ public abstract class AbstractMoodleIntegrationTest {
 
     @Before
     public final void setUpMockServers() {
-        mockSisuGraphQLServer = new MockSisuGraphQLServer(mockServerClient);
+        wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(9876));
+        wireMockServer.start();
+        mockSisuGraphQLServer = new MockSisuGraphQLServer(wireMockServer);
         studyRegistryMockServer = MockRestServiceServer.createServer(studyRegistryRestTemplate);
         expectSisuOrganisationsRequest();
     }
@@ -135,6 +133,9 @@ public abstract class AbstractMoodleIntegrationTest {
     public void verifyMockServers() {
         studyRegistryMockServer.verify();
         mockSisuGraphQLServer.verify();
+        if (wireMockServer != null) {
+            wireMockServer.stop();
+        }
     }
 
     protected String getSisuCourseId() {
