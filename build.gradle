@@ -164,8 +164,7 @@ dependencies {
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation 'com.jayway.jsonpath:json-path-assert:2.7.0'
     testImplementation 'junit:junit:4.13.2'
-    testImplementation group: 'org.mock-server', name: 'mockserver-netty', version: '5.15.0'
-    testImplementation group: 'org.mock-server', name: 'mockserver-junit-rule', version: '5.15.0'
+    testImplementation 'org.wiremock:wiremock-standalone:3.13.1'
     testImplementation 'com.graphql-java:graphql-java'
 
     runtimeOnly("org.springframework.boot:spring-boot-properties-migrator")
