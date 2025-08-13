@@ -18,6 +18,8 @@
 package fi.helsinki.moodi.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import fi.helsinki.moodi.integration.sisu.SisuCourseUnitRealisation;
 import fi.helsinki.moodi.integration.sisu.SisuPerson;
 import fi.helsinki.moodi.test.fixtures.Fixtures;
@@ -34,9 +36,6 @@ import io.aexp.nodes.graphql.Argument;
 import io.aexp.nodes.graphql.Arguments;
 import io.aexp.nodes.graphql.GraphQLRequestEntity;
 import io.aexp.nodes.graphql.internal.DefaultObjectMapperFactory;
-import org.mockserver.client.MockServerClient;
-import org.mockserver.model.Delay;
-import org.mockserver.model.HttpRequest;
 
 import java.io.File;
 import java.time.LocalDate;
@@ -48,20 +47,19 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.Assert.fail;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
 
 public class MockSisuGraphQLServer {
-    private final MockServerClient client;
+    private final WireMockServer wireMockServer;
     private static final String API_KEY_HEADER_NAME = "X-Api-Key";
     private static final String API_KEY = "test-apikey";
 
     private final GraphQLSchema graphQLSchema;
-    private List<HttpRequest> expectedRequests = new ArrayList<>();
+    private List<String> expectedRequests = new ArrayList<>();
 
-    public MockSisuGraphQLServer(MockServerClient client) {
-        this.client = client;
+    public MockSisuGraphQLServer(WireMockServer wireMockServer) {
+        this.wireMockServer = wireMockServer;
 
         File sisuSchema = new File("src/test/resources/graphql/sisu.graphql");
         TypeDefinitionRegistry typeDef = new SchemaParser().parse(sisuSchema);
@@ -69,7 +67,7 @@ public class MockSisuGraphQLServer {
     }
 
     public void reset() {
-        client.reset();
+        wireMockServer.resetAll();
         expectedRequests.clear();
     }
 
@@ -104,42 +102,54 @@ public class MockSisuGraphQLServer {
 
     public void verify() {
         if (!expectedRequests.isEmpty()) {
-            client.verify(expectedRequests.toArray(new HttpRequest[0]));
+            for (String requestBody : expectedRequests) {
+                List<LoggedRequest> requests = wireMockServer.findAll(
+                    postRequestedFor(urlEqualTo("/graphql"))
+                        .withHeader(API_KEY_HEADER_NAME, equalTo(API_KEY))
+                        .withRequestBody(equalToJson(requestBody))
+                );
+                if (requests.isEmpty()) {
+                    fail("Expected request not found: " + requestBody);
+                }
+            }
         }
     }
 
     private <T> void expectGraphqlRequest(String responseString, Class<T> requestClass, Arguments... requestArguments) {
-        HttpRequest request = request()
-            .withMethod("POST")
-            .withPath("/graphql")
-            .withHeader(API_KEY_HEADER_NAME, API_KEY)
-            .withBody(requestBodyMatcher(requestClass, requestArguments));
-
-        client
-            .when(request)
-            .respond(
-                response()
-                    .withStatusCode(200)
-                    .withBody(responseString));
-        expectedRequests.add(request);
+        String requestBody = requestBodyMatcher(requestClass, requestArguments);
+        
+        wireMockServer.stubFor(
+            post(urlEqualTo("/graphql"))
+                .withHeader(API_KEY_HEADER_NAME, equalTo(API_KEY))
+                .withRequestBody(equalToJson(requestBody))
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withBody(responseString)
+                        .withHeader("Content-Type", "application/json")
+                )
+        );
+        
+        expectedRequests.add(requestBody);
     }
 
     private <T> void expectGraphqlRequestWithDelay(String responseString, Class<T> requestClass, Arguments... requestArguments) {
-        HttpRequest request = request()
-            .withMethod("POST")
-            .withPath("/graphql")
-            .withHeader(API_KEY_HEADER_NAME, API_KEY)
-            .withBody(requestBodyMatcher(requestClass, requestArguments));
+        String requestBody = requestBodyMatcher(requestClass, requestArguments);
+        
+        wireMockServer.stubFor(
+            post(urlEqualTo("/graphql"))
+                .withHeader(API_KEY_HEADER_NAME, equalTo(API_KEY))
+                .withRequestBody(equalToJson(requestBody))
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withBody(responseString)
+                        .withHeader("Content-Type", "application/json")
+                        .withFixedDelay(ThreadLocalRandom.current().nextInt(1001))
+                )
+        );
 
-        client
-            .when(request)
-            .respond(
-                response()
-                    .withStatusCode(200)
-                    .withBody(responseString)
-                    .withDelay(Delay.milliseconds(ThreadLocalRandom.current().nextInt(1001))));
-
-        expectedRequests.add(request);
+        expectedRequests.add(requestBody);
     }
 
     private <T> String requestBodyMatcher(Class<T> requestClass, Arguments... arguments) {
