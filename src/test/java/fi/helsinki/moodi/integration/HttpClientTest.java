@@ -22,11 +22,10 @@ import fi.helsinki.moodi.Application;
 import fi.helsinki.moodi.integration.moodle.MoodleClient;
 import fi.helsinki.moodi.integration.sisu.SisuClient;
 import fi.helsinki.moodi.test.TestConfig;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockserver.client.MockServerClient;
-import org.mockserver.junit.MockServerRule;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -39,8 +38,7 @@ import java.util.stream.Stream;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(
@@ -55,10 +53,20 @@ import static org.mockserver.model.HttpResponse.response;
     },
     classes = { Application.class, TestConfig.class })
 public class HttpClientTest {
-    @Rule
-    public MockServerRule mockServerRule = new MockServerRule(this, 9876);
-    // Gets populated by the @Rule above.
-    private MockServerClient mockServerClient;
+    private WireMockServer wireMockServer;
+
+    @org.junit.Before
+    public void setup() {
+        wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(9876));
+        wireMockServer.start();
+    }
+
+    @org.junit.After
+    public void teardown() {
+        if (wireMockServer != null) {
+            wireMockServer.stop();
+        }
+    }
 
     @Autowired
     private SisuClient sisuClient;
@@ -103,12 +111,14 @@ public class HttpClientTest {
     }
 
     public void takeLongToRespond(int seconds) {
-        mockServerClient
-            .when(request().withPath(".*"))
-            .respond(response()
-                .withBody("Am I late?")
-                .withDelay(TimeUnit.SECONDS, seconds)
-            );
+        wireMockServer.stubFor(
+            any(anyUrl())
+                .willReturn(
+                    aResponse()
+                        .withBody("Am I late?")
+                        .withFixedDelay((int) TimeUnit.SECONDS.toMillis(seconds))
+                )
+        );
     }
 
 }

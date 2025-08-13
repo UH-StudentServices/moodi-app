@@ -29,10 +29,9 @@ import fi.helsinki.moodi.test.fixtures.Fixtures;
 import org.flywaydb.core.Flyway;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.runner.RunWith;
-import org.mockserver.client.MockServerClient;
-import org.mockserver.junit.MockServerRule;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
@@ -147,10 +146,7 @@ public abstract class AbstractMoodiIntegrationTest {
 
     protected MockMvc mockMvc;
 
-    @Rule
-    public MockServerRule mockServerRule = new MockServerRule(this, 9876);
-    // Gets populated by the @Rule above.
-    private MockServerClient mockServerClient;
+    private WireMockServer wireMockServer;
 
     protected MockRestServiceServer studyRegistryMockServer;
     protected MockRestServiceServer moodleMockServer;
@@ -199,7 +195,9 @@ public abstract class AbstractMoodiIntegrationTest {
         studyRegistryMockServer = MockRestServiceServer.createServer(studyRegistryRestTemplate);
         moodleMockServer = MockRestServiceServer.createServer(moodleRestTemplate);
         moodleReadOnlyMockServer = MockRestServiceServer.createServer(moodleReadOnlyRestTemplate);
-        mockSisuGraphQLServer = new MockSisuGraphQLServer(mockServerClient);
+        wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(9876));
+        wireMockServer.start();
+        mockSisuGraphQLServer = new MockSisuGraphQLServer(wireMockServer);
     }
 
     @After
@@ -208,6 +206,9 @@ public abstract class AbstractMoodiIntegrationTest {
         moodleReadOnlyMockServer.verify();
         moodleMockServer.verify();
         mockSisuGraphQLServer.verify();
+        if (wireMockServer != null) {
+            wireMockServer.stop();
+        }
     }
 
     public static String toJson(Object object) {
