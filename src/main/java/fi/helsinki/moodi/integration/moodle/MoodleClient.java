@@ -283,7 +283,7 @@ public class MoodleClient {
                 }
             } catch (Exception e) {
                 result = null;
-                logger.info("Error executing method: getEnrolledUsersForCourses (batch " + batchCounter + "/" + batches.size() + ")", e);
+                logger.warn("Error executing method: getEnrolledUsersForCourses (batch " + batchCounter + "/" + batches.size() + ")", e);
                 logger.info("attempt calling course enrollments one course at time");
                 int errorsInBatch = 0;
                 for (Long courseId : batchCourseIds) {
@@ -610,13 +610,13 @@ public class MoodleClient {
             final boolean readOnly)
             throws IOException {
 
-        logger.info("Invoke url: {} with params: {}", restUrl, paramsToString(params));
+        logger.debug("Invoke url: {} with params: {}", restUrl, paramsToString(params));
 
         final String body = getRestTemplate(readOnly)
             .postForObject(restUrl, new HttpEntity<>(params, createHeaders()), String.class);
 
         if (body != null && !body.isEmpty()) {
-            logger.info("Response body: {}", body.length() > 300 ? body.substring(0, 300) + "..." : body);
+            logger.debug("Response body: {}", body.length() > 300 ? body.substring(0, 300) + "..." : body);
             final JsonNode jsonNode = objectMapper.readTree(body);
 
             // Checking if there is a Moodle exception in the response body. Moodle returns 200 OK even if there is an
@@ -628,7 +628,7 @@ public class MoodleClient {
                 throw new MoodleClientException(message, exception, errorCode);
             }
         } else {
-            logger.info("Response body is empty");
+            logger.debug("Response body is empty");
         }
 
         // No mapping requested, return null

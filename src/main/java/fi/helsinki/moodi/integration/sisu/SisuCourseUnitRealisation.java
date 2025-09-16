@@ -23,8 +23,6 @@ import io.aexp.nodes.graphql.annotations.GraphQLArgument;
 import io.aexp.nodes.graphql.annotations.GraphQLIgnore;
 import io.aexp.nodes.graphql.annotations.GraphQLProperty;
 import io.micrometer.core.instrument.util.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -57,8 +55,6 @@ public class SisuCourseUnitRealisation {
     public static final int SPAN_SIZE = 41;
 
     @GraphQLIgnore
-    private static final Logger LOGGER = LoggerFactory.getLogger(SisuCourseUnitRealisation.class);
-    @GraphQLIgnore
     static final Map<SisuLocale, String> COURSE_UNIT_LOCALIZATION = new HashMap<SisuLocale, String>() {
         {
             put(SisuLocale.FI, "Opintojaksot");
@@ -88,7 +84,6 @@ public class SisuCourseUnitRealisation {
     public List<SisuCourseUnit> courseUnits = new ArrayList<>();
 
     public StudyRegistryCourseUnitRealisation toStudyRegistryCourseUnitRealisation() {
-        LOGGER.info("Generating StudyRegistryCourseUnitRealisation for {}", id);
         StudyRegistryCourseUnitRealisation ret = new StudyRegistryCourseUnitRealisation();
         SisuLocale teachingLanguageCode = SisuLocale.byUrnOrDefaultToFi(teachingLanguageUrn);
         ret.realisationId = id;
