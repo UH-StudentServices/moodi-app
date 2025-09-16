@@ -85,6 +85,11 @@ mailNotification:
   lockedMessageSubject: Synchronization locked
 
 sentry:
-    enabled: ${sentryEnabled:false}
-    environment: ${sentryEnvironment:dev}
-    dsn: ${sentryDsn:-}
+  enabled: ${sentryEnabled:false}
+  environment: ${sentryEnvironment:dev}
+  dsn: ${sentryDsn:-}
+  logging:
+    enabled: true
+    minimum-breadcrumb-level: debug
+    minimum-event-level: error
+  logs.enabled: true
