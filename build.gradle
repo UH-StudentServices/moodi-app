@@ -27,24 +27,21 @@ plugins {
     id "java"
     id 'checkstyle'
     id 'org.sonarqube' version '6.0.1.5171'
-    id "io.sentry.jvm.gradle" version "3.14.0"
+    id "io.sentry.jvm.gradle" version "5.11.0"
     id 'org.cyclonedx.bom' version '1.8.2'
     id 'jacoco'
 }
 
 project.group = 'fi.helsinki.moodi'
 
-if (System.getenv("SENTRY_AUTH_TOKEN")) {
-    sentry {
-        // Generates a JVM (Java, Kotlin, etc.) source bundle and uploads your source code to Sentry.
-        // This enables source context, allowing you to see your source
-        // code as part of your stack traces in Sentry.
-        includeSourceContext = true
+sentry {
+    // Generates a JVM (Java, Kotlin, etc.) source bundle and uploads your source code to Sentry.
+    // This enables source context, allowing you to see your source
+    // code as part of your stack traces in Sentry.
+    includeSourceContext = true
 
-        org = "university-of-helsinki-0p"
-        projectName = "moodi"
-        authToken = System.getenv("SENTRY_AUTH_TOKEN")
-    }
+    org = "university-of-helsinki-0p"
+    projectName = "moodi"
 }
 
 java {
@@ -157,8 +154,7 @@ dependencies {
     implementation 'org.trimou:trimou-core:2.5.1.Final'
     implementation 'javax.validation:validation-api:2.0.1.Final'
     implementation group: 'com.github.americanexpress.nodes', name: 'nodes', version: nodes_version
-    implementation 'io.sentry:sentry-spring-boot-starter:6.33.0'
-    implementation 'io.sentry:sentry-logback:6.33.0'
+    implementation 'io.sentry:sentry-logback:8.21.1'
 
     testImplementation 'com.h2database:h2'
     testImplementation "org.springframework.boot:spring-boot-starter-test"
