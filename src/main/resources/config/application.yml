@@ -92,4 +92,4 @@ sentry:
     enabled: true
     minimum-breadcrumb-level: debug
     minimum-event-level: error
-  logs.enabled: true
+  logs.enabled: false
