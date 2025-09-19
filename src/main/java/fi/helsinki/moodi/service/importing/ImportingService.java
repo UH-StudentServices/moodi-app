@@ -19,7 +19,9 @@ package fi.helsinki.moodi.service.importing;
 
 import fi.helsinki.moodi.exception.CourseAlreadyCreatedException;
 import fi.helsinki.moodi.exception.CourseNotFoundException;
+import fi.helsinki.moodi.integration.moodle.MoodleClientException;
 import fi.helsinki.moodi.integration.moodle.MoodleCourse;
+import fi.helsinki.moodi.integration.moodle.MoodleFullCourse;
 import fi.helsinki.moodi.integration.moodle.MoodleService;
 import fi.helsinki.moodi.integration.sisu.SisuClient;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
@@ -102,6 +104,29 @@ public class ImportingService {
 
         try {
             moodleCourseId = moodleService.createCourse(moodleCourse);
+        } catch (MoodleClientException e) {
+            // Check if the course already exists in Moodle (idnumber duplicate error)
+            if (e.getErrorCode() != null && e.getErrorCode().equals("courseidnumbertaken")) {
+
+                logger.info("Course already exists in Moodle for realisation {}, attempting to recover", request.realisationId);
+
+                // Try to fetch the existing course from Moodle using idnumber
+                Optional<MoodleFullCourse> existingMoodleCourse = moodleService.getCourseByIdNumber(request.realisationId);
+
+                if (existingMoodleCourse.isPresent()) {
+                    moodleCourseId = existingMoodleCourse.get().id;
+                    logger.info("Found existing Moodle course with id {} for realisation {}", moodleCourseId, request.realisationId);
+                } else {
+                    // Could not find the course in Moodle, clean up and propagate error
+                    logger.error("Could not find existing course in Moodle for realisation {}", request.realisationId);
+                    courseService.deleteCourse(dbCourse.id);
+                    throw e;
+                }
+            } else {
+                // Not a duplicate error, clean up and propagate
+                courseService.deleteCourse(dbCourse.id);
+                throw e;
+            }
         } catch (Exception e) {
             // Creating moodle course failed. Removing created course row from db and propagating error.
             courseService.deleteCourse(dbCourse.id);
