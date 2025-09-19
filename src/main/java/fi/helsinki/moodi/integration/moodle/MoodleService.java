@@ -65,6 +65,10 @@ public class MoodleService {
         return this.getCourses(Collections.singletonList(courseId)).stream().findFirst();
     }
 
+    public Optional<MoodleFullCourse> getCourseByIdNumber(@NotNull String idNumber) {
+        return moodleClient.getCourseByIdNumber(idNumber);
+    }
+
     public List<MoodleUserEnrollments> getEnrolledUsers(final long courseId) {
         return moodleClient.getEnrolledUsers(courseId);
     }

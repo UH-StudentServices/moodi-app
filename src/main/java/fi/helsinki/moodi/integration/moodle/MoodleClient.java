@@ -51,6 +51,7 @@ public class MoodleClient {
     @Value("${MoodleClient.batchsize:50}")
     private int batchSize;
 
+    private static final String FIELD = "field";
     private static final String ENROLMENTS = "enrolments";
     private static final String COURSEID = "courseid";
     private static final String ROLEID = "roleid";
@@ -99,6 +100,25 @@ public class MoodleClient {
             batchCounter++;
         }
         return ret;
+    }
+
+    public Optional<MoodleFullCourse> getCourseByIdNumber(String idNumber) {
+        final MultiValueMap<String, String> params = createParametersForFunction("core_course_get_courses_by_field");
+        params.set(FIELD, "idnumber");
+        params.set("value", idNumber);
+
+        try {
+            Map<String, List<MoodleFullCourse>> response = execute(params, new TypeReference<Map<String, List<MoodleFullCourse>>>() {}, true);
+            if (response != null && response.containsKey(COURSES)) {
+                List<MoodleFullCourse> courses = response.get(COURSES);
+                if (courses != null && !courses.isEmpty()) {
+                    return Optional.of(courses.get(0));
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error fetching course by idnumber: " + idNumber, e);
+        }
+        return Optional.empty();
     }
 
     private <T> void setListParameters(
@@ -196,7 +216,7 @@ public class MoodleClient {
     @Cacheable(value = "moodle-client.moodle-user-by-username", unless = "#result == null")
     public MoodleUser getUser(final List<String> username) {
         final MultiValueMap<String, String> params = createParametersForFunction("core_user_get_users_by_field");
-        params.set("field", "username");
+        params.set(FIELD, "username");
         setListParameters(params, "values[%s]", username, String::valueOf);
 
         try {
@@ -214,7 +234,7 @@ public class MoodleClient {
             return Collections.emptyList();
         }
         final MultiValueMap<String, String> params = createParametersForFunction("core_user_get_users_by_field");
-        params.set("field", "id");
+        params.set(FIELD, "id");
         setListParameters(params, "values[%s]", userIds, String::valueOf);
 
         try {
