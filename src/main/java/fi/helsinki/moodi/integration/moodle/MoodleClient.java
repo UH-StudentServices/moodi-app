@@ -51,6 +51,8 @@ public class MoodleClient {
     @Value("${MoodleClient.batchsize:50}")
     private int batchSize;
 
+    public static final String IDNUMBER = "idnumber";
+    private static final String FIELD = "field";
     private static final String ENROLMENTS = "enrolments";
     private static final String COURSEID = "courseid";
     private static final String ROLEID = "roleid";
@@ -101,6 +103,25 @@ public class MoodleClient {
         return ret;
     }
 
+    public Optional<MoodleFullCourse> getCourseByIdNumber(String idNumber) {
+        final MultiValueMap<String, String> params = createParametersForFunction("core_course_get_courses_by_field");
+        params.set(FIELD, IDNUMBER);
+        params.set("value", idNumber);
+
+        try {
+            Map<String, List<MoodleFullCourse>> response = execute(params, new TypeReference<Map<String, List<MoodleFullCourse>>>() {}, true);
+            if (response != null && response.containsKey(COURSES)) {
+                List<MoodleFullCourse> courses = response.get(COURSES);
+                if (courses != null && !courses.isEmpty()) {
+                    return Optional.of(courses.get(0));
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error fetching course by idnumber: " + idNumber, e);
+        }
+        return Optional.empty();
+    }
+
     private <T> void setListParameters(
             final MultiValueMap<String, String> params,
             final String paramTemplate,
@@ -118,7 +139,7 @@ public class MoodleClient {
     public long createCourse(final MoodleCourse course) {
         final MultiValueMap<String, String> params = createParametersForFunction("core_course_create_courses");
 
-        params.set(createParamName(COURSES, "idnumber", 0), course.idNumber);
+        params.set(createParamName(COURSES, IDNUMBER, 0), course.idNumber);
         params.set(createParamName(COURSES, "fullname", 0), course.fullName);
         params.set(createParamName(COURSES, "shortname", 0), course.shortName);
         params.set(createParamName(COURSES, "categoryid", 0), course.categoryId);
@@ -196,7 +217,7 @@ public class MoodleClient {
     @Cacheable(value = "moodle-client.moodle-user-by-username", unless = "#result == null")
     public MoodleUser getUser(final List<String> username) {
         final MultiValueMap<String, String> params = createParametersForFunction("core_user_get_users_by_field");
-        params.set("field", "username");
+        params.set(FIELD, "username");
         setListParameters(params, "values[%s]", username, String::valueOf);
 
         try {
@@ -214,7 +235,7 @@ public class MoodleClient {
             return Collections.emptyList();
         }
         final MultiValueMap<String, String> params = createParametersForFunction("core_user_get_users_by_field");
-        params.set("field", "id");
+        params.set(FIELD, "id");
         setListParameters(params, "values[%s]", userIds, String::valueOf);
 
         try {
@@ -235,7 +256,7 @@ public class MoodleClient {
         params.set(createParamName(USERS, "firstname", 0), firstName);
         params.set(createParamName(USERS, "lastname", 0), lastName);
         params.set(createParamName(USERS, "email", 0), email);
-        params.set(createParamName(USERS, "idnumber", 0), idNumber);
+        params.set(createParamName(USERS, IDNUMBER, 0), idNumber);
 
         try {
             return Long.parseLong(execute(params, new TypeReference<List<Map<String, String>>>() {},
@@ -379,7 +400,7 @@ public class MoodleClient {
         params.set(createParamName(GROUPS, "description", 0), moodleGroup.getDescription());
         params.set(createParamName(GROUPS, "descriptionformat", 0), String.valueOf(moodleGroup.getDescriptionFormat()));
         params.set(createParamName(GROUPS, "enrolmentkey", 0), moodleGroup.getEnrolmentKey());
-        params.set(createParamName(GROUPS, "idnumber", 0), moodleGroup.getIdNumber());
+        params.set(createParamName(GROUPS, IDNUMBER, 0), moodleGroup.getIdNumber());
 
         try {
             return execute(params, new TypeReference<List<MoodleCourseData>>() {}, false)
