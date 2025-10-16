@@ -23,7 +23,7 @@ httpClient:
       socketTimeout: 60000
     moodle:
       connectTimeout: 9000
-      socketTimeout: 120000
+      socketTimeout: 600000
 
 mapper.moodle.defaultCategory: 17
 # Some Moodle categories are overridden for the prod environment.
