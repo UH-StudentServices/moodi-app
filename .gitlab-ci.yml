@@ -112,11 +112,11 @@ deploy prod:
     needs:
         - release prod
 
-deploy dev:
+deploy qa:
     <<: *deploy_template
     image: curlimages/curl
     variables:
-        ENV: dev
+        ENV: qa
     only:
         - master
     needs:
