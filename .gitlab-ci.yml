@@ -48,19 +48,15 @@ release prod:
     image: gradle:8.14.3-jdk
     variables:
         GIT_STRATEGY: clone
-    script:
+    before_script:
         - git config --global user.email "gitlab-ci@localhost"
         - git config --global user.name "GitLab CI"
-        - mkdir -p ~/.ssh
-        - chmod 700 ~/.ssh
-        - echo "${MOODI_APP_SSH_KEY}" > ~/.ssh/id_rsa
-        - chmod 600 ~/.ssh/id_rsa
-        - git config core.sshCommand "ssh -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
-        - git remote set-url origin git@${CI_SERVER_SHELL_SSH_HOST}:${CI_PROJECT_PATH}.git
-        - git fetch
+        # Route origin over HTTPS with the job token
+        - git remote set-url origin "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
+        - git fetch --tags origin
         - git switch master
+    script:
         - ./gradlew release -Pgitlab_server=${CI_SERVER_HOST} -Pgitlab_project_id=${CI_PROJECT_ID} -Pgitlab_token=${CI_JOB_TOKEN} -Prelease.useAutomaticVersion=true
-        # Make sure, that ci-deploy.properties contain new line in the end.
         - echo "" >> ci-deploy.properties
         - PACKAGE_VERSION=$(grep -i "^version=" ci-deploy.properties | cut -d'=' -f2 | tr -d '\n')
         - git checkout "${PACKAGE_VERSION}"
