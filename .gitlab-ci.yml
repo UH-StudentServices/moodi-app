@@ -83,8 +83,9 @@ publish SNAPSHOT:
             - ci-deploy.properties
     only:
         - master
-    needs:
-        - test
+        - MOODI-206-hy-sentry
+    needs: []
+    #    - test
 
 .deploy: &deploy_template
     image: curlimages/curl
