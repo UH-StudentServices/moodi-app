@@ -22,7 +22,7 @@ buildscript {
 }
 
 plugins {
-    id "org.springframework.boot" version "3.5.6"
+    id "org.springframework.boot" version "3.5.9"
     id "net.researchgate.release" version "3.0.2"
     id "java"
     id 'checkstyle'
@@ -40,8 +40,9 @@ sentry {
     // code as part of your stack traces in Sentry.
     includeSourceContext = true
 
-    org = "university-of-helsinki-0p"
+    org = "sentry"
     projectName = "moodi"
+    authToken = System.getenv("SENTRY_AUTH_TOKEN")
 }
 
 java {
@@ -125,10 +126,7 @@ dependencies {
     implementation 'org.projectlombok:lombok:1.18.38'
     annotationProcessor 'org.projectlombok:lombok:1.18.38'
 
-    implementation('org.springframework.boot:spring-boot-starter-web') {
-        exclude module: 'spring-boot-starter-tomcat'
-    }
-    implementation 'org.springframework.boot:spring-boot-starter-undertow'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
@@ -145,7 +143,7 @@ dependencies {
     }
 
     implementation 'org.apache.commons:commons-lang3'
-    implementation 'com.google.guava:guava:33.3.0-jre'
+    implementation 'com.google.guava:guava:33.3.1-jre'
     implementation 'com.h2database:h2'
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-database-postgresql'
@@ -181,7 +179,7 @@ apply from: "gradle-build/publishing.gradle"
 apply from: "gradle-build/deploy.gradle"
 apply from: "gradle-build/release.gradle"
 
-task checkstyle {
+tasks.register('checkstyle') {
     dependsOn checkstyleMain
     dependsOn checkstyleTest
     dependsOn checkstyleItest
@@ -191,6 +189,6 @@ sonarqube {
     properties {
         property "sonar.projectKey", "moodi-app"
         property "sonar.host.url", "https://sonarqube.it.helsinki.fi/"
-        property "sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"
+        property "sonar.coverage.jacoco.xmlReportPaths", "${layout.buildDirectory}/reports/jacoco/test/jacocoTestReport.xml"
     }
 }
