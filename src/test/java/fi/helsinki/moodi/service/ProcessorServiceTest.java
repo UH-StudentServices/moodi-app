@@ -163,7 +163,6 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
                 expectGetUserRequestToMoodle(teacher.userName, TEACHER_ID_BASE + i);
             }
         );
-        expectGetUserRequestToMoodle("missing_creator" + missingId + "@test.fi", MISSING_TEACHER_ID_BASE + missingId);
     }
 
     private void createStudyRegistryStudents() {
@@ -198,7 +197,6 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
         course.moodleId = (long) i;
         course.created = timeService.getCurrentUTCDateTime();
         course.modified = timeService.getCurrentUTCDateTime();
-        course.creatorUsername = "missing_creator" + i + "@test.fi";
         course.removed = false;
         MoodleFullCourse moodleCourse = new MoodleFullCourse();
         moodleCourse.id = (long) i;

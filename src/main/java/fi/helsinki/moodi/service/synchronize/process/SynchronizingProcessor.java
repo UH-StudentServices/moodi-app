@@ -248,12 +248,6 @@ public class SynchronizingProcessor {
         personItems.addAll(course.teachers
             .stream()
             .map(UserSynchronizationItem::new).collect(Collectors.toList()));
-        if (item.getCourse().creatorUsername != null) {
-            StudyRegistryTeacher creator = new StudyRegistryTeacher();
-            creator.userName = item.getCourse().creatorUsername;
-            personItems.add(new UserSynchronizationItem(creator));
-        }
-
         Map<Boolean, List<UserSynchronizationItem>> userSynchronizationItemsByCompletedStatus =
             personItems.stream()
                 .map(i -> i.withMoodleCourseId(item.getCourse().moodleId))
