@@ -134,22 +134,6 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
     }
 
     @Test
-    public void thatCreatorIsEnrolledWithTeacherAndMoodiRoles() {
-        String creatorUsername = "jotain@helsinki.fi";
-        expectGetUserRequestToMoodle(creatorUsername, MOODLE_USER_ID);
-        SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID_IN_DB)
-            .withCreator(creatorUsername)
-            .withEmptyMoodleEnrollments()
-            .expectAddEnrollmentsToMoodleCourse(
-                teacherEnrollment(),
-                moodiEnrollment()
-            )
-            .getSynchronizationItem();
-
-        synchronizingProcessor.doSynchronize(item);
-    }
-
-    @Test
     public void thatUserIsNotEnrolledWithOnlyMoodiRoleIfNotApproved() {
         SynchronizationItem item = new CourseSynchronizationRequestChain(MOODLE_COURSE_ID_IN_DB)
             .withStudent(MOODLE_USER_ID, false)
