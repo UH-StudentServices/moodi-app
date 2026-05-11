@@ -19,15 +19,12 @@ package fi.helsinki.moodi.integration.studyregistry;
 
 import fi.helsinki.moodi.integration.sisu.SisuClient;
 import fi.helsinki.moodi.integration.sisu.SisuCourseUnitRealisation;
+import fi.helsinki.moodi.integration.sisu.SisuCourseUnitRealisationConverter;
 import fi.helsinki.moodi.integration.sisu.SisuPerson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,14 +37,14 @@ public class StudyRegistryService {
     }
 
     public Optional<StudyRegistryCourseUnitRealisation> getSisuCourseUnitRealisation(final String realisationId) {
-        return getSisuCourseUnitRealisations(Arrays.asList(realisationId)).stream().findFirst();
+        return getSisuCourseUnitRealisations(Collections.singletonList(realisationId)).stream().findFirst();
     }
 
     public List<StudyRegistryCourseUnitRealisation> getSisuCourseUnitRealisations(final List<String> realisationIds) {
         List<SisuCourseUnitRealisation> sisuCurs = sisuClient.getCourseUnitRealisations(realisationIds);
 
-        List<String> uniquePersonIds = sisuCurs.stream().flatMap(cur -> cur.teacherSisuIds().stream())
-                .filter(Objects::nonNull).distinct().collect(Collectors.toList());
+        List<String> uniquePersonIds = sisuCurs.stream().flatMap(cur -> SisuCourseUnitRealisationConverter.teacherSisuIds(cur).stream())
+                .filter(Objects::nonNull).distinct().toList();
 
         // Diverging from existing pattern here:
         // Getting all teacher user names immediately, as opposed to getting them one by one in EnrollmentService,
@@ -57,6 +54,6 @@ public class StudyRegistryService {
                 .stream().collect(Collectors.toMap(SisuPerson::getId, SisuPerson::toStudyRegistryTeacher));
 
         return sisuCurs.stream()
-            .map(cur -> cur.toStudyRegistryCourseUnitRealisation(teachersById)).collect(Collectors.toList());
+            .map(cur -> SisuCourseUnitRealisationConverter.convert(cur, teachersById)).toList();
     }
 }
