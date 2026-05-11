@@ -20,6 +20,7 @@ package fi.helsinki.moodi.service.importing;
 import fi.helsinki.moodi.integration.moodle.MoodleCourse;
 import fi.helsinki.moodi.integration.sisu.SisuCourseUnit;
 import fi.helsinki.moodi.integration.sisu.SisuCourseUnitRealisation;
+import fi.helsinki.moodi.integration.sisu.SisuCourseUnitRealisationConverter;
 import fi.helsinki.moodi.integration.sisu.SisuCourseUnitRealisationType;
 import fi.helsinki.moodi.integration.sisu.SisuDateRange;
 import fi.helsinki.moodi.integration.sisu.SisuLearningEnvironment;
@@ -52,7 +53,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         SisuCourseUnitRealisation cur = getSisuCur("sv");
         expectSisuOrganisationExportRequest();
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation(), 1L);
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(SisuCourseUnitRealisationConverter.convert(cur), 1L);
 
         assertEquals(generateMultiLangSpan("sv", REALISATION_NAME_SV)
                 + generateMultiLangSpan("fi", REALISATION_NAME_FI)
@@ -76,7 +77,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         SisuCourseUnitRealisation cur = getSisuCur("fi");
         expectSisuOrganisationExportRequest();
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation(), 1L);
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(SisuCourseUnitRealisationConverter.convert(cur), 1L);
 
         assertEquals(generateMultiLangSpan("fi", REALISATION_NAME_FI)
             + generateMultiLangSpan("sv", REALISATION_NAME_SV)
@@ -102,7 +103,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         cur.name.sv = "Cöntémporary European History";
         expectSisuOrganisationExportRequest();
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation(), 1000000L);
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(SisuCourseUnitRealisationConverter.convert(cur), 1000000L);
         assertEquals("Contemporary Europea-LFLS", moodleCourse.shortName);
         assertEquals(MoodleCourseBuilder.MAX_SHORTNAME_LENGTH, moodleCourse.shortName.length());
     }
@@ -119,8 +120,8 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
 
         expectSisuOrganisationExportRequest();
 
-        MoodleCourse moodleCourse1 = moodleCourseBuilder.buildMoodleCourse(cur1.toStudyRegistryCourseUnitRealisation(), 1L);
-        MoodleCourse moodleCourse2 = moodleCourseBuilder.buildMoodleCourse(cur2.toStudyRegistryCourseUnitRealisation(), 2L);
+        MoodleCourse moodleCourse1 = moodleCourseBuilder.buildMoodleCourse(SisuCourseUnitRealisationConverter.convert(cur1), 1L);
+        MoodleCourse moodleCourse2 = moodleCourseBuilder.buildMoodleCourse(SisuCourseUnitRealisationConverter.convert(cur2), 2L);
 
         assertNotEquals(moodleCourse1.shortName, moodleCourse2.shortName);
     }
@@ -132,7 +133,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         cur.activityPeriod = null;
         cur.organisations = new ArrayList<>();
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation(), 10000000L);
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(SisuCourseUnitRealisationConverter.convert(cur), 10000000L);
 
         assertEquals(generateMultiLangSpan("fi", REALISATION_NAME_FI)
             + generateMultiLangSpan("sv", REALISATION_NAME_SV)
@@ -157,7 +158,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         cur.teachingLanguageUrn = "urn:code:language:sv";
         cur.organisations = null;
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation(), 10000000L);
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(SisuCourseUnitRealisationConverter.convert(cur), 10000000L);
 
         assertEquals(MOODLE_DEFAULT_CATEGORY_ID, moodleCourse.categoryId);
     }
