@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static fi.helsinki.moodi.Constants.RESPONSIBLE_ORGANISATION;
@@ -33,9 +34,9 @@ import static fi.helsinki.moodi.Constants.TEACHER_TYPES;
 
 public final class SisuCourseUnitRealisationConverter {
 
-    public static final int MAX_NAME_DB_LENGTH = 255;
-    public static final int SPAN_SIZE = 41;
     public static final String SEPARATOR = ", ";
+
+    private static final List<SisuLocale> FALLBACK_ORDER = List.of(SisuLocale.FI, SisuLocale.EN, SisuLocale.SV);
 
     static final Map<SisuLocale, String> COURSE_UNIT_LOCALIZATION = new EnumMap<>(SisuLocale.class) {
         {
@@ -50,6 +51,20 @@ public final class SisuCourseUnitRealisationConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(SisuCourseUnitRealisationConverter.class);
 
     private SisuCourseUnitRealisationConverter() {
+    }
+
+    private static String resolveText(SisuLocale preferred, Function<SisuLocale, String> getter) {
+        String result = getter.apply(preferred);
+        if (StringUtils.isNotBlank(result)) {
+            return result;
+        }
+        for (SisuLocale fallback : FALLBACK_ORDER) {
+            result = getter.apply(fallback);
+            if (StringUtils.isNotBlank(result)) {
+                return result;
+            }
+        }
+        return null;
     }
 
     public static StudyRegistryCourseUnitRealisation convert(SisuCourseUnitRealisation cur) {
@@ -76,25 +91,27 @@ public final class SisuCourseUnitRealisationConverter {
 
         ret.mainOrganisationId = getMainOrganisationId(cur);
 
-        String defaultLocalizedUrl = getLearningEnvironmentUrl(cur.learningEnvironments, SisuLocale.FI, "");
+        String resolvedUrl = resolveText(teachingLanguageCode,
+            locale -> getLearningEnvironmentUrl(cur.learningEnvironments, locale, null));
+        if (resolvedUrl == null) {
+            resolvedUrl = "";
+        }
 
-        String localizedUrls =
-            getLocalizedSpan(SisuLocale.FI, getLearningEnvironmentUrl(cur.learningEnvironments, SisuLocale.FI, defaultLocalizedUrl))
-            + getLocalizedSpan(SisuLocale.EN, getLearningEnvironmentUrl(cur.learningEnvironments, SisuLocale.EN, defaultLocalizedUrl))
-            + getLocalizedSpan(SisuLocale.SV, getLearningEnvironmentUrl(cur.learningEnvironments, SisuLocale.SV, defaultLocalizedUrl));
-
-        String localizedCUNames = getLocalizedSpan(SisuLocale.FI, COURSE_UNIT_LOCALIZATION.get(SisuLocale.FI))
-            + getLocalizedSpan(SisuLocale.EN, COURSE_UNIT_LOCALIZATION.get(SisuLocale.EN))
-            + getLocalizedSpan(SisuLocale.SV, COURSE_UNIT_LOCALIZATION.get(SisuLocale.SV));
+        String resolvedCUName = resolveText(teachingLanguageCode, COURSE_UNIT_LOCALIZATION::get);
+        if (resolvedCUName == null) {
+            resolvedCUName = "";
+        }
 
         String courseUnitCodes = cur.courseUnits.stream()
             .sorted(Comparator.comparing(cu -> cu.code))
             .map(cu -> cu.code)
             .collect(Collectors.joining(", "));
 
-        String localizedCUTypes = getLocalizedSpan(SisuLocale.FI, cur.courseUnitRealisationType.name.getForLocaleOrDefault(SisuLocale.FI))
-            + getLocalizedSpan(SisuLocale.EN, cur.courseUnitRealisationType.name.getForLocaleOrDefault(SisuLocale.EN))
-            + getLocalizedSpan(SisuLocale.SV, cur.courseUnitRealisationType.name.getForLocaleOrDefault(SisuLocale.SV));
+        String resolvedCUType = resolveText(teachingLanguageCode,
+            locale -> cur.courseUnitRealisationType.name.getForLocale(locale));
+        if (resolvedCUType == null) {
+            resolvedCUType = "";
+        }
 
         String courseDatesPart = "";
         if (cur.activityPeriod != null && cur.activityPeriod.startDate != null) {
@@ -109,9 +126,9 @@ public final class SisuCourseUnitRealisationConverter {
             courseDatesPart = ", " + FINNISH_DATE_FORMAT.format(cur.activityPeriod.startDate) + endPart;
         }
 
-        ret.description = "<p>" + localizedUrls + "</p>"
-            + "<p>" + localizedCUNames + " " + courseUnitCodes + "</p>"
-            + "<p>" + localizedCUTypes + courseDatesPart + "</p>";
+        ret.description = "<p>" + resolvedUrl + "</p>"
+            + "<p>" + resolvedCUName + " " + courseUnitCodes + "</p>"
+            + "<p>" + resolvedCUType + courseDatesPart + "</p>";
 
         return ret;
     }
@@ -129,72 +146,7 @@ public final class SisuCourseUnitRealisationConverter {
     }
 
     public static String generateName(SisuCourseUnitRealisation cur, SisuLocale teachingLanguage) {
-        SisuLocale otherLang1 = getOtherLanguage(teachingLanguage);
-        SisuLocale otherLang2 = getOtherLanguage(teachingLanguage, otherLang1);
-
-        String defaultName = calculateName(cur, teachingLanguage);
-        String otherName1 = calculateName(cur, otherLang1);
-        String otherName2 = calculateName(cur, otherLang2);
-
-        String compDefault = defaultName != null ? defaultName.trim() : "";
-        String comp1 = otherName1 != null ? otherName1.trim() : "";
-        String comp2 = otherName2 != null ? otherName2.trim() : "";
-
-        boolean allNamesAreSame = compDefault.equalsIgnoreCase(comp1) && compDefault.equalsIgnoreCase(comp2);
-
-        // default name = teaching language name
-        // 1 cases when there is no localisation:
-        // 1.1 if all names are same
-        //      -> return the default name
-        // 1.2 if other names are empty or null
-        //      -> return the default name
-        // 1.3 if default name is empty but one other name exists
-        //      -> return existing name
-        // 1.4 the total number of characters in localised languages is higher than db max_length - (number of languages * localisation span size)
-        //     -> return default name
-        // 2 cases when there is localisation:
-        // 2.1 if at least 2 languages are not null and are not equal
-        //     -> return localised non-null non-empty languages that are not equal to default language
-        // 2.2 see 1.4. (total length fits within the db max_length)
-
-        // 1.1., 1.2 and 1.3
-        if (allNamesAreSame) {
-            return defaultName;
-        } else if (StringUtils.isNotEmpty(compDefault) && StringUtils.isEmpty(comp1) && StringUtils.isEmpty(comp2)) {
-            return defaultName;
-        } else if (StringUtils.isEmpty(compDefault) && StringUtils.isNotEmpty(comp1) && StringUtils.isEmpty(comp2)) {
-            return otherName1;
-        } else if (StringUtils.isEmpty(compDefault) && StringUtils.isEmpty(comp1) && StringUtils.isNotEmpty(comp2)) {
-            return otherName2;
-        }
-
-        String defaultFinal = "";
-        String other1Final = "";
-        String other2Final = "";
-        if (StringUtils.isNotEmpty(compDefault)) {
-            defaultFinal = getLocalizedSpan(teachingLanguage, defaultName);
-        }
-        // determine comp1 and comp2
-        if (StringUtils.isNotEmpty(comp1) && !compDefault.equals(comp1)) {
-            other1Final = getLocalizedSpan(otherLang1, otherName1);
-        }
-        if (StringUtils.isNotEmpty(comp2) && !compDefault.equals(comp2)) {
-            other2Final = getLocalizedSpan(otherLang2, otherName2);
-        }
-
-        // if total length exceeds maximum length revert to non-localized teaching language name
-        if (defaultFinal.length() + other1Final.length() + other2Final.length() >= MAX_NAME_DB_LENGTH) {
-            if (StringUtils.isNotEmpty(compDefault)) {
-                return defaultName;
-            } else if (StringUtils.isNotEmpty(comp1)) {
-                return otherName1;
-            } else if (StringUtils.isNotEmpty(comp2)) {
-                return otherName2;
-            }
-            return "";
-        }
-
-        return defaultFinal + other1Final + other2Final;
+        return resolveText(teachingLanguage, locale -> calculateName(cur, locale));
     }
 
     public static String calculateName(SisuCourseUnitRealisation cur, SisuLocale locale) {
@@ -228,15 +180,6 @@ public final class SisuCourseUnitRealisationConverter {
         return value2;
     }
 
-    private static SisuLocale getOtherLanguage(SisuLocale... languages) {
-        for (SisuLocale locale : SisuLocale.values()) {
-            if (!Arrays.asList(languages).contains(locale)) {
-                return locale;
-            }
-        }
-        return null;
-    }
-
     private static String getLearningEnvironmentUrl(List<SisuLearningEnvironment> learningEnvironments, SisuLocale sisuLocale, String defaultUrl) {
         SisuLearningEnvironment le = learningEnvironments.stream()
             .filter(x -> SisuLocale.byCodeOrDefaultToFi(x.language).equals(sisuLocale))
@@ -245,12 +188,6 @@ public final class SisuCourseUnitRealisationConverter {
             return defaultUrl;
         }
         return le.url == null ? defaultUrl : "<a href=\"" + le.url + "\">" + le.url + "</a>";
-    }
-
-    private static String getLocalizedSpan(SisuLocale locale, String text) {
-        String languageSpanStart = "<span lang=\"%lang%\" class=\"multilang\">";
-        String languageSpanEnd = "</span>";
-        return languageSpanStart.replace("%lang%", locale.toString().toLowerCase()) + text + languageSpanEnd;
     }
 
     private static String getMainOrganisationId(SisuCourseUnitRealisation cur) {
