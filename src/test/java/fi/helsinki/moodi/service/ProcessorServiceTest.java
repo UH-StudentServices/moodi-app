@@ -35,7 +35,7 @@ import fi.helsinki.moodi.service.time.TimeService;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.*;
 
@@ -62,7 +62,7 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
     @Autowired
     private TimeService timeService;
 
-    @MockBean
+    @MockitoBean
     private CourseRepository courseRepository;
 
     @Test

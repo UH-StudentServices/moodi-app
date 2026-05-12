@@ -9,6 +9,11 @@ spring:
       locations: classpath:db/migration/common, classpath:db/migration/h2
       clean-disabled: false
 
+management:
+  health:
+    diskspace:
+      enabled: false
+
 auth.client.testclient: xxx123
 auth.enabled: true
 

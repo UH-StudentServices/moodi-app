@@ -22,7 +22,7 @@ buildscript {
 }
 
 plugins {
-    id "org.springframework.boot" version "3.5.14"
+    id "org.springframework.boot" version "4.0.6"
     id "net.researchgate.release" version "3.0.2"
     id "java"
     id 'checkstyle'
@@ -61,7 +61,6 @@ jar {
 
 bootJar {
     mainClass = "fi.helsinki.moodi.Application"
-    launchScript()
 }
 
 bootRun {
@@ -132,6 +131,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.springframework.boot:spring-boot-starter-restclient'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
+    implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
 
     implementation 'ch.qos.logback:logback-classic'
     implementation 'ch.qos.logback:logback-core'
@@ -145,7 +147,7 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3'
     implementation 'com.google.guava:guava:33.3.1-jre'
     implementation 'com.h2database:h2'
-    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.springframework.boot:spring-boot-starter-flyway'
     implementation 'org.flywaydb:flyway-database-postgresql'
     implementation 'org.postgresql:postgresql'
     implementation 'org.apache.httpcomponents.client5:httpclient5'
