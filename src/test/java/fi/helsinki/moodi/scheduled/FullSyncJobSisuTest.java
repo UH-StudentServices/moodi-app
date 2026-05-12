@@ -27,7 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDateTime;
@@ -56,12 +56,12 @@ public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
     @Autowired
     protected MapperService mapperService;
 
-    @MockBean
+    @MockitoBean
     private CourseRepository courseRepository;
 
     @Before
     public void init() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test

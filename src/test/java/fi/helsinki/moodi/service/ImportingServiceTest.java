@@ -26,12 +26,10 @@ import fi.helsinki.moodi.service.importing.ImportingService;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import org.junit.Test;
 import org.mockito.stubbing.Answer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -43,10 +41,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 public class ImportingServiceTest extends AbstractMoodiIntegrationTest {
@@ -58,12 +53,10 @@ public class ImportingServiceTest extends AbstractMoodiIntegrationTest {
     private static final long TEACHER_ROLE_ID = 3;
     private static final long SYNCED_ROLE_ID = 10;
 
-    private final Logger logger = LoggerFactory.getLogger(ImportingServiceTest.class);
-
     @Autowired
     private ImportingService importingService;
 
-    @MockBean
+    @MockitoBean
     private CourseRepository courseRepository;
 
     @Test
