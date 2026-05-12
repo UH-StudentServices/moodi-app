@@ -20,6 +20,8 @@ package fi.helsinki.moodi.test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import fi.helsinki.moodi.Application;
 import fi.helsinki.moodi.integration.moodle.*;
 import fi.helsinki.moodi.service.importing.ImportCourseRequest;
@@ -29,16 +31,14 @@ import fi.helsinki.moodi.test.fixtures.Fixtures;
 import org.flywaydb.core.Flyway;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.runner.RunWith;
-import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -46,8 +46,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -64,7 +64,6 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(
     properties = { "server.port:0", "spring.main.allow-bean-definition-overriding=true", "flyway.cleanDisabled=false" },
     classes = { Application.class, TestConfig.class })
@@ -405,7 +404,7 @@ public abstract class AbstractMoodiIntegrationTest {
                     try {
                         Thread.sleep(ThreadLocalRandom.current().nextInt(1001));
                     } catch (InterruptedException ignored) {
-                        ;
+                        // ignored
                     }
                 }
                 return withSuccess(json, MediaType.APPLICATION_JSON).createResponse(request);
@@ -422,7 +421,6 @@ public abstract class AbstractMoodiIntegrationTest {
             .andRespond(request -> withServerError().createResponse(request));
 
         // then each item of the batch attempts request separately, and one of them creates error
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         for (int i = 0; i < resultObjects.size(); i++) {
             if (failAtIndex == i) {
                 moodleReadOnlyMockServer.expect(requestTo(getMoodleRestUrl()))
@@ -495,20 +493,20 @@ public abstract class AbstractMoodiIntegrationTest {
         ret.id = (long) moodleUserId;
         ret.username = userName;
         ret.enrolledCourses = Collections.singletonList(new MoodleCourseData(enrolledCourseId));
-        ret.roles = Arrays.stream(roleIds).mapToObj(MoodleRole::new).collect(Collectors.toList());
+        ret.roles = Arrays.stream(roleIds).mapToObj(MoodleRole::new).toList();
         return ret;
     }
 
     protected void setUpMockSisuAndPrefetchCourses() {
         // With batch size 2 Moodi makes 2 calls to fetch Sisu CURs
-        mockSisuGraphQLServer.expectCourseUnitRealisationsRequest(SISU_COURSE_REALISATION_IDS.stream().limit(2).collect(Collectors.toList()),
+        mockSisuGraphQLServer.expectCourseUnitRealisationsRequest(SISU_COURSE_REALISATION_IDS.stream().limit(2).toList(),
             "/sisu/course-unit-realisations-1.json");
-        mockSisuGraphQLServer.expectCourseUnitRealisationsRequest(SISU_COURSE_REALISATION_IDS.stream().skip(2).collect(Collectors.toList()),
+        mockSisuGraphQLServer.expectCourseUnitRealisationsRequest(SISU_COURSE_REALISATION_IDS.stream().skip(2).toList(),
             "/sisu/course-unit-realisations-2.json");
 
         mockSisuGraphQLServer.expectPersonsRequest(Arrays.asList("hy-hlo-1", "hy-hlo-2"), "/sisu/persons-many-1.json");
         mockSisuGraphQLServer.expectPersonsRequest(Arrays.asList("hy-hlo-2.1", "hy-hlo-3"), "/sisu/persons-many-2.json");
-        mockSisuGraphQLServer.expectPersonsRequest(Arrays.asList("hy-hlo-4"), "/sisu/persons.json");
+        mockSisuGraphQLServer.expectPersonsRequest(List.of("hy-hlo-4"), "/sisu/persons.json");
 
         enricherService.prefetchSisuCourses(SISU_COURSE_REALISATION_IDS);
     }
@@ -520,11 +518,7 @@ public abstract class AbstractMoodiIntegrationTest {
     }
 
     private String urlEncode(final String string) {
-        try {
-            return URLEncoder.encode(string, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+        return URLEncoder.encode(string, StandardCharsets.UTF_8);
     }
 
 }

@@ -52,7 +52,7 @@ public class GroupSynchronizationCreateTest extends AbstractGroupSynchronization
             createSisuStudyGroupSet("grouping2", Arrays.asList(sisuStudySubGroups.get(2), sisuStudySubGroups.get(3)))
         );
 
-        sisuCourseUnitRealisation = createSisuCourseUnitRealisation(sisuRealisationId, moodleCourseUsers, sisuStudyGroupSets);
+        sisuCourseUnitRealisation = createSisuCourseUnitRealisation(sisuRealisationId, sisuStudyGroupSets);
         when(courseService.findByRealisationId(sisuRealisationId)).thenReturn(Optional.of(createMoodiCourse(sisuRealisationId, moodleCourseId)));
         when(sisuClient.getCourseUnitRealisation(sisuRealisationId)).thenReturn(Optional.of(sisuCourseUnitRealisation));
         when(moodleService.getCourse(moodleCourseId)).thenReturn(Optional.of(moodleCourse));

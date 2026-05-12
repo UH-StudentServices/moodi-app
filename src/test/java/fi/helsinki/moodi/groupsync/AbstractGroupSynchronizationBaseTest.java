@@ -108,12 +108,11 @@ public abstract class AbstractGroupSynchronizationBaseTest {
 
     protected SisuCourseUnitRealisation createSisuCourseUnitRealisation(
         String id,
-        List<MoodleUser> users,
         List<SisuStudyGroupSet> sisuStudyGroupSets) {
-        SisuCourseUnitRealisation sisuCourseUnitRealisation = new SisuCourseUnitRealisation();
-        sisuCourseUnitRealisation.id = id;
-        sisuCourseUnitRealisation.studyGroupSets = sisuStudyGroupSets;
-        return sisuCourseUnitRealisation;
+        SisuCourseUnitRealisation cur = new SisuCourseUnitRealisation();
+        cur.id = id;
+        cur.studyGroupSets = sisuStudyGroupSets;
+        return cur;
     }
 
     protected SisuStudyGroupSet createSisuStudyGroupSet(String id, List<SisuStudySubGroup> sisuStudyGroups) {

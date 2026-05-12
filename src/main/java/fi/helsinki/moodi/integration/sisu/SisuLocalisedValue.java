@@ -17,7 +17,7 @@
 
 package fi.helsinki.moodi.integration.sisu;
 
-import io.micrometer.core.instrument.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 
