@@ -20,6 +20,7 @@ package fi.helsinki.moodi.service.importing;
 import fi.helsinki.moodi.integration.moodle.MoodleCourse;
 import fi.helsinki.moodi.integration.sisu.SisuCourseUnit;
 import fi.helsinki.moodi.integration.sisu.SisuCourseUnitRealisation;
+import fi.helsinki.moodi.integration.sisu.SisuCourseUnitRealisationConverter;
 import fi.helsinki.moodi.integration.sisu.SisuCourseUnitRealisationType;
 import fi.helsinki.moodi.integration.sisu.SisuDateRange;
 import fi.helsinki.moodi.integration.sisu.SisuLearningEnvironment;
@@ -52,20 +53,14 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         SisuCourseUnitRealisation cur = getSisuCur("sv");
         expectSisuOrganisationExportRequest();
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation(), 1L);
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(SisuCourseUnitRealisationConverter.convert(cur), 1L);
 
-        assertEquals(generateMultiLangSpan("sv", REALISATION_NAME_SV)
-                + generateMultiLangSpan("fi", REALISATION_NAME_FI)
-                + generateMultiLangSpan("en", REALISATION_NAME_EN), moodleCourse.fullName);
+        assertEquals(REALISATION_NAME_SV, moodleCourse.fullName);
         assertEquals("hy-cur-1", moodleCourse.idNumber);
         assertEquals("Kurs namn-1", moodleCourse.shortName);
-        assertEquals("<p><span lang=\"fi\" class=\"multilang\"><a href=\"urli suomeksi\">urli suomeksi</a></span>" +
-            "<span lang=\"en\" class=\"multilang\"><a href=\"urli suomeksi\">urli suomeksi</a></span>" +
-            "<span lang=\"sv\" class=\"multilang\"><a href=\"fel url på svenska\">fel url på svenska</a></span></p>" +
-            "<p><span lang=\"fi\" class=\"multilang\">Opintojaksot</span><span lang=\"en\" class=\"multilang\">Courses</span>" +
-            "<span lang=\"sv\" class=\"multilang\">Studieavsnitten</span> CODE1, CODE2, CODE3</p><p>" +
-            "<span lang=\"fi\" class=\"multilang\">Kurssi</span><span lang=\"en\" class=\"multilang\">Course</span>" +
-            "<span lang=\"sv\" class=\"multilang\">Kurs</span>, 5.8.2019–4.11.2019</p>", moodleCourse.summary);
+        assertEquals("<p><a href=\"fel url på svenska\">fel url på svenska</a></p>" +
+            "<p>Studieavsnitten CODE1, CODE2, CODE3</p>" +
+            "<p>Kurs, 5.8.2019–4.11.2019</p>", moodleCourse.summary);
         assertEquals(LocalDate.of(2019, 8, 5), moodleCourse.startTime);
         assertEquals(LocalDate.of(2019, 12, 5), moodleCourse.endTime);
         assertEquals("9", moodleCourse.categoryId);
@@ -76,20 +71,14 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         SisuCourseUnitRealisation cur = getSisuCur("fi");
         expectSisuOrganisationExportRequest();
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation(), 1L);
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(SisuCourseUnitRealisationConverter.convert(cur), 1L);
 
-        assertEquals(generateMultiLangSpan("fi", REALISATION_NAME_FI)
-            + generateMultiLangSpan("sv", REALISATION_NAME_SV)
-            + generateMultiLangSpan("en", REALISATION_NAME_EN), moodleCourse.fullName);
+        assertEquals(REALISATION_NAME_FI, moodleCourse.fullName);
         assertEquals("hy-cur-1", moodleCourse.idNumber);
         assertEquals("Kurssin nimi-1", moodleCourse.shortName);
-        assertEquals("<p><span lang=\"fi\" class=\"multilang\"><a href=\"urli suomeksi\">urli suomeksi</a></span>" +
-            "<span lang=\"en\" class=\"multilang\"><a href=\"urli suomeksi\">urli suomeksi</a></span>" +
-            "<span lang=\"sv\" class=\"multilang\"><a href=\"fel url på svenska\">fel url på svenska</a></span></p>" +
-            "<p><span lang=\"fi\" class=\"multilang\">Opintojaksot</span><span lang=\"en\" class=\"multilang\">Courses</span>" +
-            "<span lang=\"sv\" class=\"multilang\">Studieavsnitten</span> CODE1, CODE2, CODE3</p><p>" +
-            "<span lang=\"fi\" class=\"multilang\">Kurssi</span><span lang=\"en\" class=\"multilang\">Course</span>" +
-            "<span lang=\"sv\" class=\"multilang\">Kurs</span>, 5.8.2019–4.11.2019</p>", moodleCourse.summary);
+        assertEquals("<p><a href=\"urli suomeksi\">urli suomeksi</a></p>" +
+            "<p>Opintojaksot CODE1, CODE2, CODE3</p>" +
+            "<p>Kurssi, 5.8.2019–4.11.2019</p>", moodleCourse.summary);
         assertEquals(LocalDate.of(2019, 8, 5), moodleCourse.startTime);
         assertEquals(LocalDate.of(2019, 12, 5), moodleCourse.endTime);
         assertEquals("9", moodleCourse.categoryId);
@@ -102,7 +91,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         cur.name.sv = "Cöntémporary European History";
         expectSisuOrganisationExportRequest();
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation(), 1000000L);
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(SisuCourseUnitRealisationConverter.convert(cur), 1000000L);
         assertEquals("Contemporary Europea-LFLS", moodleCourse.shortName);
         assertEquals(MoodleCourseBuilder.MAX_SHORTNAME_LENGTH, moodleCourse.shortName.length());
     }
@@ -119,8 +108,8 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
 
         expectSisuOrganisationExportRequest();
 
-        MoodleCourse moodleCourse1 = moodleCourseBuilder.buildMoodleCourse(cur1.toStudyRegistryCourseUnitRealisation(), 1L);
-        MoodleCourse moodleCourse2 = moodleCourseBuilder.buildMoodleCourse(cur2.toStudyRegistryCourseUnitRealisation(), 2L);
+        MoodleCourse moodleCourse1 = moodleCourseBuilder.buildMoodleCourse(SisuCourseUnitRealisationConverter.convert(cur1), 1L);
+        MoodleCourse moodleCourse2 = moodleCourseBuilder.buildMoodleCourse(SisuCourseUnitRealisationConverter.convert(cur2), 2L);
 
         assertNotEquals(moodleCourse1.shortName, moodleCourse2.shortName);
     }
@@ -132,20 +121,14 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         cur.activityPeriod = null;
         cur.organisations = new ArrayList<>();
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation(), 10000000L);
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(SisuCourseUnitRealisationConverter.convert(cur), 10000000L);
 
-        assertEquals(generateMultiLangSpan("fi", REALISATION_NAME_FI)
-            + generateMultiLangSpan("sv", REALISATION_NAME_SV)
-            + generateMultiLangSpan("en", REALISATION_NAME_EN), moodleCourse.fullName);
+        assertEquals(REALISATION_NAME_FI, moodleCourse.fullName);
         assertEquals("hy-cur-1", moodleCourse.idNumber);
         assertEquals("Kurssin nimi-5YC1S", moodleCourse.shortName);
-        assertEquals("<p><span lang=\"fi\" class=\"multilang\"><a href=\"urli suomeksi\">urli suomeksi</a></span>" +
-            "<span lang=\"en\" class=\"multilang\"><a href=\"urli suomeksi\">urli suomeksi</a></span>" +
-            "<span lang=\"sv\" class=\"multilang\"><a href=\"fel url på svenska\">fel url på svenska</a></span></p>" +
-            "<p><span lang=\"fi\" class=\"multilang\">Opintojaksot</span><span lang=\"en\" class=\"multilang\">Courses</span>" +
-            "<span lang=\"sv\" class=\"multilang\">Studieavsnitten</span> CODE1, CODE2, CODE3</p><p>" +
-            "<span lang=\"fi\" class=\"multilang\">Kurssi</span><span lang=\"en\" class=\"multilang\">Course</span>" +
-            "<span lang=\"sv\" class=\"multilang\">Kurs</span></p>", moodleCourse.summary);
+        assertEquals("<p><a href=\"urli suomeksi\">urli suomeksi</a></p>" +
+            "<p>Opintojaksot CODE1, CODE2, CODE3</p>" +
+            "<p>Kurssi</p>", moodleCourse.summary);
         assertEquals(LocalDate.now(), moodleCourse.startTime);
         assertEquals(LocalDate.now().plusYears(1), moodleCourse.endTime);
         assertEquals(MOODLE_DEFAULT_CATEGORY_ID, moodleCourse.categoryId);
@@ -157,7 +140,7 @@ public class MoodleCourseBuilderTest extends AbstractMoodiIntegrationTest {
         cur.teachingLanguageUrn = "urn:code:language:sv";
         cur.organisations = null;
 
-        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(cur.toStudyRegistryCourseUnitRealisation(), 10000000L);
+        MoodleCourse moodleCourse = moodleCourseBuilder.buildMoodleCourse(SisuCourseUnitRealisationConverter.convert(cur), 10000000L);
 
         assertEquals(MOODLE_DEFAULT_CATEGORY_ID, moodleCourse.categoryId);
     }

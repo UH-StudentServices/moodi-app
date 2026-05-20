@@ -21,7 +21,6 @@ import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealis
 import org.junit.Before;
 import org.junit.Test;
 import static fi.helsinki.moodi.integration.sisu.SisuLocale.FI;
-import static fi.helsinki.moodi.integration.sisu.SisuLocale.SV;
 import static fi.helsinki.moodi.integration.sisu.SisuLocale.EN;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -41,8 +40,6 @@ public class SisuCourseUnitRealisationTest {
     public static final String SPECIFIER_FI = "1";
     public static final String SPECIFIER_SV = "2";
     public static final String SPECIFIER_EN = "3";
-    public static final String SPAN_START = "<span lang=\":lang:\" class=\"multilang\">";
-    public static final String SPAN_END = "</span>";
     public SisuCourseUnitRealisation cur;
 
     @Before
@@ -77,26 +74,24 @@ public class SisuCourseUnitRealisationTest {
 
     @Test
     public void testNameLocalizationAllLanguages() {
-        String name = cur.generateName(FI);
-        assertEquals(generateSpan(FI, cur.calculateName(FI))
-            + generateSpan(SV, cur.calculateName(SV))
-            + generateSpan(EN, cur.calculateName(EN)), name);
+        String name = SisuCourseUnitRealisationConverter.generateName(cur, FI);
+        assertEquals(SisuCourseUnitRealisationConverter.calculateName(cur, FI), name);
     }
 
     @Test
     public void testNameLocalizationTwoLanguages() {
         cur.name.sv = null;
         cur.nameSpecifier.sv = null;
-        String name = cur.generateName(FI);
-        assertEquals(generateSpan(FI, cur.calculateName(FI)) + generateSpan(EN, cur.calculateName(EN)), name);
+        String name = SisuCourseUnitRealisationConverter.generateName(cur, FI);
+        assertEquals(SisuCourseUnitRealisationConverter.calculateName(cur, FI), name);
     }
 
     @Test
     public void testNameLocalizationTwoLanguagesOtherParams() {
         cur.name.fi = null;
         cur.nameSpecifier.fi = null;
-        String name = cur.generateName(FI);
-        assertEquals(generateSpan(SV, cur.calculateName(SV)) + generateSpan(EN, cur.calculateName(EN)), name);
+        String name = SisuCourseUnitRealisationConverter.generateName(cur, FI);
+        assertEquals(SisuCourseUnitRealisationConverter.calculateName(cur, EN), name);
     }
 
     @Test
@@ -105,15 +100,15 @@ public class SisuCourseUnitRealisationTest {
         cur.nameSpecifier.sv = null;
         cur.name.en = null;
         cur.nameSpecifier.en = null;
-        String name = cur.generateName(FI);
-        assertEquals(cur.calculateName(FI), name);
+        String name = SisuCourseUnitRealisationConverter.generateName(cur, FI);
+        assertEquals(SisuCourseUnitRealisationConverter.calculateName(cur, FI), name);
     }
 
     @Test
     public void testMissingTeachingLanguageNameLocalization() {
         cur.name.fi = null;
         cur.nameSpecifier.fi = null;
-        StudyRegistryCourseUnitRealisation srCur = cur.toStudyRegistryCourseUnitRealisation();
+        StudyRegistryCourseUnitRealisation srCur = SisuCourseUnitRealisationConverter.convert(cur);
         assertNotNull(srCur.teachingLanguageRealisationName);
     }
 
@@ -123,26 +118,24 @@ public class SisuCourseUnitRealisationTest {
         cur.nameSpecifier.sv = SPECIFIER_FI;
         cur.name.en = NAME_FI;
         cur.nameSpecifier.en = SPECIFIER_FI;
-        String name = cur.generateName(FI);
-        assertEquals(cur.calculateName(FI), name);
+        String name = SisuCourseUnitRealisationConverter.generateName(cur, FI);
+        assertEquals(SisuCourseUnitRealisationConverter.calculateName(cur, FI), name);
     }
 
     @Test
     public void testOneLocalizationIsIdenticalToDefault() {
         cur.name.sv = NAME_FI;
         cur.nameSpecifier.sv = SPECIFIER_FI;
-        String name = cur.generateName(FI);
-        assertEquals(generateSpan(FI, cur.calculateName(FI))
-            + generateSpan(EN, cur.calculateName(EN)), name);
+        String name = SisuCourseUnitRealisationConverter.generateName(cur, FI);
+        assertEquals(SisuCourseUnitRealisationConverter.calculateName(cur, FI), name);
     }
 
     @Test
     public void testDefaultLocalizationMissingButThereAreTwoOtherOptions() {
         cur.name.fi = null;
         cur.nameSpecifier.fi = null;
-        String name = cur.generateName(FI);
-        assertEquals(generateSpan(SV, cur.calculateName(SV))
-            + generateSpan(EN, cur.calculateName(EN)), name);
+        String name = SisuCourseUnitRealisationConverter.generateName(cur, FI);
+        assertEquals(SisuCourseUnitRealisationConverter.calculateName(cur, EN), name);
     }
 
     @Test
@@ -151,8 +144,8 @@ public class SisuCourseUnitRealisationTest {
         cur.nameSpecifier.fi = null;
         cur.name.sv = null;
         cur.nameSpecifier.sv = null;
-        String name = cur.generateName(FI);
-        assertEquals(cur.calculateName(EN), name);
+        String name = SisuCourseUnitRealisationConverter.generateName(cur, FI);
+        assertEquals(SisuCourseUnitRealisationConverter.calculateName(cur, EN), name);
     }
 
     @Test
@@ -160,37 +153,28 @@ public class SisuCourseUnitRealisationTest {
         cur.name.sv = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890" +
             "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890" +
             "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
-        String name = cur.generateName(EN);
-        assertEquals(cur.calculateName(EN), name);
+        String name = SisuCourseUnitRealisationConverter.generateName(cur, EN);
+        assertEquals(SisuCourseUnitRealisationConverter.calculateName(cur, EN), name);
     }
 
     @Test
     public void testOodiIdFormat() {
         cur.id = CUR_ID_OODI;
-        String name = cur.generateName(FI);
-        assertEquals(generateSpan(FI, NAME_FI + SisuCourseUnitRealisation.SEPARATOR + SPECIFIER_FI)
-            + generateSpan(SV, NAME_SV + SisuCourseUnitRealisation.SEPARATOR + SPECIFIER_SV)
-            + generateSpan(EN, NAME_EN + SisuCourseUnitRealisation.SEPARATOR + SPECIFIER_EN), name);
+        String name = SisuCourseUnitRealisationConverter.generateName(cur, FI);
+        assertEquals(NAME_FI + SisuCourseUnitRealisationConverter.SEPARATOR + SPECIFIER_FI, name);
     }
 
     @Test
     public void testOptimeIdFormat() {
         cur.id = CUR_ID_OPTIME;
-        String name = cur.generateName(FI);
-        assertEquals(generateSpan(FI, NAME_FI) + generateSpan(SV, NAME_SV) + generateSpan(EN, NAME_EN), name);
+        String name = SisuCourseUnitRealisationConverter.generateName(cur, FI);
+        assertEquals(NAME_FI, name);
     }
 
     @Test
     public void testNonOptimeSisuOodiIdFormat() {
         cur.id = "123412341234";
-        String name = cur.generateName(FI);
-        assertEquals(generateSpan(FI, cur.calculateName(FI))
-            + generateSpan(SV, cur.calculateName(SV))
-            + generateSpan(EN, cur.calculateName(EN)), name);
-
-    }
-
-    private String generateSpan(SisuLocale locale, String text) {
-        return SPAN_START.replace(":lang:", locale.toString()) + text + SPAN_END;
+        String name = SisuCourseUnitRealisationConverter.generateName(cur, FI);
+        assertEquals(SisuCourseUnitRealisationConverter.calculateName(cur, FI), name);
     }
 }
