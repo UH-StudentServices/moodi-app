@@ -57,22 +57,19 @@ public class MoodleIntegrationImportCourseTest extends AbstractMoodleIntegration
 
         // NOTE: THIS MEANS THAT SOMETHING IS GOING WRONG IN THE MOODLE IMPORT
         // either charset problems with input (tested and couldn't fix)
-        assertThat(mfc.fullName).isEqualTo("Lapsuus ja yhteiskuntaFör att testaFor testing");
-        assertThat(mfc.displayName).isEqualTo("Lapsuus ja yhteiskuntaFör att testaFor testing");
+        assertThat(mfc.fullName).isEqualTo("Lapsuus ja yhteiskunta");
+        assertThat(mfc.displayName).isEqualTo("Lapsuus ja yhteiskunta");
         assertThat(mfc.endDate).isGreaterThan(mfc.startDate);
         // The unique shortname suffix for integration tests is derived from the current time and
         // will stay the same length until the year ~2055.
         assertThat(mfc.shortName).startsWith("Lapsuus ja yhtei-");
         assertThat(mfc.idNumber).isEqualTo(sisuCourseId);
         assertThat(mfc.lang).isEmpty();
-        assertThat(mfc.summary).startsWith("<p><span lang=\"fi\" class=\"multilang\"><a href=\"https://courses.helsinki.fi/fi/OODI-FLOW/136394381\">" +
-            "https://courses.helsinki.fi/fi/OODI-FLOW/136394381</a></span><span lang=\"en\" class=\"multilang\">" +
-            "<a href=\"https://courses.helsinki.fi/en/OODI-FLOW/136394381\">https://courses.helsinki.fi/en/OODI-FLOW/136394381</a>" +
-            "</span><span lang=\"sv\" class=\"multilang\"><a href=\"https://courses.helsinki.fi/sv/OODI-FLOW/136394381\">" +
-            "https://courses.helsinki.fi/sv/OODI-FLOW/136394381</a></span></p><p><span lang=\"fi\" class=\"multilang\">Opintojaksot</span><span " +
-            "lang=\"en\" class=\"multilang\">Courses</span><span lang=\"sv\" class=\"multilang\">Studieavsnitten</span>" +
-            " BAR234, FOO123</p><p><span lang=\"fi\" class=\"multilang\">Kurssi</span><span lang=\"en\" class=\"multilang\">Course</span>" +
-            "<span lang=\"sv\" class=\"multilang\">Kurs</span>");
+        assertThat(mfc.summary).startsWith(
+            "<p><a href=\"https://courses.helsinki.fi/fi/OODI-FLOW/136394381\">"
+                + "https://courses.helsinki.fi/fi/OODI-FLOW/136394381</a></p>"
+                + "<p>Opintojaksot BAR234, FOO123</p><p>Kurssi"
+        );
         assertThat(mfc.categoryId).isEqualTo(9);
     }
 
