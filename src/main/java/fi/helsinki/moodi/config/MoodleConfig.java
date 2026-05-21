@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.helsinki.moodi.integration.http.RequestTimingInterceptor;
 import fi.helsinki.moodi.integration.moodle.MoodleClient;
 import org.apache.hc.client5.http.HttpRequestRetryStrategy;
+import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
@@ -32,7 +33,7 @@ import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
@@ -83,6 +84,9 @@ public class MoodleConfig {
         PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder = PoolingHttpClientConnectionManagerBuilder.create();
         // Separate timeout for the socket before the connection is established. See https://jira.it.helsinki.fi/browse/MOODI-118.
         connectionManagerBuilder.setDefaultSocketConfig(SocketConfig.custom().setSoTimeout(Timeout.ofMilliseconds(socketTimeout)).build());
+        connectionManagerBuilder.setDefaultConnectionConfig(
+            ConnectionConfig.custom().setConnectTimeout(Timeout.ofMilliseconds(socketTimeout)).build()
+        );
 
         HttpClientBuilder httpClientBuilder = HttpClients.custom()
             .setConnectionManager(connectionManagerBuilder.build())
@@ -94,7 +98,6 @@ public class MoodleConfig {
             httpClientBuilder.build()
         );
 
-        factory.setConnectTimeout(Duration.ofMillis(socketTimeout));
         factory.setConnectionRequestTimeout(Duration.ofMillis(connectTimeout));
 
         return restTemplateBuilder
