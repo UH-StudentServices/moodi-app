@@ -25,9 +25,10 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@Component
+@Configuration
 public class JsonUtil {
 
     private final ObjectMapper objectMapper = new ObjectMapper()
@@ -44,6 +45,7 @@ public class JsonUtil {
         return objectMapper.writeValueAsString(o);
     }
 
+    @Bean
     public ObjectMapper getObjectMapper() {
         return objectMapper;
     }

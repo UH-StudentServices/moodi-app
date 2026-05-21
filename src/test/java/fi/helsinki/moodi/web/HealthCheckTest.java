@@ -28,7 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDateTime;
@@ -42,15 +42,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class HealthCheckTest extends AbstractMoodiIntegrationTest {
-    private static String EXCEPTION_MESSAGE = "It's all gone Pete Tong";
-
-    @MockBean
+    @MockitoBean
     private TimeService timeService;
 
-    @MockBean
+    @MockitoBean
     private SynchronizationJobRunRepository synchronizationJobRunRepository;
 
-    @MockBean
+    @MockitoBean
     private ImportingService importingService;
 
     @Autowired
@@ -58,7 +56,7 @@ public class HealthCheckTest extends AbstractMoodiIntegrationTest {
 
     @Before
     public void init() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         moodiHealthIndicator.clearError();
     }
 
