@@ -138,7 +138,7 @@ public class EnricherService {
                 EnrichmentStatus.ERROR,
                 String.format("Course not found from Sisu with id %s", course.realisationId));
         } else if (
-            endedMoreThanYearAgo(cur)
+            endedMoreThanThreeMonthsAgo(cur)
                 || cur.documentState == SisuCourseUnitRealisation.DocumentState.DELETED
                 || cur.flowState == SisuCourseUnitRealisation.FlowState.ARCHIVED
                 || cur.flowState == SisuCourseUnitRealisation.FlowState.CANCELLED) {
@@ -150,8 +150,8 @@ public class EnricherService {
         }
     }
 
-    private boolean endedMoreThanYearAgo(StudyRegistryCourseUnitRealisation cur) {
-        return cur.endDate.plusYears(1).isBefore(LocalDate.now());
+    private boolean endedMoreThanThreeMonthsAgo(StudyRegistryCourseUnitRealisation cur) {
+        return cur.endDate.plusMonths(3).isBefore(LocalDate.now());
     }
 
     public void prefetchMoodleCoursesEnrollmentsAndUsers(List<Long> moodleCourseIds) {
