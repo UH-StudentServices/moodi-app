@@ -25,24 +25,25 @@ import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.service.synchronize.enrich.EnrichmentStatus;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem.UserSynchronizationItemStatus;
+import fi.helsinki.moodi.service.synchronize.snapshot.CourseSyncParticipant;
 import fi.helsinki.moodi.test.util.DateUtil;
 import org.junit.Test;
 import org.springframework.test.context.TestPropertySource;
-
-import java.util.Collections;
 
 import static fi.helsinki.moodi.service.course.Course.ImportStatus;
 import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
 import static fi.helsinki.moodi.test.util.DateUtil.getPastDateString;
 import static org.junit.Assert.*;
 
+/**
+ * FULL synchronization is delta-based: actions are resolved against the locally stored
+ * snapshot of the last synced Sisu state, and the Moodle enrollment state is never fetched.
+ */
 @TestPropertySource(properties = {"syncTresholds.REMOVE_ROLE.preventAll = 0"})
 public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
-    private void thatCourseIsSynchronizedWithNoExistingEnrollments(String endDateString) {
+    private void thatCourseIsSynchronizedWithNoExistingSnapshot(String endDateString) {
         setUpMockServerResponses(endDateString, true);
-
-        prepareMoodleGetEnrolledUsersForCoursesMock(MOODLE_COURSE_ID_IN_DB, Collections.emptyList());
 
         expectFindUsersRequestsToMoodle();
 
@@ -57,13 +58,42 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
     @Test
     public void thatCourseIsSynchronizedWhenEndDateInFuture() {
-        thatCourseIsSynchronizedWithNoExistingEnrollments(getFutureDateString());
+        thatCourseIsSynchronizedWithNoExistingSnapshot(getFutureDateString());
     }
 
     @Test
-    public void thatOverYearOldCourseIsRemoved() {
+    public void thatSnapshotIsWrittenAfterSuccessfulBootstrapSync() {
+        thatCourseIsSynchronizedWithNoExistingSnapshot(getFutureDateString());
+
+        CourseSyncParticipant studentSnapshot = getSnapshot(MOODLE_USERNAME_NIINA);
+        assertTrue(studentSnapshot.student);
+        assertTrue(studentSnapshot.enrolledStudent);
+        assertFalse(studentSnapshot.teacher);
+        assertEquals((Long) MOODLE_USER_ID_NIINA, studentSnapshot.moodleUserId);
+
+        CourseSyncParticipant teacherSnapshot = getSnapshot(MOODLE_USERNAME_HRAOPE);
+        assertFalse(teacherSnapshot.student);
+        assertTrue(teacherSnapshot.teacher);
+        assertEquals((Long) MOODLE_USER_HRAOPE, teacherSnapshot.moodleUserId);
+    }
+
+    @Test
+    public void thatUnchangedCourseGeneratesNoMoodleRequests() {
+        setUpMockServerResponses(getFutureDateString(), true);
+
+        seedSnapshot(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA, true, true, false);
+        seedSnapshot(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE, false, false, true);
+
+        // No expectations besides the course prefetch: no user lookups, no enrollment requests.
+        job.execute();
+    }
+
+    @Test
+    public void thatOverYearOldCourseIsRemovedAndSnapshotIsCleanedUp() {
         String endDateInPast = DateUtil.getOverYearAgoPastDateString();
         setupCourseUnitRealisationResponse(endDateInPast, true);
+
+        seedSnapshot(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA, true, true, false);
 
         Course course = findCourse();
 
@@ -75,6 +105,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
         assertTrue(course.removed);
         assertEquals(course.removedMessage, EnrichmentStatus.COURSE_ENDED.toString());
+        assertNull(getSnapshot(MOODLE_USERNAME_NIINA));
     }
 
     @Test
@@ -84,7 +115,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
         assertFalse(course.removed);
 
-        thatCourseIsSynchronizedWithNoExistingEnrollments(getPastDateString());
+        thatCourseIsSynchronizedWithNoExistingSnapshot(getPastDateString());
 
         course = findCourse();
 
@@ -105,37 +136,33 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, false);
 
-        prepareMoodleGetEnrolledUsersForCoursesMock(MOODLE_COURSE_ID_IN_DB, Collections.emptyList());
-
-        expectFindUsersRequestsToMoodle();
-
-        expectEnrollmentRequestToMoodle(
-            new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB),
-            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB));
-
-        job.execute();
-    }
-
-    @Test
-    public void thatEnrolledStudentIsAssignedStudentRoleInMoodleIfAlreadyEnrolledForAnotherRole() {
-        String endDateInFuture = getFutureDateString();
-        setUpMockServerResponses(endDateInFuture, true);
-
-        prepareMoodleGetEnrolledUsersForCoursesMock(
-            MOODLE_COURSE_ID_IN_DB,
-            Collections.singletonList(
-                getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA, (int) MOODLE_COURSE_ID_IN_DB,
-                    mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId())
-            )
-        );
-
+        // Only the teacher has a pending action, so only the teacher is looked up from Moodle.
         expectFindTeacherRequestToMoodle(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE);
 
         expectEnrollmentRequestToMoodle(
             new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB),
             new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB));
 
-        expectAssignRolesToMoodle(true, new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID_IN_DB));
+        job.execute();
+
+        // The non-enrolled student is recorded in the snapshot without any Moodle action.
+        CourseSyncParticipant studentSnapshot = getSnapshot(MOODLE_USERNAME_NIINA);
+        assertTrue(studentSnapshot.student);
+        assertFalse(studentSnapshot.enrolledStudent);
+    }
+
+    @Test
+    public void thatNewTeacherRoleIsAddedForAlreadySyncedStudent() {
+        String endDateInFuture = getFutureDateString();
+        setUpMockServerResponses(endDateInFuture, true);
+
+        seedSnapshot(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA, true, true, false);
+
+        expectFindTeacherRequestToMoodle(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE);
+
+        expectEnrollmentRequestToMoodle(
+            new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB));
 
         job.execute();
     }
@@ -145,76 +172,87 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, false);
 
-        prepareMoodleGetEnrolledUsersForCoursesMock(
-            MOODLE_COURSE_ID_IN_DB,
-            Collections.singletonList(
-                getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA, (int) MOODLE_COURSE_ID_IN_DB,
-                    mapperService.getStudentRoleId(), mapperService.getMoodiRoleId())
-            )
-        );
+        seedSnapshot(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA, true, true, false);
+        seedSnapshot(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE, false, false, true);
 
-        expectFindTeacherRequestToMoodle(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE);
-
-        expectEnrollmentRequestToMoodle(
-            new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB),
-            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB));
-
+        // The Moodle user id comes from the snapshot, so no user lookups are needed.
         expectSuspendRequestToMoodle(new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID_IN_DB));
 
         expectAssignRolesToMoodle(false, new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID_IN_DB));
 
         job.execute();
+
+        CourseSyncParticipant studentSnapshot = getSnapshot(MOODLE_USERNAME_NIINA);
+        assertFalse(studentSnapshot.enrolledStudent);
     }
 
     @Test
-    public void thatReEnrolledStudentIsEnrolledAndRoleAddedInMoodle() {
+    public void thatAlreadySuspendedStudentIsNotSuspendedAgain() {
+        String endDateInFuture = getFutureDateString();
+        setUpMockServerResponses(endDateInFuture, false);
+
+        seedSnapshot(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA, true, false, false);
+        seedSnapshot(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE, false, false, true);
+
+        // No expectations: the suspension has already been synced to Moodle.
+        job.execute();
+    }
+
+    @Test
+    public void thatReEnrolledStudentIsReactivatedInMoodle() {
         String endDateInFuture = getFutureDateString();
         // Student enrolled in Sisu...
         setUpMockServerResponses(endDateInFuture, true);
 
-        // ...but only has the sync role in Moodle.
-        prepareMoodleGetEnrolledUsersForCoursesMock(
-            MOODLE_COURSE_ID_IN_DB,
-            Collections.singletonList(
-                getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA,
-                    (int) MOODLE_COURSE_ID_IN_DB, mapperService.getMoodiRoleId())
-            )
-        );
+        // ...but the snapshot says the student was synced as not enrolled.
+        seedSnapshot(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA, true, false, false);
+        seedSnapshot(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE, false, false, true);
 
-        expectFindTeacherRequestToMoodle(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE);
-
+        // Re-enrolling clears the suspension in Moodle.
         expectEnrollmentRequestToMoodle(
-            new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB),
-            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB));
-
-        expectEnrollmentRequestToMoodle(
-            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID_IN_DB));
-
-        expectAssignRolesToMoodle(true, new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID_IN_DB));
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID_IN_DB),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID_IN_DB));
 
         job.execute();
+
+        CourseSyncParticipant studentSnapshot = getSnapshot(MOODLE_USERNAME_NIINA);
+        assertTrue(studentSnapshot.enrolledStudent);
     }
 
     @Test
-    public void thatUserWithSyncRoleIsNotSuspendedIfDoesNotSeeCourse() {
-        String endDateInFuture = getFutureDateString();
-        setUpMockServerResponses(endDateInFuture, false);
+    public void thatFailedEnrollmentIsRetriedOnNextRun() {
+        setUpMockServerResponses(getFutureDateString(), true);
 
-        prepareMoodleGetEnrolledUsersForCoursesMock(
-            MOODLE_COURSE_ID_IN_DB,
-            Collections.singletonList(
-                getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA,
-                    (int) SOME_OTHER_MOODLE_COURSE_ID, mapperService.getMoodiRoleId())
-            )
-        );
+        expectFindUsersRequestsToMoodle();
 
-        expectFindTeacherRequestToMoodle(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE);
-
-        expectEnrollmentRequestToMoodle(
+        expectEnrollmentRequestToMoodleWithResponse(MOODLE_ERROR_RESPONSE,
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID_IN_DB),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID_IN_DB),
             new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB),
             new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB));
 
         job.execute();
+
+        // No snapshot was written for the failed users...
+        assertNull(getSnapshot(MOODLE_USERNAME_NIINA));
+        assertNull(getSnapshot(MOODLE_USERNAME_HRAOPE));
+
+        // ...so the next run resolves the same delta and retries. Moodle user ids are
+        // served from the cache, so no new user lookups are made.
+        verifyMockServers();
+        setUpMockServers();
+        setUpMockServerResponses(getFutureDateString(), true);
+
+        expectEnrollmentRequestToMoodle(
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID_IN_DB),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID_IN_DB),
+            new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB));
+
+        job.execute();
+
+        assertNotNull(getSnapshot(MOODLE_USERNAME_NIINA));
+        assertNotNull(getSnapshot(MOODLE_USERNAME_HRAOPE));
     }
 
     @Test
@@ -223,14 +261,6 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         prepareMoodleGetCoursesResponseMock();
 
         setupCourseUnitRealisationResponseMultiplePeople();
-
-        prepareMoodleGetEnrolledUsersForCoursesMock(
-            MOODLE_COURSE_ID_IN_DB,
-            Collections.singletonList(
-                getMoodleUserEnrollments((int) MOODLE_USER_NOT_ENROLLED_IN_SISU, MOODLE_USERNAME_NOT_ENROLLED_IN_SISU,
-                    (int) MOODLE_COURSE_ID_IN_DB, mapperService.getStudentRoleId(), mapperService.getMoodiRoleId())
-            )
-        );
 
         expectFindStudentRequestToMoodle(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA);
         expectFindStudentRequestToMoodle(MOODLE_USERNAME_JUKKA, MOODLE_USER_ID_JUKKA);
@@ -256,11 +286,30 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
             new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_TEACH_TWO, MOODLE_COURSE_ID_IN_DB)
         );
 
+        job.execute();
+    }
+
+    @Test
+    public void thatUserSyncedByMoodiButRemovedFromSisuIsSuspended() {
+        prepareMoodleGetCoursesResponseMock();
+
+        setupCourseUnitRealisationResponse(getFutureDateString(), true);
+
+        // A user that was synced to Moodle earlier no longer appears in Sisu at all.
+        seedSnapshot(MOODLE_USERNAME_NOT_ENROLLED_IN_SISU, MOODLE_USER_NOT_ENROLLED_IN_SISU, true, true, false);
+        // The current Sisu users are already in sync.
+        seedSnapshot(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA, true, true, false);
+        seedSnapshot(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE, false, false, true);
+
         expectSuspendRequestToMoodle(new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_NOT_ENROLLED_IN_SISU, MOODLE_COURSE_ID_IN_DB));
 
         expectAssignRolesToMoodle(false, new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_NOT_ENROLLED_IN_SISU, MOODLE_COURSE_ID_IN_DB));
 
         job.execute();
+
+        CourseSyncParticipant removedSnapshot = getSnapshot(MOODLE_USERNAME_NOT_ENROLLED_IN_SISU);
+        assertFalse(removedSnapshot.student);
+        assertFalse(removedSnapshot.enrolledStudent);
     }
 
     @Test
@@ -299,8 +348,6 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
         setupCourseUnitRealisationResponse(getFutureDateString(), true);
 
-        prepareMoodleGetEnrolledUsersForCoursesMock(MOODLE_COURSE_ID_IN_DB, Collections.emptyList());
-
         expectGetUserRequestToMoodleUserNotFound(MOODLE_USERNAME_NIINA);
         expectGetUserRequestToMoodleUserNotFound(MOODLE_USERNAME_HRAOPE);
 
@@ -309,5 +356,9 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         UserSynchronizationItem userSynchronizationItem = summary.getItems().get(0).getUserSynchronizationItems().get(0);
 
         assertEquals(UserSynchronizationItemStatus.MOODLE_USER_NOT_FOUND, userSynchronizationItem.getStatus());
+
+        // Users missing from Moodle get no snapshot row, so they are retried on every run.
+        assertNull(getSnapshot(MOODLE_USERNAME_NIINA));
+        assertNull(getSnapshot(MOODLE_USERNAME_HRAOPE));
     }
 }
