@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 import fi.helsinki.moodi.exception.ProcessingException;
 import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
+import fi.helsinki.moodi.service.synchronize.snapshot.CourseSyncParticipantService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,11 +42,14 @@ public class ProcessorService {
     private static final Logger logger = LoggerFactory.getLogger(ProcessorService.class);
     private final CourseService courseService;
     private final SynchronizingProcessor synchronizingProcessor;
+    private final CourseSyncParticipantService courseSyncParticipantService;
 
     @Autowired
-    public ProcessorService(CourseService courseService, SynchronizingProcessor synchronizingProcessor) {
+    public ProcessorService(CourseService courseService, SynchronizingProcessor synchronizingProcessor,
+                            CourseSyncParticipantService courseSyncParticipantService) {
         this.courseService = courseService;
         this.synchronizingProcessor = synchronizingProcessor;
+        this.courseSyncParticipantService = courseSyncParticipantService;
     }
 
     private SynchronizationItem synchronizationError(SynchronizationItem item, ProcessingStatus status, Exception e) {
@@ -82,6 +86,8 @@ public class ProcessorService {
         }
         try {
             courseService.markAsRemoved(item.getCourse(), item.getEnrichmentStatus().toString());
+            // Removal only flags the course row, so the snapshots are cleaned up explicitly.
+            courseSyncParticipantService.deleteByCourseId(item.getCourse().id);
             item.completeProcessingPhase(ProcessingStatus.SUCCESS, "Removed", true);
         } catch (ProcessingException e) {
             return synchronizationError(item, e.getStatus(), e);

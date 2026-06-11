@@ -97,18 +97,40 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
     }
 
     private SynchronizationItem createFullSynchronizationItem(String realisationId, int moodleId) {
+        return createSynchronizationItem(realisationId, moodleId, SynchronizationType.FULL);
+    }
+
+    private SynchronizationItem createSynchronizationItem(String realisationId, int moodleId, SynchronizationType type) {
         Course course = new Course();
         course.realisationId = realisationId;
         course.moodleId = (long) moodleId;
 
-        return new SynchronizationItem(course, SynchronizationType.FULL);
+        return new SynchronizationItem(course, type);
     }
 
     @Test
     public void thatEnrichersAreRanForEachItem() {
+        // Delta-based FULL items are enriched without fetching the Moodle enrollment state.
         List<SynchronizationItem> items = new ArrayList<>();
         for (int i = 1; i < 5; i++) {
             items.add(createFullSynchronizationItem("hy-CUR-" + i, i));
+        }
+        prepareSisuPrefetchMock(items);
+        prepareMoodleGetCoursesResponseMock(
+            items.stream().map(item -> item.getCourse().moodleId).collect(Collectors.toList()), delayed);
+
+        List<SynchronizationItem> enrichedItems = enricherService.enrichItems(items);
+
+        enrichedItems.forEach(item ->
+            assertStatus(item, EnrichmentStatus.SUCCESS, true)
+        );
+    }
+
+    @Test
+    public void thatMoodleEnrollmentsAreFetchedForReconcileItems() {
+        List<SynchronizationItem> items = new ArrayList<>();
+        for (int i = 1; i < 5; i++) {
+            items.add(createSynchronizationItem("hy-CUR-" + i, i, SynchronizationType.RECONCILE));
         }
         prepareSisuPrefetchMock(items);
         prepareMoodleGetCoursesResponseMock(
@@ -129,7 +151,7 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
     public void thatMissingEnrollmentsCauseErrorForEnrichmentItem() {
         List<SynchronizationItem> items = new ArrayList<>();
         for (int i = 1; i < 5; i++) {
-            items.add(createFullSynchronizationItem("hy-CUR-" + i, i));
+            items.add(createSynchronizationItem("hy-CUR-" + i, i, SynchronizationType.RECONCILE));
         }
         prepareSisuPrefetchMock(items);
         prepareMoodleGetCoursesResponseMock(

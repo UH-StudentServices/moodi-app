@@ -322,9 +322,11 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
         private Map<Long, StudyRegistryTeacher> teacherMap = new HashMap<>();
 
         public CourseSynchronizationRequestChain(long moodleCourseId) {
+            // These tests exercise the live-Moodle-state comparison, which is used by
+            // RECONCILE (and UNLOCK) runs. FULL runs are delta-based.
             SynchronizationItem synchronizationItem = new SynchronizationItem(
                 courseService.findByRealisationId(SISU_REALISATION_IN_DB_ID).get(),
-                SynchronizationType.FULL);
+                SynchronizationType.RECONCILE);
 
             StudyRegistryCourseUnitRealisation cur = new StudyRegistryCourseUnitRealisation();
             cur.students = newArrayList();

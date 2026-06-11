@@ -60,9 +60,7 @@ manual RECONCILE synchronization type, which also rewrites the snapshots.
 ### 1. FULL (scheduled, delta-based)
 - **Schedule**: 30 minutes after the previous run completes (`FullSynchronizationJob`,
   `fixedDelay = 1800000`, initial delay 60 s)
-- **Enabled by**: `synchronize.FULL.enabled`. The effective value is set per environment at
-  deployment time and overrides the yml defaults — currently the scheduled FULL sync is enabled
-  only in the dev environment.
+- **Enabled by**: `synchronize.FULL.enabled` (enabled in production, disabled locally)
 - **Scope**: all completed courses with a Moodle ID
 - **Comparison**: current Sisu state vs. `course_sync_participant` snapshot
 

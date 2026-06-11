@@ -31,6 +31,8 @@ import fi.helsinki.moodi.service.synchronize.notify.LockedSynchronizationItemMes
 import fi.helsinki.moodi.service.synchronize.process.ProcessingStatus;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.process.UserSynchronizationItem.UserSynchronizationItemStatus;
+import fi.helsinki.moodi.service.synchronize.snapshot.CourseSyncParticipant;
+import fi.helsinki.moodi.service.synchronize.snapshot.CourseSyncParticipantService;
 import fi.helsinki.moodi.service.util.MapperService;
 import fi.helsinki.moodi.test.AbstractMoodiIntegrationTest;
 import org.mockito.Mockito;
@@ -69,6 +71,19 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
     @Autowired
     private LockedSynchronizationItemMessageBuilder lockedSynchronizationItemMessageBuilder;
 
+    @Autowired
+    protected CourseSyncParticipantService courseSyncParticipantService;
+
+    protected void seedSnapshot(String username, Long moodleUserId, boolean student, boolean enrolledStudent, boolean teacher) {
+        Course course = findCourse();
+        courseSyncParticipantService.upsertAll(course.id, Collections.singletonList(
+            new CourseSyncParticipant(course.id, username, moodleUserId, student, enrolledStudent, teacher)));
+    }
+
+    protected CourseSyncParticipant getSnapshot(String username) {
+        return courseSyncParticipantService.getSnapshotByUsername(findCourse().id).get(username);
+    }
+
     protected void setUpMockServerResponses(String endDate, boolean enrolled) {
         prepareMoodleGetCoursesResponseMock();
         setupCourseUnitRealisationResponse(endDate, enrolled);
@@ -101,22 +116,33 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, true);
 
-        prepareMoodleGetEnrolledUsersForCoursesMock(
-            MOODLE_COURSE_ID_IN_DB,
-            Collections.singletonList(
-                getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA, (int) MOODLE_COURSE_ID_IN_DB,
-                    mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId())
-            )
-        );
+        if (synchronizationType.isDeltaBased()) {
+            // No snapshot exists, so both the enrolled student and the teacher are added in one batch.
+            expectFindUsersRequestsToMoodle();
 
-        expectFindTeacherRequestToMoodle(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE);
+            expectEnrollmentRequestToMoodleWithResponse(moodleResponse,
+                new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID_IN_DB),
+                new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID_IN_DB),
+                new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB),
+                new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB));
+        } else {
+            prepareMoodleGetEnrolledUsersForCoursesMock(
+                MOODLE_COURSE_ID_IN_DB,
+                Collections.singletonList(
+                    getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA, (int) MOODLE_COURSE_ID_IN_DB,
+                        mapperService.getTeacherRoleId(), mapperService.getMoodiRoleId())
+                )
+            );
 
-        expectEnrollmentRequestToMoodleWithResponse(moodleResponse,
-            new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB),
-            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB));
+            expectFindTeacherRequestToMoodle(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE);
 
-        expectAssignRolesToMoodleWithResponse(moodleResponse, true, new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_NIINA,
-            MOODLE_COURSE_ID_IN_DB));
+            expectEnrollmentRequestToMoodleWithResponse(moodleResponse,
+                new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB),
+                new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB));
+
+            expectAssignRolesToMoodleWithResponse(moodleResponse, true, new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_NIINA,
+                MOODLE_COURSE_ID_IN_DB));
+        }
 
         SynchronizationSummary summary = synchronizationService.synchronize(synchronizationType);
 
@@ -135,15 +161,22 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
 
         setUpMockServerResponses(getFutureDateString(), false);
 
-        prepareMoodleGetEnrolledUsersForCoursesMock(
-            MOODLE_COURSE_ID_IN_DB,
-            Collections.singletonList(
-                getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA, (int) MOODLE_COURSE_ID_IN_DB,
-                    mapperService.getStudentRoleId(), mapperService.getMoodiRoleId())
-            )
-        );
+        if (synchronizationType.isDeltaBased()) {
+            // The student was synced as enrolled and the teacher already exists, so the only
+            // delta is the student no longer being enrolled.
+            seedSnapshot(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA, true, true, false);
+            seedSnapshot(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE, false, false, true);
+        } else {
+            prepareMoodleGetEnrolledUsersForCoursesMock(
+                MOODLE_COURSE_ID_IN_DB,
+                Collections.singletonList(
+                    getMoodleUserEnrollments((int) MOODLE_USER_ID_NIINA, MOODLE_USERNAME_NIINA, (int) MOODLE_COURSE_ID_IN_DB,
+                        mapperService.getStudentRoleId(), mapperService.getMoodiRoleId())
+                )
+            );
 
-        expectFindTeacherRequestToMoodle(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE);
+            expectFindTeacherRequestToMoodle(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE);
+        }
 
         SynchronizationSummary summary = synchronizationService.synchronize(synchronizationType);
 
