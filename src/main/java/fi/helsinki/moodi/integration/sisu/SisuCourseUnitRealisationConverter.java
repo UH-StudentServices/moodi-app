@@ -81,6 +81,7 @@ public final class SisuCourseUnitRealisationConverter {
         ret.flowState = cur.flowState;
         ret.documentState = cur.documentState;
 
+        // activityPeriod must be present with both start and end date per Kori API documentation.
         if (cur.activityPeriod != null) {
             ret.startDate = cur.activityPeriod.startDate != null ? cur.activityPeriod.startDate : LocalDate.now();
             ret.endDate = cur.activityPeriod.endDate != null ? cur.activityPeriod.endDate.plusMonths(1) : LocalDate.now().plusMonths(12);
