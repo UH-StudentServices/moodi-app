@@ -22,7 +22,7 @@ buildscript {
 }
 
 plugins {
-    id "org.springframework.boot" version "4.0.6"
+    id "org.springframework.boot" version "4.0.7"
     id "net.researchgate.release" version "3.0.2"
     id "java"
     id 'checkstyle'
