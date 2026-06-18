@@ -32,8 +32,8 @@ public class CleanImportStatuses {
         this.courseService = courseService;
     }
 
-    // Run once per 2 hours
-    @Scheduled(initialDelay = 30000, fixedDelay = 7200000)
+    // Clears hung initial course import statuses every 0,5h (normally it should take only a few seconds)
+    @Scheduled(initialDelay = 30000, fixedDelay = 1800000)
     public void execute() {
         courseService.cleanImportStatuses();
     }
