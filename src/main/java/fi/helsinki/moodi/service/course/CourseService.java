@@ -34,7 +34,7 @@ import static fi.helsinki.moodi.service.course.Course.ImportStatus.*;
 @Transactional
 public class CourseService {
 
-    private static final int MAX_IMPORT_TIME_SECONDS = 7200;
+    private static final int MAX_IMPORT_TIME_SECONDS = 3600;
 
     private final CourseRepository courseRepository;
     private final TimeService timeService;

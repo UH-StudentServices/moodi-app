@@ -42,7 +42,7 @@ public class FullSynchronizationJob {
     }
 
     // Run every 2 hours
-    @Scheduled(initialDelay = 60000, fixedDelay = 7200000)
+    @Scheduled(initialDelay = 60000, fixedDelay = 1800000)
     public void execute() {
         if (isEnabled()) {
             synchronizationService.synchronize(FULL);
