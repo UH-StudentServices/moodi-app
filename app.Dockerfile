@@ -1,6 +1,6 @@
 # This file is meant to be used for dockerized local development and testing with
 # https://github.com/UH-StudentServices/moodi-development project.
-FROM gradle:8.14.3-jdk
+FROM gradle:8.14.3-jdk21
 
 USER gradle
 
@@ -17,6 +17,6 @@ RUN gradle build -g /home/gradle --exclude-task test --continue --no-daemon
 # Copy the rest of the code
 COPY . /app
 
-EXPOSE 8080
+EXPOSE 8084
 
 CMD gradle bootRun -g /home/gradle --no-daemon --args="--spring.profiles.active=local_docker"

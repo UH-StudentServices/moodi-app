@@ -33,7 +33,7 @@ The project is integrated to Dependency Track for security scanning. The Depende
 ## Requirements
 
 The following programs must be installed if not using the dockerized development environment:
-- JDK 17
+- JDK 21
 
 # Local development
 
