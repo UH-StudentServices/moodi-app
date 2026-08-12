@@ -72,8 +72,6 @@ spring.jpa.generate-ddl: false
 
 auth.enabled: true
 
-dev.mode.enabled: false
-
 syncTresholds:
   REMOVE_ROLES:
     preventAll: 5

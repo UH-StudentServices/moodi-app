@@ -127,8 +127,12 @@ application-dev.yml:
 ```sh
 ./gradlew bootRun
 ```
-The test UI is now available at http://localhost:8084/login
-Credentials are: user/password
+The admin API is now available at http://localhost:8084 and can be called with the client
+credentials from `application-local.yml`, passed as `client-id` / `client-token` headers or
+request parameters. For example:
+```sh
+curl -X POST -H 'client-id: user' -H 'client-token: password' http://localhost:8084/api/v1/synchronization/full
+```
 
 ### Cleaning up
 
