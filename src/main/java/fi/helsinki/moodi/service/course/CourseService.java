@@ -91,10 +91,6 @@ public class CourseService {
         return saveCourse(course);
     }
 
-    public List<Course> findCompletedWithMoodleIdByRealisationIds(List<String> realisationIds) {
-        return courseRepository.findByImportStatusInAndRealisationIdInAndMoodleIdNotNull(newArrayList(COMPLETED, COMPLETED_FAILED), realisationIds);
-    }
-
     public void cleanImportStatuses() {
         List<Course> inProgressCourses = courseRepository.findByImportStatusInAndRemovedFalse(newArrayList(IN_PROGRESS));
 

@@ -59,7 +59,6 @@ mapper.moodle.role.student: 5
 mapper.moodle.role.moodi: 10
 
 synchronize.FULL.enabled: true
-synchronize.INCREMENTAL.enabled: false
 
 logging:
   retain-logs: P30D

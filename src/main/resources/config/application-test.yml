@@ -26,7 +26,6 @@ integration:
     apiKey: test-apikey
 
 synchronize.FULL.enabled: true
-synchronize.INCREMENTAL.enabled: false
 
 logging:
   retain-logs: PT30M

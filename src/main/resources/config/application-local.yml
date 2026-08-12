@@ -19,7 +19,6 @@ auth.client.user: password
 auth.enabled: true
 
 synchronize.FULL.enabled: false
-synchronize.INCREMENTAL.enabled: false
 
 logging:
   retain-logs: PT30M

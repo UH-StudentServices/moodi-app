@@ -55,7 +55,7 @@ manual RECONCILE synchronization type, which also rewrites the snapshots.
 
 ## Synchronization types
 
-`SynchronizationType` (`isDeltaBased()` is true for FULL and INCREMENTAL):
+`SynchronizationType` (`isDeltaBased()` is true for FULL only):
 
 ### 1. FULL (scheduled, delta-based)
 - **Schedule**: 30 minutes after the previous run completes (`FullSynchronizationJob`,
@@ -64,17 +64,12 @@ manual RECONCILE synchronization type, which also rewrites the snapshots.
 - **Scope**: all completed courses with a Moodle ID
 - **Comparison**: current Sisu state vs. `course_sync_participant` snapshot
 
-### 2. INCREMENTAL (disabled)
-- Hardcoded off since 9/2016 (`IncrementalSynchronizationJob.isEnabled()` returns `false`).
-  The Oodi API never supported enrollment updates properly and incremental sync has not been
-  implemented for Sisu. Do not enable without implementing it and updating `MoodiHealthIndicator`.
-
-### 3. UNLOCK (manual, live-state)
+### 2. UNLOCK (manual, live-state)
 - **Trigger**: `POST /api/v1/synchronization/unlock`
 - **Scope**: courses that were locked due to errors or threshold violations; unlocks and
   re-synchronizes them against the live Moodle state, then writes snapshots.
 
-### 4. RECONCILE (manual, live-state)
+### 3. RECONCILE (manual, live-state)
 - **Trigger**: `POST /api/v1/synchronization/reconcile`
 - **Scope**: same course set as FULL
 - **Comparison**: current Sisu state vs. **live Moodle enrollment state** (the pre-delta FULL
