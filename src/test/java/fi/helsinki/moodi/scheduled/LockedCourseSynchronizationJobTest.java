@@ -56,7 +56,7 @@ public class LockedCourseSynchronizationJobTest extends AbstractSynchronizationJ
     @Test
     public void thatSynchronizationSkipsLockedCourse() {
         setupCourseUnitRealisationResponse(getFutureDateString(), true);
-        SynchronizationSummary summary = synchronizationService.synchronize(SynchronizationType.FULL);
+        SynchronizationSummary summary = synchronizationService.synchronize(SynchronizationType.DELTA);
 
         SynchronizationItem item = summary.getItems().get(0);
 

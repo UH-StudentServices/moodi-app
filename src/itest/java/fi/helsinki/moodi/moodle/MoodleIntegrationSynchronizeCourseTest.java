@@ -40,7 +40,7 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
         long moodleCourseId = importCourse(sisuCourseId, creatorUser.personId);
 
         resetAndExpectCourseRealisationsWithUsers(sisuCourseId, singletonList(studentUser), singletonList(teacherUser));
-        synchronizationService.synchronize(SynchronizationType.FULL);
+        synchronizationService.synchronize(SynchronizationType.DELTA);
 
         List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
 
@@ -60,7 +60,7 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
         long moodleCourseId = importCourse(sisuCourseId);
 
         resetAndExpectCourseRealisationsWithUsers(sisuCourseId, singletonList(studentUser), new ArrayList<>());
-        synchronizationService.synchronize(SynchronizationType.FULL);
+        synchronizationService.synchronize(SynchronizationType.DELTA);
 
         List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
 
@@ -79,7 +79,7 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
         long moodleCourseId = importCourse(sisuCourseId);
 
         resetAndExpectCourseRealisationsWithUsers(sisuCourseId, singletonList(studentUser), singletonList(teacherUser));
-        synchronizationService.synchronize(SynchronizationType.FULL);
+        synchronizationService.synchronize(SynchronizationType.DELTA);
 
         List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
 
@@ -98,7 +98,7 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
         long moodleCourseId = importCourse(sisuCourseId);
 
         resetAndExpectCourseRealisationsWithUsers(sisuCourseId, singletonList(studentUser), singletonList(teacherUser));
-        synchronizationService.synchronize(SynchronizationType.FULL);
+        synchronizationService.synchronize(SynchronizationType.DELTA);
 
         List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
 
@@ -117,7 +117,7 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
         long moodleCourseId = importCourse(sisuCourseId);
 
         resetAndExpectCourseRealisationsWithUsers(sisuCourseId, singletonList(teacherInStudentRole), singletonList(teacherUser));
-        synchronizationService.synchronize(SynchronizationType.FULL);
+        synchronizationService.synchronize(SynchronizationType.DELTA);
 
         List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
 
@@ -135,7 +135,7 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
         long moodleCourseId = importCourse(sisuCourseId);
 
         resetAndExpectCourseRealisationsWithUsers(sisuCourseId, singletonList(studentUser), newArrayList(teacherUser, studentUserInTeacherRole));
-        synchronizationService.synchronize(SynchronizationType.FULL);
+        synchronizationService.synchronize(SynchronizationType.DELTA);
 
         List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
 
@@ -154,7 +154,7 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
         long moodleCourseId = importCourse(sisuCourseId);
 
         resetAndExpectCourseRealisationsWithUsers(sisuCourseId, newArrayList(studentUser, teacherInStudentRole), singletonList(teacherUser));
-        synchronizationService.synchronize(SynchronizationType.FULL);
+        synchronizationService.synchronize(SynchronizationType.DELTA);
 
         List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
 
@@ -173,7 +173,7 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
         long moodleCourseId = importCourse(sisuCourseId);
 
         resetAndExpectCourseRealisationsWithUsers(sisuCourseId, new ArrayList<>(), new ArrayList<>());
-        synchronizationService.synchronize(SynchronizationType.FULL);
+        synchronizationService.synchronize(SynchronizationType.DELTA);
 
         List<MoodleUserEnrollments> moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
 
@@ -196,7 +196,7 @@ public class MoodleIntegrationSynchronizeCourseTest extends AbstractMoodleIntegr
         assertHybridEnrollment(TEACHER_USERNAME, moodleUserEnrollmentsList);
 
         resetAndExpectCourseRealisationsWithUsers(sisuCourseId, singletonList(teacherInStudentRole.setEnrolled(false)), singletonList(teacherUser));
-        synchronizationService.synchronize(SynchronizationType.FULL);
+        synchronizationService.synchronize(SynchronizationType.DELTA);
 
         moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
 

@@ -29,7 +29,7 @@ import static org.junit.Assert.*;
 
 /**
  * RECONCILE synchronization compares against the live Moodle enrollment state (like the
- * old FULL synchronization did) and rewrites the snapshots used by delta-based runs.
+ * pre-delta scheduled synchronization did) and rewrites the snapshots used by delta-based runs.
  * It is used to bootstrap the snapshots and to correct drift caused by manual changes
  * in Moodle.
  */

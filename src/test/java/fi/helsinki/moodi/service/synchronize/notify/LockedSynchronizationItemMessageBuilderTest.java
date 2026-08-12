@@ -52,6 +52,6 @@ public class LockedSynchronizationItemMessageBuilderTest extends AbstractMoodiIn
         Course course = new Course();
         course.realisationId = realisationId;
 
-        return new SynchronizationItem(course, SynchronizationType.FULL);
+        return new SynchronizationItem(course, SynchronizationType.DELTA);
     }
 }

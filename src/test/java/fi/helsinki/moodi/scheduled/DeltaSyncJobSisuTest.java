@@ -39,7 +39,7 @@ import static org.mockito.Mockito.when;
  * Uses a mocked CourseRepository instead of the DB initialized by Flyway.
  */
 @TestPropertySource(properties = { "SisuGraphQLClient.batchsize=2", "MoodleClient.batchsize=2" })
-public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
+public class DeltaSyncJobSisuTest extends AbstractMoodiIntegrationTest {
 
     private static final long MOODLE_COURSE_ID_1 = 654321;
     private static final long MOODLE_COURSE_ID_2 = 654322;
@@ -47,7 +47,7 @@ public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
     private static final long MOODLE_COURSE_ID_ARCHIVED = 654324;
 
     @Autowired
-    private FullSynchronizationJob job;
+    private DeltaSynchronizationJob job;
 
     @Autowired
     protected MapperService mapperService;

@@ -17,7 +17,7 @@
 
 package fi.helsinki.moodi;
 
-import fi.helsinki.moodi.scheduled.FullSynchronizationJob;
+import fi.helsinki.moodi.scheduled.DeltaSynchronizationJob;
 import fi.helsinki.moodi.service.synchronize.SynchronizationStatus;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRun;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRunService;
@@ -41,13 +41,13 @@ public class MoodiHealthIndicator implements HealthIndicator {
 
     private final SynchronizationJobRunService synchronizationJobRunService;
     private final TimeService timeService;
-    private final FullSynchronizationJob fullSynchronizationJob;
+    private final DeltaSynchronizationJob deltaSynchronizationJob;
 
     public MoodiHealthIndicator(SynchronizationJobRunService synchronizationJobRunService, TimeService timeService,
-                                FullSynchronizationJob fullSynchronizationJob) {
+                                DeltaSynchronizationJob deltaSynchronizationJob) {
         this.synchronizationJobRunService = synchronizationJobRunService;
         this.timeService = timeService;
-        this.fullSynchronizationJob = fullSynchronizationJob;
+        this.deltaSynchronizationJob = deltaSynchronizationJob;
     }
 
     // Return DOWN, if
@@ -57,7 +57,7 @@ public class MoodiHealthIndicator implements HealthIndicator {
     public Health health() {
         LocalDateTime now = timeService.getCurrentUTCDateTime(); // DB timestamps are in UTC.
         try {
-            if (fullSynchronizationJob.isEnabled()) {
+            if (deltaSynchronizationJob.isEnabled()) {
                 Optional<SynchronizationJobRun> searched = synchronizationJobRunService.findLatestCompletedJob();
                 if (searched.isPresent()) {
                     SynchronizationJobRun latest = searched.get();

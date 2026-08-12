@@ -114,7 +114,7 @@ public class SynchronizationService {
      */
     private List<Course> loadCourses(final SynchronizationType type) {
         switch (type) {
-            case FULL:
+            case DELTA:
             case RECONCILE:
                 return courseService.findAllCompletedWithMoodleId();
             case UNLOCK:

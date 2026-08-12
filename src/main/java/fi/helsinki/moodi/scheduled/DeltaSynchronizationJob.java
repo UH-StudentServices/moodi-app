@@ -23,20 +23,20 @@ import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import static fi.helsinki.moodi.service.synchronize.SynchronizationType.FULL;
+import static fi.helsinki.moodi.service.synchronize.SynchronizationType.DELTA;
 
 /**
- * Scheduled job that performs full synchronization
- * to all Moodle courses create by Moodi.
+ * Scheduled job that performs the delta-based synchronization
+ * of all Moodle courses created by Moodi.
  */
 @Component
-public class FullSynchronizationJob {
+public class DeltaSynchronizationJob {
 
     private final Environment environment;
     private final SynchronizationService synchronizationService;
 
     @Autowired
-    public FullSynchronizationJob(Environment environment, SynchronizationService synchronizationService) {
+    public DeltaSynchronizationJob(Environment environment, SynchronizationService synchronizationService) {
         this.environment = environment;
         this.synchronizationService = synchronizationService;
     }
@@ -45,12 +45,12 @@ public class FullSynchronizationJob {
     @Scheduled(initialDelay = 60000, fixedDelay = 1800000)
     public void execute() {
         if (isEnabled()) {
-            synchronizationService.synchronize(FULL);
+            synchronizationService.synchronize(DELTA);
         }
     }
 
     public boolean isEnabled() {
-        final String key = String.format("synchronize.%s.enabled", FULL);
+        final String key = String.format("synchronize.%s.enabled", DELTA);
         return environment.getRequiredProperty(key, Boolean.class);
     }
 }

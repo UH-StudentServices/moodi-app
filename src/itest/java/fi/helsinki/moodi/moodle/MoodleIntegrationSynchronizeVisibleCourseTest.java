@@ -48,7 +48,7 @@ public class MoodleIntegrationSynchronizeVisibleCourseTest extends AbstractMoodl
 
         // Now set the student as non-enrolled, and run the sync
         resetAndExpectCourseRealisationsWithUsers(sisuCourseId, singletonList(studentUser.setEnrolled(false)), singletonList(teacherUser));
-        synchronizationService.synchronize(SynchronizationType.FULL);
+        synchronizationService.synchronize(SynchronizationType.DELTA);
 
         moodleUserEnrollmentsList = moodleClient.getEnrolledUsers(moodleCourseId);
 
