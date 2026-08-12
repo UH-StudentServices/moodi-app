@@ -18,8 +18,6 @@ integration:
 auth.client.user: password
 auth.enabled: true
 
-dev.mode.enabled: true
-
 synchronize.FULL.enabled: false
 synchronize.INCREMENTAL.enabled: false
 

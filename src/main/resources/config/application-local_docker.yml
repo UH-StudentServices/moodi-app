@@ -23,8 +23,6 @@ integration:
 auth.client.user: 123456
 auth.enabled: false
 
-dev.mode.enabled: true
-
 synchronize.FULL.enabled: false
 synchronize.INCREMENTAL.enabled: false
 
