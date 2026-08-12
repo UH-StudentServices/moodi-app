@@ -24,7 +24,6 @@ auth.client.user: 123456
 auth.enabled: false
 
 synchronize.FULL.enabled: false
-synchronize.INCREMENTAL.enabled: false
 
 logging:
   level:

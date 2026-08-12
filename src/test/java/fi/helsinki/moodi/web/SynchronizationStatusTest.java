@@ -40,18 +40,4 @@ public class SynchronizationStatusTest extends AbstractMoodiIntegrationTest {
             .andExpect(jsonPath("$.error").value(true))
             .andExpect(jsonPath("$.message").value("Last synchronization failed"));
     }
-
-    @Test
-    public void thatIncrementalSynchronizationFailed() throws Exception {
-        mockMvc.perform(
-            get("/api/v1/synchronization/status?type=INCREMENTAL")
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("client-id", "testclient")
-                .header("client-token", "xxx123"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.status").value("Error"))
-            .andExpect(jsonPath("$.success").value(false))
-            .andExpect(jsonPath("$.error").value(true))
-            .andExpect(jsonPath("$.message").value("Last synchronization failed"));
-    }
 }

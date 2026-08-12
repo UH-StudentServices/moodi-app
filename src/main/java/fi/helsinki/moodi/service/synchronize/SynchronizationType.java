@@ -22,7 +22,6 @@ package fi.helsinki.moodi.service.synchronize;
  */
 public enum SynchronizationType {
     FULL,
-    INCREMENTAL,
     UNLOCK,
     /**
      * Like FULL, but compares against the live Moodle enrollment state instead of the locally
@@ -36,6 +35,6 @@ public enum SynchronizationType {
      * Sisu state and do not fetch the enrollment state from Moodle.
      */
     public boolean isDeltaBased() {
-        return this == FULL || this == INCREMENTAL;
+        return this == FULL;
     }
 }

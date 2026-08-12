@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static fi.helsinki.moodi.service.synchronize.SynchronizationStatus.*;
-import static fi.helsinki.moodi.service.synchronize.SynchronizationType.INCREMENTAL;
 
 @Service
 @Transactional
@@ -65,12 +64,6 @@ public class SynchronizationJobRunService {
     public boolean isSynchronizationInProgress() {
         List<SynchronizationJobRun> inProgressRuns = synchronizationJobRunRepository.findByStatus(SynchronizationStatus.STARTED);
         return !inProgressRuns.isEmpty();
-    }
-
-    public Optional<SynchronizationJobRun> findLatestCompletedIncrementalJob() {
-        return synchronizationJobRunRepository.findFirstByTypeAndStatusInOrderByCompletedDesc(
-            INCREMENTAL,
-            Lists.newArrayList(COMPLETED_SUCCESS, COMPLETED_PARTIAL_FAILURE, COMPLETED_FAILURE));
     }
 
     public Optional<SynchronizationJobRun> findLatestJob(SynchronizationType type) {

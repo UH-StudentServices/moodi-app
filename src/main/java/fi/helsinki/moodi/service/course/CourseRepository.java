@@ -31,6 +31,4 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     List<Course> findByImportStatusInAndRemovedFalse(List<ImportStatus> importStatus);
 
     List<Course> findByImportStatusInAndRemovedFalseAndMoodleIdNotNull(List<ImportStatus> importStatus);
-
-    List<Course> findByImportStatusInAndRealisationIdInAndMoodleIdNotNull(List<ImportStatus> importStatuses, List<String> realisationIds);
 }
