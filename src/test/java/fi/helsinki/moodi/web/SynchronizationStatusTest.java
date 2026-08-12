@@ -28,9 +28,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class SynchronizationStatusTest extends AbstractMoodiIntegrationTest {
 
     @Test
-    public void thatFullSynchronizationFailed() throws Exception {
+    public void thatDeltaSynchronizationFailed() throws Exception {
         mockMvc.perform(
-            get("/api/v1/synchronization/status?type=FULL")
+            get("/api/v1/synchronization/status?type=DELTA")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("client-id", "testclient")
                 .header("client-token", "xxx123"))

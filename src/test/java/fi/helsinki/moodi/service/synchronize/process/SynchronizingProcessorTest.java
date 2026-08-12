@@ -323,7 +323,7 @@ public class SynchronizingProcessorTest extends AbstractMoodiIntegrationTest {
 
         public CourseSynchronizationRequestChain(long moodleCourseId) {
             // These tests exercise the live-Moodle-state comparison, which is used by
-            // RECONCILE (and UNLOCK) runs. FULL runs are delta-based.
+            // RECONCILE (and UNLOCK) runs. DELTA runs resolve against the stored snapshots instead.
             SynchronizationItem synchronizationItem = new SynchronizationItem(
                 courseService.findByRealisationId(SISU_REALISATION_IN_DB_ID).get(),
                 SynchronizationType.RECONCILE);

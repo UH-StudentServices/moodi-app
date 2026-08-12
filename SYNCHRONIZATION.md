@@ -7,17 +7,17 @@ Sisu is the master data source; Moodle is the target. Synchronization covers all
 has created in Moodle (rows in the `course` table with `import_status = 'COMPLETED'` and a
 `moodle_id`).
 
-The scheduled **FULL** synchronization is *delta-based*: it resolves the needed Moodle actions by
+The scheduled **DELTA** synchronization resolves the needed Moodle actions by
 comparing the current Sisu state against a locally stored snapshot of the last successfully synced
 Sisu state (table `course_sync_participant`). The live Moodle enrollment state is **not** read
-during a FULL run. A separate manual **RECONCILE** run compares against the live Moodle state and
+during a DELTA run. A separate manual **RECONCILE** run compares against the live Moodle state and
 rewrites the snapshots; it is used to bootstrap the snapshots and to correct drift.
 
 ## Design rationale
 
 ### Context
 
-Previously every FULL run fetched the complete enrollment list of every course from Moodle
+Previously every scheduled run (then called FULL) fetched the complete enrollment list of every course from Moodle
 (`core_enrol_get_enrolled_users`) and diffed the current Sisu state against the live Moodle state.
 This had two problems:
 
@@ -31,36 +31,41 @@ This had two problems:
 ### Decision
 
 Store the last successfully synced Sisu state per course and user in the
-`course_sync_participant` table, and resolve FULL synchronization actions purely from the
+`course_sync_participant` table, and resolve DELTA synchronization actions purely from the
 difference between the current Sisu state and that snapshot
 (`DeltaUserSynchronizationActionResolver`). Keep the old live-state comparison available as the
 manual RECONCILE synchronization type, which also rewrites the snapshots.
 
 ### Consequences
 
-- Unchanged courses generate no Moodle enrollment traffic; a FULL run over a quiet period is
+- Unchanged courses generate no Moodle enrollment traffic; a DELTA run over a quiet period is
   nearly free on the Moodle side.
-- Manual enrollments and removals in Moodle are invisible to FULL runs and are left untouched.
+- Manual enrollments and removals in Moodle are invisible to DELTA runs and are left untouched.
 - Snapshot rows are only written after the user's Moodle actions succeed, so failures are retried
   on the next run.
 - Accepted trade-offs:
-  - **Drift is invisible to FULL runs.** If someone manually strips a role or removes an
-    enrollment in Moodle, FULL will not re-assert it. Run a RECONCILE to detect and correct drift.
+  - **Drift is invisible to DELTA runs.** If someone manually strips a role or removes an
+    enrollment in Moodle, DELTA will not re-assert it. Run a RECONCILE to detect and correct drift.
   - **A manually removed Moodle enrollment can be re-created in suspended state** by a suspend
     action (suspending re-creates the enrollment row, invisible to the user).
   - **Bootstrap is an operational step, not enforced by code.** After deploying the first version
     with delta sync, `POST /api/v1/synchronization/reconcile` must be run once to seed the
-    snapshots. If it is skipped, the first FULL run treats every participant as never synced and
+    snapshots. If it is skipped, the first DELTA run treats every participant as never synced and
     emits a large (but idempotent) enrollment burst plus one Moodle user lookup per user.
 
 ## Synchronization types
 
-`SynchronizationType` (`isDeltaBased()` is true for FULL only):
+`SynchronizationType` (`isDeltaBased()` is true for DELTA only):
 
-### 1. FULL (scheduled, delta-based)
-- **Schedule**: 30 minutes after the previous run completes (`FullSynchronizationJob`,
+### 1. DELTA (scheduled)
+- **Schedule**: 30 minutes after the previous run completes (`DeltaSynchronizationJob`,
   `fixedDelay = 1800000`, initial delay 60 s)
-- **Enabled by**: `synchronize.FULL.enabled` (enabled in production, disabled locally)
+- **Enabled by**: `synchronize.DELTA.enabled`. Yml defaults: enabled in the base
+  `application.yml` (inherited by prod), disabled in the dev profile. Deployments override this
+  per environment through the `SYNCHRONIZE_DELTA_ENABLED` environment variable, set in the
+  systemd unit by moodi-infra (`synchronize_delta_enabled` host variable; OS env vars take
+  precedence over the ymls). Currently the scheduler is on only in the dev environment — prod
+  stays off until the reconcile bootstrap has been run.
 - **Scope**: all completed courses with a Moodle ID
 - **Comparison**: current Sisu state vs. `course_sync_participant` snapshot
 
@@ -71,8 +76,8 @@ manual RECONCILE synchronization type, which also rewrites the snapshots.
 
 ### 3. RECONCILE (manual, live-state)
 - **Trigger**: `POST /api/v1/synchronization/reconcile`
-- **Scope**: same course set as FULL
-- **Comparison**: current Sisu state vs. **live Moodle enrollment state** (the pre-delta FULL
+- **Scope**: same course set as DELTA
+- **Comparison**: current Sisu state vs. **live Moodle enrollment state** (the pre-delta scheduled-sync
   behavior), after which the snapshots are rewritten from the reconciled state.
 - **Used for**: seeding the snapshots after deployment (bootstrap) and correcting drift caused by
   manual changes in Moodle. There is no scheduled RECONCILE job; consider running it manually
@@ -98,9 +103,9 @@ table from V004):
 1. **Course import** (`EnrollmentService.writeSyncSnapshots`): rows are written for the Sisu
    students and teachers that were successfully enrolled during import. The course creator is
    excluded — Moodi enrolls the creator, but the Sisu synchronization does not manage them.
-   Without this, a Sisu change between import and the first FULL run would be invisible to the
+   Without this, a Sisu change between import and the first DELTA run would be invisible to the
    delta resolver. A side effect: newly imported courses do not cause a re-enrollment burst on
-   their first FULL run.
+   their first DELTA run.
 2. **Successful sync** (`SynchronizingProcessor.persistSnapshots`): after processing, the current
    Sisu state is persisted for every user whose Moodle actions all succeeded (or who needed
    none). Rows whose state is unchanged are skipped. Users with failed actions keep their old
@@ -110,10 +115,10 @@ table from V004):
 4. **Course removal**: snapshot rows are deleted explicitly when a course is marked removed, and
    by FK cascade if a course row is hard-deleted.
 
-## FULL (delta) synchronization process
+## DELTA synchronization process
 
 ```
-FullSynchronizationJob.execute() → SynchronizationService.synchronize(FULL)
+DeltaSynchronizationJob.execute() → SynchronizationService.synchronize(DELTA)
 ```
 
 1. **Pre-checks**: refuses to start if another synchronization is running
@@ -122,7 +127,7 @@ FullSynchronizationJob.execute() → SynchronizationService.synchronize(FULL)
 3. **Enrichment** (`EnricherService`): Sisu course data (realisation, enrollments, teachers,
    groups) is fetched and batched as before. Moodle *course* data is prefetched, but Moodle
    *enrollments and users* are only prefetched when the run contains non-delta items — a pure
-   FULL run skips them entirely.
+   DELTA run skips them entirely.
 4. **Delta resolution** (`SynchronizingProcessor.synchronizeUsersDelta`): items are built from
    Sisu students and teachers merged by username; users present in the snapshot but no longer in
    Sisu are added so their removal propagates. `DeltaUserSynchronizationActionResolver` then
@@ -173,7 +178,7 @@ All endpoints require basic auth (see `AuthorizingInterceptor`).
 | Endpoint | Method | Purpose |
 |----------|--------|---------|
 | `/api/v1/synchronization/status?type=<TYPE>` | GET | Status of the latest run of the given type |
-| `/api/v1/synchronization/full` | POST | Trigger a FULL (delta) run |
+| `/api/v1/synchronization/delta` | POST | Trigger a DELTA run |
 | `/api/v1/synchronization/unlock` | POST | Re-sync and unlock locked courses (live-state) |
 | `/api/v1/synchronization/reconcile` | POST | Live-state reconcile, rewrites snapshots |
 
@@ -184,15 +189,22 @@ All endpoints require basic auth (see `AuthorizingInterceptor`).
 - **Concurrency**: only one synchronization can run at a time, tracked via
   `synchronization_job_run`.
 - **Failure recovery**: individual course failures do not abort the run; per-user Moodle failures
-  leave the user's snapshot untouched, so the action is retried on the next FULL run.
+  leave the user's snapshot untouched, so the action is retried on the next DELTA run.
 
 ## Operations
 
+- **Deploying the FULL → DELTA rename**: anything calling `POST /api/v1/synchronization/full`
+  or `GET .../status?type=FULL` (e.g. monitoring) must switch to `/delta` and `?type=DELTA`;
+  the old values now return 404/400. Migration `V014.00__rename_sync_types.sql` renames the
+  existing `synchronization_job_run` rows. The scheduler is controlled per environment by the
+  `SYNCHRONIZE_DELTA_ENABLED` env var from moodi-infra: keep prod `false` for the first
+  deployment of the delta version, run the reconcile bootstrap, then set the
+  `synchronize_delta_enabled` host variable to `true` and re-run the deploy playbook.
 - **Bootstrap after first deployment of delta sync**: run
-  `POST /api/v1/synchronization/reconcile` once. Subsequent scheduled FULL runs are pure delta.
-- **Drift correction**: run a RECONCILE after manual mass-changes in Moodle, or if FULL behavior
+  `POST /api/v1/synchronization/reconcile` once. Subsequent scheduled DELTA runs are pure delta.
+- **Drift correction**: run a RECONCILE after manual mass-changes in Moodle, or if DELTA behavior
   suggests snapshots are out of step with reality. Note that a RECONCILE re-asserts the Sisu
-  state over manual Moodle changes, like the old FULL sync did.
+  state over manual Moodle changes, like the pre-delta scheduled sync did.
 - **Manually recovered courses**: `course` rows inserted by hand have no snapshots; a RECONCILE
   is needed to seed them.
 
@@ -201,4 +213,4 @@ All endpoints require basic auth (see `AuthorizingInterceptor`).
 - `synchronization_job_run` records each run with status and summary.
 - Key log points: job start/completion with id, per-course processing status, slow API call
   warnings, error stack traces.
-- `GET /api/v1/synchronization/status?type=FULL` reports an error if the latest run failed.
+- `GET /api/v1/synchronization/status?type=DELTA` reports an error if the latest run failed.

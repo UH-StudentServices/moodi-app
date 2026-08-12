@@ -54,11 +54,11 @@ public class SynchronizationController {
         }
     }
 
-    @RequestMapping(value = "/full", method = RequestMethod.POST)
+    @RequestMapping(value = "/delta", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<Result<String, Boolean>> synchronizeCourses() {
-        synchronizationExecutor.synchronize(SynchronizationType.FULL);
-        return response(Result.success("Full synchronization job started"));
+        synchronizationExecutor.synchronize(SynchronizationType.DELTA);
+        return response(Result.success("Delta synchronization job started"));
     }
 
     @RequestMapping(value = "/unlock", method = RequestMethod.POST)

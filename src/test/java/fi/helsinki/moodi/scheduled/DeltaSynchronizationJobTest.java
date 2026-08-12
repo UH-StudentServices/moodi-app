@@ -36,11 +36,11 @@ import static fi.helsinki.moodi.test.util.DateUtil.getPastDateString;
 import static org.junit.Assert.*;
 
 /**
- * FULL synchronization is delta-based: actions are resolved against the locally stored
+ * DELTA synchronization is delta-based: actions are resolved against the locally stored
  * snapshot of the last synced Sisu state, and the Moodle enrollment state is never fetched.
  */
 @TestPropertySource(properties = {"syncTresholds.REMOVE_ROLE.preventAll = 0"})
-public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
+public class DeltaSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
     private void thatCourseIsSynchronizedWithNoExistingSnapshot(String endDateString) {
         setUpMockServerResponses(endDateString, true);
@@ -314,24 +314,24 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
     @Test
     public void thatSynchronizationSummaryContainsErrorStatusesAndMessagesWhenMoodleResponseWithError() {
-        testSynchronizationSummary(SynchronizationType.FULL, MOODLE_ERROR_RESPONSE, true);
+        testSynchronizationSummary(SynchronizationType.DELTA, MOODLE_ERROR_RESPONSE, true);
     }
 
     @Test
     public void thatSynchronizationSummaryContainsOkStatusesAndMessagesWhenMoodleResponseWithEmptyString() {
-        testSynchronizationSummary(SynchronizationType.FULL, EMPTY_RESPONSE, false);
+        testSynchronizationSummary(SynchronizationType.DELTA, EMPTY_RESPONSE, false);
     }
 
     @Test
     public void thatSynchronizationSummaryContainsOkStatusesAndMessagesWhenMoodleResponseWithNull() {
-        testSynchronizationSummary(SynchronizationType.FULL, MOODLE_NULL_OK_RESPONSE, false);
+        testSynchronizationSummary(SynchronizationType.DELTA, MOODLE_NULL_OK_RESPONSE, false);
     }
 
     @Test
     public void thatSynchronizationIsNotStartedIfAlreadyInProgress() {
         boolean exceptionThrown = false;
 
-        synchronizationJobRunService.begin(SynchronizationType.FULL);
+        synchronizationJobRunService.begin(SynchronizationType.DELTA);
 
         try {
             job.execute();
@@ -351,7 +351,7 @@ public class FullSynchronizationJobTest extends AbstractSynchronizationJobTest {
         expectGetUserRequestToMoodleUserNotFound(MOODLE_USERNAME_NIINA);
         expectGetUserRequestToMoodleUserNotFound(MOODLE_USERNAME_HRAOPE);
 
-        SynchronizationSummary summary = synchronizationService.synchronize(SynchronizationType.FULL);
+        SynchronizationSummary summary = synchronizationService.synchronize(SynchronizationType.DELTA);
 
         UserSynchronizationItem userSynchronizationItem = summary.getItems().get(0).getUserSynchronizationItems().get(0);
 

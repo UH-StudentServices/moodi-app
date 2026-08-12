@@ -51,7 +51,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
     protected CourseService courseService;
 
     @Autowired
-    protected FullSynchronizationJob job;
+    protected DeltaSynchronizationJob job;
 
     @Autowired
     protected MapperService mapperService;
@@ -196,7 +196,7 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
         assertFalse(syncLockService.isLocked(course));
 
         SynchronizationSummary summary = testSynchronizationSummaryWhenRemovingRoles(
-            SynchronizationType.FULL,
+            SynchronizationType.DELTA,
             ProcessingStatus.LOCKED,
             expectedMessage);
         Mockito.verify(mailSender).send(lockedSynchronizationItemMessageBuilder.buildMessage(summary.getItems()));

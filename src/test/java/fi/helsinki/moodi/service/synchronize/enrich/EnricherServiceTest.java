@@ -45,7 +45,7 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
     @Test
     public void thatSisuCoursesAndPersonsAreFetched() {
         setUpMockSisuAndPrefetchCourses();
-        SynchronizationItem synchronizationItem = createFullSynchronizationItem("hy-CUR-1"); // Published and ongoing
+        SynchronizationItem synchronizationItem = createDeltaSynchronizationItem("hy-CUR-1"); // Published and ongoing
 
         enricherService.enrichWithSisuCourse(synchronizationItem);
 
@@ -55,7 +55,7 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
     @Test
     public void thatSynchronizationItemIsSetToErrorStatusWhenCourseIsNotFound() {
         setUpMockSisuAndPrefetchCourses();
-        SynchronizationItem synchronizationItem = createFullSynchronizationItem("hy-CUR-not-found");
+        SynchronizationItem synchronizationItem = createDeltaSynchronizationItem("hy-CUR-not-found");
 
         enricherService.enrichWithSisuCourse(synchronizationItem);
 
@@ -65,7 +65,7 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
     @Test
     public void thatUnPublishedCourseGetsEnriched() {
         setUpMockSisuAndPrefetchCourses();
-        SynchronizationItem synchronizationItem = createFullSynchronizationItem("hy-CUR-unpublished");
+        SynchronizationItem synchronizationItem = createDeltaSynchronizationItem("hy-CUR-unpublished");
 
         enricherService.enrichWithSisuCourse(synchronizationItem);
 
@@ -75,7 +75,7 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
     @Test
     public void thatSynchronizationItemIsSetToEndedStatusWhenCourseIsEnded() {
         setUpMockSisuAndPrefetchCourses();
-        SynchronizationItem synchronizationItem = createFullSynchronizationItem("hy-CUR-ended");
+        SynchronizationItem synchronizationItem = createDeltaSynchronizationItem("hy-CUR-ended");
 
         enricherService.enrichWithSisuCourse(synchronizationItem);
 
@@ -89,15 +89,15 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
         assertEquals(expectedStatus, item.getEnrichmentStatus());
     }
 
-    private SynchronizationItem createFullSynchronizationItem(String realisationId) {
+    private SynchronizationItem createDeltaSynchronizationItem(String realisationId) {
         Course course = new Course();
         course.realisationId = realisationId;
 
-        return new SynchronizationItem(course, SynchronizationType.FULL);
+        return new SynchronizationItem(course, SynchronizationType.DELTA);
     }
 
-    private SynchronizationItem createFullSynchronizationItem(String realisationId, int moodleId) {
-        return createSynchronizationItem(realisationId, moodleId, SynchronizationType.FULL);
+    private SynchronizationItem createDeltaSynchronizationItem(String realisationId, int moodleId) {
+        return createSynchronizationItem(realisationId, moodleId, SynchronizationType.DELTA);
     }
 
     private SynchronizationItem createSynchronizationItem(String realisationId, int moodleId, SynchronizationType type) {
@@ -110,10 +110,10 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
 
     @Test
     public void thatEnrichersAreRanForEachItem() {
-        // Delta-based FULL items are enriched without fetching the Moodle enrollment state.
+        // DELTA items are enriched without fetching the Moodle enrollment state.
         List<SynchronizationItem> items = new ArrayList<>();
         for (int i = 1; i < 5; i++) {
-            items.add(createFullSynchronizationItem("hy-CUR-" + i, i));
+            items.add(createDeltaSynchronizationItem("hy-CUR-" + i, i));
         }
         prepareSisuPrefetchMock(items);
         prepareMoodleGetCoursesResponseMock(

@@ -14,10 +14,10 @@ enrolled via Moodle api by Moodi application)
 
 ## Synchronization
 
-Enrollments are synchronized from Sisu to Moodle by a scheduled full synchronization that is
-delta-based: actions are resolved by comparing the current Sisu state against a locally stored
-snapshot of the last successfully synced state, so unchanged users generate no Moodle API calls
-and manual changes made in Moodle are not touched. A manual reconcile synchronization
+Enrollments are synchronized from Sisu to Moodle by a scheduled delta synchronization: actions
+are resolved by comparing the current Sisu state against a locally stored snapshot of the last
+successfully synced state, so unchanged users generate no Moodle API calls and manual changes
+made in Moodle are not touched. A manual reconcile synchronization
 (`POST /api/v1/synchronization/reconcile`) compares against the live Moodle state and rewrites
 the snapshots. See [SYNCHRONIZATION.md](SYNCHRONIZATION.md) for the full documentation.
 
@@ -131,7 +131,7 @@ The admin API is now available at http://localhost:8084 and can be called with t
 credentials from `application-local.yml`, passed as `client-id` / `client-token` headers or
 request parameters. For example:
 ```sh
-curl -X POST -H 'client-id: user' -H 'client-token: password' http://localhost:8084/api/v1/synchronization/full
+curl -X POST -H 'client-id: user' -H 'client-token: password' http://localhost:8084/api/v1/synchronization/delta
 ```
 
 ### Cleaning up

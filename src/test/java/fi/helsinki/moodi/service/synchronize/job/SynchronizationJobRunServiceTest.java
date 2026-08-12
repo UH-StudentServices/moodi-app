@@ -38,13 +38,13 @@ public class SynchronizationJobRunServiceTest extends AbstractMoodiIntegrationTe
     @Test
     public void testIsSynchronizationInProgress() {
         assertFalse(synchronizationJobRunService.isSynchronizationInProgress());
-        synchronizationJobRunService.begin(SynchronizationType.FULL);
+        synchronizationJobRunService.begin(SynchronizationType.DELTA);
         assertTrue(synchronizationJobRunService.isSynchronizationInProgress());
     }
 
     @Test
     public void testCheckInterruptedRuns() {
-        synchronizationJobRunService.begin(SynchronizationType.FULL);
+        synchronizationJobRunService.begin(SynchronizationType.DELTA);
 
         assertEquals(getNumberOfStartedJobs(), 1);
         assertEquals(getNumberOfInterruptedJobs(), 0);

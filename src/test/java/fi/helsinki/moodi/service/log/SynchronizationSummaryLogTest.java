@@ -67,7 +67,7 @@ public class SynchronizationSummaryLogTest extends AbstractSummaryLogTest {
     @Test
     public void thatSynchronizationSummaryLogIsCreated() {
 
-        SynchronizationType synchronizationType = SynchronizationType.FULL;
+        SynchronizationType synchronizationType = SynchronizationType.DELTA;
 
         SynchronizationItem item = getSynchronizationItem(synchronizationType);
 

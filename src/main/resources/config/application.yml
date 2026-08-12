@@ -58,7 +58,7 @@ mapper.moodle.role.student: 5
 # Also known as the synced role
 mapper.moodle.role.moodi: 10
 
-synchronize.FULL.enabled: true
+synchronize.DELTA.enabled: true
 
 logging:
   retain-logs: P30D
