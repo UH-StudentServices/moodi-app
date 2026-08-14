@@ -37,8 +37,6 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
-
 @Service
 public class EnricherService {
 
@@ -63,15 +61,15 @@ public class EnricherService {
      */
     public List<SynchronizationItem> enrichItems(final List<SynchronizationItem> items) {
         // First enrich all items with Sisu data
-        prefetchSisuCourses(items.stream().map(item -> item.getCourse().realisationId).collect(toList()));
+        prefetchSisuCourses(items.stream().map(item -> item.getCourse().realisationId).toList());
         items.forEach(this::enrichItemWithSisu);
         // Then enrich those items that are not locked or finished with Moodle data
-        List<SynchronizationItem> activeItems = items.stream().filter(item -> !this.completed(item)).collect(toList());
+        List<SynchronizationItem> activeItems = items.stream().filter(item -> !this.completed(item)).toList();
         // Delta-based runs resolve enrollment actions against the locally stored snapshot, so the
         // Moodle enrollment state is only fetched for runs that compare against live Moodle state.
         boolean fetchMoodleEnrollments = activeItems.stream()
             .anyMatch(item -> !item.getSynchronizationType().isDeltaBased());
-        prefetchMoodleCourses(activeItems.stream().map(item -> item.getCourse().moodleId).collect(toList()));
+        prefetchMoodleCourses(activeItems.stream().map(item -> item.getCourse().moodleId).toList());
         if (fetchMoodleEnrollments) {
             // Prefetching enrollments also gives us enrolled Moodle users, so we don't have to fetch them separately later
             prefetchMoodleEnrollmentsAndUsers();

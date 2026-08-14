@@ -39,7 +39,7 @@ public class SynchronizationController {
         this.synchronizationExecutor = synchronizationExecutor;
     }
 
-    @RequestMapping(value = "/status", method = RequestMethod.GET)
+    @GetMapping(value = "/status")
     public ResponseEntity<Result<Boolean, Boolean>> getStatus(
         @RequestParam("type") final SynchronizationType type) {
 
@@ -54,22 +54,19 @@ public class SynchronizationController {
         }
     }
 
-    @RequestMapping(value = "/delta", method = RequestMethod.POST)
-    @ResponseBody
+    @PostMapping(value = "/delta")
     public ResponseEntity<Result<String, Boolean>> synchronizeCourses() {
         synchronizationExecutor.synchronize(SynchronizationType.DELTA);
         return response(Result.success("Delta synchronization job started"));
     }
 
-    @RequestMapping(value = "/unlock", method = RequestMethod.POST)
-    @ResponseBody
+    @PostMapping(value = "/unlock")
     public ResponseEntity<Result<String, Boolean>> synchronizeAndUnlockLockedCourses() {
         synchronizationExecutor.synchronize(SynchronizationType.UNLOCK);
         return response(Result.success("Unlock synchronization job started"));
     }
 
-    @RequestMapping(value = "/reconcile", method = RequestMethod.POST)
-    @ResponseBody
+    @PostMapping(value = "/reconcile")
     public ResponseEntity<Result<String, Boolean>> reconcileCourses() {
         synchronizationExecutor.synchronize(SynchronizationType.RECONCILE);
         return response(Result.success("Reconcile synchronization job started"));

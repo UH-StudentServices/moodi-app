@@ -81,7 +81,7 @@ public class SynchronizingProcessor {
                                   UserSynchronizationActionResolver synchronizationActionResolver,
                                   DeltaUserSynchronizationActionResolver deltaSynchronizationActionResolver,
                                   CourseSyncParticipantService courseSyncParticipantService,
-                                  BatchProcessor batchProcessor) {
+                                  BatchProcessor<UserSynchronizationAction> batchProcessor) {
         this.mapperService = mapperService;
         this.moodleService = moodleService;
         this.courseService = courseService;
@@ -149,7 +149,7 @@ public class SynchronizingProcessor {
 
         return userSynchronizationItems.stream()
             .map(this::completeItem)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<UserSynchronizationItem> createDeltaUserSynchronizationItems(
@@ -184,7 +184,7 @@ public class SynchronizingProcessor {
 
         return itemsByUsername.values().stream()
             .map(item -> item.withMoodleCourseId(parentItem.getCourse().moodleId))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private void enrichWithMoodleUserByUsername(final UserSynchronizationItem item) {
@@ -225,7 +225,7 @@ public class SynchronizingProcessor {
             .filter(item -> item.getStudent() != null || item.getTeacher() != null || item.getExistingSnapshot() != null)
             .filter(item -> !item.toNewSnapshotState(courseId).hasSameStateAs(item.getExistingSnapshot()))
             .map(item -> item.toNewSnapshotState(courseId))
-            .collect(Collectors.toList());
+            .toList();
         courseSyncParticipantService.upsertAll(courseId, rows);
     }
 
@@ -252,7 +252,7 @@ public class SynchronizingProcessor {
 
         return userSynchronizationItems.stream()
             .map(this::completeItem)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private UserSynchronizationItem completeItem(UserSynchronizationItem item) {
@@ -279,12 +279,11 @@ public class SynchronizingProcessor {
 
         List<MoodleEnrollment> moodleEnrollments = actions.stream()
             .flatMap(action -> actionsToMoodleEnrollents(parentItem, action))
-            .collect(Collectors.toList());
+            .toList();
 
         try {
             switch (actionType) {
-                case ADD_ENROLLMENT:
-                case REACTIVATE_ENROLLMENT: // Adding the enrollment again in Moodle sets the enrollment suspend flag to 0
+                case ADD_ENROLLMENT, REACTIVATE_ENROLLMENT: // Adding the enrollment again in Moodle sets the enrollment suspend flag to 0
                     moodleService.addEnrollments(moodleEnrollments);
                     break;
                 case SUSPEND_ENROLLMENT:
@@ -301,13 +300,13 @@ public class SynchronizingProcessor {
             }
             return actions.stream()
                 .map(UserSynchronizationAction::withSuccessStatus)
-                .collect(Collectors.toList());
+                .toList();
 
         } catch (Exception e) {
             logger.error(String.format("Error when executing action %s", e), e);
             return actions.stream()
                 .map(UserSynchronizationAction::withErrorStatus)
-                .collect(Collectors.toList());
+                .toList();
         }
     }
 
@@ -397,10 +396,10 @@ public class SynchronizingProcessor {
 
         personItems.addAll(course.students
             .stream()
-            .map(UserSynchronizationItem::new).collect(Collectors.toList()));
+            .map(UserSynchronizationItem::new).toList());
         personItems.addAll(course.teachers
             .stream()
-            .map(UserSynchronizationItem::new).collect(Collectors.toList()));
+            .map(UserSynchronizationItem::new).toList());
         Map<Boolean, List<UserSynchronizationItem>> userSynchronizationItemsByCompletedStatus =
             personItems.stream()
                 .map(i -> i.withMoodleCourseId(item.getCourse().moodleId))
@@ -421,7 +420,7 @@ public class SynchronizingProcessor {
 
         // https://jira.it.helsinki.fi/browse/MOODI-122 process Moodle users that do not appear in StudyRegistry.
         Stream<UserSynchronizationItem> moodleUsersNotInStudyRegistry =
-            moodleEnrollmentsByUserId.values().stream().filter(m -> m.username != null & !studyRegistryStudentUsernames.contains(m.username))
+            moodleEnrollmentsByUserId.values().stream().filter(m -> m.username != null && !studyRegistryStudentUsernames.contains(m.username))
             .map(m -> new UserSynchronizationItem(m).withMoodleCourseId(item.getCourse().moodleId));
 
         return Stream.concat(
@@ -429,7 +428,7 @@ public class SynchronizingProcessor {
             Stream.concat(
                 combinedUncompletedItems.stream().map(enrichWithMoodleUserEnrollments(moodleEnrollmentsByUserId)),
                 completedItems.stream())
-        ).collect(Collectors.toList());
+        ).toList();
     }
 
     private Function<UserSynchronizationItem, UserSynchronizationItem> enrichWithMoodleUserEnrollments(final Map<Long,
@@ -454,14 +453,14 @@ public class SynchronizingProcessor {
             return item.withStatus(SUCCESS);
         }
         return getMoodleUser(usernames).map(item::withMoodleUser).orElseGet(() ->  {
-            logger.warn("User not found from Moodle with usernames " + usernames);
+            logger.warn("User not found from Moodle with usernames {}", usernames);
             return item.withStatus(MOODLE_USER_NOT_FOUND);
         });
     }
 
     private Optional<MoodleUser> getMoodleUser(final List<String> usernameList) {
         Optional<MoodleUser> moodleUser = enricherService.getPrefetchedMoodleUser(usernameList);
-        if (!moodleUser.isPresent()) {
+        if (moodleUser.isEmpty()) {
             moodleUser = moodleService.getUser(usernameList);
         }
         return moodleUser;

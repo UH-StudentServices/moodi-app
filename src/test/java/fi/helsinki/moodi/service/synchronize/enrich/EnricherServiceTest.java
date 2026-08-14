@@ -117,7 +117,7 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
         }
         prepareSisuPrefetchMock(items);
         prepareMoodleGetCoursesResponseMock(
-            items.stream().map(item -> item.getCourse().moodleId).collect(Collectors.toList()), delayed);
+            items.stream().map(item -> item.getCourse().moodleId).toList(), delayed);
 
         List<SynchronizationItem> enrichedItems = enricherService.enrichItems(items);
 
@@ -134,10 +134,10 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
         }
         prepareSisuPrefetchMock(items);
         prepareMoodleGetCoursesResponseMock(
-            items.stream().map(item -> item.getCourse().moodleId).collect(Collectors.toList()), delayed);
+            items.stream().map(item -> item.getCourse().moodleId).toList(), delayed);
         prepareMoodleGetEnrolledUsersForCoursesMock(
             items.stream().map(item ->
-                new MoodleCourseWithEnrollments(item.getCourse().moodleId, Collections.emptyList())).collect(Collectors.toList())
+                new MoodleCourseWithEnrollments(item.getCourse().moodleId, Collections.emptyList())).toList()
         );
 
         List<SynchronizationItem> enrichedItems = enricherService.enrichItems(items);
@@ -155,10 +155,10 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
         }
         prepareSisuPrefetchMock(items);
         prepareMoodleGetCoursesResponseMock(
-            items.stream().map(item -> item.getCourse().moodleId).collect(Collectors.toList()), delayed);
+            items.stream().map(item -> item.getCourse().moodleId).toList(), delayed);
         prepareMoodleGetEnrolledUsersForCoursesMock(
             items.stream().map(item ->
-                new MoodleCourseWithEnrollments(item.getCourse().moodleId, Collections.emptyList())).collect(Collectors.toList()),
+                new MoodleCourseWithEnrollments(item.getCourse().moodleId, Collections.emptyList())).toList(),
             3);
 
         List<SynchronizationItem> enrichedItems = enricherService.enrichItems(items);
@@ -176,7 +176,7 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
                 .build())
         ).collect(Collectors.joining(", "));
         String response = "{\"data\": {\"course_unit_realisations\": [" + curs + "] } }";
-        List<String> curIds = itemBatch.stream().map(item -> item.getCourse().realisationId).collect(Collectors.toList());
+        List<String> curIds = itemBatch.stream().map(item -> item.getCourse().realisationId).toList();
         mockSisuGraphQLServer.expectCourseUnitRealisationsRequestFromString(curIds, response, delayed);
     }
 
@@ -196,7 +196,7 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
             mockSisuCURRequestForBatch(itemBatch);
         }
         mockSisuGraphQLServer.expectPersonsRequest(singletonList("hy-hlo-1"), "/sisu/persons.json");
-        List<String> curIds = items.stream().map(item -> item.getCourse().realisationId).collect(Collectors.toList());
+        List<String> curIds = items.stream().map(item -> item.getCourse().realisationId).toList();
         enricherService.prefetchSisuCourses(curIds);
     }
 }
