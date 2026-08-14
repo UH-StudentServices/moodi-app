@@ -36,13 +36,13 @@ public class BatchProcessor<T> {
     }
 
     public List<T> process(final List<T> items,
-                           final ProcessBatch processBatch,
+                           final ProcessBatch<T> processBatch,
                            final int batchSize) {
         return process(items, processBatch, newArrayList(), newArrayList(), batchSize);
     }
 
     private List<T> process(final List<T> items,
-                            final ProcessBatch processBatch,
+                            final ProcessBatch<T> processBatch,
                             final List<T> results,
                             final List<T> processedItems,
                             final int batchSize) {
@@ -53,7 +53,7 @@ public class BatchProcessor<T> {
             .limit(batchSize)
             .collect(Collectors.toList());
 
-        if (itemsToProcess.size() > 0) {
+        if (!itemsToProcess.isEmpty()) {
             logger.info("Processing batch of {} items", itemsToProcess.size());
             results.addAll(processBatch.apply(itemsToProcess));
             processedItems.addAll(itemsToProcess);

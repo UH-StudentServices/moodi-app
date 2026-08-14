@@ -43,7 +43,6 @@ public class CourseSyncParticipantService {
         this.timeService = timeService;
     }
 
-    @Transactional(readOnly = true)
     public Map<String, CourseSyncParticipant> getSnapshotByUsername(Long courseId) {
         if (courseId == null) {
             return Map.of();

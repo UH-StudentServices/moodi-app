@@ -32,10 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -113,15 +111,10 @@ public class SynchronizationService {
      * Load courses to be synchronized.
      */
     private List<Course> loadCourses(final SynchronizationType type) {
-        switch (type) {
-            case DELTA:
-            case RECONCILE:
-                return courseService.findAllCompletedWithMoodleId();
-            case UNLOCK:
-                return syncLockService.getAndUnlockLockedCourses();
-            default:
-                return Collections.emptyList();
-        }
+        return switch (type) {
+            case DELTA, RECONCILE -> courseService.findAllCompletedWithMoodleId();
+            case UNLOCK -> syncLockService.getAndUnlockLockedCourses();
+        };
     }
 
     /**
@@ -129,7 +122,7 @@ public class SynchronizationService {
      * data required to perform the actual synchronization.
      */
     private List<SynchronizationItem> makeItems(final List<Course> courses, SynchronizationType type) {
-        return courses.stream().map(c -> new SynchronizationItem(c, type)).collect(toList());
+        return courses.stream().map(c -> new SynchronizationItem(c, type)).toList();
     }
 
     private SynchronizationSummary complete(

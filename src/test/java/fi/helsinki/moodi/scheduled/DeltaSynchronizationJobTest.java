@@ -20,6 +20,7 @@ package fi.helsinki.moodi.scheduled;
 import fi.helsinki.moodi.exception.SynchronizationInProgressException;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.service.course.Course;
+import fi.helsinki.moodi.service.synchronize.SynchronizationStatus;
 import fi.helsinki.moodi.service.synchronize.SynchronizationSummary;
 import fi.helsinki.moodi.service.synchronize.SynchronizationType;
 import fi.helsinki.moodi.service.synchronize.enrich.EnrichmentStatus;
@@ -84,8 +85,13 @@ public class DeltaSynchronizationJobTest extends AbstractSynchronizationJobTest 
         seedSnapshot(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA, true, true, false);
         seedSnapshot(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE, false, false, true);
 
-        // No expectations besides the course prefetch: no user lookups, no enrollment requests.
-        job.execute();
+        // No expectations besides the course prefetch: no user lookups, no enrollment requests
+        // (enforced by the mock server verification in the @After hook).
+        SynchronizationSummary summary = synchronizationService.synchronize(SynchronizationType.DELTA);
+
+        assertEquals(SynchronizationStatus.COMPLETED_SUCCESS, summary.getStatus());
+        assertTrue(summary.getItems().getFirst().getUserSynchronizationItems().stream()
+            .allMatch(item -> item.getActions().isEmpty()));
     }
 
     @Test
@@ -194,8 +200,13 @@ public class DeltaSynchronizationJobTest extends AbstractSynchronizationJobTest 
         seedSnapshot(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA, true, false, false);
         seedSnapshot(MOODLE_USERNAME_HRAOPE, MOODLE_USER_HRAOPE, false, false, true);
 
-        // No expectations: the suspension has already been synced to Moodle.
-        job.execute();
+        // No expectations: the suspension has already been synced to Moodle
+        // (enforced by the mock server verification in the @After hook).
+        SynchronizationSummary summary = synchronizationService.synchronize(SynchronizationType.DELTA);
+
+        assertEquals(SynchronizationStatus.COMPLETED_SUCCESS, summary.getStatus());
+        assertTrue(summary.getItems().getFirst().getUserSynchronizationItems().stream()
+            .allMatch(item -> item.getActions().isEmpty()));
     }
 
     @Test
@@ -353,7 +364,7 @@ public class DeltaSynchronizationJobTest extends AbstractSynchronizationJobTest 
 
         SynchronizationSummary summary = synchronizationService.synchronize(SynchronizationType.DELTA);
 
-        UserSynchronizationItem userSynchronizationItem = summary.getItems().get(0).getUserSynchronizationItems().get(0);
+        UserSynchronizationItem userSynchronizationItem = summary.getItems().getFirst().getUserSynchronizationItems().getFirst();
 
         assertEquals(UserSynchronizationItemStatus.MOODLE_USER_NOT_FOUND, userSynchronizationItem.getStatus());
 
