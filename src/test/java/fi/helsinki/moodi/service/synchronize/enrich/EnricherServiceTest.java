@@ -169,6 +169,58 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
         }
     }
 
+    @Test
+    public void thatMixedRunFetchesEnrollmentsOnlyForReconcileItems() {
+        List<SynchronizationItem> items = new ArrayList<>();
+        items.add(createDeltaSynchronizationItem("hy-CUR-1", 1));
+        items.add(createDeltaSynchronizationItem("hy-CUR-2", 2));
+        items.add(createSynchronizationItem("hy-CUR-3", 3, SynchronizationType.RECONCILE));
+        items.add(createSynchronizationItem("hy-CUR-4", 4, SynchronizationType.RECONCILE));
+
+        prepareSisuPrefetchMock(items);
+        prepareMoodleGetCoursesResponseMock(
+            items.stream().map(item -> item.getCourse().moodleId).toList(), delayed);
+        // The enrollment prefetch is narrowed to the RECONCILE courses only: a broader fetch
+        // would generate unmatched requests and fail the mock server verification.
+        prepareMoodleGetEnrolledUsersForCoursesMock(
+            items.stream()
+                .filter(item -> item.getSynchronizationType() == SynchronizationType.RECONCILE)
+                .map(item -> new MoodleCourseWithEnrollments(item.getCourse().moodleId, Collections.emptyList())).toList()
+        );
+
+        List<SynchronizationItem> enrichedItems = enricherService.enrichItems(items);
+
+        enrichedItems.forEach(item ->
+            assertStatus(item, EnrichmentStatus.SUCCESS, true)
+        );
+    }
+
+    @Test
+    public void thatMissingEnrollmentsInMixedRunOnlyErrorReconcileItems() {
+        List<SynchronizationItem> items = new ArrayList<>();
+        items.add(createDeltaSynchronizationItem("hy-CUR-1", 1));
+        items.add(createDeltaSynchronizationItem("hy-CUR-2", 2));
+        items.add(createSynchronizationItem("hy-CUR-3", 3, SynchronizationType.RECONCILE));
+        items.add(createSynchronizationItem("hy-CUR-4", 4, SynchronizationType.RECONCILE));
+
+        prepareSisuPrefetchMock(items);
+        prepareMoodleGetCoursesResponseMock(
+            items.stream().map(item -> item.getCourse().moodleId).toList(), delayed);
+        // The second reconcile course's enrollment fetch fails; the delta items never
+        // consult the enrollment state and stay unaffected.
+        prepareMoodleGetEnrolledUsersForCoursesMock(
+            items.stream()
+                .filter(item -> item.getSynchronizationType() == SynchronizationType.RECONCILE)
+                .map(item -> new MoodleCourseWithEnrollments(item.getCourse().moodleId, Collections.emptyList())).toList(),
+            1);
+
+        List<SynchronizationItem> enrichedItems = enricherService.enrichItems(items);
+
+        for (int i = 0; i < enrichedItems.size(); i++) {
+            assertStatus(enrichedItems.get(i), i == 3 ? EnrichmentStatus.ERROR : EnrichmentStatus.SUCCESS, true);
+        }
+    }
+
     private void mockSisuCURRequestForBatch(List<SynchronizationItem> itemBatch) {
         String curs = itemBatch.stream().map(item -> Fixtures.asString("/sisu/course-unit-realisation-template.json",
             new ImmutableMap.Builder<String, String>()

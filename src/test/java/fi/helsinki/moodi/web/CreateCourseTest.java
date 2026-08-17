@@ -137,6 +137,9 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
         assertEquals((Long) MOODLE_USER_ID_NIINA, snapshot.get(MOODLE_USERNAME_NIINA).moodleUserId);
         // The creator is enrolled by Moodi but not managed by the Sisu synchronization.
         assertNull(snapshot.get(MOODLE_USERNAME_CREATOR));
+
+        // Import seeding bootstraps the course, so scheduled runs synchronize it delta-based.
+        assertTrue(course.syncBootstrapped);
     }
 
     @Test

@@ -112,6 +112,17 @@ public class SynchronizingProcessor {
         completeCourseEnrollments(item);
         item.setUserSynchronizationItems(processedItems);
         item.completeProcessingPhase();
+
+        if (!item.getSynchronizationType().isDeltaBased()
+                && item.getProcessingStatus() == ProcessingStatus.SUCCESS
+                && !item.getCourse().syncBootstrapped) {
+            // A successful live-state run has seeded this course's snapshots, so subsequent
+            // scheduled runs can synchronize it delta-based.
+            courseService.markSyncBootstrapped(item.getCourse().realisationId);
+            logger.info("Course {} (moodle id {}) marked sync-bootstrapped after {} run",
+                item.getCourse().realisationId, item.getCourse().moodleId, item.getSynchronizationType());
+        }
+
         return item;
     }
 

@@ -65,16 +65,19 @@ public class EnricherService {
         items.forEach(this::enrichItemWithSisu);
         // Then enrich those items that are not locked or finished with Moodle data
         List<SynchronizationItem> activeItems = items.stream().filter(item -> !this.completed(item)).toList();
-        // Delta-based runs resolve enrollment actions against the locally stored snapshot, so the
-        // Moodle enrollment state is only fetched for runs that compare against live Moodle state.
-        boolean fetchMoodleEnrollments = activeItems.stream()
-            .anyMatch(item -> !item.getSynchronizationType().isDeltaBased());
         prefetchMoodleCourses(activeItems.stream().map(item -> item.getCourse().moodleId).toList());
-        if (fetchMoodleEnrollments) {
+        // Delta-based items resolve enrollment actions against the locally stored snapshot;
+        // only live-state (RECONCILE, UNLOCK) items compare against the Moodle enrollment
+        // state. In a mixed run the enrollment prefetch is narrowed to the live-state courses.
+        List<Long> liveStateCourseIds = activeItems.stream()
+            .filter(item -> !item.getSynchronizationType().isDeltaBased())
+            .map(item -> item.getCourse().moodleId)
+            .toList();
+        if (!liveStateCourseIds.isEmpty()) {
             // Prefetching enrollments also gives us enrolled Moodle users, so we don't have to fetch them separately later
-            prefetchMoodleEnrollmentsAndUsers();
+            prefetchMoodleEnrollmentsAndUsers(liveStateCourseIds);
         }
-        activeItems.forEach(item -> enrichItemWithMoodle(item, fetchMoodleEnrollments));
+        activeItems.forEach(this::enrichItemWithMoodle);
         return items;
     }
 
@@ -87,10 +90,10 @@ public class EnricherService {
         }
     }
 
-    public void enrichItemWithMoodle(final SynchronizationItem item, final boolean withEnrollments) {
+    public void enrichItemWithMoodle(final SynchronizationItem item) {
         try {
             enrichWithMoodleCourse(item);
-            if (withEnrollments) {
+            if (!item.getSynchronizationType().isDeltaBased()) {
                 enrichWithMoodleEnrollments(item);
             }
             if (!completed(item)) {
@@ -169,8 +172,12 @@ public class EnricherService {
         prefetchedMoodleEnrollmentsByCourseId.clear();
     }
 
-    private void prefetchMoodleEnrollmentsAndUsers() {
-        List<Long> foundCourseIds = new ArrayList<>(prefetchedMoodleCoursesById.keySet());
+    private void prefetchMoodleEnrollmentsAndUsers(final List<Long> moodleCourseIds) {
+        // Enrollments can only be fetched for courses that were found in Moodle.
+        List<Long> foundCourseIds = moodleCourseIds.stream()
+            .distinct()
+            .filter(prefetchedMoodleCoursesById::containsKey)
+            .toList();
         moodleService.fetchEnrolledUsersForCourses(prefetchedMoodleEnrollmentsByCourseId, foundCourseIds);
         prefetchedMoodleEnrollmentsByCourseId.values().forEach(enrollments -> {
             if (enrollments != null) {

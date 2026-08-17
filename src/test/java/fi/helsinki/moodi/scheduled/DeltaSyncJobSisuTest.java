@@ -31,7 +31,10 @@ import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
@@ -132,6 +135,74 @@ public class DeltaSyncJobSisuTest extends AbstractMoodiIntegrationTest {
         c.created = LocalDateTime.MIN;
         c.modified = LocalDateTime.MIN;
         c.importStatus = Course.ImportStatus.COMPLETED;
+        c.syncBootstrapped = true;
         return c;
+    }
+
+    @Test
+    public void thatNonBootstrappedCourseIsAutoReconciledWithinDeltaRun() {
+        Course courseTwo = getCourse("hy-CUR-2", MOODLE_COURSE_ID_2);
+        courseTwo.syncBootstrapped = false;
+        // Marking the course bootstrapped after the successful reconcile loads it by
+        // realisation id.
+        when(courseRepository.findByRealisationId("hy-CUR-2")).thenReturn(Optional.of(courseTwo));
+
+        coursesInDb(
+            getCourse("hy-CUR-1", MOODLE_COURSE_ID_1),
+            courseTwo,
+            getCourse("hy-CUR-ended", MOODLE_COURSE_ID_ENDED),
+            getCourse("hy-CUR-archived", MOODLE_COURSE_ID_ARCHIVED)
+        );
+
+        setUpMockSisuAndPrefetchCourses();
+
+        prepareMoodleGetCoursesResponseMock(Arrays.asList(MOODLE_COURSE_ID_1, MOODLE_COURSE_ID_2), true);
+
+        // The Moodle enrollment state is fetched only for the non-bootstrapped course two,
+        // which is stamped RECONCILE within the delta run. A broader fetch would generate
+        // unmatched requests and fail the mock server verification.
+        prepareMoodleGetEnrolledUsersForCoursesMock(MOODLE_COURSE_ID_2, Collections.emptyList());
+
+        // Course one is synced delta-based exactly as before.
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_JUKKA, MOODLE_USER_ID_JUKKA);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_MAKE, MOODLE_USER_ID_MAKE);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_ONE, MOODLE_USER_TEACH_ONE);
+
+        // Course two users are not present in the (empty) Moodle enrollments, so they are
+        // looked up individually and enrolled by the reconcile.
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_NIINA2, MOODLE_USER_NIINA2);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_TWO, MOODLE_USER_TEACH_TWO);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_THREE, MOODLE_USER_TEACH_THREE);
+
+        expectEnrollmentRequestToMoodle(
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID_1),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID_1),
+
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_JUKKA, MOODLE_COURSE_ID_1),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_ID_JUKKA, MOODLE_COURSE_ID_1),
+
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_MAKE, MOODLE_COURSE_ID_1),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_ID_MAKE, MOODLE_COURSE_ID_1),
+
+            new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_TEACH_ONE, MOODLE_COURSE_ID_1),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_TEACH_ONE, MOODLE_COURSE_ID_1)
+        );
+
+        // The live-state processing path enrolls teachers before students.
+        expectEnrollmentRequestToMoodle(
+            new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_TEACH_TWO, MOODLE_COURSE_ID_2),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_TEACH_TWO, MOODLE_COURSE_ID_2),
+
+            new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_TEACH_THREE, MOODLE_COURSE_ID_2),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_TEACH_THREE, MOODLE_COURSE_ID_2),
+
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_NIINA2, MOODLE_COURSE_ID_2),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_NIINA2, MOODLE_COURSE_ID_2)
+        );
+
+        job.execute();
+
+        assertTrue(courseTwo.syncBootstrapped);
     }
 }

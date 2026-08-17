@@ -74,4 +74,11 @@ public class Course {
     @Column(name = "removed_message")
     public String removedMessage;
 
+    // True once the course_sync_participant snapshots have been seeded (by import or a
+    // successful live-state RECONCILE/UNLOCK run). Non-bootstrapped courses are
+    // auto-reconciled against the live Moodle state as part of the scheduled DELTA run.
+    @Column(name = "sync_bootstrapped")
+    @NotNull
+    public boolean syncBootstrapped;
+
 }

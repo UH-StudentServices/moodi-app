@@ -122,7 +122,35 @@ public class SynchronizationService {
      * data required to perform the actual synchronization.
      */
     private List<SynchronizationItem> makeItems(final List<Course> courses, SynchronizationType type) {
-        return courses.stream().map(c -> new SynchronizationItem(c, type)).toList();
+        final List<SynchronizationItem> items = courses.stream()
+            .map(c -> new SynchronizationItem(c, effectiveType(c, type)))
+            .toList();
+        logAutoReconciledItems(type, items);
+        return items;
+    }
+
+    /**
+     * Courses whose snapshots have never been seeded get a live-state reconcile as part of
+     * the scheduled delta run. This replaces the manual bootstrap RECONCILE step.
+     */
+    private static SynchronizationType effectiveType(final Course course, final SynchronizationType runType) {
+        return runType == SynchronizationType.DELTA && !course.syncBootstrapped
+            ? SynchronizationType.RECONCILE
+            : runType;
+    }
+
+    private void logAutoReconciledItems(final SynchronizationType runType, final List<SynchronizationItem> items) {
+        if (runType != SynchronizationType.DELTA) {
+            return;
+        }
+        final List<String> autoReconciled = items.stream()
+            .filter(i -> i.getSynchronizationType() == SynchronizationType.RECONCILE)
+            .map(i -> i.getCourse().realisationId)
+            .toList();
+        if (!autoReconciled.isEmpty()) {
+            logger.info("Auto-reconciling {} non-bootstrapped course(s)", autoReconciled.size());
+            logger.debug("Auto-reconciled courses: {}", autoReconciled);
+        }
     }
 
     private SynchronizationSummary complete(

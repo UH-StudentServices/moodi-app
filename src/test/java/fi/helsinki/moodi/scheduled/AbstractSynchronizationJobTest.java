@@ -78,6 +78,12 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
         Course course = findCourse();
         courseSyncParticipantService.upsertAll(course.id, Collections.singletonList(
             new CourseSyncParticipant(course.id, username, moodleUserId, student, enrolledStudent, teacher)));
+        // Snapshot rows imply a bootstrapped course, mirroring the V015 migration backfill.
+        courseService.markSyncBootstrapped(course.realisationId);
+    }
+
+    protected void markCourseBootstrapped() {
+        courseService.markSyncBootstrapped(findCourse().realisationId);
     }
 
     protected CourseSyncParticipant getSnapshot(String username) {
@@ -117,7 +123,9 @@ public abstract class AbstractSynchronizationJobTest extends AbstractMoodiIntegr
         setUpMockServerResponses(endDateInFuture, true);
 
         if (synchronizationType.isDeltaBased()) {
-            // No snapshot exists, so both the enrolled student and the teacher are added in one batch.
+            // Bootstrapped course with no snapshot rows: both the enrolled student and the
+            // teacher are new users and are added in one batch.
+            markCourseBootstrapped();
             expectFindUsersRequestsToMoodle();
 
             expectEnrollmentRequestToMoodleWithResponse(moodleResponse,
