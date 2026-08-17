@@ -74,6 +74,7 @@ public class SynchronizationSummaryLog {
             return new SynchronizationItemLogEntry(
                 course.realisationId,
                 course.moodleId,
+                item.getSynchronizationType(),
                 item.getEnrichmentStatus(),
                 item.getProcessingStatus(),
                 new UserEnrollmentsLogEntry(
@@ -120,6 +121,9 @@ public class SynchronizationSummaryLog {
     public static class SynchronizationItemLogEntry {
         public final String realisationId;
         public final long moodleId;
+        // The effective per-course type: in a mixed DELTA run, auto-reconciled courses show
+        // up as RECONCILE here.
+        public final SynchronizationType synchronizationType;
         public final EnrichmentStatus enrichmentStatus;
         public final ProcessingStatus processingStatus;
         public final UserEnrollmentsLogEntry userEnrollments;
@@ -128,6 +132,7 @@ public class SynchronizationSummaryLog {
 
         public SynchronizationItemLogEntry(String realisationId,
                                            long moodleId,
+                                           SynchronizationType synchronizationType,
                                            EnrichmentStatus enrichmentStatus,
                                            ProcessingStatus processingStatus,
                                            UserEnrollmentsLogEntry userEnrollments,
@@ -135,6 +140,7 @@ public class SynchronizationSummaryLog {
                                            String processingMessage) {
             this.realisationId = realisationId;
             this.moodleId = moodleId;
+            this.synchronizationType = synchronizationType;
             this.enrichmentStatus = enrichmentStatus;
             this.processingStatus = processingStatus;
             this.userEnrollments = userEnrollments;

@@ -18,6 +18,7 @@
 package fi.helsinki.moodi.scheduled;
 
 import fi.helsinki.moodi.exception.SynchronizationInProgressException;
+import fi.helsinki.moodi.integration.moodle.MoodleCourseWithEnrollments;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.synchronize.SynchronizationStatus;
@@ -31,6 +32,8 @@ import fi.helsinki.moodi.test.util.DateUtil;
 import org.junit.Test;
 import org.springframework.test.context.TestPropertySource;
 
+import java.util.Collections;
+
 import static fi.helsinki.moodi.service.course.Course.ImportStatus;
 import static fi.helsinki.moodi.test.util.DateUtil.getFutureDateString;
 import static fi.helsinki.moodi.test.util.DateUtil.getPastDateString;
@@ -38,12 +41,19 @@ import static org.junit.Assert.*;
 
 /**
  * DELTA synchronization is delta-based: actions are resolved against the locally stored
- * snapshot of the last synced Sisu state, and the Moodle enrollment state is never fetched.
+ * snapshot of the last synced Sisu state, and the Moodle enrollment state is not fetched
+ * for bootstrapped courses. Courses whose snapshots have never been seeded
+ * (sync_bootstrapped = false) are automatically reconciled against the live Moodle state
+ * as part of the run.
  */
 @TestPropertySource(properties = {"syncTresholds.REMOVE_ROLE.preventAll = 0"})
 public class DeltaSynchronizationJobTest extends AbstractSynchronizationJobTest {
 
-    private void thatCourseIsSynchronizedWithNoExistingSnapshot(String endDateString) {
+    private void synchronizeBootstrappedCourseWithNoSnapshotRows(String endDateString) {
+        // Bootstrapped course with no snapshot rows: all Sisu users are new and get
+        // delta ADD_ENROLLMENT actions.
+        markCourseBootstrapped();
+
         setUpMockServerResponses(endDateString, true);
 
         expectFindUsersRequestsToMoodle();
@@ -59,12 +69,12 @@ public class DeltaSynchronizationJobTest extends AbstractSynchronizationJobTest 
 
     @Test
     public void thatCourseIsSynchronizedWhenEndDateInFuture() {
-        thatCourseIsSynchronizedWithNoExistingSnapshot(getFutureDateString());
+        synchronizeBootstrappedCourseWithNoSnapshotRows(getFutureDateString());
     }
 
     @Test
-    public void thatSnapshotIsWrittenAfterSuccessfulBootstrapSync() {
-        thatCourseIsSynchronizedWithNoExistingSnapshot(getFutureDateString());
+    public void thatSnapshotIsWrittenForNewUsersAfterSuccessfulSync() {
+        synchronizeBootstrappedCourseWithNoSnapshotRows(getFutureDateString());
 
         CourseSyncParticipant studentSnapshot = getSnapshot(MOODLE_USERNAME_NIINA);
         assertTrue(studentSnapshot.student);
@@ -76,6 +86,70 @@ public class DeltaSynchronizationJobTest extends AbstractSynchronizationJobTest 
         assertFalse(teacherSnapshot.student);
         assertTrue(teacherSnapshot.teacher);
         assertEquals((Long) MOODLE_USER_HRAOPE, teacherSnapshot.moodleUserId);
+    }
+
+    @Test
+    public void thatNonBootstrappedCourseIsAutoReconciledOnDeltaRun() {
+        assertFalse(findCourse().syncBootstrapped);
+
+        setUpMockServerResponses(getFutureDateString(), true);
+
+        // The course is stamped RECONCILE within the delta run, so the live Moodle
+        // enrollment state is fetched and the Sisu users are enrolled against it.
+        prepareMoodleGetEnrolledUsersForCoursesMock(MOODLE_COURSE_ID_IN_DB, Collections.emptyList());
+
+        expectFindUsersRequestsToMoodle();
+
+        expectEnrollmentRequestToMoodle(
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID_IN_DB),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID_IN_DB),
+            new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_HRAOPE, MOODLE_COURSE_ID_IN_DB));
+
+        job.execute();
+
+        CourseSyncParticipant studentSnapshot = getSnapshot(MOODLE_USERNAME_NIINA);
+        assertTrue(studentSnapshot.student);
+        assertTrue(studentSnapshot.enrolledStudent);
+        assertEquals((Long) MOODLE_USER_ID_NIINA, studentSnapshot.moodleUserId);
+
+        CourseSyncParticipant teacherSnapshot = getSnapshot(MOODLE_USERNAME_HRAOPE);
+        assertTrue(teacherSnapshot.teacher);
+
+        assertTrue(findCourse().syncBootstrapped);
+    }
+
+    @Test
+    public void thatSecondRunAfterAutoReconcileIsPureDelta() {
+        thatNonBootstrappedCourseIsAutoReconciledOnDeltaRun();
+
+        verifyMockServers();
+        setUpMockServers();
+
+        // The bootstrapped and unchanged course generates no enrollment fetches, user
+        // lookups or enrollment requests (enforced by the mock server verification in the
+        // @After hook).
+        setUpMockServerResponses(getFutureDateString(), true);
+
+        job.execute();
+
+        assertTrue(findCourse().syncBootstrapped);
+    }
+
+    @Test
+    public void thatCourseIsNotMarkedBootstrappedWhenAutoReconcileFails() {
+        setUpMockServerResponses(getFutureDateString(), true);
+
+        // Both the batched enrollment fetch and the per-course fallback fail, so the
+        // auto-reconcile item errors during enrichment.
+        prepareMoodleGetEnrolledUsersForCoursesMock(
+            Collections.singletonList(new MoodleCourseWithEnrollments(MOODLE_COURSE_ID_IN_DB, Collections.emptyList())), 0);
+
+        job.execute();
+
+        // The course stays non-bootstrapped and is auto-reconciled again on the next run.
+        assertFalse(findCourse().syncBootstrapped);
+        assertNull(getSnapshot(MOODLE_USERNAME_NIINA));
     }
 
     @Test
@@ -112,6 +186,8 @@ public class DeltaSynchronizationJobTest extends AbstractSynchronizationJobTest 
         assertTrue(course.removed);
         assertEquals(course.removedMessage, EnrichmentStatus.COURSE_ENDED.toString());
         assertNull(getSnapshot(MOODLE_USERNAME_NIINA));
+        // The bootstrap flag follows the snapshots: a resurrected course starts non-bootstrapped.
+        assertFalse(course.syncBootstrapped);
     }
 
     @Test
@@ -121,7 +197,7 @@ public class DeltaSynchronizationJobTest extends AbstractSynchronizationJobTest 
 
         assertFalse(course.removed);
 
-        thatCourseIsSynchronizedWithNoExistingSnapshot(getPastDateString());
+        synchronizeBootstrappedCourseWithNoSnapshotRows(getPastDateString());
 
         course = findCourse();
 
@@ -139,6 +215,8 @@ public class DeltaSynchronizationJobTest extends AbstractSynchronizationJobTest 
 
     @Test
     public void thatNonEnrolledStudentIsNotEnrolledToMoodle() {
+        markCourseBootstrapped();
+
         String endDateInFuture = getFutureDateString();
         setUpMockServerResponses(endDateInFuture, false);
 
@@ -232,6 +310,8 @@ public class DeltaSynchronizationJobTest extends AbstractSynchronizationJobTest 
 
     @Test
     public void thatFailedEnrollmentIsRetriedOnNextRun() {
+        markCourseBootstrapped();
+
         setUpMockServerResponses(getFutureDateString(), true);
 
         expectFindUsersRequestsToMoodle();
@@ -268,6 +348,7 @@ public class DeltaSynchronizationJobTest extends AbstractSynchronizationJobTest 
 
     @Test
     public void thatMultipleStudentsAndTeachersAreSyncedCorrectly() {
+        markCourseBootstrapped();
 
         prepareMoodleGetCoursesResponseMock();
 
@@ -355,6 +436,8 @@ public class DeltaSynchronizationJobTest extends AbstractSynchronizationJobTest 
 
     @Test
     public void thatIfUserIsNotFoundFromMoodleSynchronizationIsNotCompleted() {
+        markCourseBootstrapped();
+
         prepareMoodleGetCoursesResponseMock();
 
         setupCourseUnitRealisationResponse(getFutureDateString(), true);

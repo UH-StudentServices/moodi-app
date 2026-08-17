@@ -66,6 +66,10 @@ public class ReconcileSynchronizationJobTest extends AbstractSynchronizationJobT
 
         CourseSyncParticipant teacherSnapshot = getSnapshot(MOODLE_USERNAME_HRAOPE);
         assertTrue(teacherSnapshot.teacher);
+
+        // A successful live-state run marks the course bootstrapped, so scheduled runs
+        // synchronize it delta-based from now on.
+        assertTrue(findCourse().syncBootstrapped);
     }
 
     @Test

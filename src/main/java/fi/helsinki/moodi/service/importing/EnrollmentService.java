@@ -95,8 +95,12 @@ public class EnrollmentService {
             final List<Enrollment> approvedEnrollments = filterApprovedEnrollments(enrollments, enrollmentWarnings);
             final List<Enrollment> enrollmentsWithMoodleIds = enrichEnrollmentsWithMoodleIds(approvedEnrollments);
 
-            // Used to leave the course creator out of the sync state snapshot: the creator is
-            // enrolled by Moodi but not managed by the Sisu synchronization.
+            // Usernames coming from Sisu (students and teachers). The enrollments list also
+            // contains the course creator, added by Moodi itself in createEnrollments, but
+            // writeSyncSnapshots skips usernames not present in this set. This leaves the
+            // creator out of the sync state snapshot: the creator is enrolled only to set up
+            // the course and may be removed from it later, so the Sisu synchronization must
+            // not manage (or re-add) that enrollment.
             final Set<String> sisuUsernames = Stream.concat(
                     courseUnitRealisation.students.stream().map(s -> s.userName),
                     courseUnitRealisation.teachers.stream().map(t -> t.userName))
@@ -109,6 +113,11 @@ public class EnrollmentService {
                 ENROLLMENT_BATCH_MAX_SIZE);
 
             courseService.completeCourseImport(course.realisationId, true);
+            // Snapshots for the successfully enrolled Sisu users were written per batch in
+            // writeSyncSnapshots. Users in a failed batch have no snapshot row and are
+            // self-healed by the next DELTA run (no snapshot -> idempotent ADD_ENROLLMENT),
+            // so the course counts as bootstrapped even when some enrollments failed.
+            courseService.markSyncBootstrapped(course.realisationId);
 
             loggingService.logCourseImportEnrollments(course, enrollmentsWithMoodleIds, enrollmentWarnings);
 
@@ -133,11 +142,11 @@ public class EnrollmentService {
                 s.studentNumber,
                 s.userName,
                 s.isEnrolled))
-            .collect(toList()));
+            .toList());
 
         enrollments.addAll(cur.teachers.stream()
             .map(s -> Enrollment.forTeacher(s.employeeNumber, s.userName))
-            .collect(toList()));
+            .toList());
 
         if (creatorUsername != null) {
             enrollments.add(Enrollment.forCreator(creatorUsername));
@@ -244,7 +253,7 @@ public class EnrollmentService {
         }
         final Map<String, CourseSyncParticipant> rowsByUsername = new LinkedHashMap<>();
         for (Enrollment enrollment : enrollments) {
-            final String username = enrollment.usernameList.get(0);
+            final String username = enrollment.usernameList.getFirst();
             if (!sisuUsernames.contains(username)) {
                 continue;
             }

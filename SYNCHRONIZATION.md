@@ -10,8 +10,11 @@ has created in Moodle (rows in the `course` table with `import_status = 'COMPLET
 The scheduled **DELTA** synchronization resolves the needed Moodle actions by
 comparing the current Sisu state against a locally stored snapshot of the last successfully synced
 Sisu state (table `course_sync_participant`). The live Moodle enrollment state is **not** read
-during a DELTA run. A separate manual **RECONCILE** run compares against the live Moodle state and
-rewrites the snapshots; it is used to bootstrap the snapshots and to correct drift.
+during a DELTA run for bootstrapped courses. Courses whose snapshots have never been seeded
+(`course.sync_bootstrapped = false`) are automatically reconciled against the live Moodle state as
+part of the same run, so no manual bootstrap step is needed. A separate manual **RECONCILE** run
+compares all (or a single) course against the live Moodle state and rewrites the snapshots; it is
+used to correct drift.
 
 ## Design rationale
 
@@ -48,10 +51,12 @@ manual RECONCILE synchronization type, which also rewrites the snapshots.
     enrollment in Moodle, DELTA will not re-assert it. Run a RECONCILE to detect and correct drift.
   - **A manually removed Moodle enrollment can be re-created in suspended state** by a suspend
     action (suspending re-creates the enrollment row, invisible to the user).
-  - **Bootstrap is an operational step, not enforced by code.** After deploying the first version
-    with delta sync, `POST /api/v1/synchronization/reconcile` must be run once to seed the
-    snapshots. If it is skipped, the first DELTA run treats every participant as never synced and
-    emits a large (but idempotent) enrollment burst plus one Moodle user lookup per user.
+- **Bootstrap is automatic.** The `course.sync_bootstrapped` flag (migration
+  `V015.00__course_sync_bootstrapped.sql`, backfilled to `true` for courses that already have
+  snapshot rows) records whether a course's snapshots have been seeded. A scheduled DELTA run
+  stamps RECONCILE on any non-bootstrapped course and reconciles it against the live Moodle state
+  within the same run; on success the flag is set and later runs are pure delta. The flag is also
+  set by import seeding and successful UNLOCK runs, and cleared when a course is removed.
 
 ## Synchronization types
 
@@ -64,24 +69,30 @@ manual RECONCILE synchronization type, which also rewrites the snapshots.
   `application.yml` (inherited by prod), disabled in the dev profile. Deployments override this
   per environment through the `SYNCHRONIZE_DELTA_ENABLED` environment variable, set in the
   systemd unit by moodi-infra (`synchronize_delta_enabled` host variable; OS env vars take
-  precedence over the ymls). Currently the scheduler is on only in the dev environment — prod
-  stays off until the reconcile bootstrap has been run.
+  precedence over the ymls).
 - **Scope**: all completed courses with a Moodle ID
 - **Comparison**: current Sisu state vs. `course_sync_participant` snapshot
+- **Mixed runs**: courses with `sync_bootstrapped = false` are stamped RECONCILE per item and
+  synchronized live-state within the same run (see RECONCILE below); the Moodle enrollment
+  prefetch is narrowed to those courses only.
 
 ### 2. UNLOCK (manual, live-state)
 - **Trigger**: `POST /api/v1/synchronization/unlock`
 - **Scope**: courses that were locked due to errors or threshold violations; unlocks and
   re-synchronizes them against the live Moodle state, then writes snapshots.
 
-### 3. RECONCILE (manual, live-state)
-- **Trigger**: `POST /api/v1/synchronization/reconcile`
+### 3. RECONCILE (live-state)
+- **Trigger**: `POST /api/v1/synchronization/reconcile` (all courses), or automatically per course
+  within a scheduled DELTA run for courses with `sync_bootstrapped = false`. A single course can
+  be marked for reconcile with `POST /api/v1/synchronization/reconcile/{realisationId}`, which
+  clears its bootstrap flag; the next scheduled run then reconciles it.
 - **Scope**: same course set as DELTA
 - **Comparison**: current Sisu state vs. **live Moodle enrollment state** (the pre-delta scheduled-sync
-  behavior), after which the snapshots are rewritten from the reconciled state.
-- **Used for**: seeding the snapshots after deployment (bootstrap) and correcting drift caused by
-  manual changes in Moodle. There is no scheduled RECONCILE job; consider running it manually
-  after larger manual interventions in Moodle.
+  behavior), after which the snapshots are rewritten from the reconciled state and the course is
+  marked bootstrapped.
+- **Used for**: seeding the snapshots (automatic) and correcting drift caused by manual changes in
+  Moodle. There is no scheduled full-set RECONCILE job; consider running one manually after larger
+  manual interventions in Moodle.
 
 ## The sync state snapshot: `course_sync_participant`
 
@@ -115,6 +126,15 @@ table from V004):
 4. **Course removal**: snapshot rows are deleted explicitly when a course is marked removed, and
    by FK cascade if a course row is hard-deleted.
 
+### The bootstrap flag: `course.sync_bootstrapped`
+
+Records whether the snapshots for a course have been seeded. Set to `true` on successful import
+seeding and after a successful live-state (RECONCILE/UNLOCK) synchronization of the course;
+cleared when a course is marked removed (alongside the snapshot deletion) and by
+`POST /api/v1/synchronization/reconcile/{realisationId}`. Courses with `sync_bootstrapped = false`
+are automatically stamped RECONCILE within the scheduled DELTA run. A failed reconcile leaves the
+flag `false`, so the bootstrap is retried on the next run.
+
 ## DELTA synchronization process
 
 ```
@@ -123,11 +143,13 @@ DeltaSynchronizationJob.execute() → SynchronizationService.synchronize(DELTA)
 
 1. **Pre-checks**: refuses to start if another synchronization is running
    (`SynchronizationInProgressException`); creates a `SynchronizationJobRun` record.
-2. **Course loading**: `courseService.findAllCompletedWithMoodleId()`.
+2. **Course loading**: `courseService.findAllCompletedWithMoodleId()`. Each course becomes a
+   `SynchronizationItem`; courses with `sync_bootstrapped = false` are stamped RECONCILE
+   (auto-bootstrap), the rest DELTA.
 3. **Enrichment** (`EnricherService`): Sisu course data (realisation, enrollments, teachers,
-   groups) is fetched and batched as before. Moodle *course* data is prefetched, but Moodle
-   *enrollments and users* are only prefetched when the run contains non-delta items — a pure
-   DELTA run skips them entirely.
+   groups) is fetched and batched as before. Moodle *course* data is prefetched for all items,
+   but Moodle *enrollments and users* are only prefetched for the live-state (RECONCILE) items —
+   a pure DELTA run skips them entirely.
 4. **Delta resolution** (`SynchronizingProcessor.synchronizeUsersDelta`): items are built from
    Sisu students and teachers merged by username; users present in the snapshot but no longer in
    Sisu are added so their removal propagates. `DeltaUserSynchronizationActionResolver` then
@@ -180,7 +202,8 @@ All endpoints require basic auth (see `AuthorizingInterceptor`).
 | `/api/v1/synchronization/status?type=<TYPE>` | GET | Status of the latest run of the given type |
 | `/api/v1/synchronization/delta` | POST | Trigger a DELTA run |
 | `/api/v1/synchronization/unlock` | POST | Re-sync and unlock locked courses (live-state) |
-| `/api/v1/synchronization/reconcile` | POST | Live-state reconcile, rewrites snapshots |
+| `/api/v1/synchronization/reconcile` | POST | Live-state reconcile of all courses, rewrites snapshots |
+| `/api/v1/synchronization/reconcile/{realisationId}` | POST | Mark one course for reconcile on the next scheduled run |
 
 ## Error handling
 
@@ -197,20 +220,24 @@ All endpoints require basic auth (see `AuthorizingInterceptor`).
   or `GET .../status?type=FULL` (e.g. monitoring) must switch to `/delta` and `?type=DELTA`;
   the old values now return 404/400. Migration `V014.00__rename_sync_types.sql` renames the
   existing `synchronization_job_run` rows. The scheduler is controlled per environment by the
-  `SYNCHRONIZE_DELTA_ENABLED` env var from moodi-infra: keep prod `false` for the first
-  deployment of the delta version, run the reconcile bootstrap, then set the
-  `synchronize_delta_enabled` host variable to `true` and re-run the deploy playbook.
-- **Bootstrap after first deployment of delta sync**: run
-  `POST /api/v1/synchronization/reconcile` once. Subsequent scheduled DELTA runs are pure delta.
-- **Drift correction**: run a RECONCILE after manual mass-changes in Moodle, or if DELTA behavior
-  suggests snapshots are out of step with reality. Note that a RECONCILE re-asserts the Sisu
-  state over manual Moodle changes, like the pre-delta scheduled sync did.
-- **Manually recovered courses**: `course` rows inserted by hand have no snapshots; a RECONCILE
-  is needed to seed them.
+  `SYNCHRONIZE_DELTA_ENABLED` env var from moodi-infra (`synchronize_delta_enabled` host
+  variable).
+- **First deployment of delta sync**: no manual bootstrap step. The first scheduled DELTA run
+  auto-reconciles every course whose snapshots have not been seeded — a one-time live-state pass
+  comparable in Moodle load to one pre-delta FULL run. Subsequent runs are pure delta.
+- **Drift correction**: `POST /api/v1/synchronization/reconcile/{realisationId}` marks a single
+  course for reconcile on the next scheduled run; run a full `POST /api/v1/synchronization/reconcile`
+  after manual mass-changes in Moodle, or if DELTA behavior suggests snapshots are out of step
+  with reality. Note that a RECONCILE re-asserts the Sisu state over manual Moodle changes, like
+  the pre-delta scheduled sync did.
+- **Manually recovered courses**: `course` rows inserted by hand default to
+  `sync_bootstrapped = false` and are seeded automatically by the next scheduled run.
 
 ## Monitoring
 
 - `synchronization_job_run` records each run with status and summary.
 - Key log points: job start/completion with id, per-course processing status, slow API call
-  warnings, error stack traces.
+  warnings, error stack traces. A DELTA run containing auto-reconciled courses logs
+  "Auto-reconciling N non-bootstrapped course(s)" at INFO (course ids at DEBUG), and the JSON
+  summary log records each course's effective `synchronizationType`.
 - `GET /api/v1/synchronization/status?type=DELTA` reports an error if the latest run failed.

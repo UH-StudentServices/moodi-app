@@ -18,6 +18,7 @@
 package fi.helsinki.moodi.web;
 
 import fi.helsinki.moodi.service.Result;
+import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.synchronize.*;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRunService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,12 +32,15 @@ public class SynchronizationController {
 
     private final SynchronizationJobRunService synchronizationJobRunService;
     private final SynchronizationExecutor synchronizationExecutor;
+    private final CourseService courseService;
 
     @Autowired
     public SynchronizationController(SynchronizationJobRunService synchronizationJobRunService,
-                                     SynchronizationExecutor synchronizationExecutor) {
+                                     SynchronizationExecutor synchronizationExecutor,
+                                     CourseService courseService) {
         this.synchronizationJobRunService = synchronizationJobRunService;
         this.synchronizationExecutor = synchronizationExecutor;
+        this.courseService = courseService;
     }
 
     @GetMapping(value = "/status")
@@ -70,6 +74,15 @@ public class SynchronizationController {
     public ResponseEntity<Result<String, Boolean>> reconcileCourses() {
         synchronizationExecutor.synchronize(SynchronizationType.RECONCILE);
         return response(Result.success("Reconcile synchronization job started"));
+    }
+
+    @PostMapping(value = "/reconcile/{realisationId}")
+    public ResponseEntity<Result<String, Boolean>> reconcileCourse(@PathVariable("realisationId") final String realisationId) {
+        // Clearing the bootstrap flag makes the next scheduled synchronization run stamp the
+        // course RECONCILE, which compares against the live Moodle state and rewrites the
+        // snapshots (drift correction for a single course).
+        courseService.markForReconcile(realisationId);
+        return response(Result.success("Course marked for reconcile on the next scheduled synchronization run"));
     }
 
     private <D, E> ResponseEntity<Result<D, E>> response(Result<D, E> result) {
