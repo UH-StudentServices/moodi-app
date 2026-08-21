@@ -22,35 +22,15 @@ import fi.helsinki.moodi.integration.sisu.SisuPerson;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.Random;
 
-// For development purposes while creating test users in Moodle.
-// Previously uuid was used, but it doesn't fulfill the requirements of Moodle.
+// For development purposes: generates fake usernames for Sisu persons when running
+// against a development Moodle (MODE=dev).
 public class DevModeUtils {
     private static final String LOWER = "abcdefghijklmnopqrstuvwxyz";
-    private static final String UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String DIGITS = "0123456789";
-    private static final String SPECIAL_CHARS = "!@#$%^&*()-+";
-    private static final String ALL_CHARS = LOWER + UPPER + DIGITS + SPECIAL_CHARS;
-    private static final SecureRandom RANDOM = new SecureRandom();
 
     private static final boolean DEV_MODE = System.getenv("MODE") != null && System.getenv("MODE").equals("dev");
-
-    public static String generatePassword(int length) {
-        StringBuilder password = new StringBuilder(length);
-
-        password.append(LOWER.charAt(RANDOM.nextInt(LOWER.length())));
-        password.append(UPPER.charAt(RANDOM.nextInt(UPPER.length())));
-        password.append(DIGITS.charAt(RANDOM.nextInt(DIGITS.length())));
-        password.append(SPECIAL_CHARS.charAt(RANDOM.nextInt(SPECIAL_CHARS.length())));
-
-        for (int i = 0; i < length; i++) {
-            password.append(ALL_CHARS.charAt(RANDOM.nextInt(ALL_CHARS.length())));
-        }
-
-        return password.toString();
-    }
 
     public static String pseudoRandomId(int length, String seedStr) {
         StringBuilder password = new StringBuilder(length);

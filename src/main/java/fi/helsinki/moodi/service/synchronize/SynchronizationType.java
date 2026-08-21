@@ -21,7 +21,20 @@ package fi.helsinki.moodi.service.synchronize;
  * Describes different types of synchronization runs.
  */
 public enum SynchronizationType {
-    FULL,
-    INCREMENTAL,
-    UNLOCK
+    DELTA,
+    UNLOCK,
+    /**
+     * Like DELTA, but compares against the live Moodle enrollment state instead of the locally
+     * stored snapshot, and rewrites the snapshots. Used to bootstrap the snapshots and to
+     * correct drift caused by manual changes in Moodle.
+     */
+    RECONCILE;
+
+    /**
+     * Delta runs resolve actions against the locally stored snapshot of the last synced
+     * Sisu state and do not fetch the enrollment state from Moodle.
+     */
+    public boolean isDeltaBased() {
+        return this == DELTA;
+    }
 }

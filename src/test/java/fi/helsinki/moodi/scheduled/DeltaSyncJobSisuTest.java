@@ -17,7 +17,6 @@
 
 package fi.helsinki.moodi.scheduled;
 
-import fi.helsinki.moodi.integration.moodle.MoodleCourseWithEnrollments;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseRepository;
@@ -31,11 +30,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.Optional;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
@@ -43,7 +42,7 @@ import static org.mockito.Mockito.when;
  * Uses a mocked CourseRepository instead of the DB initialized by Flyway.
  */
 @TestPropertySource(properties = { "SisuGraphQLClient.batchsize=2", "MoodleClient.batchsize=2" })
-public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
+public class DeltaSyncJobSisuTest extends AbstractMoodiIntegrationTest {
 
     private static final long MOODLE_COURSE_ID_1 = 654321;
     private static final long MOODLE_COURSE_ID_2 = 654322;
@@ -51,7 +50,7 @@ public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
     private static final long MOODLE_COURSE_ID_ARCHIVED = 654324;
 
     @Autowired
-    private FullSynchronizationJob job;
+    private DeltaSynchronizationJob job;
 
     @Autowired
     protected MapperService mapperService;
@@ -76,20 +75,9 @@ public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
         // The JSON mock data files contain the courses above.
         setUpMockSisuAndPrefetchCourses();
 
-        // Moodle prefetching doesn't include courses that Sisu counts as finished
+        // Moodle prefetching doesn't include courses that Sisu counts as finished.
+        // The Moodle enrollment state itself is not fetched in delta-based synchronization.
         prepareMoodleGetCoursesResponseMock(Arrays.asList(MOODLE_COURSE_ID_1, MOODLE_COURSE_ID_2), true);
-        // Two users are already enrolled with student and synced roles.
-        // One of them now gets returned from Sisu with a non-enrolled status, and the
-        // other one does not get returned from Sisu at all, as someone has totally removed the whole enrollment from Sisu.
-        List<MoodleCourseWithEnrollments> expectedEnrollmentsByCourse = new ArrayList<>();
-        expectedEnrollmentsByCourse.add(new MoodleCourseWithEnrollments(MOODLE_COURSE_ID_1, Arrays.asList(
-            getMoodleUserEnrollments((int) MOODLE_USER_NOT_ENROLLED_IN_SISU, MOODLE_USERNAME_NOT_ENROLLED_IN_SISU, (int) MOODLE_COURSE_ID_1,
-                mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()),
-            getMoodleUserEnrollments((int) MOODLE_USER_NOT_IN_STUDY_REGISTRY, MOODLE_USERNAME_NOT_IN_STUDY_REGISTRY, (int) MOODLE_COURSE_ID_1,
-                mapperService.getStudentRoleId(), mapperService.getMoodiRoleId())
-            )));
-        expectedEnrollmentsByCourse.add(new MoodleCourseWithEnrollments(MOODLE_COURSE_ID_2, Collections.emptyList()));
-        prepareMoodleGetEnrolledUsersForCoursesMock(expectedEnrollmentsByCourse);
 
         // Course one students and teacher are fetched from Moodle.
         expectGetUserRequestToMoodle(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA);
@@ -117,24 +105,19 @@ public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
             new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_TEACH_ONE, MOODLE_COURSE_ID_1)
         );
 
-        // The existing students gets suspended and student role removed, because no longer enrolled or found in Sisu.
-        expectSuspendRequestToMoodle(
-            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_NOT_IN_STUDY_REGISTRY, MOODLE_COURSE_ID_1),
-            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_NOT_ENROLLED_IN_SISU, MOODLE_COURSE_ID_1));
-        expectAssignRolesToMoodle(false,
-            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_NOT_IN_STUDY_REGISTRY, MOODLE_COURSE_ID_1),
-            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_NOT_ENROLLED_IN_SISU, MOODLE_COURSE_ID_1));
+        // The non-enrolled Sisu student and the Moodle-only users generate no actions:
+        // without a snapshot row, Moodi has never synced them, so they are left untouched.
 
         // Course two student and teachers are enrolled.
         expectEnrollmentRequestToMoodle(
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_NIINA2, MOODLE_COURSE_ID_2),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_NIINA2, MOODLE_COURSE_ID_2),
+
             new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_TEACH_TWO, MOODLE_COURSE_ID_2),
             new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_TEACH_TWO, MOODLE_COURSE_ID_2),
 
             new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_TEACH_THREE, MOODLE_COURSE_ID_2),
-            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_TEACH_THREE, MOODLE_COURSE_ID_2),
-
-            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_NIINA2, MOODLE_COURSE_ID_2),
-            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_NIINA2, MOODLE_COURSE_ID_2)
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_TEACH_THREE, MOODLE_COURSE_ID_2)
         );
 
         job.execute();
@@ -152,6 +135,74 @@ public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
         c.created = LocalDateTime.MIN;
         c.modified = LocalDateTime.MIN;
         c.importStatus = Course.ImportStatus.COMPLETED;
+        c.syncBootstrapped = true;
         return c;
+    }
+
+    @Test
+    public void thatNonBootstrappedCourseIsAutoReconciledWithinDeltaRun() {
+        Course courseTwo = getCourse("hy-CUR-2", MOODLE_COURSE_ID_2);
+        courseTwo.syncBootstrapped = false;
+        // Marking the course bootstrapped after the successful reconcile loads it by
+        // realisation id.
+        when(courseRepository.findByRealisationId("hy-CUR-2")).thenReturn(Optional.of(courseTwo));
+
+        coursesInDb(
+            getCourse("hy-CUR-1", MOODLE_COURSE_ID_1),
+            courseTwo,
+            getCourse("hy-CUR-ended", MOODLE_COURSE_ID_ENDED),
+            getCourse("hy-CUR-archived", MOODLE_COURSE_ID_ARCHIVED)
+        );
+
+        setUpMockSisuAndPrefetchCourses();
+
+        prepareMoodleGetCoursesResponseMock(Arrays.asList(MOODLE_COURSE_ID_1, MOODLE_COURSE_ID_2), true);
+
+        // The Moodle enrollment state is fetched only for the non-bootstrapped course two,
+        // which is stamped RECONCILE within the delta run. A broader fetch would generate
+        // unmatched requests and fail the mock server verification.
+        prepareMoodleGetEnrolledUsersForCoursesMock(MOODLE_COURSE_ID_2, Collections.emptyList());
+
+        // Course one is synced delta-based exactly as before.
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_JUKKA, MOODLE_USER_ID_JUKKA);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_MAKE, MOODLE_USER_ID_MAKE);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_ONE, MOODLE_USER_TEACH_ONE);
+
+        // Course two users are not present in the (empty) Moodle enrollments, so they are
+        // looked up individually and enrolled by the reconcile.
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_NIINA2, MOODLE_USER_NIINA2);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_TWO, MOODLE_USER_TEACH_TWO);
+        expectGetUserRequestToMoodle(MOODLE_USERNAME_THREE, MOODLE_USER_TEACH_THREE);
+
+        expectEnrollmentRequestToMoodle(
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID_1),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_ID_NIINA, MOODLE_COURSE_ID_1),
+
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_JUKKA, MOODLE_COURSE_ID_1),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_ID_JUKKA, MOODLE_COURSE_ID_1),
+
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_ID_MAKE, MOODLE_COURSE_ID_1),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_ID_MAKE, MOODLE_COURSE_ID_1),
+
+            new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_TEACH_ONE, MOODLE_COURSE_ID_1),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_TEACH_ONE, MOODLE_COURSE_ID_1)
+        );
+
+        // The live-state processing path enrolls teachers before students.
+        expectEnrollmentRequestToMoodle(
+            new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_TEACH_TWO, MOODLE_COURSE_ID_2),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_TEACH_TWO, MOODLE_COURSE_ID_2),
+
+            new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_TEACH_THREE, MOODLE_COURSE_ID_2),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_TEACH_THREE, MOODLE_COURSE_ID_2),
+
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_NIINA2, MOODLE_COURSE_ID_2),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_NIINA2, MOODLE_COURSE_ID_2)
+        );
+
+        job.execute();
+
+        assertTrue(courseTwo.syncBootstrapped);
     }
 }

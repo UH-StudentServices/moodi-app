@@ -50,6 +50,10 @@ public class CourseService {
     public void markAsRemoved(Course course, String message) {
         course.removed = true;
         course.removedMessage = message;
+        // Removal also deletes the course_sync_participant snapshots, so the bootstrap flag
+        // must follow: a manually resurrected course row starts non-bootstrapped and is
+        // auto-reconciled instead of delta-synced against empty snapshots.
+        course.syncBootstrapped = false;
         saveCourse(course);
     }
 
@@ -91,8 +95,22 @@ public class CourseService {
         return saveCourse(course);
     }
 
-    public List<Course> findCompletedWithMoodleIdByRealisationIds(List<String> realisationIds) {
-        return courseRepository.findByImportStatusInAndRealisationIdInAndMoodleIdNotNull(newArrayList(COMPLETED, COMPLETED_FAILED), realisationIds);
+    public Course markSyncBootstrapped(String realisationId) {
+        Course course = courseRepository.findByRealisationId(realisationId)
+            .orElseThrow(() -> new RuntimeException("Course not found to mark sync bootstrapped for realisationId " + realisationId));
+
+        course.syncBootstrapped = true;
+
+        return saveCourse(course);
+    }
+
+    public Course markForReconcile(String realisationId) {
+        Course course = findByRealisationId(realisationId).orElseThrow(notFoundException(
+            String.format("Study registry course not found with realisation id %s", realisationId)));
+
+        course.syncBootstrapped = false;
+
+        return saveCourse(course);
     }
 
     public void cleanImportStatuses() {

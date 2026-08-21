@@ -23,24 +23,17 @@ import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.log.LoggingService;
 import fi.helsinki.moodi.service.synchronize.enrich.EnricherService;
-import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRun;
 import fi.helsinki.moodi.service.synchronize.job.SynchronizationJobRunService;
 import fi.helsinki.moodi.service.synchronize.notify.SynchronizationItemNotifier;
 import fi.helsinki.moodi.service.synchronize.process.ProcessorService;
 import fi.helsinki.moodi.service.synclock.SyncLockService;
-import fi.helsinki.moodi.service.time.TimeService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
-import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -50,7 +43,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class SynchronizationService {
 
     private static final Logger logger = getLogger(SynchronizationService.class);
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final EnricherService enricherService;
     private final ProcessorService processorService;
@@ -58,7 +50,6 @@ public class SynchronizationService {
     private final LoggingService loggingService;
     private final CourseService courseService;
     private final SyncLockService syncLockService;
-    private final TimeService timeService;
     private final List<SynchronizationItemNotifier> notifiers;
 
     @Autowired
@@ -69,7 +60,6 @@ public class SynchronizationService {
         LoggingService loggingService,
         CourseService courseService,
         SyncLockService syncLockService,
-        TimeService timeService,
         List<SynchronizationItemNotifier> notifiers) {
 
         this.enricherService = enricherService;
@@ -78,7 +68,6 @@ public class SynchronizationService {
         this.loggingService = loggingService;
         this.courseService = courseService;
         this.syncLockService = syncLockService;
-        this.timeService = timeService;
         this.notifiers = notifiers;
     }
 
@@ -122,27 +111,10 @@ public class SynchronizationService {
      * Load courses to be synchronized.
      */
     private List<Course> loadCourses(final SynchronizationType type) {
-        switch (type) {
-            case FULL:
-                return courseService.findAllCompletedWithMoodleId();
-            case UNLOCK:
-                return syncLockService.getAndUnlockLockedCourses();
-            case INCREMENTAL:
-                final Optional<SynchronizationJobRun> lastRun =
-                    synchronizationJobRunService.findLatestCompletedIncrementalJob();
-                final LocalDateTime afterDate =
-                    lastRun.map(s -> s.completed).orElse(timeService.getCurrentUTCDateTime().minusDays(1));
-
-                logger.debug("Last successful synchronization run at {}", FORMATTER.format(afterDate));
-
-                // Here we would call the Sisu export API to get changed courses.
-                // We would also need to get changed/new enrollments and match those to the course ID we have in DB.
-                final List<String> realisationIds = null;
-
-                return courseService.findCompletedWithMoodleIdByRealisationIds(realisationIds);
-            default:
-                return Collections.emptyList();
-        }
+        return switch (type) {
+            case DELTA, RECONCILE -> courseService.findAllCompletedWithMoodleId();
+            case UNLOCK -> syncLockService.getAndUnlockLockedCourses();
+        };
     }
 
     /**
@@ -150,7 +122,35 @@ public class SynchronizationService {
      * data required to perform the actual synchronization.
      */
     private List<SynchronizationItem> makeItems(final List<Course> courses, SynchronizationType type) {
-        return courses.stream().map(c -> new SynchronizationItem(c, type)).collect(toList());
+        final List<SynchronizationItem> items = courses.stream()
+            .map(c -> new SynchronizationItem(c, effectiveType(c, type)))
+            .toList();
+        logAutoReconciledItems(type, items);
+        return items;
+    }
+
+    /**
+     * Courses whose snapshots have never been seeded get a live-state reconcile as part of
+     * the scheduled delta run. This replaces the manual bootstrap RECONCILE step.
+     */
+    private static SynchronizationType effectiveType(final Course course, final SynchronizationType runType) {
+        return runType == SynchronizationType.DELTA && !course.syncBootstrapped
+            ? SynchronizationType.RECONCILE
+            : runType;
+    }
+
+    private void logAutoReconciledItems(final SynchronizationType runType, final List<SynchronizationItem> items) {
+        if (runType != SynchronizationType.DELTA) {
+            return;
+        }
+        final List<String> autoReconciled = items.stream()
+            .filter(i -> i.getSynchronizationType() == SynchronizationType.RECONCILE)
+            .map(i -> i.getCourse().realisationId)
+            .toList();
+        if (!autoReconciled.isEmpty()) {
+            logger.info("Auto-reconciling {} non-bootstrapped course(s)", autoReconciled.size());
+            logger.debug("Auto-reconciled courses: {}", autoReconciled);
+        }
     }
 
     private SynchronizationSummary complete(

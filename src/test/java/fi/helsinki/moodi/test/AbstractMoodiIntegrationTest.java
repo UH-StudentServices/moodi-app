@@ -202,12 +202,17 @@ public abstract class AbstractMoodiIntegrationTest {
 
     @After
     public void verifyMockServers() {
-        studyRegistryMockServer.verify();
-        moodleReadOnlyMockServer.verify();
-        moodleMockServer.verify();
-        mockSisuGraphQLServer.verify();
-        if (wireMockServer != null) {
-            wireMockServer.stop();
+        try {
+            studyRegistryMockServer.verify();
+            moodleReadOnlyMockServer.verify();
+            moodleMockServer.verify();
+            mockSisuGraphQLServer.verify();
+        } finally {
+            // Always release port 9876, otherwise one verification failure cascades into
+            // bind failures in every subsequent test.
+            if (wireMockServer != null) {
+                wireMockServer.stop();
+            }
         }
     }
 

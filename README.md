@@ -12,6 +12,15 @@ Moodi is an integration application that automates course creation and user enro
 - Moodle (Target for modification operations by Moodi. Course spaces are created and users are 
 enrolled via Moodle api by Moodi application)
 
+## Synchronization
+
+Enrollments are synchronized from Sisu to Moodle by a scheduled delta synchronization: actions
+are resolved by comparing the current Sisu state against a locally stored snapshot of the last
+successfully synced state, so unchanged users generate no Moodle API calls and manual changes
+made in Moodle are not touched. A manual reconcile synchronization
+(`POST /api/v1/synchronization/reconcile`) compares against the live Moodle state and rewrites
+the snapshots. See [SYNCHRONIZATION.md](SYNCHRONIZATION.md) for the full documentation.
+
 ## Environments
 
 Currently Moodi has 4 environments: local, local_docker, dev, and prod. Integrations are mapped for each environment in corresponding application-<env>.yml. local_docker is meant to be used with the [dockerized development environment] (https://github.com/UH-StudentServices/moodi-development) (see below).
@@ -28,12 +37,16 @@ Port 443 is open at UH for internal, VPN networks, and the Silta environment.
 Deployment processes leverage GitLab CI for testing, building, and deployment initiation. Deployments occur within a separate project, [moodi-infra](https://version.helsinki.fi/OPADev/moodi-infra). The QA server receives automatic deployments upon new commits to the master branch. Production deployments are manual, initiated by executing the `release prod` job in the GitLab CI pipeline. The GitLab Package Registry stores the application's Maven package. For detailed information, refer to [.gitlab-ci.yml](.gitlab-ci.yml).
 
 
+Note: when deploying the first version that includes delta-based synchronization, run
+`POST /api/v1/synchronization/reconcile` once after the deployment to seed the sync state
+snapshots (see [SYNCHRONIZATION.md](SYNCHRONIZATION.md)).
+
 The project is integrated to Dependency Track for security scanning. The Dependency Track server is located at <https://dtrack.it.helsinki.fi>. After production deployment, the SBOM is uploaded to Dependency Track for scanning to track vulnerabilities in the production environment.
 
 ## Requirements
 
 The following programs must be installed if not using the dockerized development environment:
-- JDK 17
+- JDK 21
 
 # Local development
 
@@ -114,8 +127,12 @@ application-dev.yml:
 ```sh
 ./gradlew bootRun
 ```
-The test UI is now available at http://localhost:8084/login
-Credentials are: user/password
+The admin API is now available at http://localhost:8084 and can be called with the client
+credentials from `application-local.yml`, passed as `client-id` / `client-token` headers or
+request parameters. For example:
+```sh
+curl -X POST -H 'client-id: user' -H 'client-token: password' http://localhost:8084/api/v1/synchronization/delta
+```
 
 ### Cleaning up
 

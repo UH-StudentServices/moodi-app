@@ -15,19 +15,15 @@
  * along with Moodi application.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package fi.helsinki.moodi.config;
+package fi.helsinki.moodi.service.synchronize.snapshot;
 
-import org.springframework.context.annotation.Condition;
-import org.springframework.context.annotation.ConditionContext;
-import org.springframework.core.type.AnnotatedTypeMetadata;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public class DevMode implements Condition {
+import java.util.List;
 
-    @Override
-    public boolean matches(
-            final ConditionContext conditionContext,
-            final AnnotatedTypeMetadata annotatedTypeMetadata) {
+public interface CourseSyncParticipantRepository extends JpaRepository<CourseSyncParticipant, Long> {
 
-        return conditionContext.getEnvironment().getProperty("dev.mode.enabled", Boolean.class);
-    }
+    List<CourseSyncParticipant> findByCourseId(Long courseId);
+
+    void deleteByCourseId(Long courseId);
 }

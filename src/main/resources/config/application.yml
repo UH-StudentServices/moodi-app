@@ -58,8 +58,7 @@ mapper.moodle.role.student: 5
 # Also known as the synced role
 mapper.moodle.role.moodi: 10
 
-synchronize.FULL.enabled: true
-synchronize.INCREMENTAL.enabled: false
+synchronize.DELTA.enabled: true
 
 logging:
   retain-logs: P30D
@@ -71,8 +70,6 @@ spring.jpa.hibernate.ddl-auto: none
 spring.jpa.generate-ddl: false
 
 auth.enabled: true
-
-dev.mode.enabled: false
 
 syncTresholds:
   REMOVE_ROLES:

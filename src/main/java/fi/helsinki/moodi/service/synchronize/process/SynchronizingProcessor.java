@@ -23,10 +23,14 @@ import fi.helsinki.moodi.integration.moodle.MoodleService;
 import fi.helsinki.moodi.integration.moodle.MoodleUser;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryCourseUnitRealisation;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryStudent;
+import fi.helsinki.moodi.integration.studyregistry.StudyRegistryTeacher;
 import fi.helsinki.moodi.service.batch.BatchProcessor;
 import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.synchronize.SynchronizationItem;
 import fi.helsinki.moodi.service.synchronize.enrich.EnricherService;
+import fi.helsinki.moodi.service.synchronize.snapshot.CourseSyncParticipant;
+import fi.helsinki.moodi.service.synchronize.snapshot.CourseSyncParticipantService;
 import fi.helsinki.moodi.service.synclock.SyncLockService;
 import fi.helsinki.moodi.service.util.MapperService;
 import org.apache.commons.lang3.StringUtils;
@@ -63,6 +67,8 @@ public class SynchronizingProcessor {
     private final SynchronizationThreshold synchronizationThreshold;
     private final SyncLockService syncLockService;
     private final UserSynchronizationActionResolver synchronizationActionResolver;
+    private final DeltaUserSynchronizationActionResolver deltaSynchronizationActionResolver;
+    private final CourseSyncParticipantService courseSyncParticipantService;
     private final BatchProcessor<UserSynchronizationAction> batchProcessor;
 
     @Autowired
@@ -73,7 +79,9 @@ public class SynchronizingProcessor {
                                   SynchronizationThreshold synchronizationThreshold,
                                   SyncLockService syncLockService,
                                   UserSynchronizationActionResolver synchronizationActionResolver,
-                                  BatchProcessor batchProcessor) {
+                                  DeltaUserSynchronizationActionResolver deltaSynchronizationActionResolver,
+                                  CourseSyncParticipantService courseSyncParticipantService,
+                                  BatchProcessor<UserSynchronizationAction> batchProcessor) {
         this.mapperService = mapperService;
         this.moodleService = moodleService;
         this.courseService = courseService;
@@ -81,19 +89,155 @@ public class SynchronizingProcessor {
         this.synchronizationThreshold = synchronizationThreshold;
         this.syncLockService = syncLockService;
         this.synchronizationActionResolver = synchronizationActionResolver;
+        this.deltaSynchronizationActionResolver = deltaSynchronizationActionResolver;
+        this.courseSyncParticipantService = courseSyncParticipantService;
         this.batchProcessor = batchProcessor;
     }
 
     public SynchronizationItem doSynchronize(final SynchronizationItem item) {
 
-        final Map<Long, MoodleUserEnrollments> moodleEnrollmentsById = groupMoodleEnrollmentsByUserId(item);
+        final List<UserSynchronizationItem> processedItems;
 
-        final List<UserSynchronizationItem> processedItems = synchronizeUsers(item, moodleEnrollmentsById);
+        if (item.getSynchronizationType().isDeltaBased()) {
+            processedItems = synchronizeUsersDelta(item);
+        } else {
+            final Map<Long, MoodleUserEnrollments> moodleEnrollmentsById = groupMoodleEnrollmentsByUserId(item);
+            processedItems = synchronizeUsers(item, moodleEnrollmentsById);
+            // Live-state runs (RECONCILE, UNLOCK) rewrite the snapshots so that subsequent
+            // delta-based runs work against the corrected state.
+            attachExistingSnapshots(item, processedItems);
+        }
 
+        persistSnapshots(item, processedItems);
         completeCourseEnrollments(item);
         item.setUserSynchronizationItems(processedItems);
         item.completeProcessingPhase();
+
+        if (!item.getSynchronizationType().isDeltaBased()
+                && item.getProcessingStatus() == ProcessingStatus.SUCCESS
+                && !item.getCourse().syncBootstrapped) {
+            // A successful live-state run has seeded this course's snapshots, so subsequent
+            // scheduled runs can synchronize it delta-based.
+            courseService.markSyncBootstrapped(item.getCourse().realisationId);
+            logger.info("Course {} (moodle id {}) marked sync-bootstrapped after {} run",
+                item.getCourse().realisationId, item.getCourse().moodleId, item.getSynchronizationType());
+        }
+
         return item;
+    }
+
+    /**
+     * Synchronize one course based solely on the difference between the current Sisu state and
+     * the locally stored snapshot of the last synced Sisu state. The live Moodle enrollment state
+     * is not consulted, so users enrolled or removed manually in Moodle are left untouched.
+     */
+    private List<UserSynchronizationItem> synchronizeUsersDelta(final SynchronizationItem parentItem) {
+        final Map<String, CourseSyncParticipant> snapshotByUsername =
+            courseSyncParticipantService.getSnapshotByUsername(parentItem.getCourse().id);
+
+        final List<UserSynchronizationItem> userSynchronizationItems =
+            createDeltaUserSynchronizationItems(parentItem, snapshotByUsername);
+
+        userSynchronizationItems.forEach(deltaSynchronizationActionResolver::enrichWithActions);
+
+        // Only users with pending actions need a Moodle user id; resolve it from the snapshot
+        // cache first and fall back to the (cached) Moodle user lookup by username.
+        userSynchronizationItems.stream()
+            .filter(item -> !item.getActions().isEmpty() && item.getMoodleUserId() == null)
+            .forEach(this::enrichWithMoodleUserByUsername);
+
+        Map<UserSynchronizationActionType, List<UserSynchronizationAction>> userSynchronizationActionMap =
+            userSynchronizationItems.stream()
+                .filter(item -> !item.isCompleted())
+                .flatMap(item -> item.getActions().stream())
+                .collect(Collectors.groupingBy(UserSynchronizationAction::getActionType));
+
+        checkDeltaThresholdLimits(userSynchronizationActionMap, parentItem, snapshotByUsername.values());
+
+        for (UserSynchronizationActionType actionType : UserSynchronizationActionType.values()) {
+            batchProcessActions(parentItem, actionType, userSynchronizationActionMap.getOrDefault(actionType, newArrayList()));
+        }
+
+        return userSynchronizationItems.stream()
+            .map(this::completeItem)
+            .toList();
+    }
+
+    private List<UserSynchronizationItem> createDeltaUserSynchronizationItems(
+        final SynchronizationItem parentItem,
+        final Map<String, CourseSyncParticipant> snapshotByUsername) {
+
+        final StudyRegistryCourseUnitRealisation course = parentItem.getStudyRegistryCourse();
+        final Map<String, UserSynchronizationItem> itemsByUsername = new LinkedHashMap<>();
+
+        for (StudyRegistryStudent student : course.students) {
+            // Some users do not have a username, and thus cannot be synced to Moodle.
+            if (StringUtils.isNotEmpty(student.userName)) {
+                itemsByUsername.merge(student.userName, new UserSynchronizationItem(student), UserSynchronizationItem::combine);
+            }
+        }
+        for (StudyRegistryTeacher teacher : course.teachers) {
+            if (StringUtils.isNotEmpty(teacher.userName)) {
+                itemsByUsername.merge(teacher.userName, new UserSynchronizationItem(teacher), UserSynchronizationItem::combine);
+            }
+        }
+
+        // Users with a snapshot row that are no longer present in Sisu are kept in the run
+        // so that their removal is propagated to Moodle (and recorded in the snapshot).
+        snapshotByUsername.forEach((username, snapshot) -> {
+            final UserSynchronizationItem existingItem = itemsByUsername.get(username);
+            if (existingItem != null) {
+                existingItem.withExistingSnapshot(snapshot);
+            } else {
+                itemsByUsername.put(username, new UserSynchronizationItem(snapshot));
+            }
+        });
+
+        return itemsByUsername.values().stream()
+            .map(item -> item.withMoodleCourseId(parentItem.getCourse().moodleId))
+            .toList();
+    }
+
+    private void enrichWithMoodleUserByUsername(final UserSynchronizationItem item) {
+        final Optional<MoodleUser> moodleUser = getMoodleUser(Collections.singletonList(item.getUsername()));
+        if (moodleUser.isPresent()) {
+            item.withMoodleUser(moodleUser.get());
+            // Actions were resolved before the Moodle user id was known; re-resolve to stamp it in.
+            deltaSynchronizationActionResolver.enrichWithActions(item);
+        } else {
+            logger.warn("User not found from Moodle with username {}", item.getUsername());
+            item.withActions(newArrayList()).withStatus(MOODLE_USER_NOT_FOUND);
+        }
+    }
+
+    private void attachExistingSnapshots(final SynchronizationItem parentItem, final List<UserSynchronizationItem> processedItems) {
+        final Map<String, CourseSyncParticipant> snapshotByUsername =
+            courseSyncParticipantService.getSnapshotByUsername(parentItem.getCourse().id);
+        processedItems.stream()
+            .filter(item -> item.getExistingSnapshot() == null && item.getUsername() != null)
+            .forEach(item -> item.withExistingSnapshot(snapshotByUsername.get(item.getUsername())));
+    }
+
+    /**
+     * Persist the current Sisu state for every user whose Moodle actions all succeeded (or who
+     * needed none), so that the next delta-based run only acts on subsequent Sisu changes. Users
+     * with failed actions keep their old snapshot and are retried on the next run.
+     */
+    private void persistSnapshots(final SynchronizationItem parentItem, final List<UserSynchronizationItem> processedItems) {
+        final Long courseId = parentItem.getCourse().id;
+        if (courseId == null) {
+            return;
+        }
+        final List<CourseSyncParticipant> rows = processedItems.stream()
+            .filter(UserSynchronizationItem::isSuccess)
+            .filter(item -> item.getUsername() != null)
+            // Moodle users that are neither in Sisu nor in the snapshot are manually managed
+            // and get no snapshot row.
+            .filter(item -> item.getStudent() != null || item.getTeacher() != null || item.getExistingSnapshot() != null)
+            .filter(item -> !item.toNewSnapshotState(courseId).hasSameStateAs(item.getExistingSnapshot()))
+            .map(item -> item.toNewSnapshotState(courseId))
+            .toList();
+        courseSyncParticipantService.upsertAll(courseId, rows);
     }
 
     private void completeCourseEnrollments(final SynchronizationItem item) {
@@ -119,7 +263,7 @@ public class SynchronizingProcessor {
 
         return userSynchronizationItems.stream()
             .map(this::completeItem)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private UserSynchronizationItem completeItem(UserSynchronizationItem item) {
@@ -146,12 +290,11 @@ public class SynchronizingProcessor {
 
         List<MoodleEnrollment> moodleEnrollments = actions.stream()
             .flatMap(action -> actionsToMoodleEnrollents(parentItem, action))
-            .collect(Collectors.toList());
+            .toList();
 
         try {
             switch (actionType) {
-                case ADD_ENROLLMENT:
-                case REACTIVATE_ENROLLMENT: // Adding the enrollment again in Moodle sets the enrollment suspend flag to 0
+                case ADD_ENROLLMENT, REACTIVATE_ENROLLMENT: // Adding the enrollment again in Moodle sets the enrollment suspend flag to 0
                     moodleService.addEnrollments(moodleEnrollments);
                     break;
                 case SUSPEND_ENROLLMENT:
@@ -168,13 +311,13 @@ public class SynchronizingProcessor {
             }
             return actions.stream()
                 .map(UserSynchronizationAction::withSuccessStatus)
-                .collect(Collectors.toList());
+                .toList();
 
         } catch (Exception e) {
             logger.error(String.format("Error when executing action %s", e), e);
             return actions.stream()
                 .map(UserSynchronizationAction::withErrorStatus)
-                .collect(Collectors.toList());
+                .toList();
         }
     }
 
@@ -212,6 +355,32 @@ public class SynchronizingProcessor {
 
     }
 
+    /**
+     * Threshold check for delta-based runs. The dangerous-action counts are compared against the
+     * snapshot population (the users Moodi has synced to Moodle) instead of the current Sisu
+     * counts, so that bad Sisu data (e.g. an empty enrollment list) locks the course instead of
+     * suspending everyone.
+     */
+    private void checkDeltaThresholdLimits(Map<UserSynchronizationActionType, List<UserSynchronizationAction>> actionsMap,
+                                           SynchronizationItem parentItem,
+                                           Collection<CourseSyncParticipant> snapshotRows) {
+
+        final long snapshotEnrolledStudentCount = snapshotRows.stream().filter(row -> row.enrolledStudent).count();
+        final long snapshotStudentCount = snapshotRows.stream().filter(row -> row.student).count();
+
+        actionsMap.forEach((action, actions) -> {
+            final long actionCount = actions.size();
+            final long affectedUserCount = action == UserSynchronizationActionType.SUSPEND_ENROLLMENT ?
+                snapshotEnrolledStudentCount : snapshotStudentCount;
+
+            if (synchronizationThreshold.isLimitedByThreshold(action, actionCount)) {
+                lockItem(parentItem, String.format(THRESHOLD_EXCEEDED_MESSAGE, action, actionCount));
+            } else if (actionCount == affectedUserCount && synchronizationThreshold.isActionPreventedToAllItems(action, actionCount)) {
+                lockItem(parentItem, String.format(PREVENT_ACTION_ON_ALL_MESSAGE, action));
+            }
+        });
+    }
+
     private void lockItem(SynchronizationItem parentItem, String message) {
         syncLockService.setLock(parentItem.getCourse(), message);
         throw new ProcessingException(ProcessingStatus.LOCKED, message);
@@ -238,10 +407,10 @@ public class SynchronizingProcessor {
 
         personItems.addAll(course.students
             .stream()
-            .map(UserSynchronizationItem::new).collect(Collectors.toList()));
+            .map(UserSynchronizationItem::new).toList());
         personItems.addAll(course.teachers
             .stream()
-            .map(UserSynchronizationItem::new).collect(Collectors.toList()));
+            .map(UserSynchronizationItem::new).toList());
         Map<Boolean, List<UserSynchronizationItem>> userSynchronizationItemsByCompletedStatus =
             personItems.stream()
                 .map(i -> i.withMoodleCourseId(item.getCourse().moodleId))
@@ -262,7 +431,7 @@ public class SynchronizingProcessor {
 
         // https://jira.it.helsinki.fi/browse/MOODI-122 process Moodle users that do not appear in StudyRegistry.
         Stream<UserSynchronizationItem> moodleUsersNotInStudyRegistry =
-            moodleEnrollmentsByUserId.values().stream().filter(m -> m.username != null & !studyRegistryStudentUsernames.contains(m.username))
+            moodleEnrollmentsByUserId.values().stream().filter(m -> m.username != null && !studyRegistryStudentUsernames.contains(m.username))
             .map(m -> new UserSynchronizationItem(m).withMoodleCourseId(item.getCourse().moodleId));
 
         return Stream.concat(
@@ -270,7 +439,7 @@ public class SynchronizingProcessor {
             Stream.concat(
                 combinedUncompletedItems.stream().map(enrichWithMoodleUserEnrollments(moodleEnrollmentsByUserId)),
                 completedItems.stream())
-        ).collect(Collectors.toList());
+        ).toList();
     }
 
     private Function<UserSynchronizationItem, UserSynchronizationItem> enrichWithMoodleUserEnrollments(final Map<Long,
@@ -295,14 +464,14 @@ public class SynchronizingProcessor {
             return item.withStatus(SUCCESS);
         }
         return getMoodleUser(usernames).map(item::withMoodleUser).orElseGet(() ->  {
-            logger.warn("User not found from Moodle with usernames " + usernames);
+            logger.warn("User not found from Moodle with usernames {}", usernames);
             return item.withStatus(MOODLE_USER_NOT_FOUND);
         });
     }
 
     private Optional<MoodleUser> getMoodleUser(final List<String> usernameList) {
         Optional<MoodleUser> moodleUser = enricherService.getPrefetchedMoodleUser(usernameList);
-        if (!moodleUser.isPresent()) {
+        if (moodleUser.isEmpty()) {
             moodleUser = moodleService.getUser(usernameList);
         }
         return moodleUser;

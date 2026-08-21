@@ -74,7 +74,7 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
 
         List<SynchronizationItem> items = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
-            items.add(createFullSynchronizationItem("hy-CUR-" + i, i));
+            items.add(createDeltaSynchronizationItem("hy-CUR-" + i, i));
         }
 
         // Prepare mocks for successful processing of item 0
@@ -187,7 +187,7 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
         }
     }
 
-    private SynchronizationItem createFullSynchronizationItem(String realisationId, int i) {
+    private SynchronizationItem createDeltaSynchronizationItem(String realisationId, int i) {
         Course course = new Course();
         course.realisationId = realisationId;
         course.importStatus = Course.ImportStatus.IN_PROGRESS;
@@ -205,7 +205,7 @@ public class ProcessorServiceTest extends AbstractMoodiIntegrationTest {
         cur.realisationName = "course " + realisationId;
         cur.students = STUDY_REGISTRY_STUDENTS.subList(i, i + 4);
         cur.teachers = STUDY_REGISTRY_TEACHERS.subList(i, i + 2);
-        SynchronizationItem item = new SynchronizationItem(course, SynchronizationType.FULL);
+        SynchronizationItem item = new SynchronizationItem(course, SynchronizationType.DELTA);
         item.setStudyRegistryCourse(cur);
         item.setMoodleCourse(moodleCourse);
         item.setMoodleEnrollments(createExistingMoodleUserEnrollments());

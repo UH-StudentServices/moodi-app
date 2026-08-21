@@ -21,11 +21,16 @@ import fi.helsinki.moodi.integration.moodle.MoodleUser;
 import fi.helsinki.moodi.integration.moodle.MoodleUserEnrollments;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryStudent;
 import fi.helsinki.moodi.integration.studyregistry.StudyRegistryTeacher;
+import fi.helsinki.moodi.service.synchronize.snapshot.CourseSyncParticipant;
+import lombok.Getter;
+import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 
+@Getter
 public class UserSynchronizationItem {
 
     public enum UserSynchronizationItemStatus {
@@ -42,8 +47,12 @@ public class UserSynchronizationItem {
     private Long moodleCourseId;
     private MoodleUserEnrollments moodleUserEnrollments;
 
+    @Setter
     private StudyRegistryStudent student;
+    @Setter
     private StudyRegistryTeacher teacher;
+
+    private CourseSyncParticipant existingSnapshot;
 
     private List<UserSynchronizationAction> actions = newArrayList();
 
@@ -61,6 +70,14 @@ public class UserSynchronizationItem {
         this.teacher = teacher;
     }
 
+    public UserSynchronizationItem(CourseSyncParticipant existingSnapshot) {
+        this.existingSnapshot = existingSnapshot;
+        if (existingSnapshot.moodleUserId != null) {
+            this.moodleUser = new MoodleUser();
+            this.moodleUser.setId(existingSnapshot.moodleUserId);
+        }
+    }
+
     public static UserSynchronizationItem combine(UserSynchronizationItem firstItem, UserSynchronizationItem secondItem) {
         if (firstItem.getStudent() == null) {
             firstItem.setStudent(secondItem.getStudent());
@@ -75,28 +92,8 @@ public class UserSynchronizationItem {
         return this;
     }
 
-    public void setStudent(StudyRegistryStudent student) {
-        this.student = student;
-    }
-
-    public void setTeacher(StudyRegistryTeacher teacher) {
-        this.teacher = teacher;
-    }
-
-    public MoodleUser getMoodleUser() {
-        return moodleUser;
-    }
-
     public Long getMoodleUserId() {
         return moodleUser != null ? moodleUser.getId() : null;
-    }
-
-    public StudyRegistryStudent getStudent() {
-        return student;
-    }
-
-    public StudyRegistryTeacher getTeacher() {
-        return teacher;
     }
 
     public boolean isCompleted() {
@@ -109,14 +106,6 @@ public class UserSynchronizationItem {
 
     public boolean isMoodleUserNotFound() {
         return UserSynchronizationItemStatus.MOODLE_USER_NOT_FOUND.equals(status);
-    }
-
-    public List<UserSynchronizationAction> getActions() {
-        return actions;
-    }
-
-    public Long getMoodleCourseId() {
-        return moodleCourseId;
     }
 
     public UserSynchronizationItem withMoodleCourseId(Long moodleCourseId) {
@@ -134,14 +123,6 @@ public class UserSynchronizationItem {
         return this;
     }
 
-    public MoodleUserEnrollments getMoodleUserEnrollments() {
-        return this.moodleUserEnrollments;
-    }
-
-    public UserSynchronizationItemStatus getStatus() {
-        return status;
-    }
-
     public UserSynchronizationItem withStatus(UserSynchronizationItemStatus status) {
         this.status = status;
         return this;
@@ -151,4 +132,43 @@ public class UserSynchronizationItem {
         return moodleUserEnrollments != null && moodleUserEnrollments.seesCourse(this.moodleCourseId);
     }
 
+    public UserSynchronizationItem withExistingSnapshot(CourseSyncParticipant existingSnapshot) {
+        this.existingSnapshot = existingSnapshot;
+        if (this.moodleUser == null && existingSnapshot != null && existingSnapshot.moodleUserId != null) {
+            this.moodleUser = new MoodleUser();
+            this.moodleUser.setId(existingSnapshot.moodleUserId);
+        }
+        return this;
+    }
+
+    public String getUsername() {
+        if (student != null && StringUtils.isNotEmpty(student.userName)) {
+            return student.userName;
+        }
+        if (teacher != null && StringUtils.isNotEmpty(teacher.userName)) {
+            return teacher.userName;
+        }
+        if (existingSnapshot != null) {
+            return existingSnapshot.username;
+        }
+        return moodleUserEnrollments != null ? moodleUserEnrollments.username : null;
+    }
+
+    /**
+     * The snapshot row representing the current Sisu state of this user, to be persisted
+     * after all actions for this user have been successfully applied to Moodle.
+     */
+    public CourseSyncParticipant toNewSnapshotState(Long courseId) {
+        Long snapshotMoodleUserId = getMoodleUserId();
+        if (snapshotMoodleUserId == null && existingSnapshot != null) {
+            snapshotMoodleUserId = existingSnapshot.moodleUserId;
+        }
+        return new CourseSyncParticipant(
+            courseId,
+            getUsername(),
+            snapshotMoodleUserId,
+            student != null,
+            student != null && student.isEnrolled,
+            teacher != null);
+    }
 }

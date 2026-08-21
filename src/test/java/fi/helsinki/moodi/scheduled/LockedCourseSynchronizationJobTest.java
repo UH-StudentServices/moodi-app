@@ -56,7 +56,7 @@ public class LockedCourseSynchronizationJobTest extends AbstractSynchronizationJ
     @Test
     public void thatSynchronizationSkipsLockedCourse() {
         setupCourseUnitRealisationResponse(getFutureDateString(), true);
-        SynchronizationSummary summary = synchronizationService.synchronize(SynchronizationType.FULL);
+        SynchronizationSummary summary = synchronizationService.synchronize(SynchronizationType.DELTA);
 
         SynchronizationItem item = summary.getItems().get(0);
 
@@ -68,8 +68,11 @@ public class LockedCourseSynchronizationJobTest extends AbstractSynchronizationJ
     public void thatLockedCourseIsUnlockedWhenUnlockSynchronizationIsTriggeredAndThresholdsAreNotExceeded() {
         Course course = getTestCourse();
         assertTrue(syncLockService.isLocked(course));
+        assertFalse(course.syncBootstrapped);
         testSynchronizationSummary(SynchronizationType.UNLOCK, EMPTY_RESPONSE, false);
         assertFalse(syncLockService.isLocked(course));
+        // A successful UNLOCK run is live-state and marks the course bootstrapped.
+        assertTrue(getTestCourse().syncBootstrapped);
     }
 
     @Test
@@ -97,6 +100,7 @@ public class LockedCourseSynchronizationJobTest extends AbstractSynchronizationJ
             SynchronizationItem.SUCCESS_MESSAGE);
 
         assertFalse(syncLockService.isLocked(course));
+        assertTrue(getTestCourse().syncBootstrapped);
     }
 
     private Course getTestCourse() {

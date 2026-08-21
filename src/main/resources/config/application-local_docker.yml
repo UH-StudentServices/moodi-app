@@ -8,7 +8,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     database: PostgreSQL
   flyway:
-    locations: classpath:db/migration/common,classpath:db/migration/psql
+    locations: classpath:db/migration/common
     table: schema_version
     ignoreMigrationPatterns: ['*:missing']
     validateOnMigrate: false
@@ -23,10 +23,7 @@ integration:
 auth.client.user: 123456
 auth.enabled: false
 
-dev.mode.enabled: true
-
-synchronize.FULL.enabled: false
-synchronize.INCREMENTAL.enabled: false
+synchronize.DELTA.enabled: false
 
 logging:
   level:

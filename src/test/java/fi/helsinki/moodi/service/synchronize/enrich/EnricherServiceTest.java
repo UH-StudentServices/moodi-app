@@ -45,7 +45,7 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
     @Test
     public void thatSisuCoursesAndPersonsAreFetched() {
         setUpMockSisuAndPrefetchCourses();
-        SynchronizationItem synchronizationItem = createFullSynchronizationItem("hy-CUR-1"); // Published and ongoing
+        SynchronizationItem synchronizationItem = createDeltaSynchronizationItem("hy-CUR-1"); // Published and ongoing
 
         enricherService.enrichWithSisuCourse(synchronizationItem);
 
@@ -55,7 +55,7 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
     @Test
     public void thatSynchronizationItemIsSetToErrorStatusWhenCourseIsNotFound() {
         setUpMockSisuAndPrefetchCourses();
-        SynchronizationItem synchronizationItem = createFullSynchronizationItem("hy-CUR-not-found");
+        SynchronizationItem synchronizationItem = createDeltaSynchronizationItem("hy-CUR-not-found");
 
         enricherService.enrichWithSisuCourse(synchronizationItem);
 
@@ -65,7 +65,7 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
     @Test
     public void thatUnPublishedCourseGetsEnriched() {
         setUpMockSisuAndPrefetchCourses();
-        SynchronizationItem synchronizationItem = createFullSynchronizationItem("hy-CUR-unpublished");
+        SynchronizationItem synchronizationItem = createDeltaSynchronizationItem("hy-CUR-unpublished");
 
         enricherService.enrichWithSisuCourse(synchronizationItem);
 
@@ -75,7 +75,7 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
     @Test
     public void thatSynchronizationItemIsSetToEndedStatusWhenCourseIsEnded() {
         setUpMockSisuAndPrefetchCourses();
-        SynchronizationItem synchronizationItem = createFullSynchronizationItem("hy-CUR-ended");
+        SynchronizationItem synchronizationItem = createDeltaSynchronizationItem("hy-CUR-ended");
 
         enricherService.enrichWithSisuCourse(synchronizationItem);
 
@@ -89,33 +89,55 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
         assertEquals(expectedStatus, item.getEnrichmentStatus());
     }
 
-    private SynchronizationItem createFullSynchronizationItem(String realisationId) {
+    private SynchronizationItem createDeltaSynchronizationItem(String realisationId) {
         Course course = new Course();
         course.realisationId = realisationId;
 
-        return new SynchronizationItem(course, SynchronizationType.FULL);
+        return new SynchronizationItem(course, SynchronizationType.DELTA);
     }
 
-    private SynchronizationItem createFullSynchronizationItem(String realisationId, int moodleId) {
+    private SynchronizationItem createDeltaSynchronizationItem(String realisationId, int moodleId) {
+        return createSynchronizationItem(realisationId, moodleId, SynchronizationType.DELTA);
+    }
+
+    private SynchronizationItem createSynchronizationItem(String realisationId, int moodleId, SynchronizationType type) {
         Course course = new Course();
         course.realisationId = realisationId;
         course.moodleId = (long) moodleId;
 
-        return new SynchronizationItem(course, SynchronizationType.FULL);
+        return new SynchronizationItem(course, type);
     }
 
     @Test
     public void thatEnrichersAreRanForEachItem() {
+        // DELTA items are enriched without fetching the Moodle enrollment state.
         List<SynchronizationItem> items = new ArrayList<>();
         for (int i = 1; i < 5; i++) {
-            items.add(createFullSynchronizationItem("hy-CUR-" + i, i));
+            items.add(createDeltaSynchronizationItem("hy-CUR-" + i, i));
         }
         prepareSisuPrefetchMock(items);
         prepareMoodleGetCoursesResponseMock(
-            items.stream().map(item -> item.getCourse().moodleId).collect(Collectors.toList()), delayed);
+            items.stream().map(item -> item.getCourse().moodleId).toList(), delayed);
+
+        List<SynchronizationItem> enrichedItems = enricherService.enrichItems(items);
+
+        enrichedItems.forEach(item ->
+            assertStatus(item, EnrichmentStatus.SUCCESS, true)
+        );
+    }
+
+    @Test
+    public void thatMoodleEnrollmentsAreFetchedForReconcileItems() {
+        List<SynchronizationItem> items = new ArrayList<>();
+        for (int i = 1; i < 5; i++) {
+            items.add(createSynchronizationItem("hy-CUR-" + i, i, SynchronizationType.RECONCILE));
+        }
+        prepareSisuPrefetchMock(items);
+        prepareMoodleGetCoursesResponseMock(
+            items.stream().map(item -> item.getCourse().moodleId).toList(), delayed);
         prepareMoodleGetEnrolledUsersForCoursesMock(
             items.stream().map(item ->
-                new MoodleCourseWithEnrollments(item.getCourse().moodleId, Collections.emptyList())).collect(Collectors.toList())
+                new MoodleCourseWithEnrollments(item.getCourse().moodleId, Collections.emptyList())).toList()
         );
 
         List<SynchronizationItem> enrichedItems = enricherService.enrichItems(items);
@@ -129,19 +151,71 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
     public void thatMissingEnrollmentsCauseErrorForEnrichmentItem() {
         List<SynchronizationItem> items = new ArrayList<>();
         for (int i = 1; i < 5; i++) {
-            items.add(createFullSynchronizationItem("hy-CUR-" + i, i));
+            items.add(createSynchronizationItem("hy-CUR-" + i, i, SynchronizationType.RECONCILE));
         }
         prepareSisuPrefetchMock(items);
         prepareMoodleGetCoursesResponseMock(
-            items.stream().map(item -> item.getCourse().moodleId).collect(Collectors.toList()), delayed);
+            items.stream().map(item -> item.getCourse().moodleId).toList(), delayed);
         prepareMoodleGetEnrolledUsersForCoursesMock(
             items.stream().map(item ->
-                new MoodleCourseWithEnrollments(item.getCourse().moodleId, Collections.emptyList())).collect(Collectors.toList()),
+                new MoodleCourseWithEnrollments(item.getCourse().moodleId, Collections.emptyList())).toList(),
             3);
 
         List<SynchronizationItem> enrichedItems = enricherService.enrichItems(items);
 
         // item 3 is set to fail
+        for (int i = 0; i < enrichedItems.size(); i++) {
+            assertStatus(enrichedItems.get(i), i == 3 ? EnrichmentStatus.ERROR : EnrichmentStatus.SUCCESS, true);
+        }
+    }
+
+    @Test
+    public void thatMixedRunFetchesEnrollmentsOnlyForReconcileItems() {
+        List<SynchronizationItem> items = new ArrayList<>();
+        items.add(createDeltaSynchronizationItem("hy-CUR-1", 1));
+        items.add(createDeltaSynchronizationItem("hy-CUR-2", 2));
+        items.add(createSynchronizationItem("hy-CUR-3", 3, SynchronizationType.RECONCILE));
+        items.add(createSynchronizationItem("hy-CUR-4", 4, SynchronizationType.RECONCILE));
+
+        prepareSisuPrefetchMock(items);
+        prepareMoodleGetCoursesResponseMock(
+            items.stream().map(item -> item.getCourse().moodleId).toList(), delayed);
+        // The enrollment prefetch is narrowed to the RECONCILE courses only: a broader fetch
+        // would generate unmatched requests and fail the mock server verification.
+        prepareMoodleGetEnrolledUsersForCoursesMock(
+            items.stream()
+                .filter(item -> item.getSynchronizationType() == SynchronizationType.RECONCILE)
+                .map(item -> new MoodleCourseWithEnrollments(item.getCourse().moodleId, Collections.emptyList())).toList()
+        );
+
+        List<SynchronizationItem> enrichedItems = enricherService.enrichItems(items);
+
+        enrichedItems.forEach(item ->
+            assertStatus(item, EnrichmentStatus.SUCCESS, true)
+        );
+    }
+
+    @Test
+    public void thatMissingEnrollmentsInMixedRunOnlyErrorReconcileItems() {
+        List<SynchronizationItem> items = new ArrayList<>();
+        items.add(createDeltaSynchronizationItem("hy-CUR-1", 1));
+        items.add(createDeltaSynchronizationItem("hy-CUR-2", 2));
+        items.add(createSynchronizationItem("hy-CUR-3", 3, SynchronizationType.RECONCILE));
+        items.add(createSynchronizationItem("hy-CUR-4", 4, SynchronizationType.RECONCILE));
+
+        prepareSisuPrefetchMock(items);
+        prepareMoodleGetCoursesResponseMock(
+            items.stream().map(item -> item.getCourse().moodleId).toList(), delayed);
+        // The second reconcile course's enrollment fetch fails; the delta items never
+        // consult the enrollment state and stay unaffected.
+        prepareMoodleGetEnrolledUsersForCoursesMock(
+            items.stream()
+                .filter(item -> item.getSynchronizationType() == SynchronizationType.RECONCILE)
+                .map(item -> new MoodleCourseWithEnrollments(item.getCourse().moodleId, Collections.emptyList())).toList(),
+            1);
+
+        List<SynchronizationItem> enrichedItems = enricherService.enrichItems(items);
+
         for (int i = 0; i < enrichedItems.size(); i++) {
             assertStatus(enrichedItems.get(i), i == 3 ? EnrichmentStatus.ERROR : EnrichmentStatus.SUCCESS, true);
         }
@@ -154,7 +228,7 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
                 .build())
         ).collect(Collectors.joining(", "));
         String response = "{\"data\": {\"course_unit_realisations\": [" + curs + "] } }";
-        List<String> curIds = itemBatch.stream().map(item -> item.getCourse().realisationId).collect(Collectors.toList());
+        List<String> curIds = itemBatch.stream().map(item -> item.getCourse().realisationId).toList();
         mockSisuGraphQLServer.expectCourseUnitRealisationsRequestFromString(curIds, response, delayed);
     }
 
@@ -174,7 +248,7 @@ public class EnricherServiceTest extends AbstractMoodiIntegrationTest  {
             mockSisuCURRequestForBatch(itemBatch);
         }
         mockSisuGraphQLServer.expectPersonsRequest(singletonList("hy-hlo-1"), "/sisu/persons.json");
-        List<String> curIds = items.stream().map(item -> item.getCourse().realisationId).collect(Collectors.toList());
+        List<String> curIds = items.stream().map(item -> item.getCourse().realisationId).toList();
         enricherService.prefetchSisuCourses(curIds);
     }
 }

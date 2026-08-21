@@ -29,9 +29,6 @@ import java.util.Optional;
 
 public interface SynchronizationJobRunRepository extends JpaRepository<SynchronizationJobRun, Long> {
 
-    Optional<SynchronizationJobRun> findFirstByTypeAndStatusInOrderByCompletedDesc(
-            SynchronizationType type, List<SynchronizationStatus> status);
-
     List<SynchronizationJobRun> findByStatus(SynchronizationStatus status);
 
     Optional<SynchronizationJobRun> findFirstByTypeOrderByCompletedDesc(SynchronizationType type);
