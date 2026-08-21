@@ -41,7 +41,7 @@ public class FullSynchronizationJob {
         this.synchronizationService = synchronizationService;
     }
 
-    // Run every 2 hours
+    // Run 30 minutes after the previous run has completed
     @Scheduled(initialDelay = 60000, fixedDelay = 1800000)
     public void execute() {
         if (isEnabled()) {

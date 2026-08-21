@@ -17,7 +17,6 @@
 
 package fi.helsinki.moodi.scheduled;
 
-import fi.helsinki.moodi.integration.moodle.MoodleCourseWithEnrollments;
 import fi.helsinki.moodi.integration.moodle.MoodleEnrollment;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseRepository;
@@ -31,10 +30,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
@@ -76,20 +72,9 @@ public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
         // The JSON mock data files contain the courses above.
         setUpMockSisuAndPrefetchCourses();
 
-        // Moodle prefetching doesn't include courses that Sisu counts as finished
+        // Moodle prefetching doesn't include courses that Sisu counts as finished.
+        // The Moodle enrollment state itself is not fetched in delta-based synchronization.
         prepareMoodleGetCoursesResponseMock(Arrays.asList(MOODLE_COURSE_ID_1, MOODLE_COURSE_ID_2), true);
-        // Two users are already enrolled with student and synced roles.
-        // One of them now gets returned from Sisu with a non-enrolled status, and the
-        // other one does not get returned from Sisu at all, as someone has totally removed the whole enrollment from Sisu.
-        List<MoodleCourseWithEnrollments> expectedEnrollmentsByCourse = new ArrayList<>();
-        expectedEnrollmentsByCourse.add(new MoodleCourseWithEnrollments(MOODLE_COURSE_ID_1, Arrays.asList(
-            getMoodleUserEnrollments((int) MOODLE_USER_NOT_ENROLLED_IN_SISU, MOODLE_USERNAME_NOT_ENROLLED_IN_SISU, (int) MOODLE_COURSE_ID_1,
-                mapperService.getStudentRoleId(), mapperService.getMoodiRoleId()),
-            getMoodleUserEnrollments((int) MOODLE_USER_NOT_IN_STUDY_REGISTRY, MOODLE_USERNAME_NOT_IN_STUDY_REGISTRY, (int) MOODLE_COURSE_ID_1,
-                mapperService.getStudentRoleId(), mapperService.getMoodiRoleId())
-            )));
-        expectedEnrollmentsByCourse.add(new MoodleCourseWithEnrollments(MOODLE_COURSE_ID_2, Collections.emptyList()));
-        prepareMoodleGetEnrolledUsersForCoursesMock(expectedEnrollmentsByCourse);
 
         // Course one students and teacher are fetched from Moodle.
         expectGetUserRequestToMoodle(MOODLE_USERNAME_NIINA, MOODLE_USER_ID_NIINA);
@@ -117,24 +102,19 @@ public class FullSyncJobSisuTest extends AbstractMoodiIntegrationTest {
             new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_TEACH_ONE, MOODLE_COURSE_ID_1)
         );
 
-        // The existing students gets suspended and student role removed, because no longer enrolled or found in Sisu.
-        expectSuspendRequestToMoodle(
-            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_NOT_IN_STUDY_REGISTRY, MOODLE_COURSE_ID_1),
-            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_NOT_ENROLLED_IN_SISU, MOODLE_COURSE_ID_1));
-        expectAssignRolesToMoodle(false,
-            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_NOT_IN_STUDY_REGISTRY, MOODLE_COURSE_ID_1),
-            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_NOT_ENROLLED_IN_SISU, MOODLE_COURSE_ID_1));
+        // The non-enrolled Sisu student and the Moodle-only users generate no actions:
+        // without a snapshot row, Moodi has never synced them, so they are left untouched.
 
         // Course two student and teachers are enrolled.
         expectEnrollmentRequestToMoodle(
+            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_NIINA2, MOODLE_COURSE_ID_2),
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_NIINA2, MOODLE_COURSE_ID_2),
+
             new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_TEACH_TWO, MOODLE_COURSE_ID_2),
             new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_TEACH_TWO, MOODLE_COURSE_ID_2),
 
             new MoodleEnrollment(getTeacherRoleId(), MOODLE_USER_TEACH_THREE, MOODLE_COURSE_ID_2),
-            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_TEACH_THREE, MOODLE_COURSE_ID_2),
-
-            new MoodleEnrollment(getStudentRoleId(), MOODLE_USER_NIINA2, MOODLE_COURSE_ID_2),
-            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_NIINA2, MOODLE_COURSE_ID_2)
+            new MoodleEnrollment(getMoodiRoleId(), MOODLE_USER_TEACH_THREE, MOODLE_COURSE_ID_2)
         );
 
         job.execute();

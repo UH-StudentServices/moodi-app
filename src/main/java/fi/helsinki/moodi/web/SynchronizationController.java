@@ -68,6 +68,13 @@ public class SynchronizationController {
         return response(Result.success("Unlock synchronization job started"));
     }
 
+    @RequestMapping(value = "/reconcile", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<Result<String, Boolean>> reconcileCourses() {
+        synchronizationExecutor.synchronize(SynchronizationType.RECONCILE);
+        return response(Result.success("Reconcile synchronization job started"));
+    }
+
     private <D, E> ResponseEntity<Result<D, E>> response(Result<D, E> result) {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }

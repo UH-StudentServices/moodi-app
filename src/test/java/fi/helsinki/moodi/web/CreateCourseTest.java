@@ -18,14 +18,22 @@
 package fi.helsinki.moodi.web;
 
 import fi.helsinki.moodi.exception.CourseNotFoundException;
+import fi.helsinki.moodi.service.course.Course;
+import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.importing.ImportingService;
+import fi.helsinki.moodi.service.synchronize.snapshot.CourseSyncParticipant;
+import fi.helsinki.moodi.service.synchronize.snapshot.CourseSyncParticipantService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 
+import java.util.Map;
+
 import static java.lang.Math.toIntExact;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
@@ -36,6 +44,12 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
 
     @Autowired
     private ImportingService importingService;
+
+    @Autowired
+    private CourseService courseService;
+
+    @Autowired
+    private CourseSyncParticipantService courseSyncParticipantService;
 
     private static String COURSE_NOT_FOUND_MESSAGE = "Study registry course not found with realisation id %s (%s)";
     private static String PERSON_NOT_FOUND_MESSAGE = "Sisu person not found with id %s";
@@ -103,6 +117,26 @@ public class CreateCourseTest extends AbstractSuccessfulCreateCourseTest {
         makeCreateCourseRequest(SISU_REALISATION_NOT_IN_DB_ID, CREATOR_SISU_ID)
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.moodleCourseId").value(toIntExact(MOODLE_COURSE_ID_NOT_IN_DB)));
+    }
+
+    @Test
+    public void thatImportWritesSyncSnapshotsForSisuUsersButNotForCreator() throws Exception {
+        setUpMockServerResponsesForSisuCourse123(true, CREATOR_SISU_ID);
+
+        makeCreateCourseRequest(SISU_REALISATION_NOT_IN_DB_ID, CREATOR_SISU_ID)
+            .andExpect(status().isOk());
+
+        Course course = courseService.findByRealisationId(SISU_REALISATION_NOT_IN_DB_ID).get();
+        Map<String, CourseSyncParticipant> snapshot = courseSyncParticipantService.getSnapshotByUsername(course.id);
+
+        assertEquals(4, snapshot.size());
+        assertTrue(snapshot.get(MOODLE_USERNAME_NIINA).enrolledStudent);
+        assertTrue(snapshot.get(MOODLE_USERNAME_JUKKA).enrolledStudent);
+        assertTrue(snapshot.get(MOODLE_USERNAME_MAKE).enrolledStudent);
+        assertTrue(snapshot.get(MOODLE_USERNAME_HRAOPE).teacher);
+        assertEquals((Long) MOODLE_USER_ID_NIINA, snapshot.get(MOODLE_USERNAME_NIINA).moodleUserId);
+        // The creator is enrolled by Moodi but not managed by the Sisu synchronization.
+        assertNull(snapshot.get(MOODLE_USERNAME_CREATOR));
     }
 
     @Test

@@ -26,13 +26,19 @@ import fi.helsinki.moodi.service.batch.BatchProcessor;
 import fi.helsinki.moodi.service.course.Course;
 import fi.helsinki.moodi.service.course.CourseService;
 import fi.helsinki.moodi.service.log.LoggingService;
+import fi.helsinki.moodi.service.synchronize.snapshot.CourseSyncParticipant;
+import fi.helsinki.moodi.service.synchronize.snapshot.CourseSyncParticipantService;
 import fi.helsinki.moodi.service.util.MapperService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -40,6 +46,7 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
@@ -53,6 +60,7 @@ public class EnrollmentService {
     private final MapperService mapperService;
     private final CourseService courseService;
     private final LoggingService loggingService;
+    private final CourseSyncParticipantService courseSyncParticipantService;
     private final BatchProcessor<Enrollment> batchProcessor;
 
     @Autowired
@@ -61,11 +69,13 @@ public class EnrollmentService {
         MapperService mapperService,
         CourseService courseService,
         LoggingService loggingService,
+        CourseSyncParticipantService courseSyncParticipantService,
         BatchProcessor batchProcessor) {
         this.moodleService = moodleService;
         this.mapperService = mapperService;
         this.courseService = courseService;
         this.loggingService = loggingService;
+        this.courseSyncParticipantService = courseSyncParticipantService;
         this.batchProcessor = batchProcessor;
     }
 
@@ -85,9 +95,17 @@ public class EnrollmentService {
             final List<Enrollment> approvedEnrollments = filterApprovedEnrollments(enrollments, enrollmentWarnings);
             final List<Enrollment> enrollmentsWithMoodleIds = enrichEnrollmentsWithMoodleIds(approvedEnrollments);
 
+            // Used to leave the course creator out of the sync state snapshot: the creator is
+            // enrolled by Moodi but not managed by the Sisu synchronization.
+            final Set<String> sisuUsernames = Stream.concat(
+                    courseUnitRealisation.students.stream().map(s -> s.userName),
+                    courseUnitRealisation.teachers.stream().map(t -> t.userName))
+                .filter(StringUtils::isNotEmpty)
+                .collect(toSet());
+
             batchProcessor.process(
                 enrollmentsWithMoodleIds,
-                itemsToProcess -> persistMoodleEnrollments(moodleCourseId, itemsToProcess, enrollmentWarnings),
+                itemsToProcess -> persistMoodleEnrollments(course, moodleCourseId, itemsToProcess, enrollmentWarnings, sisuUsernames),
                 ENROLLMENT_BATCH_MAX_SIZE);
 
             courseService.completeCourseImport(course.realisationId, true);
@@ -190,9 +208,11 @@ public class EnrollmentService {
         return enrollments.stream().filter(e -> role.equals(e.role)).count();
     }
 
-    private List<Enrollment> persistMoodleEnrollments(final long courseId,
+    private List<Enrollment> persistMoodleEnrollments(final Course course,
+                                          final long moodleCourseId,
                                           final List<Enrollment> enrollments,
-                                          final List<EnrollmentWarning> enrollmentWarnings) {
+                                          final List<EnrollmentWarning> enrollmentWarnings,
+                                          final Set<String> sisuUsernames) {
 
         final List<Enrollment> enrollmentsWithUsernames = filterOutEnrollmentsWithoutUsername(enrollments, enrollmentWarnings);
         final List<Enrollment> enrollmentsWithMoodleIds = filterOutEnrollmentsWithoutMoodleIds(enrollmentsWithUsernames, enrollmentWarnings);
@@ -202,8 +222,11 @@ public class EnrollmentService {
 
         logger.info("About to enroll {} teacher(s) and {} students", teacherCount, studentCount);
 
-        if (enrollToCourse(courseId, enrollmentsWithMoodleIds)) {
+        if (enrollToCourse(moodleCourseId, enrollmentsWithMoodleIds)) {
             logger.info("Successfully enrolled {} teacher(s) and {} student(s)", teacherCount, studentCount);
+            // Record the applied state so that delta-based synchronization can detect Sisu
+            // changes that happen between the import and the first synchronization run.
+            writeSyncSnapshots(course.id, enrollmentsWithMoodleIds, sisuUsernames);
         } else {
             logger.warn("Failed to enroll {} teacher(s) and {} student(s)", teacherCount, studentCount);
             enrollmentsWithMoodleIds
@@ -213,6 +236,30 @@ public class EnrollmentService {
         }
 
         return enrollments;
+    }
+
+    private void writeSyncSnapshots(final Long courseId, final List<Enrollment> enrollments, final Set<String> sisuUsernames) {
+        if (courseId == null) {
+            return;
+        }
+        final Map<String, CourseSyncParticipant> rowsByUsername = new LinkedHashMap<>();
+        for (Enrollment enrollment : enrollments) {
+            final String username = enrollment.usernameList.get(0);
+            if (!sisuUsernames.contains(username)) {
+                continue;
+            }
+            final CourseSyncParticipant row = rowsByUsername.computeIfAbsent(username,
+                u -> new CourseSyncParticipant(courseId, u, null, false, false, false));
+            row.moodleUserId = enrollment.moodleId.get();
+            if (Enrollment.ROLE_STUDENT.equals(enrollment.role)) {
+                // Only approved (enrolled) students get this far in the import.
+                row.student = true;
+                row.enrolledStudent = true;
+            } else if (Enrollment.ROLE_TEACHER.equals(enrollment.role)) {
+                row.teacher = true;
+            }
+        }
+        courseSyncParticipantService.upsertAll(courseId, new ArrayList<>(rowsByUsername.values()));
     }
 
     private boolean enrollToCourse(final long courseId, final List<Enrollment> enrollments) {
