@@ -96,6 +96,6 @@ public class AccessLoggingInterceptor implements HandlerInterceptor {
             .map(Cookie::getValue)
             .filter(value -> value != null)
             .map(value -> value.split(":")[0])
-            .findFirst().get();
+            .findFirst().orElse(null);
     }
 }

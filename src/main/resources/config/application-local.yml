@@ -18,6 +18,8 @@ integration:
 auth.client.user: password
 auth.enabled: true
 
+dev.mode.enabled: true
+
 synchronize.DELTA.enabled: false
 
 logging:

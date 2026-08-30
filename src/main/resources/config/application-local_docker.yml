@@ -23,6 +23,8 @@ integration:
 auth.client.user: 123456
 auth.enabled: false
 
+dev.mode.enabled: true
+
 synchronize.DELTA.enabled: false
 
 logging:

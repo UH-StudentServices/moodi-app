@@ -88,7 +88,7 @@ public class AuthorizingInterceptor implements HandlerInterceptor {
                 final String value = cookie.getValue();
                 if (value != null) {
                     final String[] parts = value.split(":");
-                    return authorize(parts[0], parts[1]);
+                    return parts.length == 2 && authorize(parts[0], parts[1]);
                 }
             }
         }
