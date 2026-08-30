@@ -19,4 +19,6 @@ integration:
     baseUrl: https://gw-api-test.it.helsinki.fi/secure/sisu
     apiKey: ${apiGatewayApiKey}
 
+dev.mode.enabled: true
+
 synchronize.DELTA.enabled: false

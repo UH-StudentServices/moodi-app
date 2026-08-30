@@ -134,6 +134,9 @@ request parameters. For example:
 curl -X POST -H 'client-id: user' -H 'client-token: password' http://localhost:8084/api/v1/synchronization/delta
 ```
 
+The test UI is available at http://localhost:8084/login
+Credentials are: user/password (the client credentials from `application-local.yml`).
+
 ### Cleaning up
 
 - Comment out the line in /etc/hosts.
