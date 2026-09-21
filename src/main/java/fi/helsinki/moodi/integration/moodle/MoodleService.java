@@ -26,6 +26,8 @@ import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
+// (This is just a useless comment to trigger rebuild.)
+
 @Service
 public class MoodleService {
 
